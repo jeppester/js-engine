@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<title>JsEngine Playground</title>
+
+	<!-- IMPROVE MOBILE DEVICE SUPPORT -->
+	<!-- Disable pinch zoom on touch devices -->
+	<meta name="viewport" content="user-scalable=1.0,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+
+	<!-- Remote debugging for mobile devices -->
+	<!--<script src="http://debug.phonegap.com/target/target-script-min.js#ccd"></script>-->
+
+	<style type="text/css">
+		body {
+			/* Set the body background to make it easy to see the borders of the game arena */
+			background: #444;
+			margin:0;
+		}
+		/* An arena should not have a border (It messes with the mouse's coordinates)
+		   if you want a border, put the arena inside a container with a border. */
+		#arena {
+			position:absolute;
+			background:#fff;
+		}
+
+		/* Style load overlay */
+		#loadOverlay {
+			background-color:#222;
+			box-shadow: inset 0 2px 8px rgba(0,0,0,.8);
+		}
+		#loadOverlayText {
+			width:200px;
+			height:30px;
+			position:absolute;
+			top:50%;
+			left:50%;
+			margin-top:-15px;
+			margin-left:-100px;
+
+			background-color:#444;
+			color:#ddd;
+			font-family:Verdana, sans-serif;
+			text-align:center;
+			font-size:12px;
+			line-height:28px;
+			border:2px solid #aaa;
+			border-radius:10px;
+			box-shadow: 0 2px 40px rgba(0,0,0,.8);
+		}
+	</style>
+</head>
+<body>
+<div id="arena"></div>
+
+<!-- JsEngine -->
+<script type="text/javascript" src="JsEngine.packed.js"></script>
+
+<!-- Start engine -->
+<script type="text/javascript">
+	new JsEngine({
+		// Set the JsEngine path (This is used for loading engine classes)
+		enginePath:'js/JsEngine',
+
+		// Set game-class path (Look at this file to start programming your game)
+		gameClassPath:'js/StressTest.js',
+
+		// Set themes to load
+		themes:['Example'],
+
+		// Set number of depth layers. Remember that setting 10 layers will spawn depths 0-9, but not depth 10
+		depths:2,
+
+		// Set arena background-color
+		backgroundColor: "#000",
+
+		// Set resolution of the game
+		canvasResX:600,
+		canvasResY:400,
+	});
+</script>
+
+<!-- Disable iPad scroll -->
+<script type="text/javascript">
+	// Disable scrolling by touch move
+	document.addEventListener('touchmove', function(event) {
+		event.preventDefault();
+	}, false)
+</script>
+<script type="text/javascript">
+	// Disable scrolling by touch start
+	document.addEventListener('touchstart', function(event) {
+		event.preventDefault();
+	}, false)
+</script>
+</body>
+</html>
