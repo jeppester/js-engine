@@ -10,7 +10,7 @@ Requires:
 
 function SceneEditor() {
 	// Load default scene
-	var defaultScene = {"duration": 50, "actors": {"Background": {"source": "Backgrounds.cliffCityGround", "drawOrder": 0, "keyFrames": [{"frame": 0, "properties": {"x": 300, "y": 375, "bmSize": 1, "opacity": 1}}]}, "Cliffs": {"source": "Backgrounds.cliffSide", "drawOrder": 1, "keyFrames": [{"frame": 0, "properties": {"opacity": 1, "x": 300, "y": 375}}, {"frame": 5, "properties": {"x": 310}, "ease": "quadInOut"}, {"frame": 10, "properties": {"x": 300}, "ease": "quadInOut"}]}, "Rock": {"source": "Rocks.Orange3", "drawOrder": "3", "keyFrames": [{"frame": 17, "properties": {"opacity": 1, "y": - 50, "x": 300}}, {"frame": 37, "properties": {"y": 693}, "ease": "quadIn"}]}, "Building": {"source": "Buildings.Building1", "drawOrder": "2", "keyFrames": [{"frame": 0, "properties": {"x": 300, "y": 695, "opacity": 1}}]}}};
+	var defaultScene = {"duration":50,"loopSpeed":20,"workarea":{"width":"200","height":"200","backgroundColor":"#14161C"},"actors":{"Man":{"source":"Character","drawOrder":0,"keyFrames":[{"frame":0,"properties":{"x":100,"y":100,"opacity":1,"bmSize":1,"dir":0}},{"frame":24,"properties":{"opacity":1,"bmSize":1,"dir":-6.28},"ease":"quadInOut"},{"frame":49,"properties":{"dir":-12.57},"ease":"quadInOut"}]},"Rock":{"source":"Rock","drawOrder":1,"keyFrames":[{"frame":0,"properties":{"bmSize":1,"opacity":1,"x":-16,"y":134,"dir":1}},{"frame":49,"properties":{"x":216},"ease":"linear"}]},"Rock2":{"source":"Rock","drawOrder":2,"keyFrames":[{"frame":0,"properties":{"opacity":1,"y":134,"x":100}},{"frame":24,"properties":{"x":216},"ease":"linear"},{"frame":25,"properties":{"x":-16}},{"frame":49,"properties":{"x":100},"ease":"linear"}]},"Star":{"source":"Folder.Star2","drawOrder":3,"keyFrames":[{"frame":0,"properties":{"opacity":1,"y":30,"x":-10,"dir":1}},{"frame":49,"properties":{"x":100},"ease":"linear"}]},"Star2":{"source":"Folder.Star2","drawOrder":4,"keyFrames":[{"frame":0,"properties":{"opacity":1,"y":30,"x":100,"dir":1}},{"frame":49,"properties":{"x":210},"ease":"linear"}]}}}
 
 	// Create director object and Load scene
 	this.director = new Director();
@@ -84,29 +84,79 @@ function SceneEditor() {
 			sceneEditor.removeKeyFrameProperty(sceneEditor.currentActor, propName, sceneEditor.director.frame);
 		}
 	});
-	$('.property').bind('blur', function () {
-		// Save keyframe when a property has been changed and blurred
-		if (!$(this).attr('disabled')) {
-			sceneEditor.saveKeyFrame();
+
+	$('#keyFrameEditor .property').bind('input', function (e) {
+		sceneEditor.saveKeyFrame();
+	});
+
+	$('#workAreaEditor .property').bind('input', function (e) {
+		switch ($(this.parentNode).attr('data-property')) {
+			case 'width':
+				sceneEditor.setSceneWidth(this.value);
+				break;
+			case 'height':
+				sceneEditor.setSceneHeight(this.value);
+				break;
+			case 'backgroundColor':
+				sceneEditor.setSceneBackgroundColor(this.value);
+				break;
 		}
 	});
-	$('.property').bind('keyup', function (e) {
-		// Save property instantly
-		if (e.keyCode !== 32) {
-			sceneEditor.saveKeyFrame();
+
+	$('#sceneEditor .property').bind('blur', function (e) {
+		switch ($(this.parentNode).attr('data-property')) {
+			case 'duration':
+				sceneEditor.setSceneDuration(this.value);
+				break;
+			case 'loopSpeed':
+				sceneEditor.setSceneLoopSpeed(this.value);
+				break;
 		}
 	});
+
 	// Save new easing instantly on changed
 	$('[data-property="ease"]').bind('change', function () {sceneEditor.saveKeyFrame(); });
+
+	// Initiate global keyboard shortcuts
 	$(document).bind('keydown', function (e) {
-		if (e.keyCode === 32) {
-			if (sceneEditor.playing) {
-				sceneEditor.pause();
-			}
-			else {
-				sceneEditor.play();
-			}
-			return false;
+		if ($('input:focus').length) {return; }
+		
+		var actor;
+
+		switch (e.keyCode) {
+			case 32:
+				if (sceneEditor.playing) {
+					sceneEditor.pause();
+				}
+				else {
+					sceneEditor.play();
+				}
+				return false;
+				break;
+
+			case KEY_LEFT:
+				sceneEditor.director.frame = Math.max(sceneEditor.director.frame - 1, 0);
+				sceneEditor.selectFrame(sceneEditor.currentActor, sceneEditor.director.frame);
+				break;
+
+			case KEY_RIGHT:
+				sceneEditor.director.frame = Math.min(sceneEditor.director.frame + 1, sceneEditor.scene.duration - 1);
+				sceneEditor.selectFrame(sceneEditor.currentActor, sceneEditor.director.frame);
+				break;
+
+			case KEY_UP:
+				actor = $('[data-actor="' + sceneEditor.currentActor + '"]').prev();
+				if (actor.length) {
+					sceneEditor.selectFrame(actor.attr('data-actor'), sceneEditor.director.frame);
+				}
+				break;
+
+			case KEY_DOWN:
+				actor = $('[data-actor="' + sceneEditor.currentActor + '"]').next();
+				if (actor.length) {
+					sceneEditor.selectFrame(actor.attr('data-actor'), sceneEditor.director.frame);
+				}
+				break;
 		}
 	});
 	$('#deleteKeyFrame').bind('click', function () {
@@ -159,9 +209,98 @@ SceneEditor.prototype.loadScene = function (scene) {
 	this.director.loadScene(scene);
 
 	this.currentActor = Object.keys(this.scene.actors)[0];
-	this.refreshTimeLine();
+
+	this.setSceneWidth(scene.workarea.width);
+	this.setSceneHeight(scene.workarea.height);
+	this.setSceneBackgroundColor(scene.workarea.backgroundColor);
+	this.setSceneLoopSpeed(scene.loopSpeed);
+	this.setSceneDuration(scene.duration);
+
 	this.selectFrame(this.currentActor, 0);
 };
+
+SceneEditor.prototype.setSceneWidth = function(width) {
+	if (width < 100 || width > 2000 || width === engine.canvasResX) {return; }
+
+	engine.setCanvasResX(width);
+	$('[data-property="width"] input').val(width);
+	this.scene.workarea.width = width;
+}
+
+SceneEditor.prototype.setSceneHeight = function (height) {
+	if (height < 100 || height > 2000 || height === engine.canvasResY) {return; }
+
+	engine.setCanvasResY(height);
+	$('[data-property="height"] input').val(height);
+	this.scene.workarea.height = height;
+}
+
+SceneEditor.prototype.setSceneBackgroundColor = function (colorStr) {
+	// Check that the provided color is actually a color
+	if (!/#[0-9a-fA-F]{6}/.test(colorStr)) {
+		console.log('Not a color!');
+		return;
+	}
+
+	this.scene.workarea.backgroundColor = colorStr;
+	$('[data-property="backgroundColor"] input').val(colorStr);
+	engine.backgroundColor = colorStr;
+}
+
+SceneEditor.prototype.setSceneDuration = function (duration) {
+	if (typeof duration === "string") {duration = duration * 1}
+	if (duration < 1) {return; }
+	
+
+	var actorName, actor, keyFrameId, deleteFrames;
+
+	deleteFrames = false;
+
+	// Check that there are no keyframes beyond the new duration
+	for (actorName in this.scene.actors) {
+		if (this.scene.actors.hasOwnProperty(actorName)) {
+			actor = this.scene.actors[actorName];
+
+			for (keyFrameId = 0; keyFrameId < actor.keyFrames.length; keyFrameId ++) {
+
+				keyFrame = actor.keyFrames[keyFrameId];
+
+				if (keyFrame.frame > duration - 1) {
+					if (deleteFrames) {
+						actor.keyFrames.splice(keyFrameId, 1);
+					}
+					else if (confirm('This will delete keyframes\nAre you sure that you want to do this?')) {
+						actor.keyFrames.splice(keyFrameId, 1);
+
+						deleteFrames = true;
+					}
+					else {
+						$('[data-property="duration"] input').val(this.scene.duration);
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	this.scene.duration = duration;
+
+	if (deleteFrames) {
+		this.loadScene(this.scene);
+	}
+	else {
+		$('[data-property="duration"] input').val(duration);
+		this.refreshTimeLine();
+	}
+}
+
+SceneEditor.prototype.setSceneLoopSpeed = function (loopSpeed) {
+	if (typeof loopSpeed === "string") {loopSpeed = loopSpeed * 1}
+
+	this.scene.loopSpeed = loopSpeed
+	$('[data-property="loopSpeed"] input').val(loopSpeed);
+	engine.setLoopSpeed(loopSpeed);
+}
 
 // Function for loading an actor and creating the HTML for it
 SceneEditor.prototype.loadActor = function (name, actor) {
@@ -172,6 +311,8 @@ SceneEditor.prototype.loadActor = function (name, actor) {
 		<div class="actor" data-name="' + name + '" data-drawOrder="' + actor.drawOrder + '">\
 			' + name + '\
 			<span style="float: right;" class="icon icon-trash"></span>\
+			<span style="float: right;" class="icon icon-arrow-1-s"></span>\
+			<span style="float: right;" class="icon icon-arrow-1-n"></span>\
 		</div>')[0];
 	actorContainer = $('#actors')[0];
 
@@ -196,6 +337,7 @@ SceneEditor.prototype.loadActor = function (name, actor) {
 			sceneEditor.loadScene(sceneEditor.scene);
 		}
 	});
+
 	// For moving the actor up and changing the it's draw order
 	$('.icon-arrow-1-n', newActor).bind('click', function () {
 		var currentDrawOrder, newDrawOrder, actorName, otherName;
@@ -268,8 +410,8 @@ SceneEditor.prototype.loadActor = function (name, actor) {
 SceneEditor.prototype.refreshTimeLine = function () {
 	var name, actor;
 
-	$('#actors').html('');
-	$('#timeLine').html('');
+	$('#actors')[0].innerHTML = '';
+	$('#timeLine')[0].innerHTML = '';
 
 	// Create scene actors
 	for (name in this.scene.actors) {
@@ -304,7 +446,7 @@ SceneEditor.prototype.selectFrame = function (actorName, frame) {
 	$('.keyFrameButton').attr('disabled', 'disabled');
 
 	if (keyFrame === undefined) {
-		$('input.property').attr('disabled', 'disabled');
+		$('#keyFrameEditor input.property').attr('disabled', 'disabled');
 		$('[data-property="ease"]').attr('disabled', 'disabled').val('false');
 		for (i = 0; i < animProps.length; i ++) {
 			propName = animProps[i];
@@ -352,7 +494,7 @@ SceneEditor.prototype.disableKeyFrameProperty = function (propName) {
 
 // Function for adding a keyframe property to a keyframe
 SceneEditor.prototype.addKeyFrameProperty = function (actorName, propName, frameNumber, value) {
-	var keyFrame = jseArrayElementByPropertyValue(this.scene.actors[actorName].keyFrames, 'frame', frameNumber);
+	var keyFrame = this.scene.actors[actorName].keyFrames.getElementByPropertyValue('frame', frameNumber);
 
 	if (keyFrame === undefined) {
 		keyFrame = this.createKeyFrame(actorName, frameNumber);
@@ -365,7 +507,7 @@ SceneEditor.prototype.addKeyFrameProperty = function (actorName, propName, frame
 
 // Function for removing a keyframe property to a keyframe
 SceneEditor.prototype.removeKeyFrameProperty = function (actorName, propName, frameNumber) {
-	var keyFrame = jseArrayElementByPropertyValue(this.scene.actors[actorName].keyFrames, 'frame', frameNumber);
+	var keyFrame = this.scene.actors[actorName].keyFrames.getElementByPropertyValue('frame', frameNumber);
 	delete keyFrame.properties[propName];
 	if (Object.keys(keyFrame.properties).length === 0) {
 		this.removeKeyFrame(actorName, frameNumber);
@@ -411,7 +553,7 @@ SceneEditor.prototype.saveKeyFrame = function () {
 		ease = undefined;
 	}
 
-	keyFrame = jseArrayElementByPropertyValue(this.scene.actors[this.currentActor].keyFrames, 'frame', this.director.frame);
+	keyFrame = this.scene.actors[this.currentActor].keyFrames.getElementByPropertyValue('frame', this.director.frame);
 	keyFrame.ease = ease;
 
 	animProps = ['x', 'y', 'dir', 'opacity', 'bmSize'];
@@ -448,7 +590,7 @@ SceneEditor.prototype.pause = function () {
 // Function for updating scene (to be run in play loop)
 SceneEditor.prototype.onPlaying = function () {
 	this.director.frame ++;
-	if (this.director.frame === this.scene.duration) {
+	if (this.director.frame >= this.scene.duration) {
 		this.director.frame = 0;
 	}
 

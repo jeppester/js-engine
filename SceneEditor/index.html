@@ -43,30 +43,57 @@
 			</div>
 		</div>
 
-		<!-- Key frame widget -->
-		<div style="float:left;margin-top:0px;width:155px;text-align:right;" id="keyFrameEditor" class="widget">
-			<h1>
-				Key frame
-			</h1>
-			<p style="line-height:24px;">
-				ease:
-				<select data-property="ease">
-					<option value="false">none</option>
-					<option value="linear">linear</option>
-					<option value="quadIn">quadIn</option>
-					<option value="quadOut">quadOut</option>
-					<option value="quadInOut">quadInOut</option>
-					<option value="powerIn">powerIn</option>
-					<option value="powerOut">powerOut</option>
-					<option value="powerInOut">powerInOut</option>
-					<option value="sinusInOut">sinusInOut</option>
-				</select>
-				<span class="noBreak" data-property="x">x: <input class="property" type="text" /><span class="propertyButton icon icon-plus roundRight"></span></span>
-				<span class="noBreak" data-property="y">y: <input class="property" type="text" /><span class="propertyButton icon icon-plus roundRight"></span></span>
-				<span class="noBreak" data-property="dir">dir: <input class="property" type="text" /><span class="propertyButton icon icon-plus roundRight"></span></span>
-				<span class="noBreak" data-property="opacity">opacity: <input class="property" type="text" /><span class="propertyButton icon icon-plus roundRight"></span></span>
-				<span class="noBreak" data-property="bmSize">size: <input class="property" type="text" /><span class="propertyButton icon icon-plus roundRight"></span></span>
-			</p>
+		<!-- Left bar -->
+		<div style="float:left;margin-top:0px;width:175px;text-align:right;">
+
+			<!-- Key frame widget -->
+			<div style="margin-top:0px;" id="keyFrameEditor" class="widget">
+				<h1>
+					Key frame
+				</h1>
+				<p style="line-height:24px;">
+					ease:
+					<select data-property="ease">
+						<option value="false">none</option>
+						<option value="linear">linear</option>
+						<option value="quadIn">quadIn</option>
+						<option value="quadOut">quadOut</option>
+						<option value="quadInOut">quadInOut</option>
+						<option value="powerIn">powerIn</option>
+						<option value="powerOut">powerOut</option>
+						<option value="powerInOut">powerInOut</option>
+						<option value="sinusInOut">sinusInOut</option>
+					</select>
+					<span class="noBreak" data-property="x">x: <input class="property" type="number" /><span class="propertyButton icon icon-plus roundRight"></span></span>
+					<span class="noBreak" data-property="y">y: <input class="property" type="number" /><span class="propertyButton icon icon-plus roundRight"></span></span>
+					<span class="noBreak" data-property="dir">dir: <input class="property" type="number" /><span class="propertyButton icon icon-plus roundRight"></span></span>
+					<span class="noBreak" data-property="opacity">opacity: <input class="property" type="number" /><span class="propertyButton icon icon-plus roundRight"></span></span>
+					<span class="noBreak" data-property="bmSize">size: <input class="property" type="number" /><span class="propertyButton icon icon-plus roundRight"></span></span>
+				</p>
+			</div>
+
+			<!-- Scene properties widget -->
+			<div id="sceneEditor" class="widget">
+				<h1>
+					Scene properties
+				</h1>
+				<p style="line-height:24px;">
+					<span class="noBreak" data-property="duration">frames: <input class="property" type="number" /></span>
+					<span class="noBreak" data-property="loopSpeed">ms/frame: <input class="property" type="number" /></span>
+				</p>
+			</div>
+
+			<!-- Scene properties widget -->
+			<div id="workAreaEditor" class="widget">
+				<h1>
+					Work area
+				</h1>
+				<p style="line-height:24px;">
+					<span class="noBreak" data-property="width">width: <input class="property" type="number" /></span>
+					<span class="noBreak" data-property="height">height: <input class="property" type="number" /></span>
+					<span class="noBreak" data-property="backgroundColor">bg-color: <input class="property" type="color" /></span>
+				</p>
+			</div>
 		</div>
 
 		<!-- Scene widget -->
@@ -90,14 +117,12 @@
 		<!-- Start engine -->
 		<script type="text/javascript">
 			new JsEngine({
-				enginePath:'../js/JsEngine',
-				gameClassPath:'js/SceneEditor.js',
-				themesPath:'/Spil/CCD/themes',
-				themes:['Day','Night'],
-				loopSpeed:30,
-				depths:1,
-				canvasResX:600,
-				canvasResY:750,
+				enginePath: "../js/JsEngine",
+				gameClassPath: 'js/SceneEditor.js',
+				themes: ['Example'],
+				depths: 1,
+
+				autoResize: false,
 
 				// Autoresize (to fit window / iframe)
 				autoResize: false,

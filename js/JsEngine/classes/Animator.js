@@ -53,9 +53,14 @@ Animator.prototype.updateLoop = function (loop) {
 
 	loop = engine.loops[loop];
 
-	// Run through the layer an update all animations
+	// Run through the layer and update all animations
 	for (animId = loop.animations.length - 1; animId > -1; animId --) {
 		a = loop.animations[animId];
+
+		if (a === undefined) {
+			continue;
+		}
+
 		t = loop.time - a.start;
 
 		if (t > a.dur) {

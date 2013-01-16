@@ -50,10 +50,19 @@
 			border-radius:10px;
 			box-shadow: 0 2px 40px rgba(0,0,0,.8);
 		}
+
+		#fallbackText {
+			display:none;
+		}
 	</style>
 </head>
 <body>
-<div id="arena"></div>
+<div id="arena">
+	<!--<div id="fallbackText">
+		<h1>Missing canvas support</h1>
+		<p>JsEngine needs canvas support in order to run properly.</p>
+	</div>-->
+</div>
 
 <!-- JsEngine -->
 <script type="text/javascript" src="js/JsEngine/JsEngine.js"></script>
@@ -62,7 +71,7 @@
 <script type="text/javascript">
 	new JsEngine({
 		// Set themes to load
-		themes:['Example'],
+		themes:['Empty'],
 
 		// Set number of depth layers. Remember that setting 10 layers will spawn depths 0-9, but not depth 10
 		depths:2,

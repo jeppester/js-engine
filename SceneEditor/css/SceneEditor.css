@@ -43,8 +43,8 @@ body {
 }
 #arena {
 	position:relative;
-	width:600px;
-	height:750px;
+	width:auto;
+	height:auto;
 }
 .widget {
 	background-image: -webkit-linear-gradient(top,#444,#666);

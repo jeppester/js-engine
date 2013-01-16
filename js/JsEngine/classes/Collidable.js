@@ -109,7 +109,6 @@ Collidable.prototype.generateMask = function (ressourceString, alphaLimit) {
 	for (pixel = 0; pixel < data.length; pixel ++) {
 		// If the pixel is partly transparent, make it completely transparent, else make it completely black
 		if (data[pixel * 4 + 3] < alphaLimit) {
-
 			data[pixel * 4] = 0; // Red
 			data[pixel * 4 + 1] = 0; // Green
 			data[pixel * 4 + 2] = 0; // Blue
@@ -127,11 +126,16 @@ Collidable.prototype.generateMask = function (ressourceString, alphaLimit) {
 	this.mask = canvas;
 };
 
-Collidable.prototype.boundingBoxCollidesWith = function (obj, getCollisionPosition) {
-	if (obj === undefined) {throw new Error('Missing argument: obj'); }
-	getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
+Collidable.prototype.boundingBoxCollidesWith = function (objects, getCollidingObjects) {
+	if (objects === undefined) {throw new Error('Missing argument: objects'); }
+	if (!Array.prototype.isPrototypeOf(objects)) {
+		objects = [objects];
+	}
 
-	var bb1, bb2;
+	getCollidingObjects = getCollidingObjects !== undefined ? getCollidingObjects : false;
+	//getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
+
+	var obj, bb1, bb2, i, collideObjects;
 
 	bb1 = {
 		x1: this.x + this.boundingBox.xOff,
@@ -139,40 +143,65 @@ Collidable.prototype.boundingBoxCollidesWith = function (obj, getCollisionPositi
 		y1: this.y + this.boundingBox.yOff,
 		y2: this.y + this.boundingBox.yOff + this.boundingBox.height
 	};
-	bb2 = {
-		x1: obj.x + obj.boundingBox.xOff,
-		x2: obj.x + obj.boundingBox.xOff + obj.boundingBox.width,
-		y1: obj.y + obj.boundingBox.yOff,
-		y2: obj.y + obj.boundingBox.yOff + obj.boundingBox.height
-	};
 
-	// Find out if the two objects' bounding boxes intersect
-	if (bb1.x1 < bb2.x2 &&
-		bb1.x2 > bb2.x1 &&
+	collidingObjects = [];
 
-		bb1.y1 < bb2.y2 &&
-		bb1.y2 > bb2.y1) {
-		return true;
+	for (i = 0; i < objects.length; i++) {
+		obj = objects[i];
+
+		bb2 = {
+			x1: obj.x + obj.boundingBox.xOff,
+			x2: obj.x + obj.boundingBox.xOff + obj.boundingBox.width,
+			y1: obj.y + obj.boundingBox.yOff,
+			y2: obj.y + obj.boundingBox.yOff + obj.boundingBox.height
+		};
+
+		// Find out if the two objects' bounding boxes intersect
+		if (bb1.x1 < bb2.x2 &&
+			bb1.x2 > bb2.x1 &&
+
+			bb1.y1 < bb2.y2 &&
+			bb1.y2 > bb2.y1) {
+
+			if (getCollidingObjects) {
+				collidingObjects.push(obj);
+			}
+			else {
+				return true;
+			}
+		}
 	}
 
-	return false;
+	if (collidingObjects.length) {
+		return collidingObjects;
+	}
+	else {
+		return false;
+	}
 };
 
-Collidable.prototype.bitmapCollidesWith = function (obj, resolution, getCollisionPosition, checkBoundingBox) {
-	if (obj === undefined) {throw new Error('Missing argument: obj'); }
+Collidable.prototype.bitmapCollidesWith = function (objects, resolution, getCollisionPosition, checkBoundingBox) {
+	if (objects === undefined) {throw new Error('Missing argument: objects'); }
+	if (!Array.prototype.isPrototypeOf(objects)) {
+		objects = [objects];
+	}
+
 	resolution = resolution !== undefined ? resolution : 1;
 	getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
 	checkBoundingBox = checkBoundingBox !== undefined ? checkBoundingBox : true;
 
-	if (checkBoundingBox && !this.boundingBoxCollidesWith(obj)) {
-		return false;
-	}
+	var canvas, canvasSize, ctx, obj, bitmap, i, data, length, pixel, pxArr, x, y, sumX, sumY, avX, avY, avDist, avDir;
 
 	if (this.bmSize === 0) {
 		return false;
 	}
 
-	var canvas, canvasSize, ctx, bitmap, data, length, pixel, pxArr, x, y, sumX, sumY, avX, avY, avDist, avDir;
+	if (checkBoundingBox) {
+		objects = this.boundingBoxCollidesWith(objects, true);
+		if (objects === false) {
+			return false;
+		}
+	}
 
 	// Create a new canvas for checking for a collision
 	canvas = document.createElement('canvas');
@@ -187,6 +216,7 @@ Collidable.prototype.bitmapCollidesWith = function (obj, resolution, getCollisio
 	ctx.globalAlpha = 0.5;
 	ctx.save();
 
+	// Draw checked object
 	ctx.drawImage(
 		this.mask,
 		0,
@@ -195,19 +225,26 @@ Collidable.prototype.bitmapCollidesWith = function (obj, resolution, getCollisio
 		this.bmHeight * this.bmSize
 	);
 	ctx.translate(this.xOff * this.bmSize, this.yOff * this.bmSize);
-	ctx.rotate(- this.dir);
+	ctx.rotate(-this.dir);
 
-	ctx.translate(obj.x - this.x, obj.y - this.y);
+	// Draw other objects
+	for (i = 0; i < objects.length; i++) {
+		obj = objects[i];
 
-	ctx.rotate(obj.dir);
+		ctx.translate(obj.x - this.x, obj.y - this.y);
+		ctx.rotate(obj.dir);
 
-	ctx.drawImage(
-		obj.mask,
-		- obj.xOff * obj.bmSize,
-		- obj.yOff * obj.bmSize,
-		obj.bmWidth * obj.bmSize,
-		obj.bmHeight * obj.bmSize
-	);
+		ctx.drawImage(
+			obj.mask,
+			- obj.xOff * obj.bmSize,
+			- obj.yOff * obj.bmSize,
+			obj.bmWidth * obj.bmSize,
+			obj.bmHeight * obj.bmSize
+		);
+
+		ctx.translate(this.x - obj.x, this.y - obj.y);
+		ctx.rotate(-obj.dir);
+	}
 	ctx.restore();
 
 	bitmap = ctx.getImageData(0, 0, canvas.width, canvas.height);

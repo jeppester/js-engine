@@ -39,6 +39,12 @@ Array.prototype.sortByNumericProperty = function (property, desc) {
 	return sortedArray;
 };
 
+Array.prototype.forEach = function (func) {
+	for (var i = 0; i < this.length; i ++) {
+		func.call(this[i], i);
+	}
+}
+
 Object.prototype.importProperties = function(from) {
 	var i;
 	for (i in from) {

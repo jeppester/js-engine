@@ -16,6 +16,7 @@ View.prototype.view = function (depth) {
 // Method for adding a child
 View.prototype.addChild = function (child) {
 	if (child === undefined) {throw new Error('Missing argument: child'); }
+	if (typeof child !== 'object') {throw new Error('Argument "child" has to be of type "object"'); }
 
 	if (this.children === undefined) {
 		this.children = [];
@@ -78,14 +79,22 @@ View.prototype.insertBefore = function (insertChildren, child) {
 };
 
 View.prototype.getChildren = function () {
-	return this.children !== undefined  ?  this.children : [];
+	var ret = [];
+	
+	if (this.children) {
+		this.children.forEach(function () {
+			ret.push(this);
+		})
+	}
+	
+	return ret;
 };
 
 View.prototype.setDepth = function (depth) {
 	if (depth === undefined) {throw new Error('Missing argument: depth'); }
 	var i;
 
-	// Store depth and ctx in object (ctx is for improving performance)
+	// Store depth and ctx in object (ctx is for improving drawing performance)
 	this.depth = depth;
 	this.ctx = engine.depth[depth].ctx;
 

@@ -84,19 +84,14 @@ Loader.prototype.getRessource = function (ressource, typeString, themeName) {
 		ressource = ressource.replace('/', '.');
 	}
 
-	res = false;
-	try {
-		eval('res = this.themes.' + themeName + '.' + typeString + '.' + ressource);
-	} catch (e) {}
+	res = this.themes[themeName][typeString][ressource];
 
 	// Search for the image in inherited themes
-	if (!res) {
+	if (res === undefined) {
 		for (i = 0; i < this.themes[themeName].inherit.length; i ++) {
 			inh = this.themes[themeName].inherit[i];
 			if (this.themes[inh]) {
-				try {
-					eval('var res = this.themes.' + inh + '.' + typeString + '.' + ressource);
-				} catch (e) {}
+				res = this.themes[inh][typeString][ressource];
 
 				if (res) {
 					break;
@@ -176,9 +171,9 @@ Loader.prototype.reloadAllClasses = function () {
 // Function for loading themes
 Loader.prototype.loadThemes = function (themeNames, callback) {
 	if (themeNames === undefined) {throw new Error('Missing argument: themeNames'); }
-	if (callback !== undefined) {this.onthemesloaded = callback}
+	if (callback !== undefined) {this.onthemesloaded = callback; }
 
-	var name, req, i;
+	var name, req, i, total;
 
 	for (i = 0; i < themeNames.length; i ++) {
 		name = themeNames[i];
@@ -192,7 +187,7 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 		req.send();
 
 		// Check that the theme is actually there
-		if (req.status === 404) {console.log('Theme not found: '+name); continue; }
+		if (req.status === 404) {console.log('Theme not found: ' + name); continue; }
 
 		// Get theme details
 		eval('var theme = ' + req.responseText);
@@ -208,75 +203,92 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 		theme.ressourcesLoaded = 0;
 
 		// Load all images
-		this.loadRessources(theme, theme.images, 'images', []);
-		this.loadRessources(theme, theme.sfx, 'sfx', []);
-		this.loadRessources(theme, theme.music, 'music', []);
+		this.loadRessources(theme, theme.images, 'images');
+		this.loadRessources(theme, theme.sfx, 'sfx');
+		this.loadRessources(theme, theme.music, 'music');
+	}
+
+	// Check if the theme was empty, if so, run callback
+	total = 0;
+	for (i in this.themes) {
+		if (this.themes.hasOwnProperty(i)) {
+			total += this.themes[i].ressourcesCount;
+		}
+	}
+	if (total === 0) {
+		if (this.onthemesloaded) {
+			this.onthemesloaded();
+		}
 	}
 };
 
-Loader.prototype.loadRessources = function (theme, object, typeString, currentDir) {
+Loader.prototype.loadRessources = function (theme, object, typeString) {
 	if (theme === undefined) {throw new Error('Missing argument: theme'); }
 	if (object === undefined) {throw new Error('Missing argument: object'); }
 	if (typeString === undefined) {throw new Error('Missing argument: typeString'); }
-	if (currentDir === undefined) {throw new Error('Missing argument: currentDir'); }
-	var onload, res, i;
 
-	if (object.length !== undefined || typeof object === "string") {
-		onload = function () {
-			var total, loaded, theme, i;
-			if (this.hasAttribute('data-loaded')) {return; }
+	var onload, res, path, i, format;
 
-			this.setAttribute('data-loaded', 'true');
-			loader.themes[this.getAttribute('data-theme')].ressourcesLoaded ++;
+	onload = function () {
+		var total, loaded, theme, i;
+		if (this.hasAttribute('data-loaded')) {return; }
 
-			total = 0;
-			loaded = 0;
+		this.setAttribute('data-loaded', 'true');
+		loader.themes[this.getAttribute('data-theme')].ressourcesLoaded ++;
 
-			for (i in loader.themes) {
-				if (loader.themes.hasOwnProperty(i)) {
-					theme = loader.themes[i];
-					total += theme.ressourcesCount;
-					loaded += theme.ressourcesLoaded;
-				}
+		total = 0;
+		loaded = 0;
+
+		for (i in loader.themes) {
+			if (loader.themes.hasOwnProperty(i)) {
+				theme = loader.themes[i];
+				total += theme.ressourcesCount;
+				loaded += theme.ressourcesLoaded;
 			}
-			if (loaded === total) {
-				if (loader.onthemesloaded) {
-					loader.onthemesloaded();
-				}
-			}
-		};
-
-		switch (typeString) {
-		case 'images':
-			res = new Image();
-			res.src = engine.themesPath + "/" + theme.name + "/images/" + currentDir.join('/') + '.png';
-			eval('theme.images.' + currentDir.join('.') + ' = res');
-			res.onload = onload;
-			break;
-
-		case 'sfx':
-			res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + currentDir.join('/') + '.wav');
-			eval('theme.sfx.' + currentDir.join('.') + ' = res');
-			res.addEventListener("canplaythrough", onload, false);
-			break;
-
-		case 'music':
-			res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + currentDir.join('/') + '.mp3');
-			res.setAttribute('preload', 'preload');
-			eval('theme.music.' + currentDir.join('.') + ' = res');
-			res.addEventListener("canplaythrough", onload, false);
-			break;
 		}
-
-		theme.ressourcesCount ++;
-		res.setAttribute('data-theme', theme.name);
-	} else {
-		for (i in object) {
-			if (object.hasOwnProperty(i)) {
-				currentDir.push(i);
-				this.loadRessources(theme, object[i], typeString, currentDir);
-				currentDir.pop();
+		if (loaded === total) {
+			if (loader.onthemesloaded) {
+				loader.onthemesloaded();
 			}
+		}
+	};
+
+	for (path in object) {
+		if (object.hasOwnProperty(path)) {
+			switch (typeString) {
+			case 'images':
+				res = new Image();
+				res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, '/') + '.png';
+				theme.images[path] = res;
+				res.onload = onload;
+				break;
+
+			case 'sfx':
+				format = false;
+				for (i = 0; i < engine.host.supportedAudio.length; i++) {
+					if (object[path].search(engine.host.supportedAudio[i]) !== -1) {
+						format = engine.host.supportedAudio[i];
+					}
+				}
+				if (!format) {
+					console.log('Sound was not available in a supported format: ' + theme.name + "/sfx/" + path.replace(/\./g, '/'));
+					continue;
+				}
+				res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, '/') + '.' + format);
+				theme.sfx[path] = res;
+				res.addEventListener("canplaythrough", onload, false);
+				break;
+
+			case 'music':
+				res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, '/') + '.mp3');
+				res.setAttribute('preload', 'preload');
+				theme.music[path] = res;
+				res.addEventListener("canplaythrough", onload, false);
+				break;
+			}
+
+			theme.ressourcesCount ++;
+			res.setAttribute('data-theme', theme.name);
 		}
 	}
 };

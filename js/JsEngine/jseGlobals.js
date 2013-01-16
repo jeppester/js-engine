@@ -28,6 +28,6 @@ KEY_F10			= 121;
 KEY_F11			= 122;
 KEY_F12			= 123;
 
-// Speed formats
+// Speed units
 SPEED_PIXELS_PER_SECOND		= 1;
 SPEED_PIXELS_PER_FRAME		= 2;

@@ -83,3 +83,20 @@ Animation.prototype.getAnimations = function () {
 	}
 	return animations;
 };
+
+Animation.prototype.stopAnimations = function () {
+	var animations, name, loop, animId, animation;
+
+	animations = [];
+	for (name in engine.loops) {
+		if (engine.loops.hasOwnProperty(name)) {
+			loop = engine.loops[name];
+			for (animId = loop.animations.length - 1; animId > -1; animId --) {
+				animation = loop.animations[animId];
+				if (animation.obj === this) {
+					loop.animations.splice(animId, 1);
+				}
+			}
+		}
+	}
+}

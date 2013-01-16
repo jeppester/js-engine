@@ -81,6 +81,7 @@ else {
 		$e . "classes/Animation.js",
 		$e . "classes/Animator.js",
 		$e . "classes/View.js",
+		$e . "classes/CustomLoop.js",
 		$e . "classes/Collidable.js",
 		$e . "classes/Director.js",
 		$e . "classes/Sprite.js",

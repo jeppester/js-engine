@@ -19,6 +19,7 @@ Mouse.prototype.mouse = function () {
 		}, false);
 		document.addEventListener('touchmove', function (event) {
 			mouse.onTouchMove.call(mouse, event);
+			this.touches = event.touches;
 		}, false);
 	}
 	else {
@@ -106,6 +107,8 @@ Mouse.prototype.onTouchStart = function (event) {
 	if (event === undefined) {throw new Error('Missing argument: event'); }
 	var frame = engine.frames;
 
+	this.touches = event.touches;
+	
 	if (engine.updatesPerformed) {
 		frame ++;
 	}
@@ -120,6 +123,8 @@ Mouse.prototype.onTouchStart = function (event) {
 Mouse.prototype.onTouchEnd = function (event) {
 	if (event === undefined) {throw new Error('Missing argument: event'); }
 	var frame, evt, i;
+
+	this.touches = event.touches;
 
 	frame = engine.frames;
 	for (i = this.events.length - 1; i >= 0; i --) {
@@ -141,6 +146,9 @@ Mouse.prototype.onTouchEnd = function (event) {
 
 Mouse.prototype.onTouchMove = function (event) {
 	if (event === undefined) {throw new Error('Missing argument: event'); }
+	
+	this.touches = event.touches;
+	
 	this.windowX = event.targetTouches[0].pageX;
 	this.windowY = event.targetTouches[0].pageY;
 

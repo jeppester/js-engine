@@ -28,15 +28,15 @@ GravityObject.prototype.gravityObject = function (source, x, y, dir, additionalP
 };
 
 GravityObject.prototype.doGrav = function () {
-	this.dX += Math.cos(this.gravDir) * this.gravity * (engine.now - engine.last) / 1000;
-	this.dY += Math.sin(this.gravDir) * this.gravity * (engine.now - engine.last) / 1000;
+	this.dX += Math.cos(this.gravDir) * this.gravity * engine.timeIncrease / 1000;
+	this.dY += Math.sin(this.gravDir) * this.gravity * engine.timeIncrease / 1000;
 };
 
 GravityObject.prototype.doBorders = function () {
 	if (this.x < this.bmSize / 2 || this.x > engine.canvasResX - this.bmSize / 2) {
 
 		while (this.x < this.bmSize / 2 || this.x > engine.canvasResX - this.bmSize / 2) {
-			this.x -= this.dX * (engine.now - engine.last) / 1000;
+			this.x -= this.dX * engine.timeIncrease / 1000;
 		}
 
 		this.dX = -this.dX;
@@ -46,7 +46,7 @@ GravityObject.prototype.doBorders = function () {
 		this.y = engine.canvasResY - this.bmSize / 2;
 		if (Math.abs(this.dY) < 100) {
 			this.dY *= -0.4;
-			if (Math.abs(this.dY * (engine.now - engine.last) / 1000) < 1) {
+			if (Math.abs(this.dY * engine.timeIncrease / 1000) < 1) {
 				this.dY = 0;
 			}
 		} else {

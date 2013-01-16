@@ -11,19 +11,23 @@ jseCreateClass = function (className, inherits) {
 	newClass = window[className];
 
 	if (inherits) {
+		if (!Array.prototype.isPrototypeOf(inherits)) {throw new Error("Arguments inherits is not an array"); }
+
 		for (i = 0; i < inherits.length; i ++) {
 			inheritClass = inherits[i];
-
-			for (functionName in inheritClass.prototype) {
-				if (typeof inheritClass.prototype[functionName] === "function") {
-					newClass.prototype[functionName] = inheritClass.prototype[functionName];
-				}
-			}
+			jseExtend(newClass, inheritClass);
 		}
 	}
-	
 	return newClass;
 };
+
+jseExtend = function (newClass, inheritClass) {
+	for (functionName in inheritClass.prototype) {
+		if (typeof inheritClass.prototype[functionName] === "function") {
+			newClass.prototype[functionName] = inheritClass.prototype[functionName];
+		}
+	}
+}
 
 // Function to clean every trace of an element in the engine
 jsePurge = function (obj) {

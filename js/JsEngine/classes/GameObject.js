@@ -62,21 +62,10 @@ GameObject.prototype.accelerate = function (direction, speed) {
 	this.dY += Math.sin(direction) * speed;
 }
 
-GameObject.prototype.remove = function (time) {
-	time = time !== undefined ?  time : 200;
-
-	if (this.alive) {
-		this.alive = false;
-		this.animate({"bmSize": 0}, {'dur': time, callback: "jsePurge('" + this.id + "')", 'layer': 1});
-		return true;
-	}
-	return false;
-};
-
 GameObject.prototype.update = function () {
 	if (this.alive) {
 		// Kør funktion til tilføjelse af yderligere til update(), kaldet "step";
-		this.x += this.dX * (engine.now - engine.last) / 1000;
-		this.y += this.dY * (engine.now - engine.last) / 1000;
+		this.x += this.dX * engine.timeIncrease / 1000;
+		this.y += this.dY * engine.timeIncrease / 1000;
 	}
 };
