@@ -95,7 +95,7 @@ Loader.prototype.getRessource = function (ressource, typeString, themeName) {
 	var res, inh, i;
 
 	if (ressource.indexOf('/') !== -1) {
-		ressource = ressource.replace('/', '.');
+		ressource = ressource.replace(/\//g, '.');
 	}
 
 	res = this.themes[themeName][typeString][ressource];
@@ -243,11 +243,21 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 };
 
 Loader.prototype.preGenerateMask = function (theme, ressourceString) {
+	if (theme === undefined) {throw new Error('Missing argument: theme'); }
+	if (ressourceString === undefined) {throw new Error('Missing argument: ressourceString'); }
+
+	console.log('Generating mask: ' + ressourceString);
+
 	theme.masks[ressourceString] = Collidable.prototype.generateMask(ressourceString);
 	theme.masksGenerated ++;
 }
 
 Loader.prototype.preGenerateBBox = function (theme, ressourceString) {
+	if (theme === undefined) {throw new Error('Missing argument: theme'); }
+	if (ressourceString === undefined) {throw new Error('Missing argument: ressourceString'); }
+
+	console.log('Generating bbox: ' + ressourceString);
+
 	theme.bBoxes[ressourceString] = Collidable.prototype.generateBBox(theme.masks[ressourceString]);
 	theme.bBoxesGenerated ++;
 }

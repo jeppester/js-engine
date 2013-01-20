@@ -199,26 +199,26 @@ Collidable.prototype.generateBBox = function (mask) {
 
 Collidable.prototype.generateMask = function (ressourceString, alphaLimit) {
 	if (ressourceString === undefined) {throw new Error('Missing argument: ressourceString'); }
-
-	this.maskSource = ressourceString;
-	this.maskGenerate = true;
-	this.maskGenerateAlphaLimit = alphaLimit;
-	this.refreshMaskSource();
-
 	alphaLimit = alphaLimit !== undefined ? alphaLimit : 255;
 
-	var canvas, ctx, bitmap, data, length, pixel;
+	var image, canvas, ctx, bitmap, data, length, pixel;
+
+	image = loader.getImage(ressourceString);
 
 	canvas = document.createElement('canvas');
-	canvas.width = this.mask.width;
-	canvas.height = this.mask.height;
+	canvas.width = image.width;
+	canvas.height = image.height;
 	ctx = canvas.getContext('2d');
+
+	if (image === false) {
+		console.log(ressourceString);
+	}
 	ctx.drawImage(
-		this.mask,
+		image,
 		0,
 		0,
-		this.mask.width,
-		this.mask.height
+		image.width,
+		image.height
 	);
 
 	bitmap = ctx.getImageData(0, 0, canvas.width, canvas.height);
