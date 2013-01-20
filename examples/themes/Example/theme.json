@@ -20,10 +20,8 @@
         "Dot":"png",
 
         // Images inside a folder
-		"Folder":{
-			"Star1":"",
-			"Star2":"",
-			"Star3":""
-		}
+		"Folder.Star1": "png",
+		"Folder.Star2": "png",
+		"Folder.Star3": "png"
 	}
 }
