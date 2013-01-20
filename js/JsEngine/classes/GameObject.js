@@ -19,13 +19,13 @@ GameObject.prototype.gameObject = function (source, x, y, dir, additionalPropert
 
 	if (this.maskSource) {
 		this.setMask(this.maskSource);
+		this.boundingBox = {xOff: - this.xOff, yOff: - this.yOff, width: this.bmWidth, height: this.bmHeight};
 	}
 	else {
 		this.maskGenerateAlphaLimit = this.maskGenerateAlphaLimit ? this.maskGenerateAlphaLimit : 255;
-		this.generateMask(source, this.maskGenerateAlphaLimit);
+		this.mask = loader.getMask(source);
+		this.bBox = loader.getBBox(source);
 	}
-
-	this.generateBoundingBox();
 
 	// Add object to right loop
 	this.loop = this.loop ? this.loop: 'eachFrame';

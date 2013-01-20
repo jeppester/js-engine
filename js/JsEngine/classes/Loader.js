@@ -68,9 +68,24 @@ Loader.prototype.getSound = function (ressource, clone, themeName) {
 	sfx = this.getRessource(ressource, 'sfx', themeName);
 	return sfx  ?  (clone  ?  sfx.cloneNode() : sfx) : false;
 };
+
 Loader.prototype.getMusic = function (ressource, themeName) {
 	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
 	return this.getRessource(ressource, 'music', themeName);
+};
+
+Loader.prototype.getMask = function (ressource, themeName) {
+	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
+	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
+
+	return this.getRessource(ressource, 'masks', themeName);
+}
+
+Loader.prototype.getBBox = function (ressource, themeName) {
+	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
+	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
+
+	return this.getRessource(ressource, 'bBoxes', themeName);
 };
 
 Loader.prototype.getRessource = function (ressource, typeString, themeName) {
@@ -80,13 +95,12 @@ Loader.prototype.getRessource = function (ressource, typeString, themeName) {
 	var res, inh, i;
 
 	if (ressource.indexOf('/') !== -1) {
-		console.log('Fixing source format: ' + ressource);
 		ressource = ressource.replace('/', '.');
 	}
 
 	res = this.themes[themeName][typeString][ressource];
 
-	// Search for the image in inherited themes
+	// Search for the ressource in inherited themes
 	if (res === undefined) {
 		for (i = 0; i < this.themes[themeName].inherit.length; i ++) {
 			inh = this.themes[themeName].inherit[i];
@@ -201,6 +215,12 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 		this.themes[name] = theme;
 		theme.ressourcesCount = 0;
 		theme.ressourcesLoaded = 0;
+		theme.masksCount = 0;
+		theme.bBoxesCount = 0;
+		theme.masksGenerated = 0;
+		theme.bBoxesGenerated = 0;
+		theme.masks = {};
+		theme.bBoxes = {};
 
 		// Load all images
 		this.loadRessources(theme, theme.images, 'images');
@@ -222,6 +242,16 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 	}
 };
 
+Loader.prototype.preGenerateMask = function (theme, ressourceString) {
+	theme.masks[ressourceString] = Collidable.prototype.generateMask(ressourceString);
+	theme.masksGenerated ++;
+}
+
+Loader.prototype.preGenerateBBox = function (theme, ressourceString) {
+	theme.bBoxes[ressourceString] = Collidable.prototype.generateBBox(theme.masks[ressourceString]);
+	theme.bBoxesGenerated ++;
+}
+
 Loader.prototype.loadRessources = function (theme, object, typeString) {
 	if (theme === undefined) {throw new Error('Missing argument: theme'); }
 	if (object === undefined) {throw new Error('Missing argument: object'); }
@@ -230,27 +260,32 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 	var onload, res, path, i, format;
 
 	onload = function () {
-		var total, loaded, theme, i;
+		var total, loaded, ressourceString, theme, i;
 		if (this.hasAttribute('data-loaded')) {return; }
 
 		this.setAttribute('data-loaded', 'true');
-		loader.themes[this.getAttribute('data-theme')].ressourcesLoaded ++;
+		theme = loader.themes[this.getAttribute('data-theme')];
+		ressourceString = this.getAttribute('data-ressourceString');
+		theme.ressourcesLoaded ++;
 
-		total = 0;
-		loaded = 0;
+		// If the loaded object is an image, generate mask and bboxes
+		if (this.toString() === '[object HTMLImageElement]') {
+			if (this.width * this.height < 20000) {
+				theme.masksCount++;
+				theme.bBoxesCount++;
 
-		for (i in loader.themes) {
-			if (loader.themes.hasOwnProperty(i)) {
-				theme = loader.themes[i];
-				total += theme.ressourcesCount;
-				loaded += theme.ressourcesLoaded;
+				setTimeout(function () {
+					loader.preGenerateMask(theme, ressourceString);
+					loader.preGenerateBBox(theme, ressourceString);
+					loader.checkAllLoaded();
+				}, 1);
+			}
+			else {
+				console.log('Skipping generation of mask and bbox (> 20000 px): ' + ressourceString);
 			}
 		}
-		if (loaded === total) {
-			if (loader.onthemesloaded) {
-				loader.onthemesloaded();
-			}
-		}
+
+		loader.checkAllLoaded();
 	};
 
 	for (path in object) {
@@ -280,7 +315,17 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 				break;
 
 			case 'music':
-				res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, '/') + '.mp3');
+				format = false;
+				for (i = 0; i < engine.host.supportedAudio.length; i++) {
+					if (object[path].search(engine.host.supportedAudio[i]) !== -1) {
+						format = engine.host.supportedAudio[i];
+					}
+				}
+				if (!format) {
+					console.log('Sound was not available in a supported format: ' + theme.name + "/sfx/" + path.replace(/\./g, '/'));
+					continue;
+				}
+				res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, '/') + '.' + format);
 				res.setAttribute('preload', 'preload');
 				theme.music[path] = res;
 				res.addEventListener("canplaythrough", onload, false);
@@ -289,6 +334,30 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 
 			theme.ressourcesCount ++;
 			res.setAttribute('data-theme', theme.name);
+			res.setAttribute('data-ressourceString', path.replace(/\./g, '/'));
 		}
 	}
 };
+
+Loader.prototype.checkAllLoaded = function () {
+	total = 0;
+	loaded = 0;
+
+	for (i in this.themes) {
+		if (this.themes.hasOwnProperty(i)) {
+			theme = this.themes[i];
+			total += theme.ressourcesCount;
+			total += theme.masksCount;
+			total += theme.bBoxesCount;
+
+			loaded += theme.ressourcesLoaded;
+			loaded += theme.masksGenerated;
+			loaded += theme.bBoxesGenerated;
+		}
+	}
+	if (loaded === total) {
+		if (this.onthemesloaded) {
+			this.onthemesloaded();
+		}
+	}
+}

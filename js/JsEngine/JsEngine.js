@@ -28,6 +28,9 @@ JsEngine = function (_opt) {
 	this.canvasResY = 600;
 	this.enginePath = 'js/JsEngine';
 	this.themesPath = 'themes'
+	this.drawBBoxes = false;
+	this.drawMasks = false;
+	this.pauseOnBlur = true;
 	this.arena = document.getElementById('arena');
 	this.autoResize = true;
 	this.autoResizeLimitToResolution = true;
@@ -38,7 +41,7 @@ JsEngine = function (_opt) {
 
 	// Copy options to engine (except those which are only used for engine initialization)
 	this.options = _opt ? _opt: {};
-	copyOpt = ['backgroundColor','arena', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor','arena', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -200,7 +203,18 @@ JsEngine.prototype.initialize = function () {
 		loader.hideOverlay();
 	}
 	this.startMainLoop();
-	console.log('JsEngine ready');
+
+	// Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
+	if (this.pauseOnBlur) {
+		window.addEventListener('blur', function () {
+			engine.stopMainLoop();
+		});
+		window.addEventListener('focus', function () {
+			engine.startMainLoop();
+		});
+	}
+
+	console.log('JsEngine started');
 };
 
 JsEngine.prototype.autoResizeCanvas = function () {
@@ -406,7 +420,7 @@ JsEngine.prototype.mainLoop = function () {
 	this.last = this.now;
 
 	// Draw game objects (asynchroneous)
-	engine.redraw(0);
+	this.redraw(0);
 
 	// Count frames per second
 	if (this.fpsMsCounter < 1000) {

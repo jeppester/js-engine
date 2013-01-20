@@ -26,9 +26,6 @@ Collidable.prototype.collidable = function (maskSource, x, y, dir, additionalPro
 	this.bmHeight = this.mask.height;
 	this.xOff = this.xOff !== undefined && this.xOff !== 'center' ? this.xOff : this.bmWidth / 2;
 	this.yOff = this.yOff !== undefined && this.xOff !== 'center' ? this.yOff : this.bmHeight / 2;
-
-	// Create bounding box
-	this.boundingBox = {xOff: - this.xOff, yOff: - this.yOff, width: this.bmWidth, height: this.bmHeight};
 };
 
 Collidable.prototype.refreshMaskSource = function () {
@@ -66,16 +63,138 @@ Collidable.prototype.setMask = function (ressourceString) {
 	this.refreshMaskSource();
 };
 
-Collidable.prototype.generateBoundingBox = function (bitmap, cropWidth) {
-	bitmap = bitmap !== undefined ? bitmap : this.mask;
-	cropWidth = cropWidth !== undefined ? cropWidth : 0;
+Collidable.prototype.bBoxCollidesWith = function (objects, getCollidingObjects) {
+	if (objects === undefined) {throw new Error('Missing argument: objects'); }
+	if (!Array.prototype.isPrototypeOf(objects)) {
+		objects = [objects];
+	}
 
-	this.boundingBox = {
-		xOff: - this.xOff + cropWidth,
-		yOff: - this.yOff + cropWidth,
-		width: bitmap.width - 2 * cropWidth,
-		height: bitmap.height - 2 * cropWidth
+	getCollidingObjects = getCollidingObjects !== undefined ? getCollidingObjects : false;
+	//getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
+
+	var obj, bBox, rVect, bb1, bb2, i, collideObjects;
+
+	bBox = Math.round(this.dir / Math.PI * 50);
+	while (bBox > 99) {
+		bBox -= 100;
+	}
+	bb1 = this.bBox[bBox];
+	rVect = this.rotateVector(this.bm.width / 2 - this.xOff, this.bm.height / 2 - this.yOff, this.dir);
+
+	bb1 = {
+		x1: this.x + (rVect.x + bb1.xOff) * this.bmSize,
+		x2: this.x + (rVect.x + bb1.xOff + bb1.width) * this.bmSize,
+		y1: this.y + (rVect.y + bb1.yOff) * this.bmSize,
+		y2: this.y + (rVect.y + bb1.yOff + bb1.height) * this.bmSize
 	};
+
+	collidingObjects = [];
+
+	for (i = 0; i < objects.length; i++) {
+		obj = objects[i];
+
+		bBox = Math.round(obj.dir / Math.PI * 50);
+		while (bBox > 99) {
+			bBox -= 100;
+		}
+		bb2 = obj.bBox[bBox];
+		rVect = this.rotateVector(obj.bm.width / 2 - obj.xOff, obj.bm.height / 2 - obj.yOff, obj.dir);
+		
+		bb2 = {
+			x1: obj.x + (rVect.x + bb2.xOff) * obj.bmSize,
+			x2: obj.x + (rVect.x + bb2.xOff + bb2.width) * obj.bmSize,
+			y1: obj.y + (rVect.y + bb2.yOff) * obj.bmSize,
+			y2: obj.y + (rVect.y + bb2.yOff + bb2.height) * obj.bmSize
+		};
+
+		// Find out if the two objects' bounding boxes intersect
+		if (bb1.x1 < bb2.x2 &&
+			bb1.x2 > bb2.x1 &&
+
+			bb1.y1 < bb2.y2 &&
+			bb1.y2 > bb2.y1) {
+
+			if (getCollidingObjects) {
+				collidingObjects.push(obj);
+			}
+			else {
+				return true;
+			}
+		}
+	}
+
+	if (collidingObjects.length) {
+		return collidingObjects;
+	}
+	else {
+		return false;
+	}
+};
+
+Collidable.prototype.generateBBox = function (mask) {
+	mask = mask !== undefined ? mask : this.mask;
+
+	// New method
+	var bBoxes, i, canvas, ctx, bitmap, data, length, pixel, left, top, right, bottom;
+	bBoxes = [];
+
+	canvas = document.createElement('canvas');
+	canvas.width = Math.ceil(Math.max(mask.width, mask.height) * 1.42);
+	canvas.height = canvas.width;
+	ctx = canvas.getContext('2d');
+
+	// Generate the bounding box for 100 angles
+	for (i = 0; i < 100; i++) {
+		// Draw bitmap
+		ctx.save();
+		ctx.fillStyle = "#FFF";
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		ctx.translate(canvas.width / 2, canvas.height / 2);
+		ctx.rotate(Math.PI * 2 / 100 * i);
+
+		ctx.drawImage(
+			mask,
+			- mask.width / 2,
+			- mask.height / 2,
+			mask.width,
+			mask.height
+		);
+
+		ctx.restore();
+
+		// Find bounding box
+		top = canvas.height;
+		bottom = 0;
+		left = canvas.width;
+		right = 0;
+
+		bitmap = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		data = bitmap.data;
+		length = data.length / 4;
+
+		pxArr = [];
+		for (pixel = 0; pixel < length; pixel++) {
+			if (data[pixel * 4] < 255) {
+				y = Math.floor(pixel / bitmap.width);
+				x = pixel - y * bitmap.width;
+
+				top = Math.min(y, top);
+				bottom = Math.max(y, top);
+				left = Math.min(x, left);
+				right = Math.max(x, right);
+			}
+		}
+
+		bBoxes[i] = {
+			xOff: left - canvas.width / 2,
+			yOff: top - canvas.height / 2,
+			width: right - left,
+			height: bottom - top
+		}
+	}
+
+	return bBoxes;
 };
 
 Collidable.prototype.generateMask = function (ressourceString, alphaLimit) {
@@ -88,7 +207,7 @@ Collidable.prototype.generateMask = function (ressourceString, alphaLimit) {
 
 	alphaLimit = alphaLimit !== undefined ? alphaLimit : 255;
 
-	var canvas, ctx, bitmap, data, lengt, pixel;
+	var canvas, ctx, bitmap, data, length, pixel;
 
 	canvas = document.createElement('canvas');
 	canvas.width = this.mask.width;
@@ -123,64 +242,10 @@ Collidable.prototype.generateMask = function (ressourceString, alphaLimit) {
 	}
 	ctx.putImageData(bitmap, 0, 0);
 
-	this.mask = canvas;
+	return canvas;
 };
 
-Collidable.prototype.boundingBoxCollidesWith = function (objects, getCollidingObjects) {
-	if (objects === undefined) {throw new Error('Missing argument: objects'); }
-	if (!Array.prototype.isPrototypeOf(objects)) {
-		objects = [objects];
-	}
-
-	getCollidingObjects = getCollidingObjects !== undefined ? getCollidingObjects : false;
-	//getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
-
-	var obj, bb1, bb2, i, collideObjects;
-
-	bb1 = {
-		x1: this.x + this.boundingBox.xOff,
-		x2: this.x + this.boundingBox.xOff + this.boundingBox.width,
-		y1: this.y + this.boundingBox.yOff,
-		y2: this.y + this.boundingBox.yOff + this.boundingBox.height
-	};
-
-	collidingObjects = [];
-
-	for (i = 0; i < objects.length; i++) {
-		obj = objects[i];
-
-		bb2 = {
-			x1: obj.x + obj.boundingBox.xOff,
-			x2: obj.x + obj.boundingBox.xOff + obj.boundingBox.width,
-			y1: obj.y + obj.boundingBox.yOff,
-			y2: obj.y + obj.boundingBox.yOff + obj.boundingBox.height
-		};
-
-		// Find out if the two objects' bounding boxes intersect
-		if (bb1.x1 < bb2.x2 &&
-			bb1.x2 > bb2.x1 &&
-
-			bb1.y1 < bb2.y2 &&
-			bb1.y2 > bb2.y1) {
-
-			if (getCollidingObjects) {
-				collidingObjects.push(obj);
-			}
-			else {
-				return true;
-			}
-		}
-	}
-
-	if (collidingObjects.length) {
-		return collidingObjects;
-	}
-	else {
-		return false;
-	}
-};
-
-Collidable.prototype.bitmapCollidesWith = function (objects, resolution, getCollisionPosition, checkBoundingBox) {
+Collidable.prototype.bitmapCollidesWith = function (objects, resolution, getCollisionPosition, checkbBox) {
 	if (objects === undefined) {throw new Error('Missing argument: objects'); }
 	if (!Array.prototype.isPrototypeOf(objects)) {
 		objects = [objects];
@@ -188,7 +253,7 @@ Collidable.prototype.bitmapCollidesWith = function (objects, resolution, getColl
 
 	resolution = resolution !== undefined ? resolution : 1;
 	getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
-	checkBoundingBox = checkBoundingBox !== undefined ? checkBoundingBox : true;
+	checkbBox = checkbBox !== undefined ? checkbBox : true;
 
 	var canvas, canvasSize, ctx, obj, bitmap, i, data, length, pixel, pxArr, x, y, sumX, sumY, avX, avY, avDist, avDir;
 
@@ -196,8 +261,8 @@ Collidable.prototype.bitmapCollidesWith = function (objects, resolution, getColl
 		return false;
 	}
 
-	if (checkBoundingBox) {
-		objects = this.boundingBoxCollidesWith(objects, true);
+	if (checkbBox) {
+		objects = this.bBoxCollidesWith(objects, true);
 		if (objects === false) {
 			return false;
 		}
@@ -279,12 +344,6 @@ Collidable.prototype.bitmapCollidesWith = function (objects, resolution, getColl
 		
 		pxArr = pxArr.sortByNumericProperty('y');
 		avY = (pxArr[0].y + pxArr[pxArr.length - 1].y) / 2;
-
-		/*console.log(pxArr);
-		console.log(avX);
-		console.log(avY);
-
-		engine.stopMainLoop();*/
 		
 		// Translate the position according to the object's sprite offset
 		avX -= this.xOff * this.bmSize;
@@ -302,4 +361,77 @@ Collidable.prototype.bitmapCollidesWith = function (objects, resolution, getColl
 	}
 
 	return false;
+};
+
+Collidable.prototype.rotateVector = function (x, y, dir) {
+	var dist, initDir;
+
+	dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+	initDir = Math.atan2(y, x);
+	initDir += dir;
+
+	return {
+		x: Math.cos(initDir) * dist,
+		y: Math.sin(initDir) * dist
+	};
+}
+
+Collidable.prototype.drawBBox = function () {
+	// Draw Sprite on canvas
+	var c, bBox, rVect;
+
+	if (this.bBox) {
+		bBox = Math.round(this.dir / Math.PI * 50);
+		while (bBox > 99) {
+			bBox -= 100;
+		}
+
+		bBox = this.bBox[bBox];
+	}
+	else {
+		return;
+	}
+
+	// Rotate bbox center point according to object's xOffset and the object's direction
+	rVect = this.rotateVector(this.bm.width / 2 - this.xOff, this.bm.height / 2 - this.yOff, this.dir);
+
+	c = this.ctx;
+
+	c.save();
+	c.translate(this.x, this.y);
+	c.strokeStyle = "#00F";
+
+	try {
+		c.strokeRect((rVect.x + bBox.xOff) * this.bmSize, (rVect.y + bBox.yOff) * this.bmSize, bBox.width * this.bmSize, bBox.height * this.bmSize);
+	} catch (e) {
+		console.log(bBox);
+		engine.stopMainLoop();
+		throw new Error(e);
+	}
+	c.restore();
+};
+
+Collidable.prototype.drawMask = function () {
+	// Draw Sprite on canvas
+	var c, mask;
+
+	if (this.mask) {
+		mask = this.mask;
+	}
+	else {
+		return;
+	}
+	c = this.ctx;
+	c.save();
+	c.translate(this.x, this.y);
+	c.rotate(this.dir);
+	try {
+		c.drawImage(this.mask, - this.xOff * this.bmSize, - this.yOff * this.bmSize, this.bmWidth * this.bmSize, this.bmHeight * this.bmSize);
+	} catch (e) {
+		console.log(this.source);
+		console.log(this.bm);
+		engine.stopMainLoop();
+		throw new Error(e);
+	}
+	c.restore();
 };

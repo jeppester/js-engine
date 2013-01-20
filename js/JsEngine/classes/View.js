@@ -202,6 +202,12 @@ View.prototype.drawChildren = function () {
 	if (this.drawCanvas) {
 		if (this.depth !== undefined) {
 			this.drawCanvas();
+			if (engine.drawBBoxes && this.drawBBox) {
+				this.drawBBox();
+			}
+			if (engine.drawMasks && this.drawMask) {
+				this.drawMask();
+			}
 		}
 		else {
 			console.log(this);
