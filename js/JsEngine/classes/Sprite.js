@@ -27,15 +27,16 @@ Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 
 	// Load additional properties
 	this.importProperties(additionalProperties);
-
+	
 	if (!this.refreshSource()) {
 		throw new Error('Sprite source was not successfully loaded: ' + source);
 	}
 	
 	this.bmWidth = this.bm.width;
 	this.bmHeight = this.bm.height;
+
 	this.xOff = this.xOff !== undefined && this.xOff !== 'center' ? this.xOff : this.bmWidth / 2;
-	this.yOff = this.yOff !== undefined && this.xOff !== 'center' ? this.yOff : this.bmHeight / 2;
+	this.yOff = this.yOff !== undefined && this.yOff !== 'center' ? this.yOff : this.bmHeight / 2;
 };
 
 Sprite.prototype.refreshSource = function () {
