@@ -99,4 +99,4 @@ Animation.prototype.stopAnimations = function () {
 			}
 		}
 	}
-}
+};

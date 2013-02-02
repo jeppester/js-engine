@@ -43,9 +43,9 @@ Array.prototype.forEach = function (func) {
 	for (var i = 0; i < this.length; i ++) {
 		func.call(this[i], i);
 	}
-}
+};
 
-Object.prototype.importProperties = function(from) {
+Object.prototype.importProperties = function (from) {
 	var i;
 	for (i in from) {
 		if (from.hasOwnProperty(i)) {

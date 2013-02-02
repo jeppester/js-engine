@@ -2,7 +2,7 @@ jseCreateClass('Polygon');
 
 Polygon.prototype.polygon = function (points) {
 	this.points = points;
-}
+};
 
 Polygon.prototype.rotate = function (dir) {
 	var i;
@@ -12,10 +12,10 @@ Polygon.prototype.rotate = function (dir) {
 	}
 
 	return this;
-}
+};
 
 Polygon.prototype.scale = function (factor) {
-	if (!typeof factor === 'number') {throw new Error('Argument factor has to be of type Number'); }
+	if (typeof factor !== 'number') {throw new Error('Argument factor has to be of type Number'); }
 	
 	var i;
 
@@ -24,7 +24,7 @@ Polygon.prototype.scale = function (factor) {
 	}
 
 	return this;
-}
+};
 
 Polygon.prototype.move = function (moveX, moveY) {
 	var moveVect, i;
@@ -36,11 +36,11 @@ Polygon.prototype.move = function (moveX, moveY) {
 	}
 
 	return this;
-}
+};
 
 Polygon.prototype.copy = function () {
 	return new Polygon(this.getPoints());
-}
+};
 
 Polygon.prototype.getPoints = function () {
 	var points, i;
@@ -52,10 +52,10 @@ Polygon.prototype.getPoints = function () {
 	}
 
 	return points;
-}
+};
 
 Polygon.prototype.getLines = function () {
-	var lines, points, i;
+	var lines, points, i, to;
 
 	lines = [];
 	points = this.points;
@@ -67,7 +67,7 @@ Polygon.prototype.getLines = function () {
 	}
 
 	return lines;
-}
+};
 
 Polygon.prototype.intersects = function (object) {
 	var intersects, lines, line, oLines, oLine, i, ii;
@@ -105,5 +105,5 @@ Polygon.prototype.intersects = function (object) {
 		throw new Error('Argument object has to be of type: Line or Polygon');
 	}
 
-	return false
-}
+	return false;
+};

@@ -241,7 +241,8 @@ Mouse.prototype.circleIsPressed = function (x, y, r) {
 	if (x === undefined) {throw new Error('Missing argument: x'); }
 	if (y === undefined) {throw new Error('Missing argument: y'); }
 	if (r === undefined) {throw new Error('Missing argument: r'); }
-	var dX, dY;
+
+	var dX, dY, btn, i;
 
 	dX = this.x - x;
 	dY = this.y - y;

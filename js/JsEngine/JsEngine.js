@@ -13,7 +13,7 @@ Requires:
 
 JsEngine = function (_opt) {
 	// Define all used vars
-	var copyOpt, i, opt, req, resize, gc;
+	var copyOpt, supportedFormats, audioFormats, i, opt, req, gc;
 
 	// Set global engine variable
 	engine = this;
@@ -27,7 +27,7 @@ JsEngine = function (_opt) {
 	this.canvasResX = 800;
 	this.canvasResY = 600;
 	this.enginePath = 'js/JsEngine';
-	this.themesPath = 'themes'
+	this.themesPath = 'themes';
 	this.drawBBoxes = false;
 	this.drawMasks = false;
 	this.useRotatedBoundingBoxes = true;
@@ -42,7 +42,7 @@ JsEngine = function (_opt) {
 
 	// Copy options to engine (except those which are only used for engine initialization)
 	this.options = _opt ? _opt: {};
-	copyOpt = ['backgroundColor','arena', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'arena', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -55,7 +55,7 @@ JsEngine = function (_opt) {
 	audioFormats = ['mp3', 'ogg', 'wav'];
 	supportedFormats = [];
 	for (i = 0; i < audioFormats.length; i++) {
-		if (document.createElement('audio').canPlayType('audio/'+audioFormats[i])) {
+		if (document.createElement('audio').canPlayType('audio/' + audioFormats[i])) {
 			supportedFormats.push(audioFormats[i]);
 		}
 	}
@@ -75,8 +75,8 @@ JsEngine = function (_opt) {
 	// If autoresize is set to true, set up autoresize
 	if (this.autoResize) {
 		this.autoResizeCanvas();
-		window.addEventListener('resize', function() {engine.autoResizeCanvas(); }, false);
-		window.addEventListener('load', function() {engine.autoResizeCanvas(); }, false);
+		window.addEventListener('resize', function () {engine.autoResizeCanvas(); }, false);
+		window.addEventListener('load', function () {engine.autoResizeCanvas(); }, false);
 	}
 
 	// If JsEngine functions are not loaded, load them
@@ -138,7 +138,7 @@ JsEngine = function (_opt) {
 };
 
 JsEngine.prototype.initialize = function () {
-	var i, d, objectName, c, audioFormats, supportedFormats;
+	var i, d, objectName;
 
 	// Make array for containing references to all game objects
 	this.objectIndex = {};
@@ -169,8 +169,6 @@ JsEngine.prototype.initialize = function () {
 
 	// Create the depths
 	this.depthMap = [];
-	lastIsManualRedrawed = -1;
-	lastIsComposited = false;
 
 	// Create canvases for each depth and set the depth's main canvas, based on their composite- and manualRedraw settings
 	for (i = 0; i < this.options.depths; i ++) {
@@ -275,7 +273,7 @@ JsEngine.prototype.convertSpeed = function (speed, from, to) {
 	// Convert all formats to pixels per frame
 	switch (from) {
 	case SPEED_PIXELS_PER_SECOND:
-		speed = speed * this.timeIncrease / 1000
+		speed = speed * this.timeIncrease / 1000;
 		break;
 	case SPEED_PIXELS_PER_FRAME:
 		break;
@@ -284,14 +282,14 @@ JsEngine.prototype.convertSpeed = function (speed, from, to) {
 	// Convert pixels per frame to the output format
 	switch (to) {
 	case SPEED_PIXELS_PER_SECOND:
-		speed = speed / this.timeIncrease * 1000
+		speed = speed / this.timeIncrease * 1000;
 		break;
 	case SPEED_PIXELS_PER_FRAME:
 		break;
 	}
 
 	return speed;
-}
+};
 
 // clearStage removes all traces of a game - session
 JsEngine.prototype.clearStage = function () {
@@ -307,29 +305,31 @@ JsEngine.prototype.setLoopSpeed = function (loopSpeed) {
 	if (loopSpeed === undefined) {throw new Error('Missing argument: loopSpeed'); }
 	
 	this.loopSpeed = loopSpeed;
-}
+};
 
 JsEngine.prototype.setDefaultTheme = function (themeName, enforce) {
 	if (themeName === undefined) {throw new Error('Missing argument: themeName'); }
-	if (loader.themes[themeName] === undefined) {throw new Error('Trying to set unexisting theme: '+themeName); }
-	var i;
+	if (loader.themes[themeName] === undefined) {throw new Error('Trying to set unexisting theme: ' + themeName); }
+	var i, refreshSource;
 
-	enforce = enforce !== undefined ? enforce : false
+	enforce = enforce !== undefined ? enforce : false;
 
 	this.defaultTheme = themeName;
 
 	i = this.depth.length;
+
+	refreshSource = function () {
+		if (this.refreshSource) {
+			this.refreshSource();
+		}
+	};
 
 	while (i --) {
 		if (enforce) {
 			this.depth[i].setTheme(undefined, enforce);
 		}
 		else {
-			this.depth[i].applyToThisAndChildren(function () {
-				if (this.refreshSource) {
-					this.refreshSource();
-				}
-			});
+			this.depth[i].applyToThisAndChildren(refreshSource);
 		}
 	}
 
@@ -386,8 +386,8 @@ JsEngine.prototype.startMainLoop = function () {
 	this.running = true;
 
 	// Start mainLoop
-	this.loop = setTimeout(function() {
-		engine.mainLoop()
+	this.loop = setTimeout(function () {
+		engine.mainLoop();
 	}, this.loopSpeed);
 };
 
@@ -443,7 +443,7 @@ JsEngine.prototype.mainLoop = function () {
 	}
 
 	// Schedule next execution
-	this.loop = setTimeout(function() {
+	this.loop = setTimeout(function () {
 		engine.mainLoop();
 	}, this.loopSpeed);
 };
@@ -455,7 +455,7 @@ JsEngine.prototype.setCanvasResX = function (res) {
 	if (this.autoResize) {
 		this.autoResizeCanvas();
 	}
-}
+};
 
 JsEngine.prototype.setCanvasResY = function (res) {
 	this.mainCanvas.height = res;
@@ -463,7 +463,7 @@ JsEngine.prototype.setCanvasResY = function (res) {
 	if (this.autoResize) {
 		this.autoResizeCanvas();
 	}
-}
+};
 
 JsEngine.prototype.registerObject = function (obj, id) {
 	if (obj === undefined) {throw new Error('Missing argument: obj'); }
@@ -482,7 +482,7 @@ JsEngine.prototype.registerObject = function (obj, id) {
 // Function for redrawing the depths
 JsEngine.prototype.redraw = function (drawManualRedrawDepths) {
 	if (drawManualRedrawDepths === undefined) {throw new Error('Missing argument: manualRedrawDepths'); }
-	var i, d, ctx;
+	var i, d;
 
 	this.mainCanvas.getContext('2d').fillStyle = this.backgroundColor;
 	this.mainCanvas.getContext('2d').fillRect(0, 0, this.canvasResX, this.canvasResY);

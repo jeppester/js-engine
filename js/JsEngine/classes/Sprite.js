@@ -90,13 +90,6 @@ Sprite.prototype.drawCanvas = function () {
 	c.globalAlpha = this.opacity;
 	c.rotate(this.dir);
 	c.globalCompositeOperation = this.composite;
-	try {
-		c.drawImage(this.bm, - this.offset.x * this.bmSize, - this.offset.y * this.bmSize, this.bmWidth * this.bmSize, this.bmHeight * this.bmSize);
-	} catch (e) {
-		console.log(this.source);
-		console.log(this.bm);
-		engine.stopMainLoop();
-		throw new Error(e);
-	}
+	c.drawImage(this.bm, - this.offset.x * this.bmSize, - this.offset.y * this.bmSize, this.bmWidth * this.bmSize, this.bmHeight * this.bmSize);
 	c.restore();
 };

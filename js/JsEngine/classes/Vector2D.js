@@ -48,7 +48,7 @@ Vector2D.prototype.move = function (x, y) {
 	this.y += y;
 
 	return this;
-}
+};
 
 Vector2D.prototype.subtract = function (vector) {
 	if (Vector2D.prototype.isPrototypeOf(vector)) {
@@ -80,25 +80,25 @@ Vector2D.prototype.divide = function (vector) {
 	}
 
 	return this;
-}
+};
 
 Vector2D.prototype.scale = function (factor) {
-	if (!typeof number === 'factor') {throw new Error('Argument factor has to be of type Number'); }
+	if (typeof factor !== 'number') {throw new Error('Argument factor has to be of type Number'); }
 	
 	this.x *= factor;
 	this.y *= factor;
 
 	return this;
-}
+};
 
-Vector2D.prototype.multiply = function(vector) {
+Vector2D.prototype.multiply = function (vector) {
 	if (!Vector2D.prototype.isPrototypeOf(vector)) {throw new Error('Argument vector has to be of type Vector2D'); }
 
 	this.x *= vector.x;
 	this.y *= vector.y;
 
 	return this;
-}
+};
 
 Vector2D.prototype.setFromDirection = function (direction, length) {
 	if (typeof direction !== 'number') {throw new Error('Argument direction has to be of type: Number'); }
@@ -108,4 +108,4 @@ Vector2D.prototype.setFromDirection = function (direction, length) {
 	this.y = Math.sin(direction) * length;
 
 	return this;
-}
+};

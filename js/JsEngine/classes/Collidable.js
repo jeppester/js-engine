@@ -12,7 +12,7 @@ Collidable.prototype.polygonCollidesWith = function (objects, getCollidingObject
 
 	getCollidingObjects = getCollidingObjects !== undefined ? getCollidingObjects : false;
 
-	var pol1, pol2, i;
+	var pol1, pol2, i, collidingObjects, obj;
 
 	pol1 = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.bmSize).move(this.x, this.y);
 
@@ -39,7 +39,7 @@ Collidable.prototype.polygonCollidesWith = function (objects, getCollidingObject
 	else {
 		return false;
 	}
-}
+};
 
 Collidable.prototype.bBoxCollidesWith = function (objects, getCollidingObjects) {
 	if (objects === undefined) {throw new Error('Missing argument: objects'); }
@@ -49,7 +49,7 @@ Collidable.prototype.bBoxCollidesWith = function (objects, getCollidingObjects) 
 
 	getCollidingObjects = getCollidingObjects !== undefined ? getCollidingObjects : false;
 
-	var obj, rVect, bb1, bb2, i, collideObjects;
+	var obj, rVect, bb1, bb2, i, collidingObjects;
 
 	rVect = new Vector2D(this.bm.width / 2 - this.offset.x, this.bm.height / 2 - this.offset.y).rotate(this.dir);
 	bb1 = this.mask.bBox.copy().rotate(this.dir).move(rVect.x + this.x, rVect.y + this.y).scale(this.bmSize);
@@ -108,7 +108,7 @@ Collidable.prototype.collidesWith = function (objects, resolution, getCollisionP
 	getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
 	checkBBox = checkBBox !== undefined ? checkBBox : true;
 
-	var canvas, canvasSize, mask, ctx, obj, bitmap, i, data, length, pixel, pxArr, x, y, sumX, sumY, avX, avY, avDist, avDir;
+	var canvas, mask, ctx, obj, bitmap, i, data, length, pixel, pxArr, x, y, avX, avY, avDist, avDir;
 
 	if (this.bmSize === 0) {
 		return false;
@@ -229,7 +229,7 @@ Collidable.prototype.collidesWith = function (objects, resolution, getCollisionP
 };
 
 Collidable.prototype.drawBBox = function () {
-	var bBox, pol, points, dir, bmSize, x1, y1, x2, y2;
+	var c, pol, rVect, x1, y1, x2, y2;
 
 
 	rVect = new Vector2D(this.bm.width / 2 - this.offset.x, this.bm.height / 2 - this.offset.y).rotate(this.dir);
@@ -251,7 +251,7 @@ Collidable.prototype.drawBBox = function () {
 };
 
 Collidable.prototype.drawRotatedBBox = function () {
-	var bBox, pol, points, dir, bmSize;
+	var pol, c;
 
 	pol = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.bmSize);
 
@@ -269,7 +269,7 @@ Collidable.prototype.drawRotatedBBox = function () {
 	c.stroke();
 
 	c.restore();
-}
+};
 
 Collidable.prototype.drawMask = function () {
 	// Draw Sprite on canvas

@@ -1,7 +1,7 @@
 // Function to copy all variables from one object to another
 // Used mainly for loading option objects - See TextBlock for an example
 jseCreateClass = function (className, inherits) {
-	var constructorName, i, inheritClass, newClass, functionName;
+	var constructorName, i, inheritClass, newClass;
 
 	if (!/^\w*$/.test(className)) {throw new Error("Invalid class name: " + className); }
 
@@ -22,12 +22,14 @@ jseCreateClass = function (className, inherits) {
 };
 
 jseExtend = function (newClass, inheritClass) {
+	var functionName;
+
 	for (functionName in inheritClass.prototype) {
 		if (typeof inheritClass.prototype[functionName] === "function") {
 			newClass.prototype[functionName] = inheritClass.prototype[functionName];
 		}
 	}
-}
+};
 
 // Function to clean every trace of an element in the engine
 jsePurge = function (obj) {

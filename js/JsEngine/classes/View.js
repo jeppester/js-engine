@@ -29,7 +29,7 @@ View.prototype.addChild = function (child) {
 		child.setDepth(this.depth);
 	}
 	if (child.refreshSource) {
-		child.refreshSource;
+		child.refreshSource();
 	}
 	return child;
 };
@@ -71,7 +71,7 @@ View.prototype.insertBefore = function (insertChildren, child) {
 			child.setDepth(this.depth);
 		}
 		if (child.refreshSource) {
-			child.refreshSource;
+			child.refreshSource();
 		}
 	}
 
@@ -118,12 +118,12 @@ View.prototype.directionTo = function (obj) {
 	else {
 		throw new Error('This object, or checked object has no position');
 	}
-}
+};
 
 // Method for setting the theme of the object
 View.prototype.setTheme = function (themeName, recursive) {
 	if (themeName) {
-		if (loader.themes[themeName] === undefined) {throw new Error('Trying to set unexisting theme: '+themeName); }
+		if (loader.themes[themeName] === undefined) {throw new Error('Trying to set unexisting theme: ' + themeName); }
 	}
 	else {
 		themeName = undefined;
@@ -152,7 +152,7 @@ View.prototype.setTheme = function (themeName, recursive) {
 			});
 		}
 	}
-}
+};
 
 View.prototype.applyToThisAndChildren = function (func) {
 	if (func === undefined) {throw new Error('Missing argument: function'); }

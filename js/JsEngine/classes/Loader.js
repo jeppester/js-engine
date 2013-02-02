@@ -92,7 +92,7 @@ Loader.prototype.getMask = function (ressource, themeName) {
 		this.themes[themeName].masks[ressource] = mask;
 		return mask;
 	}
-}
+};
 
 Loader.prototype.getRessource = function (ressource, typeString, themeName) {
 	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
@@ -193,7 +193,7 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 	if (themeNames === undefined) {throw new Error('Missing argument: themeNames'); }
 	if (callback !== undefined) {this.onthemesloaded = callback; }
 
-	var name, req, i, total;
+	var name, req, i, total, theme;
 
 	for (i = 0; i < themeNames.length; i ++) {
 		name = themeNames[i];
@@ -210,7 +210,7 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 		if (req.status === 404) {console.log('Theme not found: ' + name); continue; }
 
 		// Get theme details
-		eval('var theme = ' + req.responseText);
+		eval('theme = ' + req.responseText);
 
 		// Load inherited themes
 		if (theme.inherit.length) {
@@ -252,7 +252,7 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 	var onload, res, path, i, format;
 
 	onload = function () {
-		var total, loaded, ressourceString, theme, i;
+		var ressourceString, theme, i;
 		if (this.hasAttribute('data-loaded')) {return; }
 
 		
@@ -328,12 +328,6 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 	}
 };
 
-Loader.prototype.rotateBBox = function (mask, direction) {
-	var bBox, v, top, bottom, left, right;
-
-	return new Rectangle(left, top, right - left, bottom - top).getPolygon();
-}
-
 Loader.prototype.generateMask = function (ressourceString, alphaLimit) {
 	if (ressourceString === undefined) {throw new Error('Missing argument: ressourceString'); }
 	alphaLimit = alphaLimit !== undefined ? alphaLimit : 255;
@@ -399,6 +393,8 @@ Loader.prototype.generateMask = function (ressourceString, alphaLimit) {
 };
 
 Loader.prototype.checkAllLoaded = function () {
+	var i, total, loaded, theme;
+
 	total = 0;
 	loaded = 0;
 
@@ -416,4 +412,4 @@ Loader.prototype.checkAllLoaded = function () {
 		return true;
 	}
 	return false;
-}
+};

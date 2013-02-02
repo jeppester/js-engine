@@ -13,11 +13,11 @@ Line.prototype.rotate = function (dir) {
 	this.b.rotate(dir);
 
 	return this;
-}
+};
 
 Line.prototype.copy = function () {
 	return new Line(this.a, this.b);
-}
+};
 
 Line.prototype.intersects = function (line) {
 	if (!Line.prototype.isPrototypeOf(line)) {throw new Error('Agument line should be of type: Line'); }
@@ -33,4 +33,4 @@ Line.prototype.intersects = function (line) {
 	c2 = (line.b.x - line.a.x) * (this.b.y - line.b.y) - (this.b.x - line.b.x) * (line.b.y - line.a.y);
 
 	return c1 * c2 < 0;
-}
+};

@@ -42,7 +42,7 @@ Rectangle.prototype.moveTo = function (x, y) {
 
 Rectangle.prototype.getPolygon = function () {
 	return new Polygon(this.getPoints());
-}
+};
 
 Rectangle.prototype.getPoints = function () {
 	return [

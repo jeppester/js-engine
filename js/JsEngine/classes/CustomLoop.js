@@ -1,6 +1,6 @@
 jseCreateClass('CustomLoop');
 
-CustomLoop.prototype.customLoop = function (framesPerExecution, maskFunction) {	
+CustomLoop.prototype.customLoop = function (framesPerExecution, maskFunction) {
 	this.framesPerExecution = framesPerExecution === undefined ? 1 : framesPerExecution;
 	this.maskFunction = maskFunction === undefined ? function () {return true; } : maskFunction;
 
@@ -27,7 +27,7 @@ CustomLoop.prototype.schedule = function (func, delay) {
 CustomLoop.prototype.addQueue = function () {
 	this.activities = this.activities.concat(this.activitiesQueue);
 	this.activitiesQueue = [];
-}
+};
 
 CustomLoop.prototype.execute = function () {
 	var timer, i, exec;
