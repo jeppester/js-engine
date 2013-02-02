@@ -20,7 +20,7 @@ JsEngine = function (_opt) {
 
 	// Load default options
 	// Firefox performs very bad with a low loopspeed whereas chrome performs very good
-	// Therefore firefox' default loopspeed initially set high
+	// Therefore firefox' default loopspeed initially set higher than chrome
 	this.loopSpeed = navigator.userAgent.match(/Gecko\//) ? 20 : 10;
 	this.running = false;
 	this.manualRedrawDepths = [];
@@ -30,6 +30,7 @@ JsEngine = function (_opt) {
 	this.themesPath = 'themes'
 	this.drawBBoxes = false;
 	this.drawMasks = false;
+	this.useRotatedBoundingBoxes = true;
 	this.pauseOnBlur = true;
 	this.arena = document.getElementById('arena');
 	this.autoResize = true;
@@ -41,7 +42,7 @@ JsEngine = function (_opt) {
 
 	// Copy options to engine (except those which are only used for engine initialization)
 	this.options = _opt ? _opt: {};
-	copyOpt = ['backgroundColor','arena', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor','arena', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -101,6 +102,19 @@ JsEngine = function (_opt) {
 		jseSyncLoad(this.enginePath + '/classes/Loader.js');
 	}
 
+	// Create a worker thread
+	/*if (typeof Worker !== 'undefined') {
+		this.worker = new Worker(this.enginePath + '/jseWorker.js');
+	}
+	else {
+		this.worker = false;
+	}
+	this.worker.addEventListener('message', function (e) {
+		var response = e.data;
+
+		console.log(response);
+	});*/
+
 	// Create loader object
 	loader = new Loader();
 	
@@ -108,6 +122,10 @@ JsEngine = function (_opt) {
 	loader.loadClasses([
 		this.enginePath + '/classes/Animation.js',
 		this.enginePath + '/classes/Animator.js',
+		this.enginePath + '/classes/Vector2D.js',
+		this.enginePath + '/classes/Line.js',
+		this.enginePath + '/classes/Polygon.js',
+		this.enginePath + '/classes/Rectangle.js',
 		this.enginePath + '/classes/View.js',
 		this.enginePath + '/classes/CustomLoop.js',
 		this.enginePath + '/classes/Director.js',
@@ -155,7 +173,7 @@ JsEngine.prototype.initialize = function () {
 	// Depth layers for drawing operations
 	this.depth = [];
 
-	// Arrays for update operations, an object can belong to both !
+	// Setup default loop
 	this.loops = {
 		eachFrame: new CustomLoop()
 	};
@@ -193,17 +211,6 @@ JsEngine.prototype.initialize = function () {
 	mouse = new Mouse();
 	animator = new Animator();
 
-	// Create game object
-	if (window[this.gameClassName] !== "undefined") {
-		objectName = this.gameClassName.substr(0, 1).toLowerCase() + this.gameClassName.substr(1);
-		eval(objectName + " = new " + this.gameClassName + '()');
-	}
-	else {
-		console.log('No game class found');
-		loader.hideOverlay();
-	}
-	this.startMainLoop();
-
 	// Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
 	if (this.pauseOnBlur) {
 		window.addEventListener('blur', function () {
@@ -213,6 +220,18 @@ JsEngine.prototype.initialize = function () {
 			engine.startMainLoop();
 		});
 	}
+
+	// Create game object
+	if (window[this.gameClassName] !== "undefined") {
+		objectName = this.gameClassName.substr(0, 1).toLowerCase() + this.gameClassName.substr(1);
+		eval(objectName + " = new " + this.gameClassName + '()');
+	}
+	else {
+		console.log('No game class found');
+		loader.hideOverlay();
+	}
+
+	this.startMainLoop();
 
 	console.log('JsEngine started');
 };
@@ -259,6 +278,9 @@ JsEngine.prototype.makeCanvas = function () {
 // Function for converting between speed units
 JsEngine.prototype.convertSpeed = function (speed, from, to) {
 	if (speed === undefined) {throw new Error('Missing argument: speed'); }
+	if (Vector2D.prototype.isPrototypeOf(speed)) {
+		return new Vector2D(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
+	}
 
 	from = from !== undefined ? from : SPEED_PIXELS_PER_SECOND;
 	to = to !== undefined ? to : SPEED_PIXELS_PER_FRAME;
@@ -435,7 +457,7 @@ JsEngine.prototype.mainLoop = function () {
 
 	// Schedule next execution
 	this.loop = setTimeout(function() {
-		engine.mainLoop()
+		engine.mainLoop();
 	}, this.loopSpeed);
 };
 

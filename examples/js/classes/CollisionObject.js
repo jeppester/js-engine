@@ -13,7 +13,6 @@ jseCreateClass('CollisionObject', [GameObject]);
 CollisionObject.prototype.collisionObject = function (source, x, y, additionalProperties) {
 	// Call the sprite constructor to fully extend the sprite and set all sprite properties
 	this.gameObject(source, x, y, 0, additionalProperties);
-	this.generateMask(this.source, 100);
 
 	// Add step function to 'eachFrame'-loop
 	if (this.leftKey !== undefined) {
@@ -48,22 +47,22 @@ CollisionObject.prototype.step = function () {
 	// Check that the arrow keys are down, if so, move the object by increasing or decreasing it's x and y properties
 	// Left
 	if (keyboard.isDown(this.leftKey)) {
-		this.dX -= engine.convertSpeed(100);
+		this.speed.x -= engine.convertSpeed(100);
 	}
 
 	// Right
 	if (keyboard.isDown(this.rightKey)) {
-		this.dX += engine.convertSpeed(100);
+		this.speed.x += engine.convertSpeed(100);
 	}
 
 	// Up
 	if (keyboard.isDown(this.upKey)) {
-		this.dY -= engine.convertSpeed(100);
+		this.speed.y -= engine.convertSpeed(100);
 	}
 
 	// Down
 	if (keyboard.isDown(this.downKey)) {
-		this.dY += engine.convertSpeed(100);
+		this.speed.y += engine.convertSpeed(100);
 	}
 };
 
@@ -71,13 +70,13 @@ CollisionObject.prototype.collisionCheck = function () {
 	var col, speed, sound;
 
 	if (this !== window.ball) {
-		if (col = this.bitmapCollidesWith(window.ball, 1, true)) {
+		if (col = this.collidesWith(window.ball, 1, true)) {
 			// Use the direction to the collision, and the direction of the object to calculate obj1's bounce
-			this.dX = 0;
-			this.dY = 0;
+			this.speed.x = 0;
+			this.speed.y = 0;
 
 			// Move to contact position
-			while (this.bitmapCollidesWith(window.ball, 1)) {
+			while (this.collidesWith(window.ball, 1)) {
 				this.x += 1 * Math.cos(col.dir - Math.PI);
 				this.y += 1 * Math.sin(col.dir - Math.PI);
 
@@ -85,31 +84,29 @@ CollisionObject.prototype.collisionCheck = function () {
 				window.ball.y += 1 * Math.sin(col.dir);
 			}
 
-			//engine.stopMainLoop();
-			speed = ball.getSpeed();
-			ball.dX = Math.cos(col.dir) * speed;
-			ball.dY = Math.sin(col.dir) * speed;
+			speed = ball.speed.getLength();
+			ball.speed.setFromDirection(col.dir, speed);
 		}
 	}
 
 	// Bounce against borders
 	if (this.x < 16) {
 		this.x = 16;
-		this.dX = -this.dX;
+		this.speed.x = -this.speed.x;
 	}
 
 	if (this.x > engine.canvasResX - 16) {
 		this.x = engine.canvasResX - 16;
-		this.dX = -this.dX;
+		this.speed.x = -this.speed.x;
 	}
 
 	if (this.y < 16) {
 		this.y = 16;
-		this.dY = -this.dY;
+		this.speed.y = -this.speed.y;
 	}
 
 	if (this.y > engine.canvasResY - 16) {
 		this.y = engine.canvasResY - 16;
-		this.dY = -this.dY;
+		this.speed.y = -this.speed.y;
 	}
 }

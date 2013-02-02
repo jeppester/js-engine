@@ -7,23 +7,22 @@ Requires:
 	View
 */
 
-jseCreateClass('TextBlock', [Animation, View]);
+jseCreateClass('TextBlock', [Animation, View, Vector2D]);
 
 // Constructor
 TextBlock.prototype.textBlock = function (string, x, y, width, additionalProperties) {
 	if (string === undefined) {throw new Error('Missing argument: string'); }
 	if (width === undefined) {throw new Error('Missing argument: width'); }
 
+	this.vector2D(x, y);
+
 	// Load default options
-	this.x = x !== undefined  ?  x : 0;
-	this.y = y !== undefined ?  y : 0;
 	this.width = width;
 
 	// Load default options
 	this.font = 'normal 14px Verdana';
 	this.alignment = 'left';
-	this.xOff = 0;
-	this.yOff = 0;
+	this.offset = new Vector2D();
 	this.color = "#000000";
 	this.opacity = 1;
 	this.bmSize = 1;
@@ -113,7 +112,7 @@ TextBlock.prototype.drawCanvas = function () {
 	c.rotate(this.dir);
 	c.globalAlpha = this.opacity;
 	c.globalCompositeOperation = this.composite;
-	c.drawImage(this.cache, - this.xOff * this.bmSize, - this.yOff * this.bmSize, this.cache.width * this.bmSize, this.cache.height * this.bmSize);
+	c.drawImage(this.cache, - this.offset.x * this.bmSize, - this.offset.y * this.bmSize, this.cache.width * this.bmSize, this.cache.height * this.bmSize);
 	c.restore();
 };
 

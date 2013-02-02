@@ -79,12 +79,14 @@ View.prototype.insertBefore = function (insertChildren, child) {
 };
 
 View.prototype.getChildren = function () {
-	var ret = [];
+	var ret, i;
+
+	ret = [];
 	
 	if (this.children) {
-		this.children.forEach(function () {
-			ret.push(this);
-		})
+		for (i = 0; i < this.children.length; i++) {
+			ret.push(this.children[i]);
+		}
 	}
 	
 	return ret;
@@ -107,17 +109,16 @@ View.prototype.setDepth = function (depth) {
 	}
 };
 
-View.prototype.applyToThisAndChildren = function (func) {
-	if (func === undefined) {throw new Error('Missing argument: function'); }
-	var i;
+View.prototype.directionTo = function (obj) {
+	if (obj === undefined) {throw new Error('Missing argument: obj'); }
 
-	func.call(this);
-	if (this.children) {
-		for (i = 0;i < this.children.length;i ++) {
-			this.children[i].applyToThisAndChildren(func);
-		}
+	if (this.x && this.y && obj.x && obj.y) {
+		return Math.atan2(obj.y - this.y, obj.x - this.x);
 	}
-};
+	else {
+		throw new Error('This object, or checked object has no position');
+	}
+}
 
 // Method for setting the theme of the object
 View.prototype.setTheme = function (themeName, recursive) {
@@ -152,6 +153,18 @@ View.prototype.setTheme = function (themeName, recursive) {
 		}
 	}
 }
+
+View.prototype.applyToThisAndChildren = function (func) {
+	if (func === undefined) {throw new Error('Missing argument: function'); }
+	var i;
+
+	func.call(this);
+	if (this.children) {
+		for (i = 0;i < this.children.length;i ++) {
+			this.children[i].applyToThisAndChildren(func);
+		}
+	}
+};
 
 // Method for removing the object and all of its children
 View.prototype.remove = function () {
@@ -203,7 +216,12 @@ View.prototype.drawChildren = function () {
 		if (this.depth !== undefined) {
 			this.drawCanvas();
 			if (engine.drawBBoxes && this.drawBBox) {
-				this.drawBBox();
+				if (engine.useRotatedBoundingBoxes) {
+					this.drawRotatedBBox();
+				}
+				else {
+					this.drawBBox();
+				}
 			}
 			if (engine.drawMasks && this.drawMask) {
 				this.drawMask();

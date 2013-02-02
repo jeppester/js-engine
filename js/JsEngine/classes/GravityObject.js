@@ -28,31 +28,31 @@ GravityObject.prototype.gravityObject = function (source, x, y, dir, additionalP
 };
 
 GravityObject.prototype.doGrav = function () {
-	this.dX += Math.cos(this.gravDir) * this.gravity * engine.timeIncrease / 1000;
-	this.dY += Math.sin(this.gravDir) * this.gravity * engine.timeIncrease / 1000;
+	this.speed.x += Math.cos(this.gravDir) * this.gravity * engine.timeIncrease / 1000;
+	this.speed.y += Math.sin(this.gravDir) * this.gravity * engine.timeIncrease / 1000;
 };
 
 GravityObject.prototype.doBorders = function () {
 	if (this.x < this.bmSize / 2 || this.x > engine.canvasResX - this.bmSize / 2) {
 
 		while (this.x < this.bmSize / 2 || this.x > engine.canvasResX - this.bmSize / 2) {
-			this.x -= this.dX * engine.timeIncrease / 1000;
+			this.x -= this.speed.x * engine.timeIncrease / 1000;
 		}
 
-		this.dX = -this.dX;
+		this.speed.x = -this.speed.x;
 	}
 
 	if (this.y > engine.canvasResY - this.bmSize / 2) {
 		this.y = engine.canvasResY - this.bmSize / 2;
-		if (Math.abs(this.dY) < 100) {
-			this.dY *= -0.4;
-			if (Math.abs(this.dY * engine.timeIncrease / 1000) < 1) {
-				this.dY = 0;
+		if (Math.abs(this.speed.y) < 100) {
+			this.speed.y *= -0.4;
+			if (Math.abs(this.speed.y * engine.timeIncrease / 1000) < 1) {
+				this.speed.y = 0;
 			}
 		} else {
-			this.dY = -this.dY * 0.6;
+			this.speed.y = -this.speed.y * 0.6;
 		}
 
-		this.dX *= 0.8;
+		this.speed.x *= 0.8;
 	}
 };

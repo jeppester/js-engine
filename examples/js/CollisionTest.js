@@ -40,6 +40,5 @@ CollisionTest.prototype.collisionTest = function () {
 };
 
 CollisionTest.prototype.onLoaded = function () {
-	ball.dX = -100;
-	ball.dY = -100;
+	ball.speed = new Vector2D(-100, -100);
 };

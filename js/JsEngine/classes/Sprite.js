@@ -8,15 +8,15 @@ Requirements:
 	Animator
 */
 
-jseCreateClass('Sprite', [View, Animation]);
+jseCreateClass('Sprite', [View, Animation, Vector2D]);
 
 Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 	if (source === undefined) {throw new Error('Missing argument: source'); }
 
+	this.vector2D(x, y);
+
 	// Load default options
 	this.source = source;
-	this.x = x !== undefined ? x : 0;
-	this.y = y !== undefined ? y : 0;
 	this.dir = dir !== undefined ? dir : 0;
 
 	engine.registerObject(this);
@@ -35,34 +35,38 @@ Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 	this.bmWidth = this.bm.width;
 	this.bmHeight = this.bm.height;
 
-	this.xOff = this.xOff !== undefined && this.xOff !== 'center' ? this.xOff : this.bmWidth / 2;
-	this.yOff = this.yOff !== undefined && this.yOff !== 'center' ? this.yOff : this.bmHeight / 2;
+	this.offset = this.offset !== undefined ? this.offset : new Vector2D(this.bm.width / 2, this.bm.height / 2);
+	if (this.offset.x === 'center') {this.offset.x = this.bm.width / 2; }
+	if (this.offset.y === 'center') {this.offset.y = this.bm.height / 2; }
 };
 
-Sprite.prototype.refreshSource = function () {
+Sprite.prototype.getTheme = function () {
 	var parent, theme;
 
 	theme = this.theme;
 
-	if (theme === undefined) {
-		if (this.parent) {
-			parent = this.parent;
-
-			while (theme === undefined) {
-				if (parent.theme) {
-					theme = parent.theme;
-				}
-				else {
-					if (parent.parent) {
-						parent = parent.parent
-					}
-					else {
-						break;
-					}
-				}
+	parent = this;
+	while (theme === undefined) {
+		if (parent.theme) {
+			theme = parent.theme;
+		}
+		else {
+			if (parent.parent) {
+				parent = parent.parent
+			}
+			else {
+				break;
 			}
 		}
 	}
+
+	return theme ? theme : engine.defaultTheme;
+}
+
+Sprite.prototype.refreshSource = function () {
+	var theme;
+
+	theme = this.getTheme();
 
 	this.bm = loader.getImage(this.source, theme);
 	this.bmWidth = this.bm.width;
@@ -87,7 +91,7 @@ Sprite.prototype.drawCanvas = function () {
 	c.rotate(this.dir);
 	c.globalCompositeOperation = this.composite;
 	try {
-		c.drawImage(this.bm, - this.xOff * this.bmSize, - this.yOff * this.bmSize, this.bmWidth * this.bmSize, this.bmHeight * this.bmSize);
+		c.drawImage(this.bm, - this.offset.x * this.bmSize, - this.offset.y * this.bmSize, this.bmWidth * this.bmSize, this.bmHeight * this.bmSize);
 	} catch (e) {
 		console.log(this.source);
 		console.log(this.bm);

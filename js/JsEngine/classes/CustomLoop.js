@@ -30,7 +30,7 @@ CustomLoop.prototype.addQueue = function () {
 }
 
 CustomLoop.prototype.execute = function () {
-	var timer, loop;
+	var timer, i, exec;
 
 	timer = new Date().getTime();
 
@@ -44,23 +44,26 @@ CustomLoop.prototype.execute = function () {
 	this.last = engine.now;
 
 	// Execute scheduled executions
-	loop = this;
-	this.scheduledExecutions.forEach(function (i) {
-		if (loop.time >= this.execTime) {
-			this.func();
-			loop.scheduledExecutions.splice(i, 1);
+	for (i = 0; i < this.scheduledExecutions.length; i++) {
+		exec = this.scheduledExecutions[i];
+
+		if (this.time >= exec.execTime) {
+			exec.func();
+			this.scheduledExecutions.splice(i, 1);
 		}
-	})
+	}
 
 	// Execute attached functions
-	this.activities.forEach(function () {
-		if (!this.activity) {
-			console.log(this);
+	for (i = 0; i < this.activities.length; i++) {
+		exec = this.activities[i];
+
+		if (!exec.activity) {
+			console.log(exec);
 			return;
 		}
 
-		this.activity.call(this.object);
-	})
+		exec.activity.call(exec.object);
+	}
 
 	this.addQueue();
 

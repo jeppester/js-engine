@@ -37,7 +37,7 @@ Mouse.prototype.mouse = function () {
 
 		// Set mouse cursor
 		if (engine.options.cursor) {
-			/* this.cursor = engine.depth[8].addChild(new Sprite(engine.options.cursor, 0, 0, 0, {xOff: 0, yOff: 0}));
+			/* this.cursor = engine.depth[8].addChild(new Sprite(engine.options.cursor, 0, 0, 0, {offset: new Vector2D()}));
 			engine.arena.style.cursor = 'none';*/
 			engine.arena.style.cursor = "url('" + loader.getImage(engine.options.cursor).src + "') 0 0, auto";
 		}

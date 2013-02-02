@@ -8,7 +8,7 @@ Requires;
     Loader
 */
 
-jseCreateClass('GameObject', [Sprite, Collidable]);
+jseCreateClass('GameObject', [Collidable]);
 
 GameObject.prototype.gameObject = function (source, x, y, dir, additionalProperties) {
 	if (source === undefined) {throw new Error('Missing argument: source'); }
@@ -17,55 +17,19 @@ GameObject.prototype.gameObject = function (source, x, y, dir, additionalPropert
 
 	this.sprite(source, x, y, dir, additionalProperties);
 
-	if (this.maskSource) {
-		this.setMask(this.maskSource);
-		this.boundingBox = {xOff: - this.xOff, yOff: - this.yOff, width: this.bmWidth, height: this.bmHeight};
-	}
-	else {
-		this.maskGenerateAlphaLimit = this.maskGenerateAlphaLimit ? this.maskGenerateAlphaLimit : 255;
-		this.mask = loader.getMask(source);
-		this.bBox = loader.getBBox(source);
-	}
-
+	this.mask = this.mask ? this.mask : loader.getMask(source, this.getTheme());
+	
 	// Add object to right loop
-	this.loop = this.loop ? this.loop: 'eachFrame';
-	engine.attachFunctionToLoop(this, this.update, this.loop);
+	this.loop = this.loop ? this.loop : 'eachFrame';
+	engine.attachFunctionToLoop(this, this.updatePosition, this.loop);
 
-	// Create movement variables
-	this.dX = this.dX  ?  this.dX : 0;
-	this.dY = this.dY  ?  this.dY : 0;
+	this.speed = this.speed ? this.speed : new Vector2D(0, 0);
 	this.alive = true;
 };
 
-GameObject.prototype.getSpeed = function () {
-	return Math.sqrt(Math.pow(this.dX, 2) + Math.pow(this.dY, 2));
-}
-
-GameObject.prototype.getDirection = function () {
-	return Math.atan2(this.dY, this.dX);
-}
-
-GameObject.prototype.setVelocity = function (dir, speed) {
-	dir = dir !== undefined ? dir : 0;
-	speed = speed !== undefined ? speed : 0;
-
-	this.dX = Math.cos(dir) * speed;
-	this.dY = Math.sin(dir) * speed;
-}
-
-GameObject.prototype.directionTo = function (obj) {
-	return Math.atan2(obj.y - this.y, obj.x - this.x);
-}
-
-GameObject.prototype.accelerate = function (direction, speed) {
-	this.dX += Math.cos(direction) * speed;
-	this.dY += Math.sin(direction) * speed;
-}
-
-GameObject.prototype.update = function () {
+GameObject.prototype.updatePosition = function () {
+	// If the object is "alive", add its speed vector to its position
 	if (this.alive) {
-		// Kør funktion til tilføjelse af yderligere til update(), kaldet "step";
-		this.x += this.dX * engine.timeIncrease / 1000;
-		this.y += this.dY * engine.timeIncrease / 1000;
+		this.add(engine.convertSpeed(this.speed));
 	}
 };

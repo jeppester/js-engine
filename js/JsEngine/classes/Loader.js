@@ -78,15 +78,21 @@ Loader.prototype.getMask = function (ressource, themeName) {
 	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
 	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
 
-	return this.getRessource(ressource, 'masks', themeName);
+	var mask;
+
+	// Check if the mask has been generated
+	mask = this.getRessource(ressource, 'masks', themeName);
+	if (mask) {
+		// If yes, return the mask
+		return mask;
+	}
+	// Otherwise, generate the mask and return it
+	else {
+		mask = this.generateMask(ressource);
+		this.themes[themeName].masks[ressource] = mask;
+		return mask;
+	}
 }
-
-Loader.prototype.getBBox = function (ressource, themeName) {
-	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
-	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
-
-	return this.getRessource(ressource, 'bBoxes', themeName);
-};
 
 Loader.prototype.getRessource = function (ressource, typeString, themeName) {
 	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
@@ -215,10 +221,6 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 		this.themes[name] = theme;
 		theme.ressourcesCount = 0;
 		theme.ressourcesLoaded = 0;
-		theme.masksCount = 0;
-		theme.bBoxesCount = 0;
-		theme.masksGenerated = 0;
-		theme.bBoxesGenerated = 0;
 		theme.masks = {};
 		theme.bBoxes = {};
 
@@ -242,26 +244,6 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 	}
 };
 
-Loader.prototype.preGenerateMask = function (theme, ressourceString) {
-	if (theme === undefined) {throw new Error('Missing argument: theme'); }
-	if (ressourceString === undefined) {throw new Error('Missing argument: ressourceString'); }
-
-	console.log('Generating mask: ' + ressourceString);
-
-	theme.masks[ressourceString] = Collidable.prototype.generateMask(ressourceString);
-	theme.masksGenerated ++;
-}
-
-Loader.prototype.preGenerateBBox = function (theme, ressourceString) {
-	if (theme === undefined) {throw new Error('Missing argument: theme'); }
-	if (ressourceString === undefined) {throw new Error('Missing argument: ressourceString'); }
-
-	console.log('Generating bbox: ' + ressourceString);
-
-	theme.bBoxes[ressourceString] = Collidable.prototype.generateBBox(theme.masks[ressourceString]);
-	theme.bBoxesGenerated ++;
-}
-
 Loader.prototype.loadRessources = function (theme, object, typeString) {
 	if (theme === undefined) {throw new Error('Missing argument: theme'); }
 	if (object === undefined) {throw new Error('Missing argument: object'); }
@@ -273,27 +255,20 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 		var total, loaded, ressourceString, theme, i;
 		if (this.hasAttribute('data-loaded')) {return; }
 
-		this.setAttribute('data-loaded', 'true');
-		theme = loader.themes[this.getAttribute('data-theme')];
-		ressourceString = this.getAttribute('data-ressourceString');
-		theme.ressourcesLoaded ++;
+		
+		if (engine.preGenerateBoundingBoxes && this.toString() === '[object HTMLImageElement]') {
+			ressourceString = this.getAttribute('data-ressourceString');
+			theme = this.getAttribute('data-theme');
 
-		// If the loaded object is an image, generate mask and bboxes
-		if (this.toString() === '[object HTMLImageElement]') {
-			if (this.width * this.height < 20000) {
-				theme.masksCount++;
-				theme.bBoxesCount++;
-
-				setTimeout(function () {
-					loader.preGenerateMask(theme, ressourceString);
-					loader.preGenerateBBox(theme, ressourceString);
-					loader.checkAllLoaded();
-				}, 1);
-			}
-			else {
-				console.log('Skipping generation of mask and bbox (> 20000 px): ' + ressourceString);
+			console.log('Pre-generating bounding box: ' + ressourceString);
+			for (i = 0; i < 100; i++) {
+				loader.getBBox(ressourceString, theme, i / 50 * Math.PI);
 			}
 		}
+
+		this.setAttribute('data-loaded', 'true');
+		theme = loader.themes[this.getAttribute('data-theme')];
+		theme.ressourcesLoaded ++;
 
 		loader.checkAllLoaded();
 	};
@@ -305,6 +280,10 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 				res = new Image();
 				res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, '/') + '.png';
 				theme.images[path] = res;
+				theme.bBoxes[path] = [];
+				for (i = 0; i < 100; i++) {
+					theme.bBoxes[path].push(false);
+				}
 				res.onload = onload;
 				break;
 
@@ -349,6 +328,76 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 	}
 };
 
+Loader.prototype.rotateBBox = function (mask, direction) {
+	var bBox, v, top, bottom, left, right;
+
+	return new Rectangle(left, top, right - left, bottom - top).getPolygon();
+}
+
+Loader.prototype.generateMask = function (ressourceString, alphaLimit) {
+	if (ressourceString === undefined) {throw new Error('Missing argument: ressourceString'); }
+	alphaLimit = alphaLimit !== undefined ? alphaLimit : 255;
+
+	var image, canvas, ctx, bitmap, data, length, pixel, top, bottom, left, right, x, y;
+
+	image = loader.getImage(ressourceString);
+
+	canvas = document.createElement('canvas');
+	canvas.width = image.width;
+	canvas.height = image.height;
+	ctx = canvas.getContext('2d');
+
+	if (image === false) {
+		console.log(ressourceString);
+	}
+	ctx.drawImage(
+		image,
+		0,
+		0,
+		image.width,
+		image.height
+	);
+
+	bitmap = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	data = bitmap.data;
+	length = data.length / 4;
+
+	top = bitmap.height;
+	bottom = 0;
+	left = bitmap.width;
+	right = 0;
+
+	for (pixel = 0; pixel < length; pixel ++) {
+		// If the pixel is partly transparent, make it completely transparent, else make it completely black
+		if (data[pixel * 4 + 3] < alphaLimit) {
+			data[pixel * 4] = 0; // Red
+			data[pixel * 4 + 1] = 0; // Green
+			data[pixel * 4 + 2] = 0; // Blue
+			data[pixel * 4 + 3] = 0; // Alpha
+		}
+		else {
+			data[pixel * 4] = 0; // Red
+			data[pixel * 4 + 1] = 0; // Green
+			data[pixel * 4 + 2] = 0; // Blue
+			data[pixel * 4 + 3] = 255; // Alpha
+
+			// Remember the mask's bounding box
+			y = Math.floor(pixel / bitmap.width);
+			x = pixel - y * bitmap.width;
+
+			top = Math.min(y, top);
+			bottom = Math.max(y + 1, bottom);
+			left = Math.min(x, left);
+			right = Math.max(x + 1, right);
+		}
+	}
+	ctx.putImageData(bitmap, 0, 0);
+
+	canvas.bBox = new Rectangle(left - bitmap.width / 2, top - bitmap.height / 2, right - left, bottom - top).getPolygon();
+
+	return canvas;
+};
+
 Loader.prototype.checkAllLoaded = function () {
 	total = 0;
 	loaded = 0;
@@ -357,17 +406,14 @@ Loader.prototype.checkAllLoaded = function () {
 		if (this.themes.hasOwnProperty(i)) {
 			theme = this.themes[i];
 			total += theme.ressourcesCount;
-			total += theme.masksCount;
-			total += theme.bBoxesCount;
-
 			loaded += theme.ressourcesLoaded;
-			loaded += theme.masksGenerated;
-			loaded += theme.bBoxesGenerated;
 		}
 	}
 	if (loaded === total) {
 		if (this.onthemesloaded) {
 			this.onthemesloaded();
 		}
+		return true;
 	}
+	return false;
 }
