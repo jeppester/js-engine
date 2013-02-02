@@ -102,19 +102,6 @@ JsEngine = function (_opt) {
 		jseSyncLoad(this.enginePath + '/classes/Loader.js');
 	}
 
-	// Create a worker thread
-	/*if (typeof Worker !== 'undefined') {
-		this.worker = new Worker(this.enginePath + '/jseWorker.js');
-	}
-	else {
-		this.worker = false;
-	}
-	this.worker.addEventListener('message', function (e) {
-		var response = e.data;
-
-		console.log(response);
-	});*/
-
 	// Create loader object
 	loader = new Loader();
 	
