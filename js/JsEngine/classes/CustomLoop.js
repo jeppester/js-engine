@@ -1,3 +1,8 @@
+/*
+CustomLoop:
+A loop (object) with a list of functions to run each time the loop executes.
+*/
+
 jseCreateClass('CustomLoop');
 
 CustomLoop.prototype.customLoop = function (framesPerExecution, maskFunction) {
@@ -14,15 +19,37 @@ CustomLoop.prototype.customLoop = function (framesPerExecution, maskFunction) {
 	this.scheduledExecutions = [];
 };
 
-CustomLoop.prototype.schedule = function (func, delay) {
+CustomLoop.prototype.schedule = function (func, delay, caller) {
 	if (func === undefined) {throw new Error('Missing argument: function'); }
 	if (delay === undefined) {throw new Error('Missing argument: delay'); }
+	caller = caller !== undefined ? caller : this;
 
 	this.scheduledExecutions.push({
 		func: func,
-		execTime: this.time + delay
+		execTime: this.time + delay,
+		caller: caller,
 	});
 };
+
+CustomLoop.prototype.unScheduleAll = function () {
+	this.scheduledExecutions = [];
+}
+
+CustomLoop.prototype.unSchedule = function (func, caller) {
+	if (func === undefined) {throw new Error('Missing argument: function'); }
+	caller = caller !== undefined ? caller : this;
+	
+	var i, exec;
+
+	for (i = 0; i < this.scheduledExecutions.length; i++) {
+		exec = this.scheduledExecutions[i];
+
+		if (caller === exec.caller && (exec.func === func || exec.func.toString() === func)) {
+			this.scheduledExecutions.splice(i, 1);
+			break;
+		}
+	}
+}
 
 CustomLoop.prototype.addQueue = function () {
 	this.activities = this.activities.concat(this.activitiesQueue);
@@ -48,7 +75,7 @@ CustomLoop.prototype.execute = function () {
 		exec = this.scheduledExecutions[i];
 
 		if (this.time >= exec.execTime) {
-			exec.func();
+			exec.func.call(exec.caller);
 			this.scheduledExecutions.splice(i, 1);
 		}
 	}
