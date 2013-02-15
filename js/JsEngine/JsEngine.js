@@ -1,14 +1,6 @@
 /*
 JsEngine:
 Loads all objects required by the engine, sets core functions, and runs the core loop.
-
-Game specific behavior should not be added in this file, but instead to the Game class.
-
-Requires:
-	Keyboard
-	Mouse
-	Loader
-	Animator
 */
 
 JsEngine = function (_opt) {
@@ -32,6 +24,7 @@ JsEngine = function (_opt) {
 	this.drawMasks = false;
 	this.useRotatedBoundingBoxes = true;
 	this.pauseOnBlur = true;
+	this.disableRightClick = true;
 	this.arena = document.getElementById('arena');
 	this.autoResize = true;
 	this.autoResizeLimitToResolution = true;
@@ -42,7 +35,7 @@ JsEngine = function (_opt) {
 
 	// Copy options to engine (except those which are only used for engine initialization)
 	this.options = _opt ? _opt: {};
-	copyOpt = ['backgroundColor', 'arena', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -187,9 +180,11 @@ JsEngine.prototype.initialize = function () {
 	}
 
 	// Disable right click inside arena
-	this.arena.oncontextmenu = function () {
-		return false;
-	};
+	if (this.disableRightClick) {
+		this.arena.oncontextmenu = function () {
+			return false;
+		};
+	}
 
 	// Create objects required by the engine
 	keyboard = new Keyboard();
