@@ -1,11 +1,7 @@
 /*
 Sprite:
 A drawn bitmap with rotation and size.
-Usually all graphical objects in a game extends a sprite.
-
-Requirements:
-	Animation
-	Animator
+Usually all graphical objects in a game are sprites or extends this object.
 */
 
 jseCreateClass('Sprite', [View, Animation, Vector2D]);

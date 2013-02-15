@@ -1,3 +1,8 @@
+/*
+Animation:
+An object whose numeric properties can be tween by using the animate-function.
+*/
+
 jseCreateClass('Animation');
 
 Animation.prototype.animate = function (properties, options) {

@@ -1,12 +1,6 @@
 /*
 GravityObject:
-Test object affected by the (simplified) laws of gravity
-
-Requires;
-	GameObject
-	Sprite
-	Animator
-	Loader
+Object affected by the (simplified) laws of gravity
 */
 
 jseCreateClass('GravityObject', [GameObject]);

@@ -1,7 +1,7 @@
 /*
-	View:
-	An object that can contain other objects.
-	Provides methods for removing automatic spawning and removement of contained objects
+View:
+An object which is either drawn on on the game canvas or which contains children that are drawn.
+All objects which are drawn on the game's canvas extends the View-object.
 */
 
 jseCreateClass('View');

@@ -1,3 +1,8 @@
+/*
+Polygon:
+A math object which is used for handling polygons
+*/
+
 jseCreateClass('Polygon');
 
 Polygon.prototype.polygon = function (points) {

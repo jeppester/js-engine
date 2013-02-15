@@ -3,12 +3,6 @@ Director:
 The director handles scene's with animation of sprites.
 A scene is an object (JSON) consisting of a list of actors (sprites) and a timeline with their movements.
 The director class is very useful for creating flash like animations.
-
-Requires
-	Sprite
-	Animator
-	Animation
-	View
 */
 
 jseCreateClass('Director', [View]);

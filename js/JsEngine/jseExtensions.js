@@ -1,3 +1,9 @@
+/*
+jseExtensions.js:
+This file contains extensions to existing JS classes.
+These extensions are used in some of the engine's classes and can also be used in games.
+*/
+
 Array.prototype.getElementByPropertyValue = function (property, value) {
 	var i;
 	for (i = 0; i < this.length; i ++) {

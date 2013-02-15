@@ -1,3 +1,8 @@
+/*
+Line:
+A math object which is used for handling lines
+*/
+
 jseCreateClass('Line');
 
 Line.prototype.line = function (startVector, endVector) {

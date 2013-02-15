@@ -1,8 +1,6 @@
 /*
 Keyboard:
 An object containing the current state of all keys.
-
-No requirements
 */
 
 jseCreateClass('Keyboard');

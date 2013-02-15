@@ -1,3 +1,8 @@
+/*
+Rectangle:
+A math object which is used for handling non-rotated rectangles
+*/
+
 jseCreateClass('Rectangle', [Animation]);
 
 Rectangle.prototype.rectangle = function (x, y, width, height) {
@@ -9,7 +14,7 @@ Rectangle.prototype.set = function (x, y, width, height) {
 	this.y = y !== undefined ? y : 0;
 	this.width = width !== undefined ? width : 0;
 	this.height = height !== undefined ? height : 0;
-}
+};
 
 Rectangle.prototype.setFromVectors = function (position, size) {
 	position = position !== undefined ? position : new Vector2D();
@@ -48,7 +53,7 @@ Rectangle.prototype.scale = function (factor) {
 	this.height *= factor;
 
 	return this;
-}
+};
 
 Rectangle.prototype.getPolygon = function () {
 	return new Polygon(this.getPoints());

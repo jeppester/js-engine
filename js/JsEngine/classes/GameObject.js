@@ -1,11 +1,9 @@
 /*
-Game object:
-An object with movement
-
-Requires;
-    Sprite
-    Animator
-    Loader
+GameObject:
+An object which incorporates functions which are often used by objects in games:
+- Is drawn as a sprite
+- Has movement vector
+- Has collision checking
 */
 
 jseCreateClass('GameObject', [Collidable]);

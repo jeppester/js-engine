@@ -1,3 +1,9 @@
+/*
+Collidable:
+An object with functions for checking for collisions with other objects of the same type.
+Can check both for precise (bitmap-based) collisions and bounding box collisions
+*/
+
 jseCreateClass('Collidable', [Sprite]);
 
 Collidable.prototype.collidable = function (source, x, y, dir, additionalProperties) {

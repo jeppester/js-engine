@@ -1,10 +1,6 @@
 /*
 TextBlock:
 A block of text with a limited width
-
-Requires:
-	Animation
-	View
 */
 
 jseCreateClass('TextBlock', [Animation, View, Vector2D]);

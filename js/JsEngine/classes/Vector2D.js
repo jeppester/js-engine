@@ -1,3 +1,8 @@
+/*
+Vector2D:
+A math object which is used for handling two-dimensional vectors
+*/
+
 jseCreateClass('Vector2D', [Animation]);
 
 Vector2D.prototype.vector2D = function (x, y) {

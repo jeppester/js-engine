@@ -1,8 +1,6 @@
 /*
 Loader:
 Object for loading and storing ressources
-
-No requirements
 */
 
 jseCreateClass('Loader');

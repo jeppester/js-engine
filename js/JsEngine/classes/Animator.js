@@ -3,8 +3,6 @@ Animator:
 The animator handles animations inside objects based on sprites.
 An animation is an eased change in a numeric variable inside an object.
 The animator features different easing functions.
-
-No requirements
 */
 
 jseCreateClass('Animator');
