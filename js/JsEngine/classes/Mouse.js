@@ -1,9 +1,6 @@
 /*
-buttonIndex:
+Mouse:
 An object containing the current state of all buttons.
-
-Requires:
-	arena to be set
 */
 
 jseCreateClass('Mouse');
@@ -53,6 +50,9 @@ Mouse.prototype.mouse = function () {
 
 	// Create key event array
 	this.events = [];
+
+	// Set last moved var (for checking when the mouse last moved)
+	this.lastMoved = 0;
 };
 
 Mouse.prototype.onMouseDown = function (event) {
@@ -88,6 +88,7 @@ Mouse.prototype.onMouseUp = function (event) {
 
 Mouse.prototype.onMouseMove = function (event) {
 	if (event === undefined) {throw new Error('Missing argument: event'); }
+
 	this.windowX = event.pageX;
 	this.windowY = event.pageY;
 
@@ -96,6 +97,8 @@ Mouse.prototype.onMouseMove = function (event) {
 
 	this.x = this.x / arena.offsetWidth * engine.canvasResX;
 	this.y = this.y / arena.offsetHeight * engine.canvasResY;
+
+	this.lastMoved = engine.frames;
 
 	if (this.cursor) {
 		this.cursor.x = this.x;
@@ -179,6 +182,14 @@ Mouse.prototype.cleanUp = function (button) {
 	}
 };
 
+Mouse.prototype.hasMoved = function () {
+	if (engine.frames === this.lastMoved + 1) {
+		return true;
+	}
+
+	return false;
+}
+
 Mouse.prototype.isDown = function (button) {
 	if (button === undefined) {throw new Error('Missing argument: button'); }
 	var evt, i;
@@ -209,7 +220,7 @@ Mouse.prototype.isPressed = function (button) {
 	return false;
 };
 
-Mouse.prototype.squareIsPressed = function (x, y, w, h) {
+Mouse.prototype.squareIsPressed = function (x, y, w, h, outside) {
 	if (x === undefined) {throw new Error('Missing argument: x'); }
 	if (y === undefined) {throw new Error('Missing argument: y'); }
 	if (w === undefined) {throw new Error('Missing argument: w'); }
@@ -223,18 +234,23 @@ Mouse.prototype.squareIsPressed = function (x, y, w, h) {
 			break;
 		}
 	}
-	if (btn && this.x > x && this.x < x + w && this.y > y && this.y < y + h) {
+	if (!outside && (btn && this.x > x && this.x < x + w && this.y > y && this.y < y + h)) {
+		return btn;
+	}
+	else if (outside && (btn && this.x < x || this.x > x + w || this.y < y || this.y > y + h)) {
 		return btn;
 	}
 };
 
-Mouse.prototype.squareOutsideIsPressed = function (x, y, w, h) {
-	if (x === undefined) {throw new Error('Missing argument: x'); }
-	if (y === undefined) {throw new Error('Missing argument: y'); }
-	if (w === undefined) {throw new Error('Missing argument: w'); }
-	if (h === undefined) {throw new Error('Missing argument: h'); }
+Mouse.prototype.squareIsHovered = function (x, y, w, h, outside) {
+	if (!outside && (this.x > x && this.x < x + w && this.y > y && this.y < y + h)) {
+		return true;
+	}
+	else if (outside && (this.x < x || this.x > x + w || this.y < y || this.y > y + h)) {
+		return true;
+	}
 
-	return this.isPressed(1) && (this.x < x || this.x > x + w || this.y < y || this.y > y + h);
+	return false;
 };
 
 Mouse.prototype.circleIsPressed = function (x, y, r) {
