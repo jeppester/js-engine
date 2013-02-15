@@ -1,3 +1,8 @@
+/*
+jseFunctions.js:
+This file contains global JsEngine functions
+*/
+
 // Function to copy all variables from one object to another
 // Used mainly for loading option objects - See TextBlock for an example
 jseCreateClass = function (className, inherits) {
@@ -95,6 +100,45 @@ jseSyncLoad = function (filePaths) {
 	if (window.loadedFiles === undefined) {window.loadedFiles = []; }
 	window.loadedFiles = window.loadedFiles.concat(filePaths);
 };
+
+jseRequest = function (url, params, async, callback, caller) {
+	if (url === undefined) {throw new Error('Missing argument: url'); }
+	params = params !== undefined ? params : '';
+	async = async !== undefined ? async : true;
+	caller = caller !== undefined ? caller : window;
+
+	// If params is not a string, json-stringify it
+	if (typeof params !== 'string') {
+		params = 'data=' + JSON.stringify(params);
+	}
+
+	if (async && callback === undefined) {throw new Error('Callback function needed for asynchronous requests'); }
+
+	var req;
+
+	req = new XMLHttpRequest();
+
+	if (async) {
+		req.onreadystatechange = function () {
+			if (req.readyState === 4 && req.status === 200) {
+				callback.call(caller, req.responseText);
+			}
+		}
+	}
+
+	req.open('POST', url, async);
+	req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	req.send(params);
+
+	if (!async) {
+		if (req.readyState==4 && req.status==200) {
+			return req.responseText;
+		}
+		else {
+			console.log('XMLHttpRequest failed: ' + url);
+		}
+	}
+}
 
 // Function for turning an object with properties into a json string, functions are ignored
 jsonEncode = function (obj, ignore) {
