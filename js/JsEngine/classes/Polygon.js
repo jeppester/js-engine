@@ -99,7 +99,6 @@ Polygon.prototype.getLines = function () {
 Polygon.prototype.contains = function (object) {
 	if (Vector2D.prototype.isPrototypeOf(object)) {
 		if (this.intersects(new Line().setFromCoordinates(-100000, -100000, object.x, object.y), true) % 2) {
-			console.log('yay!');
 			return true;
 		}
 		else {
