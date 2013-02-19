@@ -29,7 +29,8 @@ Collidable.prototype.polygonCollidesWith = function (objects, getCollidingObject
 		pol2 = obj.mask.bBox.copy().move(obj.mask.width / 2 - obj.offset.x, obj.mask.height / 2 - obj.offset.y).rotate(obj.dir).scale(obj.bmSize).move(obj.x, obj.y);
 
 		// Find out if the two objects' bounding boxes intersect
-		if (pol1.intersects(pol2)) {
+		// If not, check if one of the points of each object is inside the other's polygon. This will ensure that one of the objects does not contain the other
+		if (pol1.intersects(pol2) || pol1.contains(pol2.points[0]) || pol2.contains(pol1.points[0])) {
 			if (getCollidingObjects) {
 				collidingObjects.push(obj);
 			}

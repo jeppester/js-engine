@@ -96,10 +96,42 @@ Polygon.prototype.getLines = function () {
 	return lines;
 };
 
-Polygon.prototype.intersects = function (object) {
-	var intersects, lines, line, oLines, oLine, i, ii;
+Polygon.prototype.contains = function (object) {
+	if (Vector2D.prototype.isPrototypeOf(object)) {
+		if (this.intersects(new Line().setFromCoordinates(-100000, -100000, object.x, object.y), true) % 2) {
+			console.log('yay!');
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	else if (Line.prototype.isPrototypeOf(object)) {
+		if (!this.intersects(object) && this.contains(object.a)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	else if (Polygon.prototype.isPrototypeOf(object)) {
+		if (object.points.length > 0 && !this.intersects(object) && this.contains(object.points[0])) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+};
+
+Polygon.prototype.intersects = function (object, countIntersections) {
+	var intersects, getIntersections, intersectionCount, lines, line, oLines, oLine, i, ii;
 
 	intersects = false;
+	countIntersections = countIntersections !== undefined ? countIntersections : false;
+	if (countIntersections) {
+		intersectionCount = 0;
+	}
 
 	if (Line.prototype.isPrototypeOf(object)) {
 		lines = this.getLines();
@@ -108,7 +140,12 @@ Polygon.prototype.intersects = function (object) {
 			line = lines[i];
 
 			if (line.intersects(object)) {
-				return true;
+				if (countIntersections) {
+					intersectionCount ++;
+				}
+				else {
+					return true;
+				}
 			}
 		}
 	}
@@ -123,7 +160,12 @@ Polygon.prototype.intersects = function (object) {
 				oLine = oLines[ii];
 
 				if (line.intersects(oLine)) {
-					return true;
+					if (countIntersections) {
+						intersectionCount ++;
+					}
+					else {
+						return true;
+					}
 				}
 			}
 		}
@@ -132,5 +174,10 @@ Polygon.prototype.intersects = function (object) {
 		throw new Error('Argument object has to be of type: Line or Polygon');
 	}
 
-	return false;
+	if (countIntersections) {
+		return intersectionCount;
+	}
+	else {
+		return false;
+	}
 };

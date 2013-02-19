@@ -6,6 +6,9 @@ A math object which is used for handling lines
 jseCreateClass('Line');
 
 Line.prototype.line = function (startVector, endVector) {
+	startVector = startVector !== undefined ? startVector : new Vector2D(0, 0);
+	endVector = endVector !== undefined ? endVector : new Vector2D(0, 0);
+	
 	this.setFromVectors(startVector, endVector);
 };
 
