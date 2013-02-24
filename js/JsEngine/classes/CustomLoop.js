@@ -22,6 +22,7 @@ CustomLoop.prototype.customLoop = function (framesPerExecution, maskFunction) {
 CustomLoop.prototype.schedule = function (func, delay, caller) {
 	if (func === undefined) {throw new Error('Missing argument: function'); }
 	if (delay === undefined) {throw new Error('Missing argument: delay'); }
+	if (typeof func !== "function") {throw new Error('Argument func must be of type function'); }
 	caller = caller !== undefined ? caller : this;
 
 	this.scheduledExecutions.push({
@@ -83,12 +84,6 @@ CustomLoop.prototype.execute = function () {
 	// Execute attached functions
 	for (i = 0; i < this.activities.length; i++) {
 		exec = this.activities[i];
-
-		if (!exec.activity) {
-			console.log(exec);
-			return;
-		}
-
 		exec.activity.call(exec.object);
 	}
 

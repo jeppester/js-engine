@@ -341,6 +341,7 @@ JsEngine.prototype.attachFunctionToLoop = function (caller, func, loop) {
 	if (caller === undefined) {throw new Error('Missing argument: caller'); }
 	if (func === undefined) {throw new Error('Missing argument: func'); }
 	if (loop === undefined) {throw new Error('Missing argument: loop'); }
+	if (typeof func !== "function") {throw new Error('Argument func must be of type function'); }
 
 	this.loops[loop].activitiesQueue.push({
 		object: caller,
