@@ -55,16 +55,11 @@ Loader.prototype.getImage = function (ressource, themeName) {
 	return this.getRessource(ressource, 'images', themeName);
 };
 
-Loader.prototype.getSound = function (ressource, clone, themeName) {
+Loader.prototype.getSound = function (ressource, themeName) {
 	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
-	clone = clone !== undefined ? clone : true;
 	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
 
-	var sfx;
-
-	clone = clone === undefined  ?  true : clone;
-	sfx = this.getRessource(ressource, 'sfx', themeName);
-	return sfx  ?  (clone  ?  sfx.cloneNode() : sfx) : false;
+	return this.getRessource(ressource, 'sfx', themeName);
 };
 
 Loader.prototype.getMusic = function (ressource, themeName) {
@@ -118,7 +113,7 @@ Loader.prototype.getRessource = function (ressource, typeString, themeName) {
 		}
 	}
 
-	return res === undefined || res.toString() === "[object Object]"  ?  false : res;
+	return res === undefined ? false : res;
 };
 
 Loader.prototype.getImageSources = function () {
@@ -297,7 +292,7 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 					continue;
 				}
 				res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, '/') + '.' + format);
-				theme.sfx[path] = res;
+				theme.sfx[path] = new Sound(res);
 				res.addEventListener("canplaythrough", onload, false);
 				break;
 

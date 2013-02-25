@@ -93,7 +93,8 @@ else {
 		$e . "classes/GameObject.js",
 		$e . "classes/GravityObject.js",
 		$e . "classes/Keyboard.js",
-		$e . "classes/Mouse.js"
+		$e . "classes/Mouse.js",
+		$e . "classes/Sound.js"
 	);
 }
 

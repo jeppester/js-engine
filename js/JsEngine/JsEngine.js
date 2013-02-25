@@ -29,13 +29,14 @@ JsEngine = function (_opt) {
 	this.autoResize = true;
 	this.autoResizeLimitToResolution = true;
 	this.compositedDepths = [];
+	this.cachedSoundCopies = 5;
 	this.gameClassPath = "js/Game.js";
 	this.backgroundColor = "#FFF";
 	this.timeFactor = 1;
 
 	// Copy options to engine (except those which are only used for engine initialization)
 	this.options = _opt ? _opt: {};
-	copyOpt = ['backgroundColor', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'cachedSoundCopies', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -116,6 +117,7 @@ JsEngine = function (_opt) {
 		this.enginePath + '/classes/GravityObject.js',
 		this.enginePath + '/classes/Keyboard.js',
 		this.enginePath + '/classes/Mouse.js',
+		this.enginePath + '/classes/Sound.js'
 	]);
 
 	gc = this.gameClassPath;
