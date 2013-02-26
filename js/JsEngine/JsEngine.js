@@ -5,23 +5,17 @@ Loads all objects required by the engine, sets core functions, and runs the core
 
 JsEngine = function (_opt) {
 	// Define all used vars
-	var copyOpt, supportedFormats, audioFormats, i, opt, req, gc;
+	var copyOpt, audioFormats, i, opt, req, gc;
 
 	// Set global engine variable
 	engine = this;
 
 	// Detect host information
-	audioFormats = ['mp3', 'ogg', 'wav'];
-	supportedFormats = [];
-	for (i = 0; i < audioFormats.length; i++) {
-		if (document.createElement('audio').canPlayType('audio/' + audioFormats[i])) {
-			supportedFormats.push(audioFormats[i]);
-		}
-	}
 	this.host = {
 		hasTouch: 'ontouchstart' in document,
 		hasMouse: false,
-		supportedAudio: supportedFormats
+		browserEngine: 'Unknown',
+		supportedAudio: []
 	};
 	if (navigator.userAgent.match(/Firefox/)) {
 		this.host.browserEngine = 'Gecko';
@@ -29,8 +23,12 @@ JsEngine = function (_opt) {
 		this.host.browserEngine = 'WebKit';
 	} else if (navigator.userAgent.match(/Trident/)) {
 		this.host.browserEngine = 'Trident';
-	} else {
-		this.host.browserEngine = 'Unknown';
+	}
+	audioFormats = ['mp3', 'ogg', 'wav'];
+	for (i = 0; i < audioFormats.length; i++) {
+		if (document.createElement('audio').canPlayType('audio/' + audioFormats[i])) {
+			this.host.supportedAudio.push(audioFormats[i]);
+		}
 	}
 
 	// Load default options
