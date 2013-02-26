@@ -39,6 +39,11 @@ TextBlock.prototype.textBlock = function (string, x, y, width, additionalPropert
 
 	this.setString(string);
 	this.cacheRendering();
+
+	if (engine.avoidSubPixelRendering) {
+		this.offset.x = Math.round(this.offset.x); 
+		this.offset.y = Math.round(this.offset.y);
+	}
 };
 
 TextBlock.prototype.setString = function (string) {
@@ -96,22 +101,6 @@ TextBlock.prototype.cacheRendering = function () {
 	}
 };
 
-TextBlock.prototype.drawCanvas = function () {
-	var c;
-
-	// Draw on canvas
-	if (/^\s*$/.test(this.string)) {return; }
-
-	c = this.ctx;
-	c.save();
-	c.translate(this.x, this.y);
-	c.rotate(this.dir);
-	c.globalAlpha = this.opacity;
-	c.globalCompositeOperation = this.composite;
-	c.drawImage(this.cache, - this.offset.x * this.bmSize, - this.offset.y * this.bmSize, this.cache.width * this.bmSize, this.cache.height * this.bmSize);
-	c.restore();
-};
-
 TextBlock.prototype.stringToLines = function () {
 	var lt, line, paragraphs, pid, words, wid, word;
 
@@ -152,4 +141,27 @@ TextBlock.prototype.stringToLines = function () {
 		this.lines[line] = '';
 	}
 	lt.parentNode.removeChild(lt);
+};
+
+TextBlock.prototype.drawCanvas = function () {
+	var c;
+
+	// Draw on canvas
+	if (/^\s*$/.test(this.string)) {return; }
+
+	c = this.ctx;
+	c.save();
+
+	if (engine.avoidSubPixelRendering) {
+		c.translate(Math.round(this.x), Math.round(this.y));
+	}
+	else {
+		c.translate(this.x, this.y);
+	}
+
+	c.rotate(this.dir);
+	c.globalAlpha = this.opacity;
+	c.globalCompositeOperation = this.composite;
+	c.drawImage(this.cache, - this.offset.x * this.bmSize, - this.offset.y * this.bmSize, this.cache.width * this.bmSize, this.cache.height * this.bmSize);
+	c.restore();
 };

@@ -34,6 +34,11 @@ Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 	this.offset = this.offset !== undefined ? this.offset : new Vector2D(this.bm.width / 2, this.bm.height / 2);
 	if (this.offset.x === 'center') {this.offset.x = this.bm.width / 2; }
 	if (this.offset.y === 'center') {this.offset.y = this.bm.height / 2; }
+
+	if (engine.avoidSubPixelRendering) {
+		this.offset.x = Math.round(this.offset.x); 
+		this.offset.y = Math.round(this.offset.y);
+	}
 };
 
 Sprite.prototype.getTheme = function () {
@@ -82,7 +87,14 @@ Sprite.prototype.drawCanvas = function () {
 	// Draw Sprite on canvas
 	var c = this.ctx;
 	c.save();
-	c.translate(this.x, this.y);
+
+	if (engine.avoidSubPixelRendering) {
+		c.translate(Math.round(this.x), Math.round(this.y));
+	}
+	else {
+		c.translate(this.x, this.y);
+	}
+
 	c.globalAlpha = this.opacity;
 	c.rotate(this.dir);
 	c.globalCompositeOperation = this.composite;

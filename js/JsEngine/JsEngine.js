@@ -10,10 +10,46 @@ JsEngine = function (_opt) {
 	// Set global engine variable
 	engine = this;
 
+	// Detect host information
+	audioFormats = ['mp3', 'ogg', 'wav'];
+	supportedFormats = [];
+	for (i = 0; i < audioFormats.length; i++) {
+		if (document.createElement('audio').canPlayType('audio/' + audioFormats[i])) {
+			supportedFormats.push(audioFormats[i]);
+		}
+	}
+	this.host = {
+		hasTouch: 'ontouchstart' in document,
+		hasMouse: false,
+		supportedAudio: supportedFormats
+	};
+	if (navigator.userAgent.match(/Firefox/)) {
+		this.host.browserEngine = 'Gecko';
+	} else if (navigator.userAgent.match(/AppleWebKit/)) {
+		this.host.browserEngine = 'WebKit';
+	} else if (navigator.userAgent.match(/Trident/)) {
+		this.host.browserEngine = 'Trident';
+	} else {
+		this.host.browserEngine = 'Unknown';
+	}
+
 	// Load default options
-	// Firefox performs very bad with a low loopspeed whereas chrome performs very good
-	// Therefore firefox' default loopspeed initially set higher than chrome
-	this.loopSpeed = navigator.userAgent.match(/Gecko\//) ? 20 : 10;
+	// Optimize default options for each browser
+	this.avoidSubPixelRendering = true;
+	this.loopSpeed = 10;
+
+	switch (this.host.browserEngine) {
+	case 'Gecko':
+		// Firefox usually performs very bad with a low loopspeed
+		this.loopSpeed = 20;
+		break;
+	case 'WebKit':
+		// WebKit renders subpixels much better (and faster) than the other browsers
+		this.avoidSubPixelRendering = false;
+		break;
+	case 'Trident':
+		break;
+	}
 	this.running = false;
 	this.manualRedrawDepths = [];
 	this.canvasResX = 800;
@@ -36,7 +72,7 @@ JsEngine = function (_opt) {
 
 	// Copy options to engine (except those which are only used for engine initialization)
 	this.options = _opt ? _opt: {};
-	copyOpt = ['backgroundColor', 'cachedSoundCopies', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -44,20 +80,6 @@ JsEngine = function (_opt) {
 			delete this.options[opt];
 		}
 	}
-
-	// Detect host information
-	audioFormats = ['mp3', 'ogg', 'wav'];
-	supportedFormats = [];
-	for (i = 0; i < audioFormats.length; i++) {
-		if (document.createElement('audio').canPlayType('audio/' + audioFormats[i])) {
-			supportedFormats.push(audioFormats[i]);
-		}
-	}
-	this.host = {
-		hasTouch: 'ontouchstart' in document,
-		hasMouse: false,
-		supportedAudio: supportedFormats
-	};
 
 	// Make main canvas
 	this.mainCanvas = document.createElement("canvas");
