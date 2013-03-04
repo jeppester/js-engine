@@ -153,10 +153,18 @@ Collidable.prototype.collidesWith = function (objects, resolution, getCollisionP
 	// Draw checked object
 	ctx.drawImage(
 		mask,
+
+		// Define image cutout
+		this.width * this.currentImage,
+		0,
+		this.width,
+		this.height,
+
+		// Define position and width on canvas
 		0,
 		0,
-		this.bmWidth * this.bmSize,
-		this.bmHeight * this.bmSize
+		this.width * this.bmSize,
+		this.height * this.bmSize
 	);
 	ctx.translate(this.offset.x * this.bmSize, this.offset.y * this.bmSize);
 	ctx.rotate(-this.dir);
@@ -173,10 +181,18 @@ Collidable.prototype.collidesWith = function (objects, resolution, getCollisionP
 		
 		ctx.drawImage(
 			obj.mask,
+
+			// Define image cutout
+			obj.width * obj.currentImage,
+			0,
+			obj.width,
+			obj.height,
+
+			// Define position and width on canvas
 			- obj.offset.x * obj.bmSize,
 			- obj.offset.y * obj.bmSize,
-			obj.bmWidth * obj.bmSize,
-			obj.bmHeight * obj.bmSize
+			obj.width * obj.bmSize,
+			obj.height * obj.bmSize
 		);
 
 		ctx.translate(this.x - obj.x, this.y - obj.y);
@@ -293,7 +309,18 @@ Collidable.prototype.drawMask = function () {
 	c.translate(this.x, this.y);
 	c.rotate(this.dir);
 	try {
-		c.drawImage(this.mask, - this.offset.x * this.bmSize, - this.offset.y * this.bmSize, this.bmWidth * this.bmSize, this.bmHeight * this.bmSize);
+		c.drawImage(
+			this.mask,
+
+			this.width * this.currentImage,
+			0,
+			this.width,
+			this.height,
+
+			- this.offset.x * this.bmSize,
+			- this.offset.y * this.bmSize,
+			this.width * this.bmSize,
+			this.height * this.bmSize);
 	} catch (e) {
 		console.log(this.source);
 		console.log(this.bm);

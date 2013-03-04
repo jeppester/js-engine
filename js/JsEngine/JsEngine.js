@@ -15,12 +15,19 @@ JsEngine = function (_opt) {
 		hasTouch: 'ontouchstart' in document,
 		hasMouse: false,
 		browserEngine: 'Unknown',
+		device: 'Unknown',
 		supportedAudio: []
 	};
 	if (navigator.userAgent.match(/Firefox/)) {
 		this.host.browserEngine = 'Gecko';
 	} else if (navigator.userAgent.match(/AppleWebKit/)) {
 		this.host.browserEngine = 'WebKit';
+
+		if (navigator.userAgent.match(/iPad|iPhone/)) {
+			this.host.device = 'iDevice';
+		} else if (navigator.userAgent.match(/Android/)) {
+			this.host.device = 'Android';
+		}
 	} else if (navigator.userAgent.match(/Trident/)) {
 		this.host.browserEngine = 'Trident';
 	}
@@ -35,6 +42,7 @@ JsEngine = function (_opt) {
 	// Optimize default options for each browser
 	this.avoidSubPixelRendering = true;
 	this.loopSpeed = 10;
+	this.preloadSounds = true;
 
 	switch (this.host.browserEngine) {
 	case 'Gecko':
@@ -46,6 +54,13 @@ JsEngine = function (_opt) {
 		this.avoidSubPixelRendering = false;
 		break;
 	case 'Trident':
+		break;
+	}
+
+	switch (this.host.device) {
+	case 'iDevice':
+		// iDevices cannot preload sounds (which is utter crap), so disable preloading to make the engine load without sounds
+		this.preloadSounds = false;
 		break;
 	}
 	this.running = false;
@@ -70,7 +85,7 @@ JsEngine = function (_opt) {
 
 	// Copy options to engine (except those which are only used for engine initialization)
 	this.options = _opt ? _opt: {};
-	copyOpt = ['backgroundColor', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'cacheSounds', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {

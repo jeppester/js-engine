@@ -17,23 +17,24 @@ Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 
 	engine.registerObject(this);
 
+	this.imageSpeed = 1;
+	this.currentImage = 0;
+	this.imageTimeOffset = engine.gameTime;
+
 	this.bmSize = 1;
 	this.opacity = 1;
 	this.composite = 'source-over';
 
 	// Load additional properties
 	this.importProperties(additionalProperties);
-	
+		
 	if (!this.refreshSource()) {
 		throw new Error('Sprite source was not successfully loaded: ' + source);
 	}
-	
-	this.bmWidth = this.bm.width;
-	this.bmHeight = this.bm.height;
 
-	this.offset = this.offset !== undefined ? this.offset : new Vector2D(this.bm.width / 2, this.bm.height / 2);
-	if (this.offset.x === 'center') {this.offset.x = this.bm.width / 2; }
-	if (this.offset.y === 'center') {this.offset.y = this.bm.height / 2; }
+	this.offset = this.offset !== undefined ? this.offset : new Vector2D(this.width / 2, this.height / 2);
+	if (this.offset.x === 'center') {this.offset.x = this.width / 2; }
+	if (this.offset.y === 'center') {this.offset.y = this.height / 2; }
 
 	if (engine.avoidSubPixelRendering) {
 		this.offset.x = Math.round(this.offset.x); 
@@ -70,8 +71,10 @@ Sprite.prototype.refreshSource = function () {
 	theme = this.getTheme();
 
 	this.bm = loader.getImage(this.source, theme);
-	this.bmWidth = this.bm.width;
-	this.bmHeight = this.bm.height;
+	this.imageLength = this.bm.imageLength;
+	this.currentImage = Math.min(this.imageLength - 1, this.currentImage);
+	this.width = Math.floor(this.bm.width / this.imageLength);
+	this.height = this.bm.height;
 	return this.bm;
 };
 
@@ -95,9 +98,13 @@ Sprite.prototype.drawCanvas = function () {
 		c.translate(this.x, this.y);
 	}
 
+	if (this.imageLength !== 0) {
+		this.currentImage = Math.floor((engine.gameTime - this.imageTimeOffset) / 1000 * this.imageSpeed) % this.imageLength;
+	}
+
 	c.globalAlpha = this.opacity;
 	c.rotate(this.dir);
 	c.globalCompositeOperation = this.composite;
-	c.drawImage(this.bm, - this.offset.x * this.bmSize, - this.offset.y * this.bmSize, this.bmWidth * this.bmSize, this.bmHeight * this.bmSize);
+	c.drawImage(this.bm, this.width * this.currentImage, 0, this.width, this.height, - this.offset.x * this.bmSize, - this.offset.y * this.bmSize, this.width * this.bmSize, this.height * this.bmSize);
 	c.restore();
 };

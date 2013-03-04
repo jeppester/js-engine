@@ -242,7 +242,7 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 	if (object === undefined) {throw new Error('Missing argument: object'); }
 	if (typeString === undefined) {throw new Error('Missing argument: typeString'); }
 
-	var onload, res, path, i, format;
+	var onload, res, path, i, format, images;
 
 	onload = function () {
 		var ressourceString, theme, i;
@@ -272,12 +272,20 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 			case 'images':
 				res = new Image();
 				res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, '/') + '.png';
+				if (images = object[path].match(/: (\d+) images?/)) {
+					res.imageLength = images[1];
+				}
+				else {
+					res.imageLength = 1;
+				}
 				theme.images[path] = res;
 				theme.bBoxes[path] = [];
 				for (i = 0; i < 100; i++) {
 					theme.bBoxes[path].push(false);
 				}
+
 				res.onload = onload;
+				theme.ressourcesCount ++;
 				break;
 
 			case 'sfx':
@@ -293,7 +301,12 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 				}
 				res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, '/') + '.' + format);
 				theme.sfx[path] = new Sound(res);
-				res.addEventListener("canplaythrough", onload, false);
+				
+				if (engine.preloadSounds) {
+					res.setAttribute('preload', 'preload');
+					res.addEventListener("canplaythrough", onload, false);
+					theme.ressourcesCount ++;
+				}
 				break;
 
 			case 'music':
@@ -308,13 +321,16 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 					continue;
 				}
 				res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, '/') + '.' + format);
-				res.setAttribute('preload', 'preload');
 				theme.music[path] = res;
-				res.addEventListener("canplaythrough", onload, false);
+
+				if (engine.preloadSounds) {
+					res.setAttribute('preload', 'preload');
+					res.addEventListener("canplaythrough", onload, false);
+					theme.ressourcesCount ++;
+				}
 				break;
 			}
 
-			theme.ressourcesCount ++;
 			res.setAttribute('data-theme', theme.name);
 			res.setAttribute('data-ressourceString', path.replace(/\./g, '/'));
 		}
@@ -371,6 +387,10 @@ Loader.prototype.generateMask = function (ressourceString, alphaLimit) {
 			// Remember the mask's bounding box
 			y = Math.floor(pixel / bitmap.width);
 			x = pixel - y * bitmap.width;
+
+			while (x >= image.width / image.imageLength) {
+				x -= image.width / image.imageLength;
+			}
 
 			top = Math.min(y, top);
 			bottom = Math.max(y + 1, bottom);
