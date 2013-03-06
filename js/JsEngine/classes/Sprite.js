@@ -17,11 +17,11 @@ Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 
 	engine.registerObject(this);
 
-	this.imageSpeed = 1;
+	this.imageSpeed = 10;
 	this.currentImage = 0;
 	this.imageTimeOffset = engine.gameTime;
 
-	this.bmSize = 1;
+	this.size = 1;
 	this.opacity = 1;
 	this.composite = 'source-over';
 
@@ -37,7 +37,7 @@ Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 	if (this.offset.y === 'center') {this.offset.y = this.height / 2; }
 
 	if (engine.avoidSubPixelRendering) {
-		this.offset.x = Math.round(this.offset.x); 
+		this.offset.x = Math.round(this.offset.x);
 		this.offset.y = Math.round(this.offset.y);
 	}
 };
@@ -54,7 +54,7 @@ Sprite.prototype.getTheme = function () {
 		}
 		else {
 			if (parent.parent) {
-				parent = parent.parent
+				parent = parent.parent;
 			}
 			else {
 				break;
@@ -63,7 +63,7 @@ Sprite.prototype.getTheme = function () {
 	}
 
 	return theme ? theme : engine.defaultTheme;
-}
+};
 
 Sprite.prototype.refreshSource = function () {
 	var theme;
@@ -71,7 +71,7 @@ Sprite.prototype.refreshSource = function () {
 	theme = this.getTheme();
 
 	this.bm = loader.getImage(this.source, theme);
-	this.imageLength = this.bm.imageLength;
+	this.imageLength = this.bm.imageLength * 1;
 	this.currentImage = Math.min(this.imageLength - 1, this.currentImage);
 	this.width = Math.floor(this.bm.width / this.imageLength);
 	this.height = this.bm.height;
@@ -98,13 +98,13 @@ Sprite.prototype.drawCanvas = function () {
 		c.translate(this.x, this.y);
 	}
 
-	if (this.imageLength !== 0) {
+	if (this.imageLength !== 1) {
 		this.currentImage = Math.floor((engine.gameTime - this.imageTimeOffset) / 1000 * this.imageSpeed) % this.imageLength;
 	}
 
 	c.globalAlpha = this.opacity;
 	c.rotate(this.dir);
 	c.globalCompositeOperation = this.composite;
-	c.drawImage(this.bm, this.width * this.currentImage, 0, this.width, this.height, - this.offset.x * this.bmSize, - this.offset.y * this.bmSize, this.width * this.bmSize, this.height * this.bmSize);
+	c.drawImage(this.bm, (this.width + this.bm.spacing) * this.currentImage, 0, this.width, this.height, - this.offset.x * this.size, - this.offset.y * this.size, this.width * this.size, this.height * this.size);
 	c.restore();
 };

@@ -72,7 +72,7 @@ Director.prototype.getKeyFrameProperties = function (actor, keyFrameNumber) {
 	if (keyFrameNumber === undefined) {throw new Error('Missing argument: keyFrameNumber'); }
 	var ret, propName, frame, propValue;
 	
-	ret = {x: 0, y: 0, dir: 0, opacity: 0, bmSize: 1};
+	ret = {x: 0, y: 0, dir: 0, opacity: 0, size: 1};
 	for (propName in ret) {
 		if (ret.hasOwnProperty(propName)) {
 			frame = actor.keyFrames.getElementByPropertyValue('frame', keyFrameNumber);
@@ -94,7 +94,7 @@ Director.prototype.getInheritedPropertyValue = function (actor, keyFrameNumber, 
 	if (propName === undefined) {throw new Error('Missing argument: propName'); }
 	var defaults, value, inheritFrameNumber, inheritFrame, i;
 
-	defaults = {x: 0, y: 0, dir: 0, opacity: 0, bmSize: 1};
+	defaults = {x: 0, y: 0, dir: 0, opacity: 0, size: 1};
 	value = defaults[propName];
 	inheritFrameNumber = 0;
 
@@ -152,7 +152,7 @@ Director.prototype.updateScene = function () {
 				this.actors[name].y = 0;
 				this.actors[name].dir = 0;
 				this.actors[name].opacity = 0;
-				this.actors[name].bmSize = 1;
+				this.actors[name].size = 1;
 				continue;
 			}
 

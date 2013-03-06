@@ -20,13 +20,13 @@ Collidable.prototype.polygonCollidesWith = function (objects, getCollidingObject
 
 	var pol1, pol2, i, collidingObjects, obj;
 
-	pol1 = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.bmSize).move(this.x, this.y);
+	pol1 = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.size).move(this.x, this.y);
 
 	collidingObjects = [];
 	for (i = 0; i < objects.length; i++) {
 		obj = objects[i];
 
-		pol2 = obj.mask.bBox.copy().move(obj.mask.width / 2 - obj.offset.x, obj.mask.height / 2 - obj.offset.y).rotate(obj.dir).scale(obj.bmSize).move(obj.x, obj.y);
+		pol2 = obj.mask.bBox.copy().move(obj.mask.width / 2 - obj.offset.x, obj.mask.height / 2 - obj.offset.y).rotate(obj.dir).scale(obj.size).move(obj.x, obj.y);
 
 		// Find out if the two objects' bounding boxes intersect
 		// If not, check if one of the points of each object is inside the other's polygon. This will ensure that one of the objects does not contain the other
@@ -59,7 +59,7 @@ Collidable.prototype.bBoxCollidesWith = function (objects, getCollidingObjects) 
 	var obj, rVect, bb1, bb2, i, collidingObjects;
 
 	rVect = new Vector2D(this.bm.width / 2 - this.offset.x, this.bm.height / 2 - this.offset.y).rotate(this.dir);
-	bb1 = this.mask.bBox.copy().rotate(this.dir).move(rVect.x + this.x, rVect.y + this.y).scale(this.bmSize);
+	bb1 = this.mask.bBox.copy().rotate(this.dir).move(rVect.x + this.x, rVect.y + this.y).scale(this.size);
 	bb1 = {
 		x1: Math.min(bb1.points[0].x, bb1.points[1].x, bb1.points[2].x, bb1.points[3].x),
 		x2: Math.max(bb1.points[0].x, bb1.points[1].x, bb1.points[2].x, bb1.points[3].x),
@@ -73,7 +73,7 @@ Collidable.prototype.bBoxCollidesWith = function (objects, getCollidingObjects) 
 		obj = objects[i];
 
 		rVect = new Vector2D(obj.bm.width / 2 - obj.offset.x, obj.bm.height / 2 - obj.offset.y).rotate(obj.dir);
-		bb2 = obj.mask.bBox.copy().rotate(obj.dir).move(rVect.x + obj.x, rVect.y + obj.y).scale(obj.bmSize);
+		bb2 = obj.mask.bBox.copy().rotate(obj.dir).move(rVect.x + obj.x, rVect.y + obj.y).scale(obj.size);
 		bb2 = {
 			x1: Math.min(bb2.points[0].x, bb2.points[1].x, bb2.points[2].x, bb2.points[3].x),
 			x2: Math.max(bb2.points[0].x, bb2.points[1].x, bb2.points[2].x, bb2.points[3].x),
@@ -117,7 +117,7 @@ Collidable.prototype.collidesWith = function (objects, resolution, getCollisionP
 
 	var canvas, mask, ctx, obj, bitmap, i, data, length, pixel, pxArr, x, y, avX, avY, avDist, avDir;
 
-	if (this.bmSize === 0) {
+	if (this.size === 0) {
 		return false;
 	}
 
@@ -139,8 +139,8 @@ Collidable.prototype.collidesWith = function (objects, resolution, getCollisionP
 
 	// Create a new canvas for checking for a collision
 	canvas = document.createElement('canvas');
-	canvas.width = Math.ceil(mask.width * this.bmSize);
-	canvas.height = Math.ceil(mask.height * this.bmSize);
+	canvas.width = Math.ceil(mask.width * this.size);
+	canvas.height = Math.ceil(mask.height * this.size);
 
 	ctx = canvas.getContext('2d');
 	
@@ -155,7 +155,7 @@ Collidable.prototype.collidesWith = function (objects, resolution, getCollisionP
 		mask,
 
 		// Define image cutout
-		this.width * this.currentImage,
+		(this.width + this.bm.spacing) * this.currentImage,
 		0,
 		this.width,
 		this.height,
@@ -163,10 +163,10 @@ Collidable.prototype.collidesWith = function (objects, resolution, getCollisionP
 		// Define position and width on canvas
 		0,
 		0,
-		this.width * this.bmSize,
-		this.height * this.bmSize
+		this.width * this.size,
+		this.height * this.size
 	);
-	ctx.translate(this.offset.x * this.bmSize, this.offset.y * this.bmSize);
+	ctx.translate(this.offset.x * this.size, this.offset.y * this.size);
 	ctx.rotate(-this.dir);
 
 	// Draw other objects
@@ -183,16 +183,16 @@ Collidable.prototype.collidesWith = function (objects, resolution, getCollisionP
 			obj.mask,
 
 			// Define image cutout
-			obj.width * obj.currentImage,
+			(obj.width + obj.bm.spacing) * obj.currentImage,
 			0,
 			obj.width,
 			obj.height,
 
 			// Define position and width on canvas
-			- obj.offset.x * obj.bmSize,
-			- obj.offset.y * obj.bmSize,
-			obj.width * obj.bmSize,
-			obj.height * obj.bmSize
+			- obj.offset.x * obj.size,
+			- obj.offset.y * obj.size,
+			obj.width * obj.size,
+			obj.height * obj.size
 		);
 
 		ctx.translate(this.x - obj.x, this.y - obj.y);
@@ -234,8 +234,8 @@ Collidable.prototype.collidesWith = function (objects, resolution, getCollisionP
 		avY = (pxArr[0].y + pxArr[pxArr.length - 1].y) / 2;
 		
 		// Translate the position according to the object's sprite offset
-		avX -= this.offset.x * this.bmSize;
-		avY -= this.offset.y * this.bmSize;
+		avX -= this.offset.x * this.size;
+		avY -= this.offset.y * this.size;
 
 		// Rotate the position according to the object's direction
 		avDir = Math.atan2(avY, avX);
@@ -256,7 +256,7 @@ Collidable.prototype.drawBBox = function () {
 
 
 	rVect = new Vector2D(this.bm.width / 2 - this.offset.x, this.bm.height / 2 - this.offset.y).rotate(this.dir);
-	pol = this.mask.bBox.copy().rotate(this.dir).move(rVect.x, rVect.y).scale(this.bmSize);
+	pol = this.mask.bBox.copy().rotate(this.dir).move(rVect.x, rVect.y).scale(this.size);
 
 	x1 = Math.min(pol.points[0].x, pol.points[1].x, pol.points[2].x, pol.points[3].x);
 	x2 = Math.max(pol.points[0].x, pol.points[1].x, pol.points[2].x, pol.points[3].x);
@@ -276,7 +276,7 @@ Collidable.prototype.drawBBox = function () {
 Collidable.prototype.drawRotatedBBox = function () {
 	var pol, c;
 
-	pol = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.bmSize);
+	pol = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.size);
 
 	c = this.ctx;
 	c.save();
@@ -312,15 +312,15 @@ Collidable.prototype.drawMask = function () {
 		c.drawImage(
 			this.mask,
 
-			this.width * this.currentImage,
+			(this.width + this.bm.spacing) * this.currentImage,
 			0,
 			this.width,
 			this.height,
 
-			- this.offset.x * this.bmSize,
-			- this.offset.y * this.bmSize,
-			this.width * this.bmSize,
-			this.height * this.bmSize);
+			- this.offset.x * this.size,
+			- this.offset.y * this.size,
+			this.width * this.size,
+			this.height * this.size);
 	} catch (e) {
 		console.log(this.source);
 		console.log(this.bm);

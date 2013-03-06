@@ -272,11 +272,17 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 			case 'images':
 				res = new Image();
 				res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, '/') + '.png';
-				if (images = object[path].match(/: (\d+) images?/)) {
+				if (images = object[path].match(/; *(\d+) *images?/)) {
 					res.imageLength = images[1];
 				}
 				else {
 					res.imageLength = 1;
+				}
+				if (images = object[path].match(/; *bordered/)) {
+					res.spacing = 1;
+				}
+				else {
+					res.spacing = 0;
 				}
 				theme.images[path] = res;
 				theme.bBoxes[path] = [];
@@ -388,9 +394,10 @@ Loader.prototype.generateMask = function (ressourceString, alphaLimit) {
 			y = Math.floor(pixel / bitmap.width);
 			x = pixel - y * bitmap.width;
 
-			while (x >= image.width / image.imageLength) {
-				x -= image.width / image.imageLength;
+			while (x >= Math.floor(image.width / image.imageLength)) {
+				x -= Math.floor(image.width / image.imageLength) + image.spacing;
 			}
+			if (x < 0) {continue; }
 
 			top = Math.min(y, top);
 			bottom = Math.max(y + 1, bottom);

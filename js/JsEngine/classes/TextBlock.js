@@ -21,7 +21,7 @@ TextBlock.prototype.textBlock = function (string, x, y, width, additionalPropert
 	this.offset = new Vector2D();
 	this.color = "#000000";
 	this.opacity = 1;
-	this.bmSize = 1;
+	this.size = 1;
 	this.dir = 0;
 	this.composite = 'source-over';
 
@@ -162,6 +162,6 @@ TextBlock.prototype.drawCanvas = function () {
 	c.rotate(this.dir);
 	c.globalAlpha = this.opacity;
 	c.globalCompositeOperation = this.composite;
-	c.drawImage(this.cache, - this.offset.x * this.bmSize, - this.offset.y * this.bmSize, this.cache.width * this.bmSize, this.cache.height * this.bmSize);
+	c.drawImage(this.cache, - this.offset.x * this.size, - this.offset.y * this.size, this.cache.width * this.size, this.cache.height * this.size);
 	c.restore();
 };
