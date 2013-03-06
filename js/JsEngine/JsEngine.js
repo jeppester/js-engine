@@ -62,6 +62,9 @@ JsEngine = function (_opt) {
 		// iDevices cannot preload sounds (which is utter crap), so disable preloading to make the engine load without sounds
 		this.preloadSounds = false;
 		break;
+	case 'Android':
+		this.avoidSubPixelRendering = true;
+		break;
 	}
 	this.running = false;
 	this.manualRedrawDepths = [];
