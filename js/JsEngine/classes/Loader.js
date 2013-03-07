@@ -309,7 +309,7 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 				theme.sfx[path] = new Sound(res);
 				
 				if (engine.preloadSounds) {
-					res.setAttribute('preload', 'preload');
+					res.setAttribute('preload', 'auto');
 					res.addEventListener("canplaythrough", onload, false);
 					theme.ressourcesCount ++;
 				}
@@ -330,7 +330,7 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 				theme.music[path] = res;
 
 				if (engine.preloadSounds) {
-					res.setAttribute('preload', 'preload');
+					res.setAttribute('preload', 'auto');
 					res.addEventListener("canplaythrough", onload, false);
 					theme.ressourcesCount ++;
 				}
