@@ -23,15 +23,20 @@ Sound.prototype.sound = function (audioElement) {
 	}
 };
 
-Sound.prototype.play = function () {
+Sound.prototype.play = function (loop) {
 	var i, sound;
 
 	for (i = 0; i < this.elements.length; i++) {
 		sound = this.elements[i];
-		if (sound.started === false || sound.ended) {
+		if ((sound.started === false || sound.ended) && !sound.loop) {
 			sound.started = true;
 			sound.volume = 1;
 			sound.play();
+
+			if (loop) {
+				sound.loop = 'loop';
+			}
+
 			this.playbackId++;
 			sound.playbackId = this.playbackId;
 			return this.playbackId;
@@ -51,7 +56,24 @@ Sound.prototype.stop = function (playbackId) {
 		sound = this.elements[i];
 		if (sound.playbackId === playbackId && sound.started && !sound.ended) {
 			sound.volume = 0;
-			return i;
+			sound.loop = false;
+			return true;
+		}
+	}
+
+	return false;
+};
+
+Sound.prototype.stopLoop = function (playbackId) {
+	if (playbackId === undefined) {throw new Error('Missing argument: playbackId'); }
+
+	var i, sound;
+
+	for (i = 0; i < this.elements.length; i++) {
+		sound = this.elements[i];
+		if (sound.playbackId === playbackId && sound.started && !sound.ended) {
+			sound.loop = false;
+			return true;
 		}
 	}
 
