@@ -86,9 +86,12 @@ JsEngine = function (_opt) {
 	this.backgroundColor = "#FFF";
 	this.timeFactor = 1;
 
+	this.soundsMuted = false;
+	this.musicMuted = false;
+
 	// Copy options to engine (except those which are only used for engine initialization)
 	this.options = _opt ? _opt: {};
-	copyOpt = ['backgroundColor', 'cacheSounds', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'soundsMuted', 'musicMuted', 'cacheSounds', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -155,7 +158,8 @@ JsEngine = function (_opt) {
 		this.enginePath + '/classes/GravityObject.js',
 		this.enginePath + '/classes/Keyboard.js',
 		this.enginePath + '/classes/Mouse.js',
-		this.enginePath + '/classes/Sound.js'
+		this.enginePath + '/classes/Sound.js',
+		this.enginePath + '/classes/Music.js'
 	]);
 
 	gc = this.gameClassPath;
@@ -341,6 +345,32 @@ JsEngine.prototype.setLoopSpeed = function (loopSpeed) {
 	
 	this.loopSpeed = loopSpeed;
 };
+
+JsEngine.prototype.setSoundsMuted = function (muted) {
+	muted = muted !== undefined ? muted : true;
+
+	// If muting, check all sounds whether they are being played, if so stop the playback
+	if (muted) {
+		loader.getAllSounds().forEach(function () {
+			this.stopAll();
+		});
+	}
+
+	this.soundsMuted = muted;
+}
+
+JsEngine.prototype.setMusicMuted = function (muted) {
+	muted = muted !== undefined ? muted : true;
+
+	// If muting, check all sounds whether they are being played, if so stop the playback
+	if (muted) {
+		loader.getAllMusic().forEach(function () {
+			this.stop();
+		});
+	}
+
+	this.musicMuted = muted;
+}
 
 JsEngine.prototype.setDefaultTheme = function (themeName, enforce) {
 	if (themeName === undefined) {throw new Error('Missing argument: themeName'); }

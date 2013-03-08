@@ -26,6 +26,8 @@ Sound.prototype.sound = function (audioElement) {
 Sound.prototype.play = function (loop) {
 	var i, sound;
 
+	if (engine.soundsMuted) {return false; }
+
 	for (i = 0; i < this.elements.length; i++) {
 		sound = this.elements[i];
 		if ((sound.started === false || sound.ended) && !sound.loop) {
@@ -63,6 +65,17 @@ Sound.prototype.stop = function (playbackId) {
 
 	return false;
 };
+
+Sound.prototype.stopAll = function () {
+	for (i = 0; i < this.elements.length; i++) {
+		sound = this.elements[i];
+		if (sound.started && !sound.ended) {
+			sound.volume = 0;
+			sound.loop = false;
+			return true;
+		}
+	}
+}
 
 Sound.prototype.stopLoop = function (playbackId) {
 	if (playbackId === undefined) {throw new Error('Missing argument: playbackId'); }

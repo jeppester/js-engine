@@ -153,6 +153,46 @@ Loader.prototype.getImageSources = function () {
 	return sourceStrings;
 };
 
+Loader.prototype.getAllSounds = function () {
+	var res, themeName, theme, ressourceString, ressource;
+
+	res = [];
+
+	for (themeName in this.themes) {
+		if (this.themes.hasOwnProperty(themeName)) {
+			theme = this.themes[themeName];
+
+			for (ressourceString in theme.sfx) {
+				if (theme.sfx.hasOwnProperty(ressourceString)) {
+					res.push(theme.sfx[ressourceString]);
+				}
+			}
+		}
+	}
+
+	return res;
+}
+
+Loader.prototype.getAllMusic = function () {
+	var res, themeName, theme, ressourceString, ressource;
+
+	res = [];
+
+	for (themeName in this.themes) {
+		if (this.themes.hasOwnProperty(themeName)) {
+			theme = this.themes[themeName];
+
+			for (ressourceString in theme.music) {
+				if (theme.music.hasOwnProperty(ressourceString)) {
+					res.push(theme.music[ressourceString]);
+				}
+			}
+		}
+	}
+
+	return res;
+}
+
 Loader.prototype.loadClasses = function (paths) {
 	if (paths === undefined) {throw new Error('Missing argument: paths'); }
 	var className, i;
@@ -327,7 +367,7 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 					continue;
 				}
 				res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, '/') + '.' + format);
-				theme.music[path] = res;
+				theme.music[path] = new Music(res);
 
 				if (engine.preloadSounds) {
 					res.setAttribute('preload', 'auto');
