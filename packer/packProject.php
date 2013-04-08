@@ -5,8 +5,8 @@ $options = array(
 	"nominify" => false,
 	"keepLogs" => false,
 	"engineOnly" => false,
-	"engineDir" => 'js/JsEngine/',
-	"engineFile" => 'JsEngine.js',
+	"engineDir" => 'js/jsEngine/',
+	"engineFile" => 'Engine.js',
 	"gameFile" => dirname(__FILE__) . '/../index.html',
 	"gameClassFile" => 'js/Game.js',
 );
@@ -41,7 +41,7 @@ else {
 }
 
 /* SEARCH GAME FILE FOR ENGINE DIR, ENGINE FILE AND GAME CLASS FILE */
-preg_match('/["|\']([^"|\']*)(JsEngine(\.packed)?\.js)["|\']/', $gameFile, $m);
+preg_match('/["|\']([^"|\']*)(jsEngine(\.packed)?\.js)["|\']/', $gameFile, $m);
 $options['engineDir'] = $m[1];
 $options['engineFile'] = $m[2];
 
@@ -75,27 +75,25 @@ else {
 		$e . 'jseExtensions.js',
 		$e . 'jseGlobals.js',
 
-		$e . 'JsEngine.js',
+		$e . 'Engine.js',
 
-		$e . "classes/Animator.js",
-		$e . "classes/Animation.js",
-		$e . "classes/Vector2D.js",
-		$e . "classes/Line.js",
-		$e . "classes/Polygon.js",
-		$e . "classes/Rectangle.js",
-		$e . "classes/Loader.js",
-		$e . "classes/View.js",
-		$e . "classes/CustomLoop.js",
-		$e . "classes/Director.js",
-		$e . "classes/Sprite.js",
-		$e . "classes/Collidable.js",
-		$e . "classes/TextBlock.js",
-		$e . "classes/GameObject.js",
-		$e . "classes/GravityObject.js",
-		$e . "classes/Keyboard.js",
-		$e . "classes/Mouse.js",
-		$e . "classes/Sound.js",
-		$e . "classes/Music.js"
+		$e . "objects/Animator.js",
+		$e . "objects/Animation.js",
+		$e . "objects/Vector2D.js",
+		$e . "objects/Line.js",
+		$e . "objects/Polygon.js",
+		$e . "objects/Rectangle.js",
+		$e . "objects/Loader.js",
+		$e . "objects/View.js",
+		$e . "objects/CustomLoop.js",
+		$e . "objects/Sprite.js",
+		$e . "objects/Collidable.js",
+		$e . "objects/TextBlock.js",
+		$e . "objects/GameObject.js",
+		$e . "objects/Keyboard.js",
+		$e . "objects/Mouse.js",
+		$e . "objects/Sound.js",
+		$e . "objects/Music.js"
 	);
 }
 
@@ -105,7 +103,7 @@ function scanLoad($file) {
 	$fPath = $options['gameDir'] . $file;
 
 	if (in_array($file, $files)) {
-		echo "Skipping already loaded class file: " . $file . "\n";
+		echo "Skipping already loaded object file: " . $file . "\n";
 		return;
 	}
 
@@ -115,8 +113,8 @@ function scanLoad($file) {
 
 		$fCon = file_get_contents($fPath);
 
-		// Search the files for loaded classes
-		preg_match_all('/loader\.loadClasses\(\[[^\]]*\]\)/', $fCon, $m1);
+		// Search the files for loaded objects
+		preg_match_all('/loader\.loadObjects\(\[[^\]]*\]\)/', $fCon, $m1);
 
 		$m = $m1[0];
 
@@ -129,7 +127,7 @@ function scanLoad($file) {
 		}
 	}
 	else {
-		echo "Skipping non-existing class file: " . $file . "\n";
+		echo "Skipping non-existing object file: " . $file . "\n";
 		return;
 	}
 }

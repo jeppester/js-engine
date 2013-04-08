@@ -1,15 +1,36 @@
-/*
-TextBlock:
-A block of text with a limited width
-*/
+/**
+ * TextBlock:
+ * A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
+ */
 
-jseCreateClass('TextBlock', [Animation, View, Vector2D]);
+jseCreateClass('TextBlock', [Animatable, View, Vector2D]);
 
-// Constructor
+/**
+ * The constructor for the TextBlock class.
+ * 
+ * @param {string} string The string to display inside the TextBlock
+ * @param {number} x The x-position of the object in the game arena, in pixels
+ * @param {number} y The y-position of the object in the game arena, in pixels
+ * @param {number} width The width of the textblock, in pixels. When the text reaches the width, it will break into a new line
+ * @param {object} additionalProperties An object containing additional properties to assign to the created object.
+ * The default is:
+ * <code>{
+ * 	font: 'normal 14px Verdana',
+ * 	color: '#000',
+ * 	alignment: 'left',
+ * 	bmSize: 1,
+ * 	opacity: 1,
+ * 	composite: 'source-over',
+ * 	xOff: 0,
+ * 	yOff: 0
+ * }</code>
+ */
 TextBlock.prototype.textBlock = function (string, x, y, width, additionalProperties) {
 	if (string === undefined) {throw new Error('Missing argument: string'); }
 	if (width === undefined) {throw new Error('Missing argument: width'); }
 
+	// Call Vector2D's and view's constructors
+	this.view();
 	this.vector2D(x, y);
 
 	// Load default options
@@ -41,11 +62,16 @@ TextBlock.prototype.textBlock = function (string, x, y, width, additionalPropert
 	this.cacheRendering();
 
 	if (engine.avoidSubPixelRendering) {
-		this.offset.x = Math.round(this.offset.x); 
+		this.offset.x = Math.round(this.offset.x);
 		this.offset.y = Math.round(this.offset.y);
 	}
 };
 
+/**
+ * Used for setting the text string of a TextBlock object.
+ * 
+ * @param {string} string A text string to set for the TextBlock object
+ */
 TextBlock.prototype.setString = function (string) {
 	if (string === undefined) {throw new Error('Missing argument: string'); }
 	this.string = string;
@@ -54,26 +80,41 @@ TextBlock.prototype.setString = function (string) {
 		this.string = this.string.toString();
 	}
 	if (this.string === '') {
-		this.string === ' ';
+		this.string = ' ';
 	}
 
 	this.stringToLines();
 	this.cacheRendering();
 };
 
+/**
+ * Used for setting the text alignment of a TextBlock object.
+ * 
+ * @param {string} alignment A string representing the new text alignment. Valid alignments are: "left", "right", "center".
+ */
 TextBlock.prototype.setAlignment = function (alignment) {
 	if (alignment === undefined) {throw new Error('Missing argument: alignment'); }
-	if (/left|right|center/.test(alignment) === false) {throw new Error('Invalid alignment given. Valid alignments are: left, right, center'); }
+	if (/left|right|center/.test(alignment) === false) {throw new Error('Invalid alignment given. Valid alignments are: "left", "right", "center"'); }
 	this.alignment = alignment;
 	this.cacheRendering();
-}
+};
 
+/**
+ * Sets the text color of the TextBlock object.
+ * 
+ * @param {string} colorString A CSS colorstring. For instance "#000" or "#ABABAB" or "red"
+ */
 TextBlock.prototype.setColor = function (colorString) {
 	if (colorString === undefined) {throw new Error('Missing argument: colorString'); }
 	this.color = colorString;
 	this.cacheRendering();
-}
+};
 
+/**
+ * Does the actual rendering of the text, and caches it (for huge performance gains). This function is automatically called each time a property which affects the rendering has been changed (via the right setter functions).
+ * 
+ * @private
+ */
 TextBlock.prototype.cacheRendering = function () {
 	var xOffset, i;
 
@@ -101,6 +142,11 @@ TextBlock.prototype.cacheRendering = function () {
 	}
 };
 
+/**
+ * Breaks the TextBlock's text string into lines.
+ * 
+ * @private
+ */
 TextBlock.prototype.stringToLines = function () {
 	var lt, line, paragraphs, pid, words, wid, word;
 
@@ -143,13 +189,15 @@ TextBlock.prototype.stringToLines = function () {
 	lt.parentNode.removeChild(lt);
 };
 
-TextBlock.prototype.drawCanvas = function () {
-	var c;
-
+/**
+ * Draws the cached rendering of the TextBlock object to the canvas. Usually there is no reason to call this function manually since it is automatically called by the engine's redraw loop. To redraw depths that are not automatically redrawn, use the engine's redraw function.
+ * 
+ * @private
+ * @param {object} A canvas 2D context on which to draw the TextBlock
+ */
+TextBlock.prototype.drawCanvas = function (c) {
 	// Draw on canvas
 	if (/^\s*$/.test(this.string)) {return; }
-
-	c = this.ctx;
 	c.save();
 
 	if (engine.avoidSubPixelRendering) {

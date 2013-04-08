@@ -1,16 +1,21 @@
-/*
-Sound:
-A wrapper-class for audio-elements that stores multiple copies of the audio-element.
-Makes it possible to control (start, stop) multiple playbacks of the same sound.
-*/
+/**
+ * Sound:
+ * A wrapper-class for audio-elements that stores multiple copies of the audio-element.
+ * Makes it possible to control (start, stop) multiple playbacks of the same sound.
+ */
 
 jseCreateClass('Sound');
 
+/**
+ * Constructor for the sound object
+ * 
+ * @param {object} audioElement The Audio element to use as source for the sound object
+ */
 Sound.prototype.sound = function (audioElement) {
 	if (audioElement === undefined) {throw new Error('Missing argument: audioElement'); }
 	if (audioElement.toString() !== "[object HTMLAudioElement]") {throw new Error('Argument audioElement has to be of type HTMLAudioElement'); }
 
-	var i, copies;
+	var i;
 
 	this.source = audioElement;
 	this.playbackId = 0;
@@ -23,6 +28,12 @@ Sound.prototype.sound = function (audioElement) {
 	}
 };
 
+/**
+ * Starts a playback of the object. The object supports multiple playbacks. Therefore a playback ID is issued for each playback, making it possible to stop a specific playback, or stop it from looping.
+ * 
+ * @param {boolean} loop Whether or not to loop the playback
+ * @return {mixed} If playback succeeds: a playback ID representing the playback, else: false
+ */
 Sound.prototype.play = function (loop) {
 	var i, sound;
 
@@ -49,6 +60,11 @@ Sound.prototype.play = function (loop) {
 	return false;
 };
 
+/**
+ * Stops a specific playback of the object
+ * 
+ * @param {number} playbackId The playback ID of the playback to stop. The ID is generated when a playback is started, and is returned by the play-function
+ */
 Sound.prototype.stop = function (playbackId) {
 	if (playbackId === undefined) {throw new Error('Missing argument: playbackId'); }
 
@@ -66,7 +82,12 @@ Sound.prototype.stop = function (playbackId) {
 	return false;
 };
 
+/**
+ * Stops all playbacks of the object
+ */
 Sound.prototype.stopAll = function () {
+	var i, sound;
+
 	for (i = 0; i < this.elements.length; i++) {
 		sound = this.elements[i];
 		if (sound.started && !sound.ended) {
@@ -75,8 +96,12 @@ Sound.prototype.stopAll = function () {
 			return true;
 		}
 	}
-}
+};
 
+/**
+ * Stops a specific playback from looping
+ * @param {number} playbackId The playback ID of the playback to stop from looping. The ID is generated when a playback is started, and is returned by the play-function
+ */
 Sound.prototype.stopLoop = function (playbackId) {
 	if (playbackId === undefined) {throw new Error('Missing argument: playbackId'); }
 

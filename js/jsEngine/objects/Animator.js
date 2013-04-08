@@ -1,13 +1,19 @@
-/*
-Animator:
-The animator handles animations inside objects based on sprites.
-An animation is an eased change in a numeric variable inside an object.
-The animator features different easing functions.
-*/
+/**
+ * Animator:
+ * The animator handles animations inside objects based on sprites.
+ * An animation is an eased change in a numeric variable inside an object.
+ * The animator features different easing functions.
+ */
 
 jseCreateClass('Animator');
 
-// Function for adding a new animation
+/**
+ * Adds a new animation to the animator class (done automatically when running the animate-function).
+ * 
+ * @private
+ * @param {object} animation An animation object
+ * @param {string} loop The loop to add the animation to
+ */
 Animator.prototype.addAnimation = function (animation, loop) {
 	if (animation === undefined) {throw new Error('Missing argument: animation'); }
 	if (loop === undefined) {throw new Error('Missing argument: loop'); }
@@ -35,6 +41,11 @@ Animator.prototype.addAnimation = function (animation, loop) {
 	loop.animations.push(anim);
 };
 
+/**
+ * Updates the animations in all the game's custom loops (automatically called by the engine in each frame).
+ * 
+ * @private
+ */
 Animator.prototype.updateAllLoops = function () {
 	var name;
 
@@ -45,6 +56,12 @@ Animator.prototype.updateAllLoops = function () {
 	}
 };
 
+/**
+ * Update the animations in a single loop (called by updateAllLoops)
+ * 
+ * @private
+ * @param {string} loop The loop for which to update all animations
+ */
 Animator.prototype.updateLoop = function (loop) {
 	if (loop === undefined) {throw new Error('Missing argument: loop'); }
 	var animId, a, propId, t;
@@ -87,7 +104,25 @@ Animator.prototype.updateLoop = function (loop) {
 	}
 };
 
-// ease is used for easing the animation of a property
+/**
+ * Tweens an animation of a number between a start point and an end point
+ *
+ * @param {string} type The easing function to use. Available functions are:
+ * "linear"
+ * "quadIn"
+ * "quadOut"
+ * "quadInOut"
+ * "powerIn"
+ * "powerOut"
+ * "powerInOut"
+ * "sinusInOut"
+ * 
+ * @param {number} t The current time (of the animation)
+ * @param {number} b The start value
+ * @param {number} c The end value
+ * @param {number} d The animation time
+ * @return {number} The current value (at the given time in the animation)
+ */
 Animator.prototype.ease = function (type, t, b, c, d) {
 	var a;
 

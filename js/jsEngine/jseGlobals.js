@@ -1,8 +1,8 @@
-/*
-jseGlobals.js:
-This file contains global JsEngine variables.
-The purpose of the global variables is to be used as readable alternatives to "magic numbers".
-*/
+/**
+ * jseGlobals.js:
+ * This file contains global JsEngine variables.
+ * The purpose of the global variables is to be used as readable alternatives to "magic numbers".
+ */
 
 // Keyboard keys
 KEY_LEFT		= 37;

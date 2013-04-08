@@ -1,15 +1,34 @@
-/*
-Sprite:
-A drawn bitmap with rotation and size.
-Usually all graphical objects in a game are sprites or extends this object.
-*/
+/**
+ * Sprite:
+ * A drawn bitmap with rotation and size.
+ * Usually all graphical objects in a game are sprites or extends this object.
+ */
 
-jseCreateClass('Sprite', [View, Animation, Vector2D]);
+jseCreateClass('Sprite', [View, Animatable, Vector2D]);
 
+/**
+ * The constructor for Sprite objects.
+ * 
+ * @param {string} source A string representing the source of the object's bitmap
+ * @param {number} x The x-position of the object in the game arena, in pixels
+ * @param {number} y The y-position of the object in the game arena, in pixels
+ * @param {number} dir The rotation (in radians) of the object when drawn in the game arena
+ * @param {object} additionalProperties An object containing additional properties to assign to the created object.
+ * The default is:
+ * <code>{
+ * 	bmSize: 1,
+ * 	opacity: 1,
+ * 	composite: 'source-over',
+ * 	xOff: 'center',
+ * 	yOff: 'center'
+ * }</code>
+ */
 Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 	if (source === undefined) {throw new Error('Missing argument: source'); }
 
+	// Call Vector2D's and view's constructors
 	this.vector2D(x, y);
+	this.view();
 
 	// Load default options
 	this.source = source;
@@ -27,7 +46,7 @@ Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 
 	// Load additional properties
 	this.importProperties(additionalProperties);
-		
+
 	if (!this.refreshSource()) {
 		throw new Error('Sprite source was not successfully loaded: ' + source);
 	}
@@ -42,6 +61,11 @@ Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 	}
 };
 
+/**
+ * Fetches the name of the theme which currently applies to the object.
+ * 
+ * @return {string} The name of the object's theme
+ */
 Sprite.prototype.getTheme = function () {
 	var parent, theme;
 
@@ -65,6 +89,12 @@ Sprite.prototype.getTheme = function () {
 	return theme ? theme : engine.defaultTheme;
 };
 
+/**
+ * Updates the source bitmap of the object to correspond to it's current theme (set with setTheme or inherited).
+ * Calling this function is usually not necessary since it is automatically called when setting the theme of the object itself or it's parent object.
+ * 
+ * @private
+ */
 Sprite.prototype.refreshSource = function () {
 	var theme;
 
@@ -78,6 +108,11 @@ Sprite.prototype.refreshSource = function () {
 	return this.bm;
 };
 
+/**
+ * Sets the bitmap-source of the object. For more information about bitmaps and themes, see themes.
+ * 
+ * @param {string} The ressource string of the bitmap-source to use for the object
+ */
 Sprite.prototype.setSource = function (source) {
 	if (source === undefined) {throw new Error('Missing argument: source'); }
 	if (this.source === source) {return; }
@@ -86,9 +121,14 @@ Sprite.prototype.setSource = function (source) {
 	this.refreshSource();
 };
 
-Sprite.prototype.drawCanvas = function () {
+/**
+ * Draws the object to the canvas. Usually there is no reason to call this function manually since it is automatically called by the engine's redraw loop. To redraw depths that are not automatically redrawn, use redraw.
+ * 
+ * @private
+ * @param {object} A canvas 2D context on which to draw the Sprite
+ */
+Sprite.prototype.drawCanvas = function (c) {
 	// Draw Sprite on canvas
-	var c = this.ctx;
 	c.save();
 
 	if (engine.avoidSubPixelRendering) {

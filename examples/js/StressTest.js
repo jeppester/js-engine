@@ -13,9 +13,9 @@ StressTest.prototype.stressTest = function () {
 
 	engine.depth[1].addChildren(fpsCounter, objectCounter);
 	
-	engine.newLoop('each20Frames', 20);
-	engine.attachFunctionToLoop(this, this.updateFPS, 'each20Frames');
-	engine.attachFunctionToLoop(this, this.controls, 'eachFrame');
+	engine.addLoop('each20Frames', new CustomLoop(20));
+	engine.loops.each20Frames.attachFunction(this, this.updateFPS);
+	engine.loops.eachFrame.attachFunction(this, this.controls);
 }
 
 StressTest.prototype.onLoaded=function() {

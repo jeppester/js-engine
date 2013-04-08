@@ -1,10 +1,15 @@
-/*
-Keyboard:
-An object containing the current state of all keys.
-*/
+/**
+ * Keyboard:
+ * An object containing the current state of all keys.
+ */
 
 jseCreateClass('Keyboard');
 
+/**
+ * Constructor for the Keyboard object (which is automatically created by the engine on launch)
+ * 
+ * @private
+ */
 Keyboard.prototype.keyboard = function () {
 	document.addEventListener('keydown', function (event) {
 		keyboard.onKeyDown.call(keyboard, event);
@@ -17,6 +22,12 @@ Keyboard.prototype.keyboard = function () {
 	this.events = [];
 };
 
+/**
+ * Registers every onkeydown event to the Keyboard object.
+ * 
+ * @private
+ * @param {object} event Event object passed by the onkeydown event
+ */
 Keyboard.prototype.onKeyDown = function (event) {
 	if (event === undefined) {throw new Error('Missing argument: event'); }
 	var frame;
@@ -35,6 +46,12 @@ Keyboard.prototype.onKeyDown = function (event) {
 	this.events.push({'key': event.keyCode, 'frame': frame, 'type': 'pressed'});
 };
 
+/**
+ * Registers every onkeyup event to the Keyboard object.
+ * 
+ * @private
+ * @param {object} event Event object passed by the onkeyup event
+ */
 Keyboard.prototype.onKeyUp = function (event) {
 	if (event === undefined) {throw new Error('Missing argument: event'); }
 	var frame, evt, i;
@@ -55,6 +72,12 @@ Keyboard.prototype.onKeyUp = function (event) {
 	this.events.push({'key': event.keyCode, 'frame': frame, 'type': 'released'});
 };
 
+/**
+ * Removes obsolete key events for a key
+ * 
+ * @private
+ * @param {mixed} key A charcode or a string representing the key
+ */
 Keyboard.prototype.cleanUp = function (key) {
 	if (key === undefined) {throw new Error('Missing argument: key'); }
 	var clean, evt, i;
@@ -79,6 +102,12 @@ Keyboard.prototype.cleanUp = function (key) {
 	}
 };
 
+/**
+ * Checks if a given key is down.
+ * 
+ * @param {mixed} key A charcode or a string representing the key
+ * @return {boolean} True if the key is down, false if not
+ */
 Keyboard.prototype.isDown = function (key) {
 	if (key === undefined) {throw new Error('Missing argument: key'); }
 	var evt, i;
@@ -97,6 +126,12 @@ Keyboard.prototype.isDown = function (key) {
 	return false;
 };
 
+/**
+ * Checks if a given key has been pressed (in the current frame).
+ * 
+ * @param {mixed} key A charcode or a string representing the key
+ * @return {boolean} True if the key has been pressed, false if not
+ */
 Keyboard.prototype.isPressed = function (key) {
 	if (key === undefined) {throw new Error('Missing argument: key'); }
 	var evt, i;

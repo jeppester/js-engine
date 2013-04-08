@@ -1,8 +1,8 @@
-/*
-jseExtensions.js:
-This file contains extensions to existing JS classes.
-These extensions are used in some of the engine's classes and can also be used in games.
-*/
+/**
+ * jseExtensions.js:
+ * This file contains extensions to existing JS classes.
+ * These extensions are used in some of the engine's classes and can also be used in games.
+ */
 
 Array.prototype.getElementByPropertyValue = function (property, value) {
 	var i;
@@ -60,3 +60,7 @@ Object.prototype.importProperties = function (from) {
 		}
 	}
 };
+
+Object.prototype.implements = function (object) {
+	return object.prototype.isPrototypeOf(this);
+}

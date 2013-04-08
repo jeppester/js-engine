@@ -46,7 +46,7 @@ Examples.prototype.onLoaded=function() {
 	);
 
 	// To draw the text, add it to a depth
-	engine.depth[0].addChild(text);
+	engine.depth[0].addChildren(text);
 
 	// Since depth[0] is not automatically redrawn (look at the "new JsEngine"-call in game.html), redraw the depth
 	engine.redraw(true);
@@ -63,7 +63,7 @@ Examples.prototype.onLoaded=function() {
 
 	// Add sprite to depth[1] for it to be drawn
 	// (since depth[1] is automatically redrawn, there's no need to call the engine.redraw-function)
-	engine.depth[1].addChild(sprite);
+	engine.depth[1].addChildren(sprite);
 
 
 	// ANIMATION EXAMPLE
@@ -96,7 +96,7 @@ Examples.prototype.onLoaded=function() {
 	);
 
 	// And lets add the new object to depth[1]
-	engine.depth[1].addChild(movable);
+	engine.depth[1].addChildren(movable);
 
 	// You should now have a character that you can move around width the arrow keys :)
 

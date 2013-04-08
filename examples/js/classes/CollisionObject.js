@@ -29,17 +29,15 @@ CollisionObject.prototype.collisionObject = function (source, x, y, additionalPr
 			this.rightKey = this.rightKey.toUpperCase().charCodeAt(0);
 		}
 
-		engine.attachFunctionToLoop(
+		engine.loops.eachFrame.attachFunction(
 			this, // This object (an instance reference is needed by the engine)
-			this.step, // The function to call each time the loop executes
-			'eachFrame' // The loop in which to run the function (eachFrame is the default loop, but you can make your own)
+			this.step // The function to call each time the loop executes
 		);
 	}
 
-	engine.attachFunctionToLoop(
+	engine.loops.collisionChecking.attachFunction(
 		this, // This object (an instance reference is needed by the engine)
-		this.collisionCheck, // The function to call each time the loop executes
-		'collisionChecking' // The loop in which to run the function (eachFrame is the default loop, but you can make your own)
+		this.collisionCheck // The function to call each time the loop executes
 	);
 };
 

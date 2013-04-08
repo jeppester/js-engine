@@ -1,18 +1,43 @@
-/*
-Animation:
-An object whose numeric properties can be tween by using the animate-function.
-*/
+/**
+ * Animatable:
+ * An object whose numeric properties can be tweened by using the animate-function.
+ */
 
-jseCreateClass('Animation');
+jseCreateClass('Animatable');
 
-Animation.prototype.animate = function (properties, options) {
+/**
+ * Used for animating numeric properties of the owner of the function.
+ * Available easing functions are:
+ * "linear"
+ * "quadIn"
+ * "quadOut"
+ * "quadInOut"
+ * "powerIn"
+ * "powerOut"
+ * "powerInOut"
+ * "sinusInOut"
+ * 
+ * @param {object} properties An object containing key-value pairs in the following format:<code>
+ * {
+ * 	"[property name]": "[end value]"
+ * }
+ * </code>
+ * @param {object} options An object containing key-value pairs for the animation's option:<code>
+ * {
+ * 	"dur": "[animation duration (in ms)]",
+ * 	"callback": "[callback function]",
+ * 	"easing": "[easing function to use]"
+ * }
+ * </code>
+ */
+Animatable.prototype.animate = function (properties, options) {
 	if (properties === undefined) {throw new Error('Missing argument: properties'); }
 	if (options === undefined) {throw new Error('Missing argument: options'); }
 	var anim, i, c, loop, map, opt;
 
 	anim = {},
 	map = properties,
-	opt = options  ?  options : {};
+	opt = options ? options : {};
 
 	if (!map) {
 		return false;
@@ -54,7 +79,12 @@ Animation.prototype.animate = function (properties, options) {
 	animator.addAnimation(anim, loop);
 };
 
-Animation.prototype.isAnimated = function () {
+/**
+ * Checks if the object is currently being animated.
+ * 
+ * @return {boolean} Wether or not the object is being animated
+ */
+Animatable.prototype.isAnimated = function () {
 	var name, loop, animId, animation;
 
 	for (name in engine.loops) {
@@ -71,7 +101,11 @@ Animation.prototype.isAnimated = function () {
 	return false;
 };
 
-Animation.prototype.getAnimations = function () {
+/**
+ * Fetches all current animations of the object.
+ * @return {array} An array of all the current animations of the object
+ */
+Animatable.prototype.getAnimations = function () {
 	var animations, name, loop, animId, animation;
 
 	animations = [];
@@ -89,7 +123,10 @@ Animation.prototype.getAnimations = function () {
 	return animations;
 };
 
-Animation.prototype.stopAnimations = function () {
+/**
+ * Stops all current animations of the object.
+ */
+Animatable.prototype.stopAnimations = function () {
 	var animations, name, loop, animId, animation;
 
 	animations = [];

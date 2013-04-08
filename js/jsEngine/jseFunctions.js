@@ -1,7 +1,7 @@
-/*
-jseFunctions.js:
-This file contains global JsEngine functions
-*/
+/**
+ * jseFunctions.js:
+ * This file contains global JsEngine functions
+ */
 
 // Function to copy all variables from one object to another
 // Used mainly for loading option objects - See TextBlock for an example
@@ -14,6 +14,14 @@ jseCreateClass = function (className, inherits) {
 	eval('window.' + className + ' = function () {this.' + constructorName + '.apply(this, arguments); }');
 	window[className].prototype[constructorName] = function () {};
 	newClass = window[className];
+	newClass.prototype.className = className;
+	newClass.prototype.extendedObjects = [];
+	newClass.prototype.extends = function (object) {
+		return this.extendedObjects.indexOf(object) !== -1;
+	}
+	newClass.prototype.implements = function (object) {
+		return (object.prototype.isPrototypeOf(this) ? true : this.extends(object));
+	}
 
 	if (inherits) {
 		if (!Array.prototype.isPrototypeOf(inherits)) {throw new Error("Arguments inherits is not an array"); }
@@ -23,11 +31,15 @@ jseCreateClass = function (className, inherits) {
 			jseExtend(newClass, inheritClass);
 		}
 	}
+
 	return newClass;
 };
 
 jseExtend = function (newClass, inheritClass) {
 	var functionName;
+
+	newClass.prototype.extendedObjects.push(inheritClass);
+	Array.prototype.push.apply(newClass.prototype.extendedObjects, inheritClass.prototype.extendedObjects);
 
 	for (functionName in inheritClass.prototype) {
 		if (typeof inheritClass.prototype[functionName] === "function") {
@@ -71,14 +83,14 @@ jsePurge = function (obj) {
 
 	// Delete from viewlist
 	if (obj.parent) {
-		obj.parent.removeChild(obj);
+		obj.parent.removeChildren(obj);
 	}
 
 	delete engine.objectIndex[obj.id];
 };
 
 jseSyncLoad = function (filePaths) {
-	var i, req;
+	var i, req, codeString;
 
 	if (typeof filePaths === "string") {
 		filePaths = [filePaths];
@@ -89,8 +101,9 @@ jseSyncLoad = function (filePaths) {
 		req = new XMLHttpRequest();
 		req.open('GET', filePaths[i], false);
 		req.send();
+		codeString = req.responseText + "\n//@ sourceURL=/" + filePaths[i];
 		try {
-			eval.call(window, req.responseText);
+			eval.call(window, codeString);
 		}
 		catch (e) {
 			throw new Error('Failed loading "' + filePaths[i] + '": ' + e.type + ' "' + e.arguments[0] + '"');
@@ -123,22 +136,22 @@ jseRequest = function (url, params, async, callback, caller) {
 			if (req.readyState === 4 && req.status === 200) {
 				callback.call(caller, req.responseText);
 			}
-		}
+		};
 	}
 
 	req.open('POST', url, async);
-	req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	req.send(params);
 
 	if (!async) {
-		if (req.readyState==4 && req.status==200) {
+		if (req.readyState === 4 && req.status === 200) {
 			return req.responseText;
 		}
 		else {
 			console.log('XMLHttpRequest failed: ' + url);
 		}
 	}
-}
+};
 
 // Function for turning an object with properties into a json string, functions are ignored
 jsonEncode = function (obj, ignore) {

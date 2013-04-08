@@ -1,9 +1,28 @@
-/*
-JsEngine:
-Loads all objects required by the engine, sets core functions, and runs the core loop.
-*/
+/**
+ * Engine:
+ * The main game engine object.
+ * Responsible for depths, custom loops, the main loop, the main canvas, etc.
+ */
 
-JsEngine = function (_opt) {
+Engine = function (options) {
+	this.engine(options);
+};
+
+/**
+ * The constructor for the Engine object.
+ * @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
+ */
+Engine.prototype.engine = function (options) {
+	this.options = options ? options: {};
+	this.load();
+};
+
+/**
+ * Load all files and functions, that are needed before the engine can start.
+ * 
+ * @private
+ */
+Engine.prototype.load = function () {
 	// Define all used vars
 	var copyOpt, audioFormats, i, opt, req, gc;
 
@@ -70,7 +89,7 @@ JsEngine = function (_opt) {
 	this.manualRedrawDepths = [];
 	this.canvasResX = 800;
 	this.canvasResY = 600;
-	this.enginePath = 'js/JsEngine';
+	this.enginePath = 'js/jsEngine';
 	this.themesPath = 'themes';
 	this.drawBBoxes = false;
 	this.drawMasks = false;
@@ -90,7 +109,6 @@ JsEngine = function (_opt) {
 	this.musicMuted = false;
 
 	// Copy options to engine (except those which are only used for engine initialization)
-	this.options = _opt ? _opt: {};
 	copyOpt = ['backgroundColor', 'soundsMuted', 'musicMuted', 'cacheSounds', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
@@ -114,7 +132,7 @@ JsEngine = function (_opt) {
 		window.addEventListener('load', function () {engine.autoResizeCanvas(); }, false);
 	}
 
-	// If JsEngine functions are not loaded, load them
+	// If jsEngine functions are not loaded, load them
 	if (typeof jseCreateClass === "undefined") {
 		req = new XMLHttpRequest();
 		req.open('GET', this.enginePath + '/jseFunctions.js', false);
@@ -134,36 +152,34 @@ JsEngine = function (_opt) {
 
 	// If the loader class does not exist, load it
 	if (typeof Loader === "undefined") {
-		jseSyncLoad(this.enginePath + '/classes/Loader.js');
+		jseSyncLoad(this.enginePath + '/objects/Loader.js');
 	}
 
 	// Create loader object
 	loader = new Loader();
-	
+
 	// Load engine classes
-	loader.loadClasses([
-		this.enginePath + '/classes/Animation.js',
-		this.enginePath + '/classes/Animator.js',
-		this.enginePath + '/classes/Vector2D.js',
-		this.enginePath + '/classes/Line.js',
-		this.enginePath + '/classes/Polygon.js',
-		this.enginePath + '/classes/Rectangle.js',
-		this.enginePath + '/classes/View.js',
-		this.enginePath + '/classes/CustomLoop.js',
-		this.enginePath + '/classes/Director.js',
-		this.enginePath + '/classes/Sprite.js',
-		this.enginePath + '/classes/Collidable.js',
-		this.enginePath + '/classes/TextBlock.js',
-		this.enginePath + '/classes/GameObject.js',
-		this.enginePath + '/classes/GravityObject.js',
-		this.enginePath + '/classes/Keyboard.js',
-		this.enginePath + '/classes/Mouse.js',
-		this.enginePath + '/classes/Sound.js',
-		this.enginePath + '/classes/Music.js'
+	loader.loadObjects([
+		this.enginePath + '/objects/Animatable.js',
+		this.enginePath + '/objects/Animator.js',
+		this.enginePath + '/objects/Vector2D.js',
+		this.enginePath + '/objects/Line.js',
+		this.enginePath + '/objects/Polygon.js',
+		this.enginePath + '/objects/Rectangle.js',
+		this.enginePath + '/objects/View.js',
+		this.enginePath + '/objects/CustomLoop.js',
+		this.enginePath + '/objects/Sprite.js',
+		this.enginePath + '/objects/Collidable.js',
+		this.enginePath + '/objects/TextBlock.js',
+		this.enginePath + '/objects/GameObject.js',
+		this.enginePath + '/objects/Keyboard.js',
+		this.enginePath + '/objects/Mouse.js',
+		this.enginePath + '/objects/Sound.js',
+		this.enginePath + '/objects/Music.js'
 	]);
 
 	gc = this.gameClassPath;
-	loader.loadClasses([gc]);
+	loader.loadObjects([gc]);
 	this.gameClassName = gc.match(/(\w*)\.\w+$/)[1];
 
 	// Load themes
@@ -174,7 +190,12 @@ JsEngine = function (_opt) {
 	loader.loadThemes(this.options.themes);
 };
 
-JsEngine.prototype.initialize = function () {
+/**
+ * Starts the engine
+ * 
+ * @private
+ */
+Engine.prototype.initialize = function () {
 	var i, d, objectName;
 
 	// Make array for containing references to all game objects
@@ -188,7 +209,7 @@ JsEngine.prototype.initialize = function () {
 	this.executingLoops = false;
 	this.currentId = 0;
 	this.drawing = 0;
-
+	this.loops = {};
 
 	this.fps = 0;
 	this.fpsCounter = 0;
@@ -198,9 +219,7 @@ JsEngine.prototype.initialize = function () {
 	this.depth = [];
 
 	// Setup default loop
-	this.loops = {
-		eachFrame: new CustomLoop()
-	};
+	this.addLoop('eachFrame', new CustomLoop());
 	this.defaultAnimationLoop = 'eachFrame';
 	this.defaultActivityLoop = 'eachFrame';
 
@@ -209,7 +228,7 @@ JsEngine.prototype.initialize = function () {
 
 	// Create canvases for each depth and set the depth's main canvas, based on their composite- and manualRedraw settings
 	for (i = 0; i < this.options.depths; i ++) {
-		d = new View(i);
+		d = new View();
 		d.manualRedraw = this.manualRedrawDepths.indexOf(i) !== -1;
 		d.composited = this.compositedDepths.indexOf(i) !== -1;
 		d.ownCanvas = this.makeCanvas();
@@ -257,10 +276,15 @@ JsEngine.prototype.initialize = function () {
 
 	this.startMainLoop();
 
-	console.log('JsEngine started');
+	console.log('jsEngine started');
 };
 
-JsEngine.prototype.autoResizeCanvas = function () {
+/**
+ * Function for resizing the canvas. Not used if engine option "autoResizeCanvas" is false.
+ * 
+ * @private
+ */
+Engine.prototype.autoResizeCanvas = function () {
 	var h, w, windowWH, gameWH;
 
 	// Check if the window is wider og heigher than the game's canvas
@@ -288,8 +312,13 @@ JsEngine.prototype.autoResizeCanvas = function () {
 	this.mainCanvas.style.width = w + "px";
 };
 
-// Prepare canvas rendering
-JsEngine.prototype.makeCanvas = function () {
+/**
+ * Function for creating canvases for the engine depths.
+ * 
+ * @private
+ * @return {object} The created canvas
+ */
+Engine.prototype.makeCanvas = function () {
 	var c;
 
 	c = document.createElement("canvas");
@@ -299,16 +328,23 @@ JsEngine.prototype.makeCanvas = function () {
 	return c;
 };
 
-// Function for converting between speed units
-JsEngine.prototype.convertSpeed = function (speed, from, to) {
+/**
+ * Function for converting between speed units
+ * 
+ * @param {number} speed The value to convert
+ * @param {unit} from The unit to convert from. Can be SPEED_PIXELS_PER_SECOND or SPEED_PIXELS_PER_FRAME
+ * @param {unit} to The unit to convert to. Can be SPEED_PIXELS_PER_SECOND or SPEED_PIXELS_PER_FRAME
+ * @return {number} The resulting value of the conversion
+ */
+Engine.prototype.convertSpeed = function (speed, from, to) {
 	if (speed === undefined) {throw new Error('Missing argument: speed'); }
-	if (Vector2D.prototype.isPrototypeOf(speed)) {
+	if (speed.implements(Vector2D)) {
 		return new Vector2D(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
 	}
 
 	from = from !== undefined ? from : SPEED_PIXELS_PER_SECOND;
 	to = to !== undefined ? to : SPEED_PIXELS_PER_FRAME;
-	
+
 	// Convert all formats to pixels per frame
 	switch (from) {
 	case SPEED_PIXELS_PER_SECOND:
@@ -330,23 +366,35 @@ JsEngine.prototype.convertSpeed = function (speed, from, to) {
 	return speed;
 };
 
-// clearStage removes all traces of a game - session
-JsEngine.prototype.clearStage = function () {
+/**
+ * Removes all objects from the stage
+ */
+Engine.prototype.clearStage = function () {
 	// Clear all layers
 	var depthId;
 
 	for (depthId = 0; depthId < this.depth.length; depthId ++) {
-		this.depth[depthId].remove();
+		this.depth[depthId].removeAllChildren();
 	}
 };
 
-JsEngine.prototype.setLoopSpeed = function (loopSpeed) {
+/**
+ * Sets the engine's targetted loopspeed.
+ * 
+ * @param {number} loopSpeed The loopspeed to set for the engine
+ */
+Engine.prototype.setLoopSpeed = function (loopSpeed) {
 	if (loopSpeed === undefined) {throw new Error('Missing argument: loopSpeed'); }
-	
+
 	this.loopSpeed = loopSpeed;
 };
 
-JsEngine.prototype.setSoundsMuted = function (muted) {
+/**
+ * Toggles if all sound effects should be muted.
+ * 
+ * @param {boolean} muted Wether of not the sound effects should be muted
+ */
+Engine.prototype.setSoundsMuted = function (muted) {
 	muted = muted !== undefined ? muted : true;
 
 	// If muting, check all sounds whether they are being played, if so stop the playback
@@ -357,9 +405,14 @@ JsEngine.prototype.setSoundsMuted = function (muted) {
 	}
 
 	this.soundsMuted = muted;
-}
+};
 
-JsEngine.prototype.setMusicMuted = function (muted) {
+/**
+ * Toggles if all music should be muted.
+ * 
+ * @param {boolean} muted Wether of not the music should be muted
+ */
+Engine.prototype.setMusicMuted = function (muted) {
 	muted = muted !== undefined ? muted : true;
 
 	// If muting, check all sounds whether they are being played, if so stop the playback
@@ -370,9 +423,15 @@ JsEngine.prototype.setMusicMuted = function (muted) {
 	}
 
 	this.musicMuted = muted;
-}
+};
 
-JsEngine.prototype.setDefaultTheme = function (themeName, enforce) {
+/**
+ * Sets the default theme for the engine objects
+ * 
+ * @param {string} themeName A string representing the name of the theme
+ * @param {boolean} enforce Whether or not the enforce the theme on objects for which another theme has already been set
+ */
+Engine.prototype.setDefaultTheme = function (themeName, enforce) {
 	if (themeName === undefined) {throw new Error('Missing argument: themeName'); }
 	if (loader.themes[themeName] === undefined) {throw new Error('Trying to set unexisting theme: ' + themeName); }
 	var i, refreshSource;
@@ -401,49 +460,35 @@ JsEngine.prototype.setDefaultTheme = function (themeName, enforce) {
 	this.redraw(1);
 };
 
-JsEngine.prototype.newLoop = function (name, framesPerExecution, maskFunction) {
-	if (name === undefined) {throw new Error('Missing argument: object'); }
-
-	this.loops[name] = new CustomLoop(framesPerExecution, maskFunction);
-};
-
-JsEngine.prototype.attachFunctionToLoop = function (caller, func, loop) {
-	if (caller === undefined) {throw new Error('Missing argument: caller'); }
-	if (func === undefined) {throw new Error('Missing argument: func'); }
+/**
+ * Adds a custom loop to the engine.
+ * After being added, the loop will be executed in each frame.
+ * 
+ * @param {string} name The name the use for the custom loop within the engine. When added the loop can be accessed with: engine.loops[name]
+ * @param {object} loop The loop to add
+ */
+Engine.prototype.addLoop = function (name, loop) {
 	if (loop === undefined) {throw new Error('Missing argument: loop'); }
-	if (typeof func !== "function") {throw new Error('Argument func must be of type function'); }
+	if (name === undefined) {throw new Error('Missing argument: name'); }
 
-	this.loops[loop].activitiesQueue.push({
-		object: caller,
-		activity: func
-	});
+	this.loops[name] = loop;
 };
 
-JsEngine.prototype.detachFunctionFromLoop = function (caller, func, loop) {
-	if (caller === undefined) {throw new Error('Missing argument: caller'); }
-	if (func === undefined) {throw new Error('Missing argument: func'); }
-	if (loop === undefined) {throw new Error('Missing argument: loop'); }
+/**
+ * Removes a custom loop from the engine.
+ * 
+ * @param {string} name The name that the custom loop has been added as
+ */
+Engine.prototype.removeLoop = function (name) {
+	if (name === undefined) {throw new Error('Missing argument: name'); }
 
-	var removeArray, i, a;
-
-	removeArray = [];
-	for (i = 0; i < this.loops[loop].activities.length; i ++) {
-		a = this.loops[loop].activities[i];
-
-		if (a.object === caller && a.activity === func) {
-			removeArray.push(this.loops[loop].activities.splice(i, 1));
-		}
-	}
-
-	if (removeArray.length) {
-		return removeArray;
-	}
-	else {
-		return false;
-	}
+	delete this.loops[name];
 };
 
-JsEngine.prototype.startMainLoop = function () {
+/**
+ * Starts the engine's main loop
+ */
+Engine.prototype.startMainLoop = function () {
 	if (this.running) {return; }
 
 	// Restart the now - last cycle
@@ -457,13 +502,20 @@ JsEngine.prototype.startMainLoop = function () {
 	}, this.loopSpeed);
 };
 
-JsEngine.prototype.stopMainLoop = function () {
+/**
+ * Stops the engine's main loop
+ */
+Engine.prototype.stopMainLoop = function () {
 	if (!this.running) {return; }
 	this.running = false;
 };
 
-// The main loop
-JsEngine.prototype.mainLoop = function () {
+/**
+ * The engine's main loop function (should not be called manually)
+ * 
+ * @private
+ */
+Engine.prototype.mainLoop = function () {
 	var name;
 
 	if (!this.running) {return; }
@@ -514,7 +566,12 @@ JsEngine.prototype.mainLoop = function () {
 	}, this.loopSpeed);
 };
 
-JsEngine.prototype.setCanvasResX = function (res) {
+/**
+ * Sets the horisontal resolution of the main canvas
+ * 
+ * @param {number} res The new horisontal resolution
+ */
+Engine.prototype.setCanvasResX = function (res) {
 	this.mainCanvas.width = res;
 	this.canvasResX = res;
 
@@ -523,7 +580,12 @@ JsEngine.prototype.setCanvasResX = function (res) {
 	}
 };
 
-JsEngine.prototype.setCanvasResY = function (res) {
+/**
+ * Sets the vertical resolution of the main canvas
+ * 
+ * @param {number} res The new vertical resolution
+ */
+Engine.prototype.setCanvasResY = function (res) {
 	this.mainCanvas.height = res;
 	this.canvasResY = res;
 	if (this.autoResize) {
@@ -531,7 +593,15 @@ JsEngine.prototype.setCanvasResY = function (res) {
 	}
 };
 
-JsEngine.prototype.registerObject = function (obj, id) {
+/**
+ * Registers an object to the engine. This will give the object an id which can be used for accessing it at a later time.
+ * Sprites, TextBlock and objects inheriting those objects, are automatically registered when created.
+ * 
+ * @param {object} obj The object to register in the engine
+ * @param {string} id A string with the desired id
+ * @return {string} The registered id
+ */
+Engine.prototype.registerObject = function (obj, id) {
 	if (obj === undefined) {throw new Error('Missing argument: obj'); }
 
 	if (id === undefined) {
@@ -545,8 +615,12 @@ JsEngine.prototype.registerObject = function (obj, id) {
 	return id;
 };
 
-// Function for redrawing the depths
-JsEngine.prototype.redraw = function (drawManualRedrawDepths) {
+/**
+ * Redraws all automatically redrawn depths (will be called by the engine), or all manually redrawn depths.
+ * 
+ * @param {boolean} drawManualRedrawDepths Whether or not the manually redrawn depths should be drawn instead of the automaticaly redrawn depths
+ */
+Engine.prototype.redraw = function (drawManualRedrawDepths) {
 	if (drawManualRedrawDepths === undefined) {throw new Error('Missing argument: manualRedrawDepths'); }
 	var i, d;
 
@@ -559,18 +633,18 @@ JsEngine.prototype.redraw = function (drawManualRedrawDepths) {
 			if (d.manualRedraw) {
 				if (drawManualRedrawDepths) {
 					d.ctx.clearRect(0, 0, this.canvasResX, this.canvasResY);
-					d.drawChildren();
+					d.drawChildren(d.ctx);
 				}
 			}
 			else {
 				d.ctx.clearRect(0, 0, this.canvasResX, this.canvasResY);
-				d.drawChildren();
+				d.drawChildren(d.ctx);
 			}
 
 			this.mainCanvas.getContext('2d').drawImage(d.ownCanvas, 0, 0, this.canvasResX, this.canvasResY);
 		}
 		else {
-			d.drawChildren();
+			d.drawChildren(d.ctx);
 		}
 	}
 };

@@ -1,10 +1,17 @@
-/*
-Loader:
-Object for loading and storing ressources
-*/
+/**
+ * Loader:
+ * Object for loading and storing ressources
+ */
 
 jseCreateClass('Loader');
 
+/**
+ * Constructor for the Loader object.
+ * This function will also create a load overlay which will not disappear untill the hideOverlay is called.
+ * Therefore, remember to call hideOverlay, when your game is ready to be shown.
+ * 
+ * @private
+ */
 Loader.prototype.loader = function () {
 	this.sounds = {};
 	this.images = {};
@@ -23,6 +30,12 @@ Loader.prototype.loader = function () {
 	engine.arena.appendChild(this.loadOverlay);
 };
 
+/**
+ * Fades out the load overlay (which is automatically created by Loader's constructor).
+ * Remember to call this function, when your game is ready to be shown. Otherwise, the load overlay will never disappear.
+ * 
+ * @param {function} callback A callback function to run when the overlay has finished fading out
+ */
 Loader.prototype.hideOverlay = function (callback) {
 	this.fadeCallback = callback;
 	this.fadeOpacity = 1;
@@ -48,25 +61,53 @@ Loader.prototype.hideOverlay = function (callback) {
 	this.fade();
 };
 
+/**
+ * Fetches an image from the Loader. This function will automatically be called by objects that implements the Sprite object.
+ * 
+ * @param {string} ressource The ressource string of the image that should be fetched
+ * @param {string} themeName The name of the theme from which the image should be fetched. If unset, the engine's default theme will be used
+ * @return {object} The DOM Image element corresponding to the ressource string and theme
+ */
 Loader.prototype.getImage = function (ressource, themeName) {
 	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
 	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
-
 	return this.getRessource(ressource, 'images', themeName);
 };
 
+/**
+ * Fetches a sound from the Loader.
+ * 
+ * @param {string} ressource The ressource string of the sound that should be fetched
+ * @param {string} themeName The name of the theme from which the sound should be fetched. If unset, the engine's default theme will be used
+ * @return {object} A Sound object corresponding to the ressource string and theme
+ */
 Loader.prototype.getSound = function (ressource, themeName) {
 	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
 	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
-
 	return this.getRessource(ressource, 'sfx', themeName);
 };
 
+/**
+ * Fetches a music track from the Loader.
+ * 
+ * @param {string} ressource The ressource string of the track that should be fetched
+ * @param {string} themeName The name of the theme from which the track should be fetched. If unset, the engine's default theme will be used
+ * @return {object} A Music object corresponding to the ressource string and theme
+ */
 Loader.prototype.getMusic = function (ressource, themeName) {
+	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
 	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
 	return this.getRessource(ressource, 'music', themeName);
 };
 
+/**
+ * Creates (or loads from cache) a mask for an image which is loaded by the Loader.
+ * This function is automatically used by the Collidable object for fetching masks for collision checking.
+ * 
+ * @param {string} ressource The ressource string of the image that should be fetched
+ * @param {string} themeName The name of the theme from which the image should be fetched. If unset, the engine's default theme will be used
+ * @return {object} A generated mask (canvas element) for the image element corresponding to the ressource string and theme
+ */
 Loader.prototype.getMask = function (ressource, themeName) {
 	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
 	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
@@ -87,6 +128,15 @@ Loader.prototype.getMask = function (ressource, themeName) {
 	}
 };
 
+/**
+ * Fetches a ressource from the Loader's cache. Used by the getImage-, getImage- and getMusic functions.
+ * 
+ * @private
+ * @param {string} ressource The ressource string of the ressource that should be fetched
+ * @param {string} typeString A string representing the ressource type, possible values are: "image", "sfx" and "music"
+ * @param {string} themeName The name of the theme from which the image should be fetched. If unset, the engine's default theme will be used
+ * @return {mixed} The ressource corresponding to the provided ressource string, ressource type and theme name
+ */
 Loader.prototype.getRessource = function (ressource, typeString, themeName) {
 	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
 	if (typeString === undefined) {throw new Error('Missing argument: typeString'); }
@@ -116,6 +166,11 @@ Loader.prototype.getRessource = function (ressource, typeString, themeName) {
 	return res === undefined ? false : res;
 };
 
+/**
+ * Fetches all loaded images' ressource strings (from all themes).
+ * 
+ * @return {array} An array containing all loaded images' ressource strings
+ */
 Loader.prototype.getImageSources = function () {
 	var object, sourceStrings, currentDir, loopThrough, inheritTheme, i;
 
@@ -153,6 +208,11 @@ Loader.prototype.getImageSources = function () {
 	return sourceStrings;
 };
 
+/**
+ * Fetches all loaded sounds' ressource strings (from all themes).
+ * 
+ * @return {array} An array containing all loaded sounds' ressource strings
+ */
 Loader.prototype.getAllSounds = function () {
 	var res, themeName, theme, ressourceString, ressource;
 
@@ -171,8 +231,13 @@ Loader.prototype.getAllSounds = function () {
 	}
 
 	return res;
-}
+};
 
+/**
+ * Fetches all loaded music tracks' ressource strings (from all themes).
+ * 
+ * @return {array} An array containing all loaded music tracks' ressource strings
+ */
 Loader.prototype.getAllMusic = function () {
 	var res, themeName, theme, ressourceString, ressource;
 
@@ -191,26 +256,34 @@ Loader.prototype.getAllMusic = function () {
 	}
 
 	return res;
-}
+};
 
-Loader.prototype.loadClasses = function (paths) {
+/**
+ * Loads javascript objects from files. The loaded objects' names must follow the following format: [ObjectName].js 
+ * 
+ * @param {array} paths An array of paths to javascript - containing objects - that should be loaded
+ * @return {boolean} True, when the objects has been loaded without any errors
+ */
+Loader.prototype.loadObjects = function (paths) {
 	if (paths === undefined) {throw new Error('Missing argument: paths'); }
-	var className, i;
+	var objectName, i;
 
 	for (i in paths) {
 		if (paths.hasOwnProperty(i)) {
-			// Check that the class is not already loaded
-			className = paths[i].match(/(\w*)\.\w+$/)[1];
-			if (window[className]) {continue; }
+			// Check that the object is not already loaded
+			objectName = paths[i].match(/(\w*)\.\w+$/)[1];
+			if (window[objectName]) {continue; }
 
 			jseSyncLoad(paths[i]);
-			this.loaded.classes[className] = paths[i];
+			this.loaded.classes[objectName] = paths[i];
 		}
 	}
 	return true;
 };
 
-// Function for reloading all classes - Very useful for applying code changes without having to refresh the browser
+/**
+ * Reloades all classes. This function is very useful for applying code changes without having to refresh the browser, usually it has to be run multiple times though, to force the browser not to just load the files from its cache.
+ */
 Loader.prototype.reloadAllClasses = function () {
 	var i;
 
@@ -221,12 +294,18 @@ Loader.prototype.reloadAllClasses = function () {
 	}
 };
 
-// Function for loading themes
+/**
+ * Loads a list of themes. This function is automatically called by the Eninge during its startup, for loading the themes specified bh the launch options.
+ * 
+ * @private
+ * @param {array} themeNames An array of theme names (as strings) to load
+ * @param {function} callback A callback function to run when all the themes has been loaded
+ */
 Loader.prototype.loadThemes = function (themeNames, callback) {
 	if (themeNames === undefined) {throw new Error('Missing argument: themeNames'); }
 	if (callback !== undefined) {this.onthemesloaded = callback; }
 
-	var name, req, i, total, theme;
+	var name, req, i, total, theme, codeString;
 
 	for (i = 0; i < themeNames.length; i ++) {
 		name = themeNames[i];
@@ -243,7 +322,8 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 		if (req.status === 404) {console.log('Theme not found: ' + name); continue; }
 
 		// Get theme details
-		eval('theme = ' + req.responseText);
+		codeString = 'theme = ' + req.responseText + "\n//@ sourceURL=/" + engine.themesPath + '/' + name +'/theme.json';
+		eval(codeString);
 
 		// Load inherited themes
 		if (theme.inherit.length) {
@@ -277,6 +357,14 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 	}
 };
 
+/**
+ * Loads ressources to a theme. This function is used by loadThemes for caching the theme ressources.
+ * 
+ * @private
+ * @param {object} theme A theme object to load the ressources to
+ * @param {object} object An object containing references to theme ressources (like the subcategories of theme files)
+ * @param {string} typeString A string defining the ressource type. Supported types are: "images", "sfx" and "music"
+ */
 Loader.prototype.loadRessources = function (theme, object, typeString) {
 	if (theme === undefined) {throw new Error('Missing argument: theme'); }
 	if (object === undefined) {throw new Error('Missing argument: object'); }
@@ -288,7 +376,7 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 		var ressourceString, theme, i;
 		if (this.hasAttribute('data-loaded')) {return; }
 
-		
+
 		if (engine.preGenerateBoundingBoxes && this.toString() === '[object HTMLImageElement]') {
 			ressourceString = this.getAttribute('data-ressourceString');
 			theme = this.getAttribute('data-theme');
@@ -347,7 +435,7 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 				}
 				res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, '/') + '.' + format);
 				theme.sfx[path] = new Sound(res);
-				
+
 				if (engine.preloadSounds) {
 					res.setAttribute('preload', 'auto');
 					res.addEventListener("canplaythrough", onload, false);
@@ -383,6 +471,14 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 	}
 };
 
+/**
+ * Generates a mask for an image specified by its ressource string.
+ * This function is used by getMask to fetch and cache masks for each of the loaded images.
+ * 
+ * @param {string} ressourceString A ressource string specifying the image to generate a mask for
+ * @param {number} alphaLimit An alpha value (0-255). Pixel having this alpha value or larger will become black on the mask, pixels with a value below the limit will become completely transparent
+ * @return {object} A canvas element with the generated mask
+ */
 Loader.prototype.generateMask = function (ressourceString, alphaLimit) {
 	if (ressourceString === undefined) {throw new Error('Missing argument: ressourceString'); }
 	alphaLimit = alphaLimit !== undefined ? alphaLimit : 255;
@@ -452,6 +548,12 @@ Loader.prototype.generateMask = function (ressourceString, alphaLimit) {
 	return canvas;
 };
 
+/**
+ * Checks if all ressources - of all themes - has been loaded. This check is automatically called any time a single ressource has finished loading.
+ * 
+ * @private
+ * @return {boolean} Whether or not all themes' ressources has been succesfully loaded
+ */
 Loader.prototype.checkAllLoaded = function () {
 	var i, total, loaded, theme;
 

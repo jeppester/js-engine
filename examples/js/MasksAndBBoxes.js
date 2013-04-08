@@ -43,7 +43,7 @@ MasksAndBBoxes.prototype.onLoaded=function() {
 			console.log('Collides!');
 		}
 	}
-	engine.attachFunctionToLoop(object2, object2.checkCollision, 'eachFrame');
+	engine.loops.eachFrame.attachFunction(object2, object2.checkCollision);
 
 	engine.depth[0].addChildren(object, object2);
 }

@@ -15,10 +15,9 @@ MovableCharacter.prototype.movableCharacter = function(x, y) {
 	this.sprite('Character', x, y, 0);
 
 	// Add step function to 'eachFrame'-loop
-	engine.attachFunctionToLoop(
+	engine.loops.eachFrame.attachFunction(
 		this, // This object (an instance reference is needed by the engine)
-		this.step, // The function to call each time the loop executes
-		'eachFrame' // The loop in which to run the function (eachFrame is the default loop, but you can make your own)
+		this.step // The function to call each time the loop executes
 	);
 }
 
