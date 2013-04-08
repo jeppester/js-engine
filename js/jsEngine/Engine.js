@@ -60,13 +60,10 @@ Engine.prototype.load = function () {
 	// Load default options
 	// Optimize default options for each browser
 	this.avoidSubPixelRendering = true;
-	this.loopSpeed = 10;
 	this.preloadSounds = true;
 
 	switch (this.host.browserEngine) {
 	case 'Gecko':
-		// Firefox usually performs very bad with a low loopspeed
-		this.loopSpeed = 20;
 		break;
 	case 'WebKit':
 		// WebKit renders subpixels much better (and faster) than the other browsers
@@ -109,7 +106,7 @@ Engine.prototype.load = function () {
 	this.musicMuted = false;
 
 	// Copy options to engine (except those which are only used for engine initialization)
-	copyOpt = ['backgroundColor', 'soundsMuted', 'musicMuted', 'cacheSounds', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopSpeed', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'soundsMuted', 'musicMuted', 'cacheSounds', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -143,6 +140,11 @@ Engine.prototype.load = function () {
 	// If Javascript Extensions has not been loaded, load them
 	if (typeof Array.prototype.getElementByPropertyValue === "undefined") {
 		jseSyncLoad(this.enginePath + '/jseExtensions.js');
+	}
+
+	// Load polyfills
+	if (window.polyfillsLoaded === undefined) {
+		jseSyncLoad(this.enginePath + '/jsePolyfills.js');
 	}
 
 	// Load global vars
@@ -379,17 +381,6 @@ Engine.prototype.clearStage = function () {
 };
 
 /**
- * Sets the engine's targetted loopspeed.
- * 
- * @param {number} loopSpeed The loopspeed to set for the engine
- */
-Engine.prototype.setLoopSpeed = function (loopSpeed) {
-	if (loopSpeed === undefined) {throw new Error('Missing argument: loopSpeed'); }
-
-	this.loopSpeed = loopSpeed;
-};
-
-/**
  * Toggles if all sound effects should be muted.
  * 
  * @param {boolean} muted Wether of not the sound effects should be muted
@@ -493,13 +484,10 @@ Engine.prototype.startMainLoop = function () {
 
 	// Restart the now - last cycle
 	this.last = new Date().getTime();
-	this.now = this.last;
 	this.running = true;
 
 	// Start mainLoop
-	this.loop = setTimeout(function () {
-		engine.mainLoop();
-	}, this.loopSpeed);
+	engine.mainLoop();
 };
 
 /**
@@ -515,7 +503,7 @@ Engine.prototype.stopMainLoop = function () {
  * 
  * @private
  */
-Engine.prototype.mainLoop = function () {
+Engine.prototype.mainLoop = function (test) {
 	var name;
 
 	if (!this.running) {return; }
@@ -546,7 +534,7 @@ Engine.prototype.mainLoop = function () {
 	this.lastLoopTime = this.now - this.last;
 	this.last = this.now;
 
-	// Draw game objects (asynchroneous)
+	// Draw game objects
 	this.redraw(0);
 
 	// Count frames per second
@@ -560,10 +548,10 @@ Engine.prototype.mainLoop = function () {
 		this.fpsMsCounter = 0;
 	}
 
-	// Schedule next execution
-	this.loop = setTimeout(function () {
-		engine.mainLoop();
-	}, this.loopSpeed);
+	// Schedule the loop to run again
+	requestAnimationFrame(function (time) {
+		engine.mainLoop(time);
+	});
 };
 
 /**

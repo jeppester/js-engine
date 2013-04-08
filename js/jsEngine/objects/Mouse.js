@@ -68,11 +68,7 @@ Mouse.prototype.mouse = function () {
  */
 Mouse.prototype.onMouseDown = function (event) {
 	if (event === undefined) {throw new Error('Missing argument: event'); }
-	var frame = engine.frames;
-
-	if (engine.updatesPerformed) {
-		frame ++;
-	}
+	var frame = engine.frames + 1;
 
 	this.cleanUp(event.which);
 	this.events.push({'button': event.which, 'frame': frame, 'type': 'pressed'});
@@ -137,13 +133,9 @@ Mouse.prototype.onMouseMove = function (event) {
  */
 Mouse.prototype.onTouchStart = function (event) {
 	if (event === undefined) {throw new Error('Missing argument: event'); }
-	var frame = engine.frames;
+	var frame = engine.frames + 1;
 
 	this.touches = event.touches;
-
-	if (engine.updatesPerformed) {
-		frame ++;
-	}
 
 	// Update "mouse" position
 	this.onTouchMove(event);
@@ -276,7 +268,7 @@ Mouse.prototype.isPressed = function (button) {
 		evt = this.events[i];
 
 		if (evt.button === button) {
-			if (evt.frame === engine.frames - 1 && evt.type === 'pressed') {
+			if (evt.frame === engine.frames && evt.type === 'pressed') {
 				return evt;
 			}
 		}
