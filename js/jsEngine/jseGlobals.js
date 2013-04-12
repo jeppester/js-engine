@@ -34,6 +34,33 @@ KEY_F10			= 121;
 KEY_F11			= 122;
 KEY_F12			= 123;
 
+// Pointers
+MOUSE_ANY		= 0;
+MOUSE_1			= 1;
+MOUSE_2			= 2;
+MOUSE_3			= 3;
+MOUSE_4			= 4;
+MOUSE_5			= 5;
+MOUSE_6			= 6;
+MOUSE_7			= 7;
+MOUSE_8			= 8;
+MOUSE_9			= 9;
+MOUSE_10		= 10;
+
+TOUCH_ANY		= 20;
+TOUCH_1			= 21;
+TOUCH_2			= 22;
+TOUCH_3			= 23;
+TOUCH_4			= 24;
+TOUCH_5			= 25;
+TOUCH_6			= 26;
+TOUCH_7			= 27;
+TOUCH_8			= 28;
+TOUCH_9			= 29;
+TOUCH_10		= 30;
+
+MOUSE_TOUCH_ANY = 100;
+
 // Speed units
 SPEED_PIXELS_PER_SECOND		= 1;
 SPEED_PIXELS_PER_FRAME		= 2;

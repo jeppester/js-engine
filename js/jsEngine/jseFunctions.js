@@ -64,16 +64,23 @@ jsePurge = function (obj) {
 
 			// From activities
 			i = loop.activities.length;
-			while (i --) {
+			while (i--) {
 				if (obj === loop.activities[i].object) {
 					loop.activities.splice(i, 1);
 				}
 			}
 
+			// From activities queue
+			i = loop.activitiesQueue.length;
+			while (i--) {
+				if (obj === loop.activitiesQueue[i].object) {
+					loop.activitiesQueue.splice(i, 1);
+				}
+			}
+
 			// From animations
-			// FLAWED ?
 			i = loop.animations.length;
-			while (i --) {
+			while (i--) {
 				if (obj === loop.animations[i].obj) {
 					loop.animations.splice(i, 1);
 				}

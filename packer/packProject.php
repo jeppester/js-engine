@@ -13,6 +13,20 @@ $options = array(
 
 echo "\n";
 
+if (in_array("--help",$argv)) {
+	echo "
+packProject.php
+Minifies and packs a jsEngine project's code to one single file.
+
+Options:
+ --nominify: Append all files to each other, but do not minify them
+ --engine-only: Only pack the engine
+ --keeplogs: Do not remove console.log()-calls
+ --game-file [path]: Specify the game file (.html) to fetch js-file locations from
+";
+	exit;
+};
+
 if (in_array("--nominify",$argv)) {
 	$options["nominify"] = true;
 };
@@ -41,7 +55,7 @@ else {
 }
 
 /* SEARCH GAME FILE FOR ENGINE DIR, ENGINE FILE AND GAME CLASS FILE */
-preg_match('/["|\']([^"|\']*)(jsEngine(\.packed)?\.js)["|\']/', $gameFile, $m);
+preg_match('/["|\']([^"|\']*)(Engine(\.packed)?\.js)["|\']/', $gameFile, $m);
 $options['engineDir'] = $m[1];
 $options['engineFile'] = $m[2];
 
@@ -74,11 +88,12 @@ else {
 		$e . 'jseFunctions.js',
 		$e . 'jseExtensions.js',
 		$e . 'jseGlobals.js',
+		$e . 'jsePolyfills.js',
 
 		$e . 'Engine.js',
 
 		$e . "objects/Animator.js",
-		$e . "objects/Animation.js",
+		$e . "objects/Animatable.js",
 		$e . "objects/Vector2D.js",
 		$e . "objects/Line.js",
 		$e . "objects/Polygon.js",
@@ -91,7 +106,7 @@ else {
 		$e . "objects/TextBlock.js",
 		$e . "objects/GameObject.js",
 		$e . "objects/Keyboard.js",
-		$e . "objects/Mouse.js",
+		$e . "objects/Pointer.js",
 		$e . "objects/Sound.js",
 		$e . "objects/Music.js"
 	);
@@ -146,17 +161,17 @@ else {
 // Append all these files to each other
 $filesContent="";
 foreach ($files as $file) {
-	$filesContent.=file_get_contents($options['gameDir'] . $file)."\n";
+	$filesContent .= file_get_contents($options['gameDir'] . $file) . "\n";
 }
 
 if (!$options['keepLogs']) {
 	echo "Keep logs specified, keeping logs\n";
 
 	// remove all occurrences of "console.log([something])"
-	$filesContent=preg_replace ('/console\.log[^\n|;]*(\n|;)/', '', $filesContent);
+	$filesContent=preg_replace ('/console\.log[^\n|;]*(\n|;)?/', '', $filesContent);
 };
 
-require dirname(__FILE__).'/jsmin.php';
+require dirname(__FILE__) . '/jsmin.php';
 
 if ($options['nominify']) {
 	echo "Nominify option used, saving concatenated files\n";

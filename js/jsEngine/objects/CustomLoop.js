@@ -60,11 +60,21 @@ CustomLoop.prototype.detachFunction = function (caller, func) {
 	var removeArray, i, a;
 
 	removeArray = [];
+
+	// Search activities and remove function
 	for (i = 0; i < this.activities.length; i ++) {
 		a = this.activities[i];
 
 		if (a.object === caller && a.activity === func) {
 			removeArray.push(this.activities.splice(i, 1));
+		}
+	}
+	// Search activities queue and remove function
+	for (i = 0; i < this.activitiesQueue.length; i ++) {
+		a = this.activitiesQueue[i];
+
+		if (a.object === caller && a.activity === func) {
+			removeArray.push(this.activitiesQueue.splice(i, 1));
 		}
 	}
 

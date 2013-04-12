@@ -124,9 +124,12 @@ Engine.prototype.load = function () {
 
 	// If autoresize is set to true, set up autoresize
 	if (this.autoResize) {
-		this.autoResizeCanvas();
-		window.addEventListener('resize', function () {engine.autoResizeCanvas(); }, false);
-		window.addEventListener('load', function () {engine.autoResizeCanvas(); }, false);
+		this.autoResize = false;
+		this.setAutoResize(true);
+	}
+	else {
+		this.autoResize = true;
+		this.setAutoResize(false);
 	}
 
 	// If jsEngine functions are not loaded, load them
@@ -175,7 +178,7 @@ Engine.prototype.load = function () {
 		this.enginePath + '/objects/TextBlock.js',
 		this.enginePath + '/objects/GameObject.js',
 		this.enginePath + '/objects/Keyboard.js',
-		this.enginePath + '/objects/Mouse.js',
+		this.enginePath + '/objects/Pointer.js',
 		this.enginePath + '/objects/Sound.js',
 		this.enginePath + '/objects/Music.js'
 	]);
@@ -253,7 +256,7 @@ Engine.prototype.initialize = function () {
 
 	// Create objects required by the engine
 	keyboard = new Keyboard();
-	mouse = new Mouse();
+	pointer = new Pointer();
 	animator = new Animator();
 
 	// Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
@@ -282,11 +285,40 @@ Engine.prototype.initialize = function () {
 };
 
 /**
+ * Enables or disables canvas autoresize.
+ *
+ * @param {boolean} enable Decides whether autoresize should be enabled or disabled
+ */
+Engine.prototype.setAutoResize = function (enable) {
+	if (enable && !this.autoResize) {
+		this.autoResize = true;
+		this.autoResizeCanvas();
+		window.addEventListener('resize', engine.autoResizeCanvas, false);
+		window.addEventListener('load', engine.autoResizeCanvas, false);
+	}
+	else if (!enable && this.autoResize) {
+		this.autoResize = false;
+		window.removeEventListener('resize', engine.autoResizeCanvas, false);
+		window.removeEventListener('load', engine.autoResizeCanvas, false);
+
+		// Reset canvas size
+		this.arena.style.top = "50%";
+		this.arena.style.left = "50%";
+		this.arena.style.marginLeft = -this.canvasResX / 2 + "px";
+		this.arena.style.marginTop = -this.canvasResY / 2 + "px";
+		this.mainCanvas.style.width = this.canvasResX + "px";
+		this.mainCanvas.style.height = this.canvasResY + "px";
+	}
+}
+
+/**
  * Function for resizing the canvas. Not used if engine option "autoResizeCanvas" is false.
  * 
  * @private
  */
 Engine.prototype.autoResizeCanvas = function () {
+	if (this !== engine) {engine.autoResizeCanvas(); return;}
+
 	var h, w, windowWH, gameWH;
 
 	// Check if the window is wider og heigher than the game's canvas
@@ -439,7 +471,7 @@ Engine.prototype.setDefaultTheme = function (themeName, enforce) {
 		}
 	};
 
-	while (i --) {
+	while (i--) {
 		if (enforce) {
 			this.depth[i].setTheme(undefined, enforce);
 		}
