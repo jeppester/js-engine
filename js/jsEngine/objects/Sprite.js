@@ -16,11 +16,10 @@ jseCreateClass('Sprite', [View, Animatable, Vector2D]);
  * @param {object} additionalProperties An object containing additional properties to assign to the created object.
  * The default is:
  * <code>{
- * 	bmSize: 1,
+ * 	size: 1,
  * 	opacity: 1,
  * 	composite: 'source-over',
- * 	xOff: 'center',
- * 	yOff: 'center'
+ * 	offset: new Vector2D('center', 'center')
  * }</code>
  */
 Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {

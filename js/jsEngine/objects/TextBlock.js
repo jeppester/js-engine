@@ -18,11 +18,10 @@ jseCreateClass('TextBlock', [Animatable, View, Vector2D]);
  * 	font: 'normal 14px Verdana',
  * 	color: '#000',
  * 	alignment: 'left',
- * 	bmSize: 1,
+ * 	size: 1,
  * 	opacity: 1,
  * 	composite: 'source-over',
- * 	xOff: 0,
- * 	yOff: 0
+ * 	offset: new Vector2D(0, 0)
  * }</code>
  */
 TextBlock.prototype.textBlock = function (string, x, y, width, additionalProperties) {

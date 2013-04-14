@@ -15,14 +15,12 @@ jseCreateClass('GameObject', [Collidable]);
  * The default is:
  * <code>
  * {
- * 	bmSize: 1,
+ * 	size: 1,
  * 	opacity: 1,
  * 	composite: 'source-over',
- * 	xOff: 'center',
- * 	yOff: 'center',
+ * 	offset: new Vector2D('center', 'center'),
  * 	loop: 'eachFrame',
- * 	dX: 0,
- * 	dY: 0
+ * 	speed: new Vector2D(0, 0)
  * }
  * </code>
  */
