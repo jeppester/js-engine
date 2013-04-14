@@ -189,8 +189,6 @@ Pointer.prototype.onTouchEnd = function (event) {
 
 		pointerTouch.events = pointerTouch.events.slice(0, 1);
 		pointerTouch.events.unshift(-new Date().getTime());
-		pointerTouch.x = undefined;
-		pointerTouch.y = undefined;
 	}
 
 	// Update all touch positions
@@ -210,12 +208,13 @@ Pointer.prototype.onTouchMove = function (event) {
 	for (i = 0; i < event.touches.length; i++) {
 		eventTouch = event.touches[i];
 
-		if (event.changedTouches[i].identifier > 20) {
+		if (event.touches[i].identifier > 20) {
 			pointerTouch = this.touches.getElementByPropertyValue('identifier', eventTouch.identifier);
 		}
 		else {
 			pointerTouch = this.touches[eventTouch.identifier];
 		}
+
 
 		pointerTouch.set(eventTouch.pageX - engine.arena.offsetLeft - engine.mainCanvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - engine.arena.offsetTop - engine.mainCanvas.offsetTop + document.body.scrollTop);
 		pointerTouch.x = pointerTouch.x / engine.arena.offsetWidth * engine.canvasResX;
@@ -319,6 +318,7 @@ Pointer.prototype.shapeIsPressed = function (button, shape, outside) {
 
 	// Narrow possible presses down to the pressed pointers within the selected buttons
 	pointers = this.isPressed(button);
+
 	if (!pointers) {return false; }
 
 	// Check each of the pointers to see if they are inside the shape
@@ -351,6 +351,7 @@ Pointer.prototype.shapeIsReleased = function (button, shape, outside) {
 
 	// Narrow possible presses down to the pressed pointers within the selected buttons
 	pointers = this.isReleased(button);
+	
 	if (!pointers) {return false; }
 
 	// Check each of the pointers to see if they are inside the shape
@@ -444,7 +445,7 @@ Pointer.prototype.checkPointer = function (pointers, state) {
 	ret = [];
 	for (i = 0; i < pointers.length; i++) {
 		pointer = pointers[i];
-		//console.log(pointer);
+
 		switch (state) {
 		case "pressed":
 			if (pointer.events[0] > engine.last || pointer.events[1] > engine.last) {ret.push(pointer); }
@@ -498,7 +499,7 @@ Pointer.prototype.shapeIsHovered = function (shape, outside) {
 
 /**
  * Unpresses a button, and thereby prevents the button from being detected as "pressed" by the isPressed function.
- * This function is very usable for preventing one button press from having multiple effects inside the game. For instance on buttons that are placed on top of each other.
+ * This function is very useful for preventing one button press from having multiple effects inside the game. For instance on buttons that are placed on top of each other.
  * 
  * @param {number} button The button to unpress
  * @return {boolean} True if the button has now been unpressed, false if the button was not already pressed
