@@ -40,19 +40,19 @@ Pointer.prototype.pointer = function () {
 
 		// Set mouse cursor
 		if (engine.options.cursor) {
-			/* this.cursor = engine.depth[8].addChildren(new Sprite(engine.options.cursor, 0, 0, 0, {offset: new Vector2D()}));
+			/* this.cursor = engine.depth[8].addChildren(new Sprite(engine.options.cursor, 0, 0, 0, {offset: new Vector()}));
 			engine.arena.style.cursor = 'none';*/
 			engine.arena.style.cursor = "url('" + loader.getImage(engine.options.cursor).src + "') 0 0, auto";
 		}
 	}
 
 	// Setup mouse device
-	this.mouse = new Vector2D();
-	this.mouse.window = new Vector2D();
-	this.mouse.screen = new Vector2D();
+	this.mouse = new Vector();
+	this.mouse.window = new Vector();
+	this.mouse.screen = new Vector();
 	this.mouse.buttons = new Array(11);
 	for (button = 0; button < this.mouse.buttons.length; button++) {
-		this.mouse.buttons[button] = new Vector2D();
+		this.mouse.buttons[button] = new Vector();
 		this.mouse.buttons[button].events = new Array(2);
 	}
 	this.mouse.lastMoved = 0;
@@ -60,7 +60,7 @@ Pointer.prototype.pointer = function () {
 	// Setup touches
 	this.touches = new Array(10);
 	for (button = 0; button < this.touches.length; button++) {
-		this.touches[button] = new Vector2D();
+		this.touches[button] = new Vector();
 		this.touches[button].x = undefined;
 		this.touches[button].y = undefined;
 		this.touches[button].events = new Array(2);

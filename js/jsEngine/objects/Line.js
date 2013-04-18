@@ -3,31 +3,32 @@
  * A math object which is used for handling lines
  */
 
-jseCreateClass('Line');
+jseCreateClass('Line', [View]);
 
 /**
  * Constructor for the Line object. Uses setFromVectors to create the line.
  * 
- * @param {object} startVector A Vector2D representing the start point of the line
- * @param {object} endVector A Vector2D representing the end point of the line
+ * @param {object} startVector A Vector representing the start point of the line
+ * @param {object} endVector A Vector representing the end point of the line
  */
 Line.prototype.line = function (startVector, endVector) {
-	startVector = startVector !== undefined ? startVector : new Vector2D(0, 0);
-	endVector = endVector !== undefined ? endVector : new Vector2D(0, 0);
+	startVector = startVector !== undefined ? startVector : new Vector(0, 0);
+	endVector = endVector !== undefined ? endVector : new Vector(0, 0);
 
+	this.view();
 	this.setFromVectors(startVector, endVector);
 };
 
 /**
- * Sets the start- and end points from two Vector2D's.
+ * Sets the start- and end points from two Vector's.
  * 
- * @param {object} startVector A Vector2D representing the start point of the line
- * @param {object} endVector A Vector2D representing the end point of the line
+ * @param {object} startVector A Vector representing the start point of the line
+ * @param {object} endVector A Vector representing the end point of the line
  * @return {object} The resulting Line object (itself)
  */
 Line.prototype.setFromVectors = function (startVector, endVector) {
-	if (!startVector.implements(Vector2D)) {throw new Error('Agument startVector should be of type: Vector2D'); }
-	if (!endVector.implements(Vector2D)) {throw new Error('Agument endVector should be of type: Vector2D'); }
+	if (!startVector.implements(Vector)) {throw new Error('Agument startVector should be of type: Vector'); }
+	if (!endVector.implements(Vector)) {throw new Error('Agument endVector should be of type: Vector'); }
 
 	this.a = startVector;
 	this.b = endVector;
@@ -50,8 +51,8 @@ Line.prototype.setFromCoordinates = function (x1, y1, x2, y2) {
 	x2 = x2 !== undefined ? x2 : 0;
 	y2 = y2 !== undefined ? y2 : 0;
 
-	this.a = new Vector2D(x1, y1);
-	this.b = new Vector2D(x2, y2);
+	this.a = new Vector(x1, y1);
+	this.b = new Vector(x2, y2);
 
 	return this;
 };
@@ -182,11 +183,17 @@ Line.prototype.intersects = function (object) {
 
 		return c1 * c2 < 0;
 	}
+	else if (object.implements(Circle)) {
+		return object.intersects(this);
+	}
+	else if (object.implements(Rectangle)) {
+		return object.getPolygon().intersects(this);
+	}
 	else if (object.implements(Polygon)) {
 		return object.intersects(this);
 	}
 	else {
-		throw new Error('Agument object should be of type: Line or Polygon');
+		throw new Error('Agument object should be of type: Line, Rectangle, Circle or Polygon');
 	}
 };
 
@@ -196,5 +203,74 @@ Line.prototype.intersects = function (object) {
  * @return {number} The length of the line
  */
 Line.prototype.getLength = function () {
-	return this.b.copy().subtract(a).getLength();
+	return this.b.copy().subtract(this.a).getLength();
+};
+
+/**
+ * Calculates the shortest distance from the Line object to another geometric object
+ * 
+ * @param {object} object The object to calculate the distance to
+ * @return {number} The distance
+ */
+Line.prototype.getDistance = function (object) {
+	var ba, ab, bc, ac;
+
+	if (object.implements(Vector)) {
+		// Get all posibly used vectors
+		ba = this.a.copy().subtract(this.b);
+		ab = this.b.copy().subtract(this.a);
+		bc = object.copy().subtract(this.b);
+		ac = object.copy().subtract(this.a);
+
+		// Check if one of the end points is closest to the vector
+		if (ab.getDot(bc) > 0) {
+			return bc.getLength();
+		}
+		else if (ba.getDot(ac) > 0) {
+			return ac.getLength();
+		}
+		// Otherwise, return the distance from the vector to it's orthogonal projection on the line
+		else {
+			return Math.abs(ab.getCross(ac) / ab.getLength());
+		}
+	}
+	else if (object.implements(Line)) {
+		// If the lines intersect, return 0
+		if (this.intersects(object)) {
+			return 0;
+		}
+		// Else, return the shortest of the distances from each line to the other line's points
+		else {
+			return Math.min(this.getDistance(object.a), this.getDistance(object.b), object.getDistance(this.a), object.getDistance(this.b));
+		}
+	}
+	else if (object.implements(Rectangle)) {
+		return object.getDistance(this);
+	}
+	else if (object.implements(Circle)) {
+		return object.getDistance(this);
+	}
+	else {
+		throw new Error('Agument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
+	}
+};
+
+/**
+ * Draws the Line object on the canvas (if added as a child of a View)
+ *
+ * @private
+ * @param {object} c A canvas 2D context on which to draw the Line
+ */
+Line.prototype.drawCanvas = function (c) {
+	c.save();
+
+	c.strokeStyle = "#f00";
+	c.beginPath();
+
+	c.moveTo(this.a.x, this.a.y);
+	c.lineTo(this.b.x, this.b.y);
+
+	c.stroke();
+
+	c.restore();
 };

@@ -3,7 +3,7 @@
  * A math object which is used for handling non-rotated rectangles
  */
 
-jseCreateClass('Rectangle', [Animatable]);
+jseCreateClass('Rectangle', [Animatable, View]);
 
 /**
  * The constructor for the Rectangle object. Uses the set-function to set the properties of the rectangle.
@@ -14,6 +14,7 @@ jseCreateClass('Rectangle', [Animatable]);
  * @param {number} height The height of the rectangle
  */
 Rectangle.prototype.rectangle = function (x, y, width, height) {
+	this.view();
 	this.set(x, y, width, height);
 };
 
@@ -38,13 +39,13 @@ Rectangle.prototype.set = function (x, y, width, height) {
 /**
  * Sets the properties of the rectangle from two vectors: one representing the position of the top left corner, another representing the width and height of the rectangle.
  * 
- * @param {object} position A Vector2D representing the position of the top left corner to set for the Rectangle
- * @param {object} size A Vector2D representing the size (width and height) to set for the Rectangle
+ * @param {object} position A Vector representing the position of the top left corner to set for the Rectangle
+ * @param {object} size A Vector representing the size (width and height) to set for the Rectangle
  * @return {object} The resulting Rectangle object (itself)
  */
 Rectangle.prototype.setFromVectors = function (position, size) {
-	position = position !== undefined ? position : new Vector2D();
-	size = size !== undefined ? size : new Vector2D();
+	position = position !== undefined ? position : new Vector();
+	size = size !== undefined ? size : new Vector();
 
 	this.x = position.x;
 	this.y = position.y;
@@ -129,10 +130,10 @@ Rectangle.prototype.getPolygon = function () {
  */
 Rectangle.prototype.getPoints = function () {
 	return [
-		new Vector2D(this.x, this.y),
-		new Vector2D(this.x + this.width, this.y),
-		new Vector2D(this.x + this.width, this.y + this.height),
-		new Vector2D(this.x, this.y + this.height)
+		new Vector(this.x, this.y),
+		new Vector(this.x + this.width, this.y),
+		new Vector(this.x + this.width, this.y + this.height),
+		new Vector(this.x, this.y + this.height)
 	];
 };
 
@@ -155,12 +156,55 @@ Rectangle.prototype.getDiagonal = function () {
 };
 
 /**
+ * Calculates the shortest distance from the Rectangle object to another geometric object
+ * 
+ * @param {object} object The object to calculate the distance to
+ * @return {number} The distance
+ */
+Rectangle.prototype.getDistance = function (object) {
+	return this.getPolygon().getDistance(object);
+};
+
+/**
  * Checks whether or not the Rectangle contains another geometric object.
  * 
- * @param {mixed} object A geometric object to check. Supported objects are: Vector2D, Line, Rectangle and Polygon
+ * @param {mixed} object A geometric object to check. Supported objects are: Vector, Line, Rectangle and Polygon
  * @return {boolean} True if the Rectangle contains the checked object, false if not
  */
 Rectangle.prototype.contains = function (object) {
-	var polygon = this.getPolygon();
-	return polygon.contains(object);
+	return this.getPolygon().contains(object);
+};
+
+/**
+ * Checks whether or not the Rectangle intersects with another geometric object.
+ * 
+ * @param {mixed} object A geometric object to check. Supported objects are: Line, Circle, Rectangle and Polygon
+ * @return {boolean} True if the Polygon intersects with the checked object, false if not
+ */
+Rectangle.prototype.intersects = function (object) {
+	return this.getPolygon().intersects(object);
+};
+
+/**
+ * Draws the Rectangle object on the canvas (if added as a child of a View)
+ *
+ * @private
+ * @param {object} c A canvas 2D context on which to draw the Rectangle
+ */
+Rectangle.prototype.drawCanvas = function (c) {
+	c.save();
+
+	c.strokeStyle = "#f00";
+	c.beginPath();
+
+	c.moveTo(this.x, this.y);
+	c.lineTo(this.x + this.width, this.y);
+	c.lineTo(this.x + this.width, this.y + this.height);
+	c.lineTo(this.x, this.y + this.height);
+	c.lineTo(this.x, this.y);
+
+	c.stroke();
+	c.closePath();
+
+	c.restore();
 };

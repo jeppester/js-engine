@@ -4,13 +4,13 @@ CollisionTest.prototype.collisionTest = function () {
 	// Make a global reference to the game object
 	game = this;
 
-	// LOAD GAME CLASSES
-	loader.loadClasses([
-		'js/classes/CollisionObject.js',
+	// LOAD GAME OBJECTS
+	loader.loadObjects([
+		'js/objects/CollisionObject.js',
 	]);
 
 	// Add collision checking loop
-	engine.newLoop('collisionChecking', 2);
+	engine.addLoop('collisionChecking', new CustomLoop(2));
 
 	// Make two collision objects
 	ball = new CollisionObject(
@@ -40,5 +40,5 @@ CollisionTest.prototype.collisionTest = function () {
 };
 
 CollisionTest.prototype.onLoaded = function () {
-	ball.speed = new Vector2D(-100, -100);
+	ball.speed = new Vector(-100, -100);
 };

@@ -57,19 +57,26 @@
 <div id="arena"></div>
 
 <!-- JsEngine -->
-<script type="text/javascript" src="JsEngine.packed.js"></script>
+<script type="text/javascript" src="jsEngine.min.js"></script>
 
 <!-- Start engine -->
 <script type="text/javascript">
-	new JsEngine({
-		// Set game-class path (Look at this file to start programming your game)
-		gameClassPath: 'js/CollisionTest.js',
+	new Engine({
+		// Set main class to load
+		gameClassPath:'js/Examples.js',
 
 		// Set themes to load
 		themes:['Example'],
 
 		// Set number of depth layers. Remember that setting 10 layers will spawn depths 0-9, but not depth 10
-		depths:1,
+		depths:2,
+
+		// Set manual redraw depths
+		// Use these depth layers for static content (backgrounds and etc.), it will increase the game's performance
+		manualRedrawDepths:[0],
+
+		// Set arena background-color
+		backgroundColor: "#000",
 
 		// Set resolution of the game
 		canvasResX:600,

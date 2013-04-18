@@ -13,8 +13,6 @@ MasksAndBBoxes.prototype.onLoaded=function() {
 	// Hide loader overlay
 	loader.hideOverlay();
 
-	// SPRITE EXAMPLE
-	// Make a sprite object
 	object = new GameObject(
 		'Character', // Image ID (See "/themes/Example/theme.json" for an explanation of themes)
 		50, // x-position
@@ -34,16 +32,22 @@ MasksAndBBoxes.prototype.onLoaded=function() {
 
 	object2 = new GameObject(
 		'Rock', // Image ID (See "/themes/Example/theme.json" for an explanation of themes)
-		12, // x-position
+		15, // x-position
 		50, // y-position
 		0 // Direction (in radians)
 	);
 	object2.checkCollision = function () {
 		if (this.collidesWith(object)) {
-			console.log('Collides!');
+			text.setString('Collides');
+		}
+		else {
+			text.setString('');
 		}
 	}
+
+	text = new TextBlock('', 6, 4, 80);
+
 	engine.loops.eachFrame.attachFunction(object2, object2.checkCollision);
 
-	engine.depth[0].addChildren(object, object2);
+	engine.depth[0].addChildren(object, object2, text);
 }

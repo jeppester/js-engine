@@ -81,7 +81,7 @@ Collidable.prototype.bBoxCollidesWith = function (objects, getCollidingObjects) 
 
 	var obj, rVect, bb1, bb2, i, collidingObjects;
 
-	rVect = new Vector2D(this.bm.width / 2 - this.offset.x, this.bm.height / 2 - this.offset.y).rotate(this.dir);
+	rVect = new Vector(this.bm.width / 2 - this.offset.x, this.bm.height / 2 - this.offset.y).rotate(this.dir);
 	bb1 = this.mask.bBox.copy().rotate(this.dir).move(rVect.x + this.x, rVect.y + this.y).scale(this.size);
 	bb1 = {
 		x1: Math.min(bb1.points[0].x, bb1.points[1].x, bb1.points[2].x, bb1.points[3].x),
@@ -95,7 +95,7 @@ Collidable.prototype.bBoxCollidesWith = function (objects, getCollidingObjects) 
 	for (i = 0; i < objects.length; i++) {
 		obj = objects[i];
 
-		rVect = new Vector2D(obj.bm.width / 2 - obj.offset.x, obj.bm.height / 2 - obj.offset.y).rotate(obj.dir);
+		rVect = new Vector(obj.bm.width / 2 - obj.offset.x, obj.bm.height / 2 - obj.offset.y).rotate(obj.dir);
 		bb2 = obj.mask.bBox.copy().rotate(obj.dir).move(rVect.x + obj.x, rVect.y + obj.y).scale(obj.size);
 		bb2 = {
 			x1: Math.min(bb2.points[0].x, bb2.points[1].x, bb2.points[2].x, bb2.points[3].x),
@@ -291,7 +291,7 @@ Collidable.prototype.drawBBox = function () {
 	var c, pol, rVect, x1, y1, x2, y2;
 
 
-	rVect = new Vector2D(this.bm.width / 2 - this.offset.x, this.bm.height / 2 - this.offset.y).rotate(this.dir);
+	rVect = new Vector(this.bm.width / 2 - this.offset.x, this.bm.height / 2 - this.offset.y).rotate(this.dir);
 	pol = this.mask.bBox.copy().rotate(this.dir).move(rVect.x, rVect.y).scale(this.size);
 
 	x1 = Math.min(pol.points[0].x, pol.points[1].x, pol.points[2].x, pol.points[3].x);
@@ -313,7 +313,7 @@ Collidable.prototype.drawBBox = function () {
  * Draws the object's rotated BBox to the arena. Does only work (and is only relevant) if engine option "useRotatedBoundingBoxes" is not set to false. Use engine option "drawBBoxes" to draw all BBoxes.
  * 
  * @private
- * @param {object} A canvas 2D context on which to draw the bbox
+ * @param {object} c A canvas 2D context on which to draw the bbox
  */
 Collidable.prototype.drawRotatedBBox = function (c) {
 	var pol;
@@ -339,7 +339,7 @@ Collidable.prototype.drawRotatedBBox = function (c) {
  * Draws the object's collision mask to the arena. Use engine option "drawMasks" to draw all masks.
  * 
  * @private
- * @param {object} A canvas 2D context on which to draw the mask
+ * @param {object} c A canvas 2D context on which to draw the mask
  */
 Collidable.prototype.drawMask = function (c) {
 	// Draw Sprite on canvas

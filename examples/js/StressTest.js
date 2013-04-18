@@ -2,10 +2,10 @@ jseCreateClass('StressTest');
 
 StressTest.prototype.stressTest = function () {
 	// Make a global reference to the game object
-	stressTest = this;
+	game = this;
 
 	loader.hideOverlay(function () {
-		stressTest.onLoaded();
+		game.onLoaded();
 	});
 
 	fpsCounter = new TextBlock('FPS: 0', 10, 10, 100, {color: '#FFF'});
@@ -32,18 +32,12 @@ StressTest.prototype.updateFPS = function () {
 StressTest.prototype.addObjects = function (count) {
 	count = count !== undefined ? count : 1;
 
-	// SPRITE EXAMPLE
-	// Make 100 sprites
 	for (i = 0; i < count; i++) {
 		sprite = new GameObject(
 			'Rock',
 			Math.random() * 600,
 			Math.random() * 400,
-			Math.random() * Math.PI * 2 /*,
-			{
-				dX: -3 + Math.random() * 6,
-				dY: -3 + Math.random() * 6
-			}*/
+			Math.random() * Math.PI * 2
 		);
 
 		engine.depth[0].addChildren(sprite);
@@ -53,9 +47,6 @@ StressTest.prototype.addObjects = function (count) {
 StressTest.prototype.removeObjects = function (count) {
 	count = count !== undefined ? count : 1;
 
-	// SPRITE EXAMPLE
-	// Make 100 sprites
-	
 	for (i = 0; i < count; i++) {
 		var arr = Object.keys(engine.objectIndex);
 		if (arr.length > 2) {
@@ -65,10 +56,12 @@ StressTest.prototype.removeObjects = function (count) {
 }
 
 StressTest.prototype.controls = function () {
+	// Add objects when arrow up key is down
 	if (keyboard.isDown(KEY_UP)) {
 		this.addObjects();
 	}
 
+	// Remove objects when arrow down key is down
 	if (keyboard.isDown(KEY_DOWN)) {
 		this.removeObjects();
 	}

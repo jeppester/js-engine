@@ -3,7 +3,7 @@
  * A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
  */
 
-jseCreateClass('TextBlock', [Animatable, View, Vector2D]);
+jseCreateClass('TextBlock', [Animatable, View, Vector]);
 
 /**
  * The constructor for the TextBlock class.
@@ -21,16 +21,16 @@ jseCreateClass('TextBlock', [Animatable, View, Vector2D]);
  * 	size: 1,
  * 	opacity: 1,
  * 	composite: 'source-over',
- * 	offset: new Vector2D(0, 0)
+ * 	offset: new Vector(0, 0)
  * }</code>
  */
 TextBlock.prototype.textBlock = function (string, x, y, width, additionalProperties) {
 	if (string === undefined) {throw new Error('Missing argument: string'); }
 	if (width === undefined) {throw new Error('Missing argument: width'); }
 
-	// Call Vector2D's and view's constructors
+	// Call Vector's and view's constructors
 	this.view();
-	this.vector2D(x, y);
+	this.vector(x, y);
 
 	// Load default options
 	this.width = width;
@@ -38,7 +38,7 @@ TextBlock.prototype.textBlock = function (string, x, y, width, additionalPropert
 	// Load default options
 	this.font = 'normal 14px Verdana';
 	this.alignment = 'left';
-	this.offset = new Vector2D();
+	this.offset = new Vector();
 	this.color = "#000000";
 	this.opacity = 1;
 	this.size = 1;
@@ -192,7 +192,7 @@ TextBlock.prototype.stringToLines = function () {
  * Draws the cached rendering of the TextBlock object to the canvas. Usually there is no reason to call this function manually since it is automatically called by the engine's redraw loop. To redraw depths that are not automatically redrawn, use the engine's redraw function.
  * 
  * @private
- * @param {object} A canvas 2D context on which to draw the TextBlock
+ * @param {object} c A canvas 2D context on which to draw the TextBlock
  */
 TextBlock.prototype.drawCanvas = function (c) {
 	// Draw on canvas

@@ -3,21 +3,22 @@
  * A math object which is used for handling polygons
  */
 
-jseCreateClass('Polygon');
+jseCreateClass('Polygon', [View]);
 
 /**
  * The constructor for the Polygon object. Uses the setFromPoints-function to set the points of the polygon.
  * 
- * @param {array} points An array of Vector2D's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
+ * @param {array} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
  */
 Polygon.prototype.polygon = function (points) {
+	this.view();
 	this.setFromPoints(points);
 };
 
 /**
- * Sets the points of the polygon from Vector2D's.
+ * Sets the points of the polygon from Vector's.
  * 
- * @param {array} points An array of Vector2D's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
+ * @param {array} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
  * @return {object} The resulting Polygon object (itself)
  */
 Polygon.prototype.setFromPoints = function (points) {
@@ -49,7 +50,7 @@ Polygon.prototype.setFromCoordinates = function (x1, y1, x2, y2, x3, y3) {
 
 		if (typeof x !== 'number' || typeof y !== 'number') {throw new Error('All arguments should be of type: Number'); }
 
-		this.points.push(new Vector2D(x, y));
+		this.points.push(new Vector(x, y));
 	}
 
 	return this;
@@ -65,7 +66,7 @@ Polygon.prototype.setFromCoordinates = function (x1, y1, x2, y2, x3, y3) {
 Polygon.prototype.move = function (x, y) {
 	var moveVect, i;
 
-	moveVect = new Vector2D(x, y);
+	moveVect = new Vector(x, y);
 
 	for (i = 0; i < this.points.length; i++) {
 		this.points[i].add(moveVect);
@@ -118,9 +119,9 @@ Polygon.prototype.copy = function () {
 };
 
 /**
- * Fetches all of the polygon's points as Vector2D objects
+ * Fetches all of the polygon's points as Vector objects
  * 
- * @return {array} An array containing all the points of the polygon, as Vector2D objects
+ * @return {array} An array containing all the points of the polygon, as Vector objects
  */
 Polygon.prototype.getPoints = function () {
 	var points, i;
@@ -155,15 +156,71 @@ Polygon.prototype.getLines = function () {
 };
 
 /**
+ * Calculates the shortest distance from the Polygon object to another geometric object
+ * 
+ * @param {object} object The object to calculate the distance to
+ * @return {number} The distance
+ */
+Polygon.prototype.getDistance = function (object) {
+	var dist, lines, objLines, i, ii, pVector;
+
+	// Initially set the distance to infinite
+	dist = 2E+10308;
+	lines = this.getLines();
+
+	if (object.implements(Vector)) {
+		for (i = 0; i < lines.length; i++) {
+			dist = Math.min(dist, lines[i].getDistance(object));
+			if (dist < 0) {break; }
+		}
+		return dist;
+	}
+	else if (object.implements(Line)) {
+		for (i = 0; i < lines.length; i++) {
+			dist = Math.min(dist, lines[i].getDistance(object));
+			if (dist < 0) {break; }
+		}
+		return dist;
+	}
+	else if (object.implements(Circle)) {
+		pVector = new Vector(object.x, object.y);
+
+		for (i = 0; i < lines.length; i++) {
+			dist = Math.min(dist, lines[i].getDistance(pVector));
+			if (dist < 0) {break; }
+		}
+
+		return Math.max(0, dist - object.radius);
+	}
+	else if (object.implements(Rectangle)) {
+		return object.getDistance(this);
+	}
+	else if (object.implements(Polygon)) {
+		objLines = object.getLines();
+
+		for (i = 0; i < lines.length; i++) {
+			for (ii = 0; ii < objLines.length; ii++) {
+				dist = Math.min(dist, lines[i].getDistance(objLines[ii]));
+				if (dist < 0) {break; }
+			}
+			if (dist < 0) {break; }
+		}
+
+		return dist;
+	}
+	else {
+		throw new Error('Agument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
+	}
+};
+
+/**
  * Checks whether or not the Polygon contains another geometric object.
  * 
- * @param {mixed} object A geometric object to check. Supported objects are: Vector2D, Line, Rectangle and Polygon
+ * @param {mixed} object A geometric object to check. Supported objects are: Vector, Line, Rectangle and Polygon
  * @return {boolean} True if the Polygon contains the checked object, false if not
  */
 Polygon.prototype.contains = function (object) {
-	var polRect;
-
-	if (object.implements(Vector2D)) {
+	if (object.implements(Vector)) {
 		if (this.intersects(new Line().setFromCoordinates(-100000, -100000, object.x, object.y), true) % 2) {
 			return true;
 		}
@@ -179,6 +236,19 @@ Polygon.prototype.contains = function (object) {
 			return false;
 		}
 	}
+	else if (object.implements(Circle)) {
+		// Check that the circle's center is placed inside the Polygon
+		if (this.contains(new Vector(object.x, object.y))) {
+			// If so, return whether or not, the circle does not intersect the polygon
+			return !this.intersects(object);
+		}
+		else {
+			return false;
+		}
+	}
+	else if (object.implements(Rectangle)) {
+		return this.contains(object.getPolygon());
+	}
 	else if (object.implements(Polygon)) {
 		if (object.points.length > 0 && !this.intersects(object) && this.contains(object.points[0])) {
 			return true;
@@ -187,22 +257,19 @@ Polygon.prototype.contains = function (object) {
 			return false;
 		}
 	}
-	else if (object.implements(Rectangle)) {
-		polRect = object.getPolygon();
-		return this.contains(polRect);
-	} else {
-		throw new Error('Argument object has to be of type: Vector2D, Line, Rectangle or Polygon');
+	else {
+		throw new Error('Argument object has to be of type: Vector, Line, Rectangle or Polygon');
 	}
 };
 
 /**
  * Checks whether or not the Polygon intersects with another geometric object.
  * 
- * @param {mixed} object A geometric object to check. Supported objects are: Line and Polygon
+ * @param {mixed} object A geometric object to check. Supported objects are: Line, Circle, Rectangle and Polygon
  * @return {boolean} True if the Polygon intersects with the checked object, false if not
  */
 Polygon.prototype.intersects = function (object, countIntersections) {
-	var intersects, intersectionCount, lines, line, oLines, oLine, i, ii, polRect;
+	var intersects, intersectionCount, lines, line, oLines, oLine, i, ii;
 
 	intersects = false;
 	countIntersections = countIntersections !== undefined ? countIntersections : false;
@@ -226,6 +293,23 @@ Polygon.prototype.intersects = function (object, countIntersections) {
 			}
 		}
 	}
+	else if (object.implements(Circle)) {
+		// Check if each line intersects with the circle
+		lines = this.getLines();
+		for (i = 0; i < lines.length; i++) {
+			if (object.intersects(lines[i])) {
+				if (countIntersections) {
+					intersectionCount ++;
+				}
+				else {
+					return true;
+				}
+			}
+		}
+	}
+	else if (object.implements(Rectangle)) {
+		return this.intersects(object.getPolygon());
+	}
 	else if (object.implements(Polygon)) {
 		lines = this.getLines();
 		oLines = object.getLines();
@@ -247,13 +331,8 @@ Polygon.prototype.intersects = function (object, countIntersections) {
 			}
 		}
 	}
-	else if (object.implements(Rectangle)) {
-		polRect = object.getPolygon();
-
-		return this.intersects(polRect);
-	}
 	else {
-		throw new Error('Argument object has to be of type: Line, Rectangle or Polygon');
+		throw new Error('Argument object has to be of type: Line, Circle, Rectangle or Polygon');
 	}
 
 	if (countIntersections) {
@@ -262,4 +341,29 @@ Polygon.prototype.intersects = function (object, countIntersections) {
 	else {
 		return false;
 	}
+};
+
+/**
+ * Draws the Polygon object on the canvas (if added as a child of a View)
+ *
+ * @private
+ * @param {object} c A canvas 2D context on which to draw the Polygon
+ */
+Polygon.prototype.drawCanvas = function (c) {
+	var i, len;
+
+	c.save();
+
+	c.strokeStyle = "#f00";
+	c.beginPath();
+
+	len = this.points.length;
+	c.moveTo(this.points[len - 1].x, this.points[len - 1].y);
+	for (i = 0; i < len; i ++) {
+		c.lineTo(this.points[i].x, this.points[i].y);
+	}
+
+	c.stroke();
+
+	c.restore();
 };

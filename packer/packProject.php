@@ -39,6 +39,19 @@ if (!in_array("--keeplogs",$argv)) {
 	$options["keepLogs"] = true;
 };
 
+// Output dir option
+if ($id = array_search('--output-dir', $argv)) {
+	if (isset($argv[$id + 1])) {
+		$options["outputDir"] = $argv[$id + 1];
+	}
+
+	if (!is_dir($options["outputDir"])) {
+		echo "Could not find output directory\n";
+		exit;
+	}
+}
+
+// Game file options
 if ($id = array_search('--game-file', $argv)) {
 	if (isset($argv[$id + 1])) {
 		$options["gameFile"] = $argv[$id + 1];
@@ -52,6 +65,10 @@ if (!file_exists($options["gameFile"])) {
 else {
 	$gameFile = file_get_contents($options['gameFile']);
 	$options['gameDir'] = preg_replace('/\/[^\/]*$/', '/', $options['gameFile']);
+
+	if (!isset($options['outputDir'])) {
+		$options['outputDir'] = $options['gameDir'];
+	}
 }
 
 /* SEARCH GAME FILE FOR ENGINE DIR, ENGINE FILE AND GAME CLASS FILE */
@@ -94,12 +111,13 @@ else {
 
 		$e . "objects/Animator.js",
 		$e . "objects/Animatable.js",
-		$e . "objects/Vector2D.js",
-		$e . "objects/Line.js",
-		$e . "objects/Polygon.js",
-		$e . "objects/Rectangle.js",
-		$e . "objects/Loader.js",
 		$e . "objects/View.js",
+		$e . "objects/Vector.js",
+		$e . "objects/Line.js",
+		$e . "objects/Rectangle.js",
+		$e . "objects/Polygon.js",
+		$e . "objects/Circle.js",
+		$e . "objects/Loader.js",
 		$e . "objects/CustomLoop.js",
 		$e . "objects/Sprite.js",
 		$e . "objects/Collidable.js",
@@ -184,20 +202,17 @@ else {
 	$packedJS = JSMin::minify($filesContent);
 }
 
-$packedFileName = preg_replace('/\.(\w*)$/', '.packed.$1', $options['gameFile']);
+$outputFileName = preg_replace('/^.*\/(.*)\.(\w*)$/', '$1.min.$2', $options['gameFile']);
 
 if ($options['engineOnly']) {
-	echo "Saving to JsEngine.js (only engine was packed)\n";
-	file_put_contents($options['gameDir'].'JsEngine.packed.js', $packedJS);
-
-	echo "Saving HTML-file with fixed references to " . $packedFileName . "\n\n";
-	file_put_contents($packedFileName, preg_replace('/["|\']([^"|\']*)JsEngine\.js["|\']/', '"JsEngine.packed.js"', $gameFile));
+	echo "Saving to " . $options['outputDir'] . '/' . "jsEngine.min.js' (only engine was packed)\n";
+	file_put_contents($options['outputDir'] . '/' . 'jsEngine.min.js', $packedJS);
 }
 else {
 	echo "Saving game to game.packed.js\n";
-	file_put_contents($options['gameDir'].'game.packed.js', $packedJS);
+	file_put_contents($options['outputDir'] . '/'. 'game.min.js', $packedJS);
 
-	echo "Saving HTML-file with fixed references to " . $packedFileName . "\n\n";
-	file_put_contents($packedFileName, str_replace($options['engineDir'] . $options['engineFile'], 'game.packed.js', $gameFile));
+	echo "Saving HTML-file with fixed references to " . $options['outputDir'] . '/' . $outputFileName . "\n\n";
+	file_put_contents($options['outputDir'] . '/' . $outputFileName, str_replace($options['engineDir'] . $options['engineFile'], 'game.min.js', $gameFile));
 }
 ?>

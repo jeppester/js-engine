@@ -18,9 +18,9 @@ jseCreateClass('GameObject', [Collidable]);
  * 	size: 1,
  * 	opacity: 1,
  * 	composite: 'source-over',
- * 	offset: new Vector2D('center', 'center'),
+ * 	offset: new Vector('center', 'center'),
  * 	loop: 'eachFrame',
- * 	speed: new Vector2D(0, 0)
+ * 	speed: new Vector(0, 0)
  * }
  * </code>
  */
@@ -37,7 +37,7 @@ GameObject.prototype.gameObject = function (source, x, y, dir, additionalPropert
 	this.loop = this.loop ? this.loop : 'eachFrame';
 	engine.loops[this.loop].attachFunction(this, this.updatePosition);
 
-	this.speed = this.speed ? this.speed : new Vector2D(0, 0);
+	this.speed = this.speed ? this.speed : new Vector(0, 0);
 	this.alive = true;
 };
 

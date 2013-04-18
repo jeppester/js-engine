@@ -4,7 +4,7 @@
  * Usually all graphical objects in a game are sprites or extends this object.
  */
 
-jseCreateClass('Sprite', [View, Animatable, Vector2D]);
+jseCreateClass('Sprite', [View, Animatable, Vector]);
 
 /**
  * The constructor for Sprite objects.
@@ -19,14 +19,14 @@ jseCreateClass('Sprite', [View, Animatable, Vector2D]);
  * 	size: 1,
  * 	opacity: 1,
  * 	composite: 'source-over',
- * 	offset: new Vector2D('center', 'center')
+ * 	offset: new Vector('center', 'center')
  * }</code>
  */
 Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 	if (source === undefined) {throw new Error('Missing argument: source'); }
 
-	// Call Vector2D's and view's constructors
-	this.vector2D(x, y);
+	// Call Vector's and view's constructors
+	this.vector(x, y);
 	this.view();
 
 	// Load default options
@@ -50,7 +50,7 @@ Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
 		throw new Error('Sprite source was not successfully loaded: ' + source);
 	}
 
-	this.offset = this.offset !== undefined ? this.offset : new Vector2D(this.width / 2, this.height / 2);
+	this.offset = this.offset !== undefined ? this.offset : new Vector(this.width / 2, this.height / 2);
 	if (this.offset.x === 'center') {this.offset.x = this.width / 2; }
 	if (this.offset.y === 'center') {this.offset.y = this.height / 2; }
 
@@ -124,7 +124,7 @@ Sprite.prototype.setSource = function (source) {
  * Draws the object to the canvas. Usually there is no reason to call this function manually since it is automatically called by the engine's redraw loop. To redraw depths that are not automatically redrawn, use redraw.
  * 
  * @private
- * @param {object} A canvas 2D context on which to draw the Sprite
+ * @param {object} c A canvas 2D context on which to draw the Sprite
  */
 Sprite.prototype.drawCanvas = function (c) {
 	// Draw Sprite on canvas

@@ -14,12 +14,12 @@ Examples.prototype.examples = function () {
 	]);
 	*/
 
-	/* LOAD GAME CLASSES
-	loader.loadClasses([
-		'js/classes/Class1.js',
-		'js/classes/Class2.js',
-		'js/classes/Class3.js',
-		'js/classes/Class4.js',
+	/* LOAD GAME OBJECTES
+	loader.loadObjects([
+		'js/objects/Object1.js',
+		'js/objects/Object2.js',
+		'js/objects/Object3.js',
+		'js/objects/Object4.js',
 	]);
 	*/
 
@@ -80,16 +80,16 @@ Examples.prototype.onLoaded=function() {
 	);
 
 
-	// LOADING A CUSTOM CLASS
-	// Usually you would load all game classes in the Game-class' constructor-function.
+	// LOADING A CUSTOM OBJECTS
+	// Usually you would load all game objects in the Game-object's constructor-function.
 	// (see commented out example near the beginning of this file)
 
-	// For simplicity lets load the class a this point
-	loader.loadClasses([
-		'js/classes/MovableCharacter.js'
+	// For simplicity lets load the objects a this point
+	loader.loadObjects([
+		'js/objects/MovableCharacter.js'
 	]);
 
-	// Now that the class is loaded, lets create an instance of the class
+	// Now that the object is loaded, lets create an instance of the object
 	movable = new MovableCharacter(
 		120, // x-position
 		200 // y-position
@@ -100,5 +100,5 @@ Examples.prototype.onLoaded=function() {
 
 	// You should now have a character that you can move around width the arrow keys :)
 
-	// If you want to dig into how to create and extend classes, take a look at the MovableCharacter-class' source (/js/classes/MovableCharacter.js)
+	// If you want to dig into how to create and extend objects, take a look at the MovableCharacter-object's source (/js/objects/MovableCharacter.js)
 }

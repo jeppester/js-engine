@@ -167,11 +167,12 @@ Engine.prototype.load = function () {
 	loader.loadObjects([
 		this.enginePath + '/objects/Animatable.js',
 		this.enginePath + '/objects/Animator.js',
-		this.enginePath + '/objects/Vector2D.js',
+		this.enginePath + '/objects/View.js',
+		this.enginePath + '/objects/Vector.js',
 		this.enginePath + '/objects/Line.js',
 		this.enginePath + '/objects/Polygon.js',
 		this.enginePath + '/objects/Rectangle.js',
-		this.enginePath + '/objects/View.js',
+		this.enginePath + '/objects/Circle.js',
 		this.enginePath + '/objects/CustomLoop.js',
 		this.enginePath + '/objects/Sprite.js',
 		this.enginePath + '/objects/Collidable.js',
@@ -372,8 +373,8 @@ Engine.prototype.makeCanvas = function () {
  */
 Engine.prototype.convertSpeed = function (speed, from, to) {
 	if (speed === undefined) {throw new Error('Missing argument: speed'); }
-	if (speed.implements(Vector2D)) {
-		return new Vector2D(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
+	if (speed.implements(Vector)) {
+		return new Vector(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
 	}
 
 	from = from !== undefined ? from : SPEED_PIXELS_PER_SECOND;
