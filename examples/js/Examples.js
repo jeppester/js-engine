@@ -1,4 +1,4 @@
-jseCreateClass('Examples');
+NewObject('Examples');
 
 Examples.prototype.examples = function () {
 	// Make a global reference to the game object

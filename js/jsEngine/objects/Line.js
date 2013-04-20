@@ -3,7 +3,7 @@
  * A math object which is used for handling lines
  */
 
-jseCreateClass('Line', [View]);
+NewObject('Line', [View]);
 
 /**
  * Constructor for the Line object. Uses setFromVectors to create the line.

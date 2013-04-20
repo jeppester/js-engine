@@ -5,7 +5,7 @@
  * The animator features different easing functions.
  */
 
-jseCreateClass('Animator');
+NewObject('Animator');
 
 /**
  * Adds a new animation to the animator class (done automatically when running the animate-function).

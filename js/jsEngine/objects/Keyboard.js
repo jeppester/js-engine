@@ -3,7 +3,7 @@
  * An object containing the current state of all keys.
  */
 
-jseCreateClass('Keyboard');
+NewObject('Keyboard');
 
 /**
  * Constructor for the Keyboard object (which is automatically created by the engine on launch)

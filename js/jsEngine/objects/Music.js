@@ -3,7 +3,7 @@
  * A wrapper-class for audio-elements which are to be used as music.
  */
 
-jseCreateClass('Music');
+NewObject('Music');
 
 /**
  * Constructor for the Music object

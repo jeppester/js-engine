@@ -7,7 +7,7 @@ Requires:
 */
 
 // Create a new JsEngine class which extends the Sprite class
-jseCreateClass('MovableCharacter', [Sprite]);
+NewObject('MovableCharacter', [Sprite]);
 
 // Create constructor (the constructors name is always the class name with lowercase first letter)
 MovableCharacter.prototype.movableCharacter = function(x, y) {

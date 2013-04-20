@@ -3,7 +3,7 @@
  * A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
  */
 
-jseCreateClass('TextBlock', [Animatable, View, Vector]);
+NewObject('TextBlock', [Animatable, View, Vector]);
 
 /**
  * The constructor for the TextBlock class.

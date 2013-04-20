@@ -4,7 +4,7 @@
  * Makes it possible to control (start, stop) multiple playbacks of the same sound.
  */
 
-jseCreateClass('Sound');
+NewObject('Sound');
 
 /**
  * Constructor for the sound object

@@ -1,4 +1,4 @@
-jseCreateClass('MasksAndBBoxes');
+NewObject('MasksAndBBoxes');
 
 MasksAndBBoxes.prototype.masksAndBBoxes = function () {
 	// Make a global reference to the game object

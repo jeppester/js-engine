@@ -3,7 +3,7 @@
  * An object containing the current state of all mouse buttons and touches, and which provides functions for accessing the information in an easy way.
  */
 
-jseCreateClass('Pointer');
+NewObject('Pointer');
 
 /**
  * Constructor for the Pointer object (which is automatically created by the engine on launch)

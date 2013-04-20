@@ -1,4 +1,4 @@
-jseCreateClass('CollisionTest');
+NewObject('CollisionTest');
 
 CollisionTest.prototype.collisionTest = function () {
 	// Make a global reference to the game object

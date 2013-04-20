@@ -4,7 +4,7 @@
  * Can check both for precise (bitmap-based) collisions and bounding box collisions
  */
 
-jseCreateClass('Collidable', [Sprite]);
+NewObject('Collidable', [Sprite]);
 
 /**
  * The constructor for the Collidable objects

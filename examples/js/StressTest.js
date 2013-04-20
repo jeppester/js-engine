@@ -1,4 +1,4 @@
-jseCreateClass('StressTest');
+NewObject('StressTest');
 
 StressTest.prototype.stressTest = function () {
 	// Make a global reference to the game object
@@ -50,7 +50,7 @@ StressTest.prototype.removeObjects = function (count) {
 	for (i = 0; i < count; i++) {
 		var arr = Object.keys(engine.objectIndex);
 		if (arr.length > 2) {
-			jsePurge(engine.objectIndex[arr[2]]);
+			engine.purge(engine.objectIndex[arr[2]]);
 		}
 	}
 }

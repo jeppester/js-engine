@@ -3,7 +3,7 @@
  * A math object which is used for handling non-rotated rectangles
  */
 
-jseCreateClass('Rectangle', [Animatable, View]);
+NewObject('Rectangle', [Animatable, View]);
 
 /**
  * The constructor for the Rectangle object. Uses the set-function to set the properties of the rectangle.

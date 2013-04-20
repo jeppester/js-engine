@@ -3,7 +3,7 @@
  * Object for loading and storing ressources
  */
 
-jseCreateClass('Loader');
+NewObject('Loader');
 
 /**
  * Constructor for the Loader object.
@@ -274,7 +274,7 @@ Loader.prototype.loadObjects = function (paths) {
 			objectName = paths[i].match(/(\w*)\.\w+$/)[1];
 			if (window[objectName]) {continue; }
 
-			jseSyncLoad(paths[i]);
+			engine.loadFiles(paths[i]);
 			this.loaded.classes[objectName] = paths[i];
 		}
 	}
@@ -289,7 +289,7 @@ Loader.prototype.reloadAllClasses = function () {
 
 	for (i in this.loaded.classes) {
 		if (this.loaded.classes.hasOwnProperty(i)) {
-			jseSyncLoad(this.loaded.classes[i]);
+			engine.loadFiles(this.loaded.classes[i]);
 		}
 	}
 };
@@ -322,7 +322,7 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 		if (req.status === 404) {console.log('Theme not found: ' + name); continue; }
 
 		// Get theme details
-		codeString = 'theme = ' + req.responseText + "\n//@ sourceURL=/" + engine.themesPath + '/' + name +'/theme.json';
+		codeString = 'theme = ' + req.responseText + "\n//@ sourceURL=/" + engine.themesPath + '/' + name + '/theme.json';
 		eval(codeString);
 
 		// Load inherited themes

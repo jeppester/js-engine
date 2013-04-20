@@ -3,7 +3,7 @@
  * An object whose numeric properties can be tweened by using the animate-function.
  */
 
-jseCreateClass('Animatable');
+NewObject('Animatable');
 
 /**
  * Used for animating numeric properties of the owner of the function.

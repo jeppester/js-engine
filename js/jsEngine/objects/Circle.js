@@ -3,7 +3,7 @@
  * A math object which is used for handling circles
  */
 
-jseCreateClass('Circle', [Animatable, View]);
+NewObject('Circle', [Animatable, View]);
 
 /**
  * Constructor for Circle object, uses the set function, to set the properties of the circle.

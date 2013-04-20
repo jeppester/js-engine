@@ -5,7 +5,7 @@
  * A loop also has it's own time that is stopped when the loop is not executed. This makes it possible to schedule a function execution that will be "postphoned" if the loop is paused before the execution.
  */
 
-jseCreateClass('CustomLoop');
+NewObject('CustomLoop');
 
 /**
  * Constructor for CustomLoop object

@@ -6,7 +6,7 @@
  * - Has collision checking
  */
 
-jseCreateClass('GameObject', [Collidable]);
+NewObject('GameObject', [Collidable]);
 
 /**
  * The constructor for the GameObject class.

@@ -4,7 +4,7 @@
  * Usually all graphical objects in a game are sprites or extends this object.
  */
 
-jseCreateClass('Sprite', [View, Animatable, Vector]);
+NewObject('Sprite', [View, Animatable, Vector]);
 
 /**
  * The constructor for Sprite objects.

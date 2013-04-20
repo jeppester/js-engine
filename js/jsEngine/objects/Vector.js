@@ -3,7 +3,7 @@
  * A math object which is used for handling two-dimensional vectors
  */
 
-jseCreateClass('Vector', [Animatable, View]);
+NewObject('Vector', [Animatable, View]);
 
 /**
  * Constructor for the Vector object. Uses set-function to set the vector from x- and y values.

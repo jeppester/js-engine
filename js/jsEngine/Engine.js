@@ -4,12 +4,58 @@
  * Responsible for depths, custom loops, the main loop, the main canvas, etc.
  */
 
-Engine = function (options) {
-	this.engine(options);
+/**
+ * Creates a new jsEngine object
+ *
+ * @param {string} objectName The name of the new object
+ * @param {mixed} An object or an array of objects to inherit functions from (to actually extend an inherited object, run the object's constructor from inside the extending object)
+ */
+NewObject = function (objectName, inherits) {
+	var constructorName, i, inheritClass, newClass;
+
+	if (!/^\w*$/.test(objectName)) {throw new Error("Invalid class name: " + objectName); }
+
+	constructorName = objectName.charAt(0).toLowerCase() + objectName.slice(1);
+	eval('window.' + objectName + ' = function () {this.' + constructorName + '.apply(this, arguments); }');
+	window[objectName].prototype[constructorName] = function () {};
+	newClass = window[objectName];
+	newClass.prototype.objectName = objectName;
+	newClass.prototype.extendedObjects = [];
+	newClass.prototype.extends = function (object) {
+		return this.extendedObjects.indexOf(object) !== -1;
+	}
+	newClass.prototype.implements = function (object) {
+		return (object.prototype.isPrototypeOf(this) ? true : this.extends(object));
+	}
+
+	function inherit (newClass, inheritClass) {
+		var functionName;
+
+		newClass.prototype.extendedObjects.push(inheritClass);
+		Array.prototype.push.apply(newClass.prototype.extendedObjects, inheritClass.prototype.extendedObjects);
+
+		for (functionName in inheritClass.prototype) {
+			if (typeof inheritClass.prototype[functionName] === "function") {
+				newClass.prototype[functionName] = inheritClass.prototype[functionName];
+			}
+		}
+	};
+
+	if (inherits) {
+		if (!Array.prototype.isPrototypeOf(inherits)) {throw new Error("Arguments inherits is not an array"); }
+
+		for (i = 0; i < inherits.length; i ++) {
+			inheritClass = inherits[i];
+			inherit(newClass, inheritClass);
+		}
+	}
 };
+
+NewObject('Engine');
 
 /**
  * The constructor for the Engine object.
+ * 
  * @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
  */
 Engine.prototype.engine = function (options) {
@@ -82,6 +128,7 @@ Engine.prototype.load = function () {
 		this.avoidSubPixelRendering = true;
 		break;
 	}
+
 	this.running = false;
 	this.manualRedrawDepths = [];
 	this.canvasResX = 800;
@@ -133,31 +180,28 @@ Engine.prototype.load = function () {
 	}
 
 	// If jsEngine functions are not loaded, load them
-	if (typeof jseCreateClass === "undefined") {
-		req = new XMLHttpRequest();
-		req.open('GET', this.enginePath + '/jseFunctions.js', false);
-		req.send();
-		eval(req.responseText);
+	if (typeof NewObject === "undefined") {
+		this.loadFiles(this.enginePath + '/jseFunctions.js');
 	}
 
 	// If Javascript Extensions has not been loaded, load them
 	if (typeof Array.prototype.getElementByPropertyValue === "undefined") {
-		jseSyncLoad(this.enginePath + '/jseExtensions.js');
+		this.loadFiles(this.enginePath + '/jseExtensions.js');
 	}
 
 	// Load polyfills
 	if (window.polyfillsLoaded === undefined) {
-		jseSyncLoad(this.enginePath + '/jsePolyfills.js');
+		this.loadFiles(this.enginePath + '/jsePolyfills.js');
 	}
 
 	// Load global vars
 	if (typeof KEY_UP === "undefined") {
-		jseSyncLoad(this.enginePath + '/jseGlobals.js');
+		this.loadFiles(this.enginePath + '/jseGlobals.js');
 	}
 
 	// If the loader class does not exist, load it
 	if (typeof Loader === "undefined") {
-		jseSyncLoad(this.enginePath + '/objects/Loader.js');
+		this.loadFiles(this.enginePath + '/objects/Loader.js');
 	}
 
 	// Create loader object
@@ -634,6 +678,137 @@ Engine.prototype.registerObject = function (obj, id) {
 	this.objectIndex[id] = obj;
 	obj.id = id;
 	return id;
+};
+
+/**
+ * Loads and executes one or multiple JavaScript file synchroneously
+ * 
+ * @param {mixed} filePaths A file path (string), or an array of file paths to load and execute as JavaScript
+ */
+Engine.prototype.loadFiles = function (filePaths) {
+	var i, req, codeString;
+
+	if (typeof filePaths === "string") {
+		filePaths = [filePaths];
+	}
+
+	for (i = 0; i < filePaths.length; i ++) {
+		// console.log('Loading: ' + filePaths[i])
+		req = new XMLHttpRequest();
+		req.open('GET', filePaths[i], false);
+		req.send();
+		codeString = req.responseText + "\n//@ sourceURL=/" + filePaths[i];
+		try {
+			eval.call(window, codeString);
+		}
+		catch (e) {
+			throw new Error('Failed loading "' + filePaths[i] + '": ' + e.type + ' "' + e.arguments[0] + '"');
+		}
+	}
+
+	if (window.loadedFiles === undefined) {window.loadedFiles = []; }
+	window.loadedFiles = window.loadedFiles.concat(filePaths);
+};
+
+/**
+ * Uses an http request to fetch the data from a file and runs a callback function with the file data as first parameter
+ * 
+ * @param {string} url A URL path for the file to load
+ * @param {mixed} params A parameter string or an object to JSON-stringify and use as URL parameter (will be send as "data=[JSON String]")
+ * @param {boolean} async Whether or not the request should be synchroneous.
+ * @param {function} callback A callback function to run when the request has finished
+ * @param {object} caller An object to call the callback function as.
+ */
+Engine.prototype.ajaxRequest = function (url, params, async, callback, caller) {
+	if (url === undefined) {throw new Error('Missing argument: url'); }
+	if (callback === undefined) {throw new Error('Missing argument: callback'); }
+
+	params = params !== undefined ? params : '';
+	async = async !== undefined ? async : true;
+	caller = caller !== undefined ? caller : window;
+
+	// If params is not a string, json-stringify it
+	if (typeof params !== 'string') {
+		params = 'data=' + JSON.stringify(params);
+	}
+
+
+	var req;
+
+	req = new XMLHttpRequest();
+
+	if (async) {
+		req.onreadystatechange = function () {
+			if (req.readyState === 4 && req.status === 200) {
+				callback.call(caller, req.responseText);
+			}
+		};
+	}
+
+	req.open('POST', url, async);
+	req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	req.send(params);
+
+	if (!async) {
+		if (req.readyState === 4 && req.status === 200) {
+			callback(req.responseText);
+		}
+		else {
+			console.log('XMLHttpRequest failed: ' + url);
+		}
+	}
+};
+
+/**
+ * Removes an object from all engine loops, views, and from the object index
+ *
+ * param {object} obj The object to remove
+ */
+Engine.prototype.purge = function (obj) {
+	var name, loop, i;
+
+	if (obj === undefined) {throw new Error(obj); }
+	if (typeof obj === "string") {
+		obj = this.objectIndex[obj];
+	}
+
+	// Delete all references from loops
+	for (name in this.loops) {
+		if (this.loops.hasOwnProperty(name)) {
+			loop = this.loops[name];
+
+			// From activities
+			i = loop.activities.length;
+			while (i--) {
+				if (obj === loop.activities[i].object) {
+					loop.activities.splice(i, 1);
+				}
+			}
+
+			// From activities queue
+			i = loop.activitiesQueue.length;
+			while (i--) {
+				if (obj === loop.activitiesQueue[i].object) {
+					loop.activitiesQueue.splice(i, 1);
+				}
+			}
+
+			// From animations
+			i = loop.animations.length;
+			while (i--) {
+				if (obj === loop.animations[i].obj) {
+					loop.animations.splice(i, 1);
+				}
+			}
+		}
+	}
+
+	// Delete from viewlist
+	if (obj.parent) {
+		obj.parent.removeChildren(obj);
+	}
+
+	delete this.objectIndex[obj.id];
 };
 
 /**

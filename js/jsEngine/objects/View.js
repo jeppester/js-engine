@@ -4,7 +4,7 @@
  * All objects which are drawn on the game's canvas extends the View-object.
  */
 
-jseCreateClass('View');
+NewObject('View');
 
 /**
  * Constructor for the View object.
@@ -154,7 +154,7 @@ View.prototype.applyToThisAndChildren = function (func) {
  */
 View.prototype.remove = function () {
 	this.removeAllChildren();
-	jsePurge(this);
+	engine.purge(this);
 };
 
 /**

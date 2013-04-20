@@ -1,4 +1,4 @@
-jseCreateClass('GeometricObjectCollision');
+NewObject('GeometricObjectCollision');
 
 GeometricObjectCollision.prototype.geometricObjectCollision = function () {
 	// Make a global reference to the game object

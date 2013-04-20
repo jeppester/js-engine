@@ -3,7 +3,7 @@
  * A math object which is used for handling polygons
  */
 
-jseCreateClass('Polygon', [View]);
+NewObject('Polygon', [View]);
 
 /**
  * The constructor for the Polygon object. Uses the setFromPoints-function to set the points of the polygon.
