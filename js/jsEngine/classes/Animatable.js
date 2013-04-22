@@ -1,9 +1,10 @@
 /**
  * Animatable:
- * An object whose numeric properties can be tweened by using the animate-function.
+ * A class which has functions for tweening of its numeric properties.
+ * This class' main purpose is to be inherited by other classes which should be animatable.
  */
 
-NewObject('Animatable');
+NewClass('Animatable');
 
 /**
  * Used for animating numeric properties of the owner of the function.

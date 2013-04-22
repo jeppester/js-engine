@@ -1,6 +1,6 @@
-NewObject('Game');
+NewClass('Game');
 
-Game.prototype.game = function () {
+Game.prototype.Game = function () {
 	// Make a global reference to the game object
 	game = this;
 
@@ -14,12 +14,12 @@ Game.prototype.game = function () {
 	]);
 	*/
 
-	/* LOAD GAME objects
-	loader.loadObjects([
-		'js/objects/Object1.js',
-		'js/objects/Object2.js',
-		'js/objects/Object3.js',
-		'js/objects/Object4.js'
+	/* LOAD GAME CLASSES
+	loader.loadClasses([
+		'js/classes/Object1.js',
+		'js/classes/Object2.js',
+		'js/classes/Object3.js',
+		'js/classes/Object4.js'
 	]);
 	*/
 

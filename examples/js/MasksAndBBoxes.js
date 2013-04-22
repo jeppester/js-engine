@@ -1,6 +1,6 @@
-NewObject('MasksAndBBoxes');
+NewClass('MasksAndBBoxes');
 
-MasksAndBBoxes.prototype.masksAndBBoxes = function () {
+MasksAndBBoxes.prototype.MasksAndBBoxes = function () {
 	// Make a global reference to the game object
 	game = this;
 

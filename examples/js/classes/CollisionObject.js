@@ -7,12 +7,12 @@ Requires:
 */
 
 // Create a new JsEngine class which extends the Sprite class
-NewObject('CollisionObject', [GameObject]);
+NewClass('CollisionObject', [GameObject]);
 
 // Create constructor (the constructors name is always the class name with lowercase first letter)
-CollisionObject.prototype.collisionObject = function (source, x, y, additionalProperties) {
+CollisionObject.prototype.CollisionObject = function (source, x, y, additionalProperties) {
 	// Call the sprite constructor to fully extend the sprite and set all sprite properties
-	this.gameObject(source, x, y, 0, additionalProperties);
+	this.GameObject(source, x, y, 0, additionalProperties);
 
 	// Add step function to 'eachFrame'-loop
 	if (this.leftKey !== undefined) {

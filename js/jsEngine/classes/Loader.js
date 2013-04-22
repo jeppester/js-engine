@@ -1,18 +1,18 @@
 /**
  * Loader:
- * Object for loading and storing ressources
+ * Class for loading and storing ressources
  */
 
-NewObject('Loader');
+NewClass('Loader');
 
 /**
- * Constructor for the Loader object.
+ * Constructor for the Loader class.
  * This function will also create a load overlay which will not disappear untill the hideOverlay is called.
  * Therefore, remember to call hideOverlay, when your game is ready to be shown.
  * 
  * @private
  */
-Loader.prototype.loader = function () {
+Loader.prototype.Loader = function () {
 	this.sounds = {};
 	this.images = {};
 	this.scripts = {};
@@ -264,7 +264,7 @@ Loader.prototype.getAllMusic = function () {
  * @param {array} paths An array of paths to javascript - containing objects - that should be loaded
  * @return {boolean} True, when the objects has been loaded without any errors
  */
-Loader.prototype.loadObjects = function (paths) {
+Loader.prototype.loadClasses = function (paths) {
 	if (paths === undefined) {throw new Error('Missing argument: paths'); }
 	var objectName, i;
 

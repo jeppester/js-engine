@@ -1,19 +1,19 @@
 /**
  * Circle:
- * A math object which is used for handling circles
+ * A math class which is used for handling circles
  */
 
-NewObject('Circle', [Animatable, View]);
+NewClass('Circle', [Animatable, View]);
 
 /**
- * Constructor for Circle object, uses the set function, to set the properties of the circle.
+ * Constructor for Circle class, uses the set function, to set the properties of the circle.
  * 
  * @param {number} x The x-coordinate for the center of the circle
  * @param {number} y The y-coordinate for the center of the circle
  * @param {number} radius The radius for the circle
  */
-Circle.prototype.circle = function (x, y, radius) {
-	this.view();
+Circle.prototype.Circle = function (x, y, radius) {
+	this.View();
 	this.set(x, y, radius);
 };
 

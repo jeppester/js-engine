@@ -1,12 +1,12 @@
 /**
  * GameObject:
- * An object which incorporates functions that are often used by objects in games:
+ * A class which incorporates functions that are often used by objects in games:
  * - Is drawn as a sprite
  * - Has movement vector
  * - Has collision checking
  */
 
-NewObject('GameObject', [Collidable]);
+NewClass('GameObject', [Collidable]);
 
 /**
  * The constructor for the GameObject class.
@@ -24,12 +24,12 @@ NewObject('GameObject', [Collidable]);
  * }
  * </code>
  */
-GameObject.prototype.gameObject = function (source, x, y, dir, additionalProperties) {
+GameObject.prototype.GameObject = function (source, x, y, dir, additionalProperties) {
 	if (source === undefined) {throw new Error('Missing argument: source'); }
 	if (x === undefined) {throw new Error('Missing argument: x'); }
 	if (y === undefined) {throw new Error('Missing argument: y'); }
 
-	this.sprite(source, x, y, dir, additionalProperties);
+	this.Collidable(source, x, y, dir, additionalProperties);
 
 	this.mask = this.mask ? this.mask : loader.getMask(source, this.getTheme());
 

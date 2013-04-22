@@ -4,14 +4,14 @@
  * Makes it possible to control (start, stop) multiple playbacks of the same sound.
  */
 
-NewObject('Sound');
+NewClass('Sound');
 
 /**
- * Constructor for the sound object
+ * Constructor for the sound class
  * 
  * @param {object} audioElement The Audio element to use as source for the sound object
  */
-Sound.prototype.sound = function (audioElement) {
+Sound.prototype.Sound = function (audioElement) {
 	if (audioElement === undefined) {throw new Error('Missing argument: audioElement'); }
 	if (audioElement.toString() !== "[object HTMLAudioElement]") {throw new Error('Argument audioElement has to be of type HTMLAudioElement'); }
 

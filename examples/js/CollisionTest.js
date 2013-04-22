@@ -1,12 +1,12 @@
-NewObject('CollisionTest');
+NewClass('CollisionTest');
 
-CollisionTest.prototype.collisionTest = function () {
+CollisionTest.prototype.CollisionTest = function () {
 	// Make a global reference to the game object
 	game = this;
 
-	// LOAD GAME OBJECTS
-	loader.loadObjects([
-		'js/objects/CollisionObject.js',
+	// LOAD GAME CLASSES
+	loader.loadClasses([
+		'js/classes/CollisionObject.js',
 	]);
 
 	// Add collision checking loop
@@ -24,10 +24,10 @@ CollisionTest.prototype.collisionTest = function () {
 		200, // x-position
 		100, // y-position
 		{
-			upKey: 38,
-			downKey: 40,
-			leftKey: 37,
-			rightKey: 39
+			upKey: KEY_UP,
+			downKey: KEY_DOWN,
+			leftKey: KEY_LEFT,
+			rightKey: KEY_RIGHT
 		}
 	);
 

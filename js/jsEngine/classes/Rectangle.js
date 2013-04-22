@@ -1,20 +1,20 @@
 /**
  * Rectangle:
- * A math object which is used for handling non-rotated rectangles
+ * A math class which is used for handling non-rotated rectangles
  */
 
-NewObject('Rectangle', [Animatable, View]);
+NewClass('Rectangle', [Animatable, View]);
 
 /**
- * The constructor for the Rectangle object. Uses the set-function to set the properties of the rectangle.
+ * The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
  * 
  * @param {number} x The x-coordinate for the rectangle's top left corner
  * @param {number} y The y-coordinate for the rectangle's top left corner
  * @param {number} width The width of the rectangle
  * @param {number} height The height of the rectangle
  */
-Rectangle.prototype.rectangle = function (x, y, width, height) {
-	this.view();
+Rectangle.prototype.Rectangle = function (x, y, width, height) {
+	this.View();
 	this.set(x, y, width, height);
 };
 

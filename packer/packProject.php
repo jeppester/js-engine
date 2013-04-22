@@ -102,31 +102,30 @@ else {
 
 	// If not minified, include all engine files separately
 	array_push($files, 
-		$e . 'jseFunctions.js',
 		$e . 'jseExtensions.js',
 		$e . 'jseGlobals.js',
 		$e . 'jsePolyfills.js',
 
 		$e . 'Engine.js',
 
-		$e . "objects/Animator.js",
-		$e . "objects/Animatable.js",
-		$e . "objects/View.js",
-		$e . "objects/Vector.js",
-		$e . "objects/Line.js",
-		$e . "objects/Rectangle.js",
-		$e . "objects/Polygon.js",
-		$e . "objects/Circle.js",
-		$e . "objects/Loader.js",
-		$e . "objects/CustomLoop.js",
-		$e . "objects/Sprite.js",
-		$e . "objects/Collidable.js",
-		$e . "objects/TextBlock.js",
-		$e . "objects/GameObject.js",
-		$e . "objects/Keyboard.js",
-		$e . "objects/Pointer.js",
-		$e . "objects/Sound.js",
-		$e . "objects/Music.js"
+		$e . "classes/Animator.js",
+		$e . "classes/Animatable.js",
+		$e . "classes/View.js",
+		$e . "classes/Vector.js",
+		$e . "classes/Line.js",
+		$e . "classes/Rectangle.js",
+		$e . "classes/Polygon.js",
+		$e . "classes/Circle.js",
+		$e . "classes/Loader.js",
+		$e . "classes/CustomLoop.js",
+		$e . "classes/Sprite.js",
+		$e . "classes/Collidable.js",
+		$e . "classes/TextBlock.js",
+		$e . "classes/GameObject.js",
+		$e . "classes/Keyboard.js",
+		$e . "classes/Pointer.js",
+		$e . "classes/Sound.js",
+		$e . "classes/Music.js"
 	);
 }
 
@@ -147,7 +146,7 @@ function scanLoad($file) {
 		$fCon = file_get_contents($fPath);
 
 		// Search the files for loaded objects
-		preg_match_all('/loader\.loadObjects\(\[[^\]]*\]\)/', $fCon, $m1);
+		preg_match_all('/loader\.loadClasses\(\[[^\]]*\]\)/', $fCon, $m1);
 
 		$m = $m1[0];
 

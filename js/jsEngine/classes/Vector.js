@@ -1,18 +1,18 @@
 /**
  * Vector:
- * A math object which is used for handling two-dimensional vectors
+ * A math class which is used for handling two-dimensional vectors
  */
 
-NewObject('Vector', [Animatable, View]);
+NewClass('Vector', [Animatable, View]);
 
 /**
- * Constructor for the Vector object. Uses set-function to set the vector from x- and y values.
+ * Constructor for the Vector class. Uses set-function to set the vector from x- and y values.
  * 
  * @param {number} x The x-value to set for the vector
  * @param {number} y The y-value to set for the vector
  */
-Vector.prototype.vector = function (x, y) {
-	this.view();
+Vector.prototype.Vector = function (x, y) {
+	this.View();
 	this.set(x, y);
 };
 

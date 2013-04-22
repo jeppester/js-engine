@@ -1,19 +1,20 @@
 /**
  * CustomLoop:
- * A loop (object) with a list of functions to run each time the loop executes.
+ * A loop class.
+ * Contains a list of functions to run each time the loop executes.
  * For the loop to be executed, it will have to be added to the engine via the Engine.addLoop.
- * A loop also has it's own time that is stopped when the loop is not executed. This makes it possible to schedule a function execution that will be "postphoned" if the loop is paused before the execution.
+ * A loop also has it's own time that is stopped whenever the loop is not executed. This makes it possible to schedule a function execution that will be "postphoned" if the loop gets paused.
  */
 
-NewObject('CustomLoop');
+NewClass('CustomLoop');
 
 /**
- * Constructor for CustomLoop object
+ * Constructor for CustomLoop class
  * 
  * @param {number} framesPerExecution The number of frames between each execution of the custom loop
  * @param {function} maskFunction A function that will be run before each execution, if the function returns true the execution procedes as planned, if not, the execution will not be run
  */
-CustomLoop.prototype.customLoop = function (framesPerExecution, maskFunction) {
+CustomLoop.prototype.CustomLoop = function (framesPerExecution, maskFunction) {
 	this.framesPerExecution = framesPerExecution === undefined ? 1 : framesPerExecution;
 	this.maskFunction = maskFunction === undefined ? function () {return true; } : maskFunction;
 

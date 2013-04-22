@@ -1,16 +1,16 @@
 /**
  * Pointer:
- * An object containing the current state of all mouse buttons and touches, and which provides functions for accessing the information in an easy way.
+ * A class that eases the use of mouse and touch, by providing functions for checking the current state of both.
  */
 
-NewObject('Pointer');
+NewClass('Pointer');
 
 /**
- * Constructor for the Pointer object (which is automatically created by the engine on launch)
+ * Constructor for the Pointer class (which is automatically created by the engine on launch)
  * 
  * @private
  */
-Pointer.prototype.pointer = function () {
+Pointer.prototype.Pointer = function () {
 	var button;
 
 	if (engine.host.hasTouch) {

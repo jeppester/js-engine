@@ -1,15 +1,15 @@
 /**
  * View:
- * An object which is either drawn on the game canvas or which contains children that are drawn.
- * All objects which are drawn on the game's canvas extends the View-object.
+ * A class for objects that are to be drawn on the canvas (or to contain drawn objects)
+ * All objects which are drawn on the game's canvas extends the View-class.
  */
 
-NewObject('View');
+NewClass('View');
 
 /**
- * Constructor for the View object.
+ * Constructor for the View class.
  */
-View.prototype.view = function () {
+View.prototype.View = function () {
 	this.children = [];
 };
 

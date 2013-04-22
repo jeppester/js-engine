@@ -1,16 +1,16 @@
 /**
  * Keyboard:
- * An object containing the current state of all keys.
+ * An class that eases checking of the current state of all keys.
  */
 
-NewObject('Keyboard');
+NewClass('Keyboard');
 
 /**
- * Constructor for the Keyboard object (which is automatically created by the engine on launch)
+ * Constructor for the Keyboard class (which is automatically created by the engine on launch)
  * 
  * @private
  */
-Keyboard.prototype.keyboard = function () {
+Keyboard.prototype.Keyboard = function () {
 	var key;
 
 	document.addEventListener('keydown', function (event) {

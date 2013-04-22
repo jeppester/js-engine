@@ -1,10 +1,10 @@
 /**
  * Sprite:
- * A drawn bitmap with rotation and size.
- * Usually all graphical objects in a game are sprites or extends this object.
+ * Class for drawing bitmaps with rotation and size.
+ * Usually all graphical objects in a game are sprites or extends this class.
  */
 
-NewObject('Sprite', [View, Animatable, Vector]);
+NewClass('Sprite', [View, Animatable, Vector]);
 
 /**
  * The constructor for Sprite objects.
@@ -22,12 +22,12 @@ NewObject('Sprite', [View, Animatable, Vector]);
  * 	offset: new Vector('center', 'center')
  * }</code>
  */
-Sprite.prototype.sprite = function (source, x, y, dir, additionalProperties) {
+Sprite.prototype.Sprite = function (source, x, y, dir, additionalProperties) {
 	if (source === undefined) {throw new Error('Missing argument: source'); }
 
 	// Call Vector's and view's constructors
-	this.vector(x, y);
-	this.view();
+	this.View();
+	this.Vector(x, y);
 
 	// Load default options
 	this.source = source;

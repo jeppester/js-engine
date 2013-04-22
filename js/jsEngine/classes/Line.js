@@ -1,21 +1,21 @@
 /**
  * Line:
- * A math object which is used for handling lines
+ * A math class which is used for handling lines
  */
 
-NewObject('Line', [View]);
+NewClass('Line', [View]);
 
 /**
- * Constructor for the Line object. Uses setFromVectors to create the line.
+ * Constructor for the Line class. Uses setFromVectors to create the line.
  * 
  * @param {object} startVector A Vector representing the start point of the line
  * @param {object} endVector A Vector representing the end point of the line
  */
-Line.prototype.line = function (startVector, endVector) {
+Line.prototype.Line = function (startVector, endVector) {
 	startVector = startVector !== undefined ? startVector : new Vector(0, 0);
 	endVector = endVector !== undefined ? endVector : new Vector(0, 0);
 
-	this.view();
+	this.View();
 	this.setFromVectors(startVector, endVector);
 };
 

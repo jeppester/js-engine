@@ -3,14 +3,14 @@
  * A wrapper-class for audio-elements which are to be used as music.
  */
 
-NewObject('Music');
+NewClass('Music');
 
 /**
- * Constructor for the Music object
+ * Constructor for the Music class
  * 
  * @param {object} audioElement The Audio element to use as source for the music object
  */
-Music.prototype.music = function (audioElement) {
+Music.prototype.Music = function (audioElement) {
 	if (audioElement === undefined) {throw new Error('Missing argument: audioElement'); }
 	if (audioElement.toString() !== "[object HTMLAudioElement]") {throw new Error('Argument audioElement has to be of type HTMLAudioElement'); }
 

@@ -1,6 +1,6 @@
-NewObject('StressTest');
+NewClass('StressTest');
 
-StressTest.prototype.stressTest = function () {
+StressTest.prototype.StressTest = function () {
 	// Make a global reference to the game object
 	game = this;
 

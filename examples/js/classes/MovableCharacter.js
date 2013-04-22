@@ -7,12 +7,12 @@ Requires:
 */
 
 // Create a new JsEngine class which extends the Sprite class
-NewObject('MovableCharacter', [Sprite]);
+NewClass('MovableCharacter', [Sprite]);
 
 // Create constructor (the constructors name is always the class name with lowercase first letter)
-MovableCharacter.prototype.movableCharacter = function(x, y) {
+MovableCharacter.prototype.MovableCharacter = function(x, y) {
 	// Call the sprite constructor to fully extend the sprite and set all sprite properties
-	this.sprite('Character', x, y, 0);
+	this.Sprite('Character', x, y, 0);
 
 	// Add step function to 'eachFrame'-loop
 	engine.loops.eachFrame.attachFunction(
@@ -24,22 +24,22 @@ MovableCharacter.prototype.movableCharacter = function(x, y) {
 MovableCharacter.prototype.step = function() {
 	// Check that the arrow keys are down, if so, move the object by increasing or decreasing it's x and y properties
 	// Left
-	if (keyboard.isDown(37)) {
+	if (keyboard.isDown(KEY_LEFT)) {
 		this.x -= engine.convertSpeed(200);
 	}
 
 	// Right
-	if (keyboard.isDown(39)) {
+	if (keyboard.isDown(KEY_RIGHT)) {
 		this.x += engine.convertSpeed(200);
 	}
 
 	// Up
-	if (keyboard.isDown(38)) {
+	if (keyboard.isDown(KEY_UP)) {
 		this.y -= engine.convertSpeed(200);
 	}
 
 	// Down
-	if (keyboard.isDown(40)) {
+	if (keyboard.isDown(KEY_DOWN)) {
 		this.y += engine.convertSpeed(200);
 	}
 

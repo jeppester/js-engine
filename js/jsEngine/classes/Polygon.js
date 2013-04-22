@@ -1,17 +1,17 @@
 /**
  * Polygon:
- * A math object which is used for handling polygons
+ * A math class which is used for handling polygons
  */
 
-NewObject('Polygon', [View]);
+NewClass('Polygon', [View]);
 
 /**
- * The constructor for the Polygon object. Uses the setFromPoints-function to set the points of the polygon.
+ * The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
  * 
  * @param {array} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
  */
-Polygon.prototype.polygon = function (points) {
-	this.view();
+Polygon.prototype.Polygon = function (points) {
+	this.View();
 	this.setFromPoints(points);
 };
 

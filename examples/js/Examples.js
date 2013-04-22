@@ -1,6 +1,6 @@
-NewObject('Examples');
+NewClass('Examples');
 
-Examples.prototype.examples = function () {
+Examples.prototype.Examples = function () {
 	// Make a global reference to the game object
 	game = this;
 
@@ -14,12 +14,12 @@ Examples.prototype.examples = function () {
 	]);
 	*/
 
-	/* LOAD GAME OBJECTES
-	loader.loadObjects([
-		'js/objects/Object1.js',
-		'js/objects/Object2.js',
-		'js/objects/Object3.js',
-		'js/objects/Object4.js',
+	/* LOAD GAME CLASSES
+	loader.loadClasses([
+		'js/classes/Object1.js',
+		'js/classes/Object2.js',
+		'js/classes/Object3.js',
+		'js/classes/Object4.js',
 	]);
 	*/
 
@@ -80,18 +80,18 @@ Examples.prototype.onLoaded=function() {
 	);
 
 
-	// LOADING A CUSTOM OBJECTS
-	// Usually you would load all game objects in the Game-object's constructor-function.
+	// LOADING A CUSTOM CLASS
+	// Usually you would load all game classes in the Game-object's constructor-function.
 	// (see commented out example near the beginning of this file)
 
-	// For simplicity lets load the objects a this point
-	loader.loadObjects([
-		'js/objects/MovableCharacter.js'
+	// For simplicity lets load the class at this point
+	loader.loadClasses([
+		'js/classes/MovableCharacter.js'
 	]);
 
 	// Now that the object is loaded, lets create an instance of the object
 	movable = new MovableCharacter(
-		120, // x-position
+		300, // x-position
 		200 // y-position
 	);
 

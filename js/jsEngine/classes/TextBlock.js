@@ -3,7 +3,7 @@
  * A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
  */
 
-NewObject('TextBlock', [Animatable, View, Vector]);
+NewClass('TextBlock', [Animatable, View, Vector]);
 
 /**
  * The constructor for the TextBlock class.
@@ -24,13 +24,13 @@ NewObject('TextBlock', [Animatable, View, Vector]);
  * 	offset: new Vector(0, 0)
  * }</code>
  */
-TextBlock.prototype.textBlock = function (string, x, y, width, additionalProperties) {
+TextBlock.prototype.TextBlock = function (string, x, y, width, additionalProperties) {
 	if (string === undefined) {throw new Error('Missing argument: string'); }
 	if (width === undefined) {throw new Error('Missing argument: width'); }
 
 	// Call Vector's and view's constructors
-	this.view();
-	this.vector(x, y);
+	this.View();
+	this.Vector(x, y);
 
 	// Load default options
 	this.width = width;

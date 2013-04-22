@@ -1,6 +1,6 @@
-NewObject('GeometricObjectCollision');
+NewClass('GeometricObjectCollision');
 
-GeometricObjectCollision.prototype.geometricObjectCollision = function () {
+GeometricObjectCollision.prototype.GeometricObjectCollision = function () {
 	// Make a global reference to the game object
 	game = this;
 

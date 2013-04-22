@@ -1,11 +1,11 @@
 /**
  * Animator:
- * The animator handles animations inside objects based on sprites.
+ * The animator handles animations inside objects which inherit the Animatable class.
  * An animation is an eased change in a numeric variable inside an object.
  * The animator features different easing functions.
  */
 
-NewObject('Animator');
+NewClass('Animator');
 
 /**
  * Adds a new animation to the animator class (done automatically when running the animate-function).

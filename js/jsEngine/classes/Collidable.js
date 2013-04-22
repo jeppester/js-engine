@@ -1,13 +1,13 @@
 /**
  * Collidable:
- * An object with functions for checking for collisions with other objects of the same type.
+ * A class with functions for collisionschecking.
  * Can check both for precise (bitmap-based) collisions and bounding box collisions
  */
 
-NewObject('Collidable', [Sprite]);
+NewClass('Collidable', [Sprite]);
 
 /**
- * The constructor for the Collidable objects
+ * The constructor for the Collidable class
  * 
  * @param {string} source A ressource string for the sprite of the created object.
  * @param {number} x The x-position of the created object.
@@ -15,8 +15,8 @@ NewObject('Collidable', [Sprite]);
  * @param {number} dir The direction of the created object. Defaults to 0
  * @param {object} additionalProperties An object containing key-value pairs that will be set as properties for the created object. Can be used for setting advanced options such as sprite offset and opacity.
  */
-Collidable.prototype.collidable = function (source, x, y, dir, additionalProperties) {
-	this.sprite(source, x, y, dir, additionalProperties);
+Collidable.prototype.Collidable = function (source, x, y, dir, additionalProperties) {
+	this.Sprite(source, x, y, dir, additionalProperties);
 };
 
 /**

@@ -1,45 +1,45 @@
 /**
  * Engine:
- * The main game engine object.
+ * The main game engine class.
  * Responsible for depths, custom loops, the main loop, the main canvas, etc.
  */
 
 /**
- * Creates a new jsEngine object
+ * Creates a new jsEngine class
  *
- * @param {string} objectName The name of the new object
- * @param {mixed} An object or an array of objects to inherit functions from (to actually extend an inherited object, run the object's constructor from inside the extending object)
+ * @param {string} className The name of the new class
+ * @param {mixed} A class or an array of classes to inherit functions from (to actually extend an inherited class, run the class' constructor from inside the extending class)
  */
-NewObject = function (objectName, inherits) {
-	var constructorName, i, inheritClass, newClass;
+NewClass = function (className, inherits) {
+	var i, inheritClass, newClass;
 
-	if (!/^\w*$/.test(objectName)) {throw new Error("Invalid class name: " + objectName); }
+	if (!/^\w*$/.test(className)) {throw new Error("Invalid class name: " + className); }
 
-	constructorName = objectName.charAt(0).toLowerCase() + objectName.slice(1);
-	eval('window.' + objectName + ' = function () {this.' + constructorName + '.apply(this, arguments); }');
-	window[objectName].prototype[constructorName] = function () {};
-	newClass = window[objectName];
-	newClass.prototype.objectName = objectName;
-	newClass.prototype.extendedObjects = [];
-	newClass.prototype.extends = function (object) {
-		return this.extendedObjects.indexOf(object) !== -1;
-	}
-	newClass.prototype.implements = function (object) {
-		return (object.prototype.isPrototypeOf(this) ? true : this.extends(object));
-	}
+	eval('window.' + className + ' = function () {this.' + className + '.apply(this, arguments); }');
+	window[className].prototype[className] = function () {};
 
-	function inherit (newClass, inheritClass) {
+	newClass = window[className];
+	newClass.prototype.className = className;
+	newClass.prototype.extendedClasses = [];
+	newClass.prototype.extends = function (checkClass) {
+		return this.extendedClasses.indexOf(checkClass) !== -1;
+	};
+	newClass.prototype.implements = function (checkClass) {
+		return (checkClass.prototype.isPrototypeOf(this) ? true : this.extends(checkClass));
+	};
+
+	function inherit(newClass, inheritClass) {
 		var functionName;
 
-		newClass.prototype.extendedObjects.push(inheritClass);
-		Array.prototype.push.apply(newClass.prototype.extendedObjects, inheritClass.prototype.extendedObjects);
+		newClass.prototype.extendedClasses.push(inheritClass);
+		Array.prototype.push.apply(newClass.prototype.extendedClasses, inheritClass.prototype.extendedClasses);
 
 		for (functionName in inheritClass.prototype) {
 			if (typeof inheritClass.prototype[functionName] === "function") {
 				newClass.prototype[functionName] = inheritClass.prototype[functionName];
 			}
 		}
-	};
+	}
 
 	if (inherits) {
 		if (!Array.prototype.isPrototypeOf(inherits)) {throw new Error("Arguments inherits is not an array"); }
@@ -51,14 +51,14 @@ NewObject = function (objectName, inherits) {
 	}
 };
 
-NewObject('Engine');
+NewClass('Engine');
 
 /**
- * The constructor for the Engine object.
+ * The constructor for the Engine class.
  * 
- * @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
+ * @param {class} options An class containing key-value pairs that will be used as launch options for the engine.
  */
-Engine.prototype.engine = function (options) {
+Engine.prototype.Engine = function (options) {
 	this.options = options ? options: {};
 	this.load();
 };
@@ -70,7 +70,7 @@ Engine.prototype.engine = function (options) {
  */
 Engine.prototype.load = function () {
 	// Define all used vars
-	var copyOpt, audioFormats, i, opt, req, gc;
+	var copyOpt, audioFormats, i, opt, gc;
 
 	// Set global engine variable
 	engine = this;
@@ -148,12 +148,13 @@ Engine.prototype.load = function () {
 	this.gameClassPath = "js/Game.js";
 	this.backgroundColor = "#FFF";
 	this.timeFactor = 1;
+	this.disableTouchScroll = true;
 
 	this.soundsMuted = false;
 	this.musicMuted = false;
 
 	// Copy options to engine (except those which are only used for engine initialization)
-	copyOpt = ['backgroundColor', 'soundsMuted', 'musicMuted', 'cacheSounds', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'disableTouchScroll', 'soundsMuted', 'musicMuted', 'cacheSounds', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -161,6 +162,10 @@ Engine.prototype.load = function () {
 			delete this.options[opt];
 		}
 	}
+
+	// Set style for arena
+	this.arena.style.position = "absolute";
+	this.arena.style.background = "#fff";
 
 	// Make main canvas
 	this.mainCanvas = document.createElement("canvas");
@@ -179,9 +184,14 @@ Engine.prototype.load = function () {
 		this.setAutoResize(false);
 	}
 
-	// If jsEngine functions are not loaded, load them
-	if (typeof NewObject === "undefined") {
-		this.loadFiles(this.enginePath + '/jseFunctions.js');
+	// If disableTouchScroll is set to true, disable touch scroll
+	if (this.disableTouchScroll) {
+		document.addEventListener('touchmove', function(event) {
+			event.preventDefault();
+		}, false);
+		document.addEventListener('touchstart', function(event) {
+			event.preventDefault();
+		}, false);
 	}
 
 	// If Javascript Extensions has not been loaded, load them
@@ -201,35 +211,35 @@ Engine.prototype.load = function () {
 
 	// If the loader class does not exist, load it
 	if (typeof Loader === "undefined") {
-		this.loadFiles(this.enginePath + '/objects/Loader.js');
+		this.loadFiles(this.enginePath + '/classes/Loader.js');
 	}
 
 	// Create loader object
 	loader = new Loader();
 
 	// Load engine classes
-	loader.loadObjects([
-		this.enginePath + '/objects/Animatable.js',
-		this.enginePath + '/objects/Animator.js',
-		this.enginePath + '/objects/View.js',
-		this.enginePath + '/objects/Vector.js',
-		this.enginePath + '/objects/Line.js',
-		this.enginePath + '/objects/Polygon.js',
-		this.enginePath + '/objects/Rectangle.js',
-		this.enginePath + '/objects/Circle.js',
-		this.enginePath + '/objects/CustomLoop.js',
-		this.enginePath + '/objects/Sprite.js',
-		this.enginePath + '/objects/Collidable.js',
-		this.enginePath + '/objects/TextBlock.js',
-		this.enginePath + '/objects/GameObject.js',
-		this.enginePath + '/objects/Keyboard.js',
-		this.enginePath + '/objects/Pointer.js',
-		this.enginePath + '/objects/Sound.js',
-		this.enginePath + '/objects/Music.js'
+	loader.loadClasses([
+		this.enginePath + '/classes/Animatable.js',
+		this.enginePath + '/classes/Animator.js',
+		this.enginePath + '/classes/View.js',
+		this.enginePath + '/classes/Vector.js',
+		this.enginePath + '/classes/Line.js',
+		this.enginePath + '/classes/Polygon.js',
+		this.enginePath + '/classes/Rectangle.js',
+		this.enginePath + '/classes/Circle.js',
+		this.enginePath + '/classes/CustomLoop.js',
+		this.enginePath + '/classes/Sprite.js',
+		this.enginePath + '/classes/Collidable.js',
+		this.enginePath + '/classes/TextBlock.js',
+		this.enginePath + '/classes/GameObject.js',
+		this.enginePath + '/classes/Keyboard.js',
+		this.enginePath + '/classes/Pointer.js',
+		this.enginePath + '/classes/Sound.js',
+		this.enginePath + '/classes/Music.js'
 	]);
 
 	gc = this.gameClassPath;
-	loader.loadObjects([gc]);
+	loader.loadClasses([gc]);
 	this.gameClassName = gc.match(/(\w*)\.\w+$/)[1];
 
 	// Load themes
@@ -354,7 +364,7 @@ Engine.prototype.setAutoResize = function (enable) {
 		this.mainCanvas.style.width = this.canvasResX + "px";
 		this.mainCanvas.style.height = this.canvasResY + "px";
 	}
-}
+};
 
 /**
  * Function for resizing the canvas. Not used if engine option "autoResizeCanvas" is false.
@@ -362,7 +372,7 @@ Engine.prototype.setAutoResize = function (enable) {
  * @private
  */
 Engine.prototype.autoResizeCanvas = function () {
-	if (this !== engine) {engine.autoResizeCanvas(); return;}
+	if (this !== engine) {engine.autoResizeCanvas(); return; }
 
 	var h, w, windowWH, gameWH;
 
@@ -580,7 +590,7 @@ Engine.prototype.stopMainLoop = function () {
  * 
  * @private
  */
-Engine.prototype.mainLoop = function (test) {
+Engine.prototype.mainLoop = function () {
 	var name;
 
 	if (!this.running) {return; }
@@ -844,3 +854,19 @@ Engine.prototype.redraw = function (drawManualRedrawDepths) {
 		}
 	}
 };
+
+/**
+ * Downloads a screen dump of the arena. Very usable for creating game screenshots from browser consoles.
+ */
+Engine.prototype.dumpScreen = function () {
+	var dataString, img;
+
+	dataString = this.mainCanvas.toDataURL().replace(/image\/png/, 'image/octet-stream');
+
+	a = document.createElement('a');
+	a.href = dataString;
+	a.setAttribute('download', 'screendump.png');
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a, document.body);
+}
