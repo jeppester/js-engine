@@ -4,6 +4,13 @@
  * These extensions are used in some of the engine's classes and can also be used in games.
  */
 
+/**
+ * Returns the first object in an array, that has a specific property with a specific value.
+ * 
+ * @param {string} property The name of the property
+ * @param {mixed} value The value of the property (can be of any type)
+ * @return {mixed} The first found object, or false if no object is found
+ */
 Array.prototype.getElementByPropertyValue = function (property, value) {
 	var i;
 	for (i = 0; i < this.length; i ++) {
@@ -11,9 +18,16 @@ Array.prototype.getElementByPropertyValue = function (property, value) {
 			return this[i];
 		}
 	}
-	return undefined;
+	return false;
 };
 
+/**
+ * Sorts an array of objects (with the same properties) after a numeric property.
+ * 
+ * @param {string} property The name of the property
+ * @param {boolean} desc Whether of not sorting should be descending (instead of ascending); False by default.
+ * @retun {array} A sorted version of the array
+ */
 Array.prototype.sortByNumericProperty = function (property, desc) {
 	var sortedArray = [],
 		copy = [],
@@ -45,12 +59,22 @@ Array.prototype.sortByNumericProperty = function (property, desc) {
 	return sortedArray;
 };
 
+/**
+ * Executes a function as each object in an array.
+ * 
+ * @param {function} func The function to execute
+ */
 Array.prototype.forEach = function (func) {
 	for (var i = 0; i < this.length; i ++) {
 		func.call(this[i], i);
 	}
 };
 
+/**
+ * Imports all properties of another object.
+ * 
+ * @param {object} from The object from which to copy the properties
+ */
 Object.prototype.importProperties = function (from) {
 	var i;
 	for (i in from) {
@@ -61,6 +85,25 @@ Object.prototype.importProperties = function (from) {
 	}
 };
 
-Object.prototype.implements = function (object) {
-	return object.prototype.isPrototypeOf(this);
-}
+/**
+ * Checks if the object implements a class, meaning the object is either an instantiation of the class, or its class has inherited the checked class.
+ * 
+ * @param {class} checkClass The class to check if the object implements
+ * @return {boolean} Whether or not the object implements the checked class
+ */
+Object.prototype.implements = function (checkClass) {
+	return (checkClass.prototype.isPrototypeOf(this) ? true : this.inherits(checkClass));
+};
+
+/**
+ * Checks if the object's class inherits the another class.
+ * 
+ * @param {class} checkClass The class to check if the object's class has inherited
+ * @return {boolean} Whether or not the object's class inherits the checked class
+ */
+Object.prototype.inherits = function (checkClass) {
+	if (this.inheritedClasses) {
+		return this.inheritedClasses.indexOf(checkClass) !== -1;
+	}
+	return false;
+};

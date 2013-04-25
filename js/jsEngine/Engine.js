@@ -8,7 +8,7 @@
  * Creates a new jsEngine class
  *
  * @param {string} className The name of the new class
- * @param {mixed} A class or an array of classes to inherit functions from (to actually extend an inherited class, run the class' constructor from inside the extending class)
+ * @param {mixed} inherits A class or an array of classes to inherit functions from (to actually extend an inherited class, run the class' constructor from inside the extending class)
  */
 NewClass = function (className, inherits) {
 	var i, inheritClass, newClass;
@@ -20,19 +20,13 @@ NewClass = function (className, inherits) {
 
 	newClass = window[className];
 	newClass.prototype.className = className;
-	newClass.prototype.extendedClasses = [];
-	newClass.prototype.extends = function (checkClass) {
-		return this.extendedClasses.indexOf(checkClass) !== -1;
-	};
-	newClass.prototype.implements = function (checkClass) {
-		return (checkClass.prototype.isPrototypeOf(this) ? true : this.extends(checkClass));
-	};
+	newClass.prototype.inheritedClasses = [];
 
 	function inherit(newClass, inheritClass) {
 		var functionName;
 
-		newClass.prototype.extendedClasses.push(inheritClass);
-		Array.prototype.push.apply(newClass.prototype.extendedClasses, inheritClass.prototype.extendedClasses);
+		newClass.prototype.inheritedClasses.push(inheritClass);
+		Array.prototype.push.apply(newClass.prototype.inheritedClasses, inheritClass.prototype.inheritedClasses);
 
 		for (functionName in inheritClass.prototype) {
 			if (typeof inheritClass.prototype[functionName] === "function") {
@@ -186,10 +180,10 @@ Engine.prototype.load = function () {
 
 	// If disableTouchScroll is set to true, disable touch scroll
 	if (this.disableTouchScroll) {
-		document.addEventListener('touchmove', function(event) {
+		document.addEventListener('touchmove', function (event) {
 			event.preventDefault();
 		}, false);
-		document.addEventListener('touchstart', function(event) {
+		document.addEventListener('touchstart', function (event) {
 			event.preventDefault();
 		}, false);
 	}
@@ -859,7 +853,7 @@ Engine.prototype.redraw = function (drawManualRedrawDepths) {
  * Downloads a screen dump of the arena. Very usable for creating game screenshots from browser consoles.
  */
 Engine.prototype.dumpScreen = function () {
-	var dataString, img;
+	var dataString, a;
 
 	dataString = this.mainCanvas.toDataURL().replace(/image\/png/, 'image/octet-stream');
 
@@ -869,4 +863,4 @@ Engine.prototype.dumpScreen = function () {
 	document.body.appendChild(a);
 	a.click();
 	document.body.removeChild(a, document.body);
-}
+};
