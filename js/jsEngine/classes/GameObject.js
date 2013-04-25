@@ -11,6 +11,10 @@ NewClass('GameObject', [Collidable]);
 /**
  * The constructor for the GameObject class.
  *
+ * @param {string} source A string representing the source of the object's bitmap
+ * @param {number} x The x-position of the object in the game arena, in pixels
+ * @param {number} y The y-position of the object in the game arena, in pixels
+ * @param {number} dir The rotation (in radians) of the object when drawn in the game arena
  * @param {object} additionalProperties An object containing additional properties to assign to the created object.
  * The default is:
  * <code>
