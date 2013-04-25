@@ -223,11 +223,11 @@ Pointer.prototype.onTouchMove = function (event) {
 };
 
 /**
- * Checks if the pointer (mouse or touch) has been moved between the last and the current frame.
+ * Checks if the mouse has been moved between the last and the current frame.
  * 
  * @return {boolean} True if the pointer has been moved, false if not
  */
-Pointer.prototype.hasMoved = function () {
+Pointer.prototype.mouseHasMoved = function () {
 	return engine.last < this.mouse.lastMoved;
 };
 
