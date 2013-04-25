@@ -42,6 +42,8 @@ Loader.prototype.hideOverlay = function (callback) {
 	this.fade = function () {
 		var obj = loader.loadOverlay;
 		loader.fadeOpacity = Math.max(0, loader.fadeOpacity - 0.1);
+		loader.fadeOpacity = Math.floor(loader.fadeOpacity * 100) / 100;
+
 		obj.style.opacity = loader.fadeOpacity;
 
 		if (loader.fadeOpacity !== 0) {
