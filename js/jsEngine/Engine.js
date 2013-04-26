@@ -50,7 +50,31 @@ NewClass('Engine');
 /**
  * The constructor for the Engine class.
  * 
- * @param {class} options An class containing key-value pairs that will be used as launch options for the engine.
+ * @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
+ * The default options are:
+ * <code>{
+ * 	"arena": document.getElementById('arena'), // The element to use as game arena
+ * 	"avoidSubPixelRendering": true, // If subpixelrendering should be avoided
+ * 	"autoResize": true, // If the arena should autoresize to fit the window (or iframe)
+ * 	"autoResizeLimitToResolution": true, // If the autoresizing should be limited to the game's resolution
+ * 	"backgroundColor": "#FFF", // The color of the arena's background
+ * 	"cachedSoundCopies": 5, // How many times sounds should be ducplicated to allow multiple playbacks
+ * 	"canvasResX": 800, // The horizontal resolution to set for the game's main canvas
+ * 	"canvasResY": 600, // The vertical resolution to set for the game's main canvas
+ * 	"compositedDepths": [], // Id's of depth's for which compositing effects should be available
+ * 	"disableRightClick": true, // If right clicks inside the arena should be disabled
+ * 	"disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
+ * 	"drawBBoxes": false, // If Collidable object's bounding boxes should be drawn (good for debugging)
+ * 	"drawMasks": false, // If Collidable object's masks should be drawn (good for debugging)
+ * 	"enginePath": "js/jsEngine", // The path for the engine classes' directory
+ * 	"gameClassPath": "js/Game.js", // The path for the game's main class
+ * 	"manualRedrawDepths": [], // Id's of depth's which should not be automatically redrawn
+ * 	"musicMuted": false, // If all music playback should be initially muted
+ * 	"pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
+ * 	"soundsMuted": false, // If all sound effects should be initially muted
+ * 	"themesPath": "themes", // The path to the themes-directory
+ * 	"useRotatedBoundingBoxes": true, // If the engine should use rotated bounding boxes
+ * }</code>
  */
 Engine.prototype.Engine = function (options) {
 	this.options = options ? options: {};
@@ -148,7 +172,7 @@ Engine.prototype.load = function () {
 	this.musicMuted = false;
 
 	// Copy options to engine (except those which are only used for engine initialization)
-	copyOpt = ['backgroundColor', 'disableTouchScroll', 'soundsMuted', 'musicMuted', 'cacheSounds', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'loopsPerColCheck', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'disableTouchScroll', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
