@@ -73,7 +73,7 @@ Animatable.prototype.animate = function (properties, options) {
 
 	// If there are no properties left to animate and the animation does not have a callback function, do nothing
 	if (!c && anim.callback === function () {}) {
-		console.log('Animation skipped, nothing to animate');
+		// console.log('Animation skipped, nothing to animate');
 		return;
 	}
 
