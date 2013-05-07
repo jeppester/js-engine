@@ -1,6 +1,7 @@
 /**
  * Loader:
- * Class for loading and storing ressources
+ * Class for loading and storing ressources.
+ * On engine startup a Loader object is instantiated to the global variable "loader". This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed untill the loader.hideOverlay() is called.
  */
 
 NewClass('Loader');
@@ -26,7 +27,7 @@ Loader.prototype.Loader = function () {
 	this.loadOverlay = document.createElement('div');
 	this.loadOverlay.setAttribute('style', 'border: 0;position: absolute;top: 0;left: 0;width: 100%;height: 100%;z-index: 100;opacity: 1;');
 	this.loadOverlay.id = "loadOverlay";
-	this.loadOverlay.innerHTML = '<div id="loadOverlayText">JsEngine loading...</div>';
+	this.loadOverlay.innerHTML = '<div id="loadOverlayText">jsEngine loading...</div>';
 	engine.arena.appendChild(this.loadOverlay);
 };
 
@@ -495,7 +496,7 @@ Loader.prototype.generateMask = function (ressourceString, alphaLimit) {
 	ctx = canvas.getContext('2d');
 
 	if (image === false) {
-		console.log(ressourceString);
+		throw new Error('Trying to create mask for non-existing ressource: ' + ressourceString);
 	}
 	ctx.drawImage(
 		image,

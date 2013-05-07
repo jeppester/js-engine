@@ -179,8 +179,7 @@ CustomLoop.prototype.execute = function () {
 		exec = this.activities[i];
 
 		if (!exec.activity) {
-			console.log('Trying to exec non-existent attached function');
-			console.log(exec);
+			throw new Error('Trying to exec non-existent attached function');
 			return;
 		}
 
