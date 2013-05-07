@@ -305,6 +305,7 @@ Engine.prototype.initialize = function () {
 	this.depthMap = [];
 
 	// Create canvases for each depth and set the depth's main canvas, based on their composite- and manualRedraw settings
+	this.options.depths = this.options.depths !== undefined ? this.options.depths : 1;
 	for (i = 0; i < this.options.depths; i ++) {
 		d = new View();
 		d.manualRedraw = this.manualRedrawDepths.indexOf(i) !== -1;
@@ -353,8 +354,11 @@ Engine.prototype.initialize = function () {
 	}
 
 	this.startMainLoop();
-
 	console.log('jsEngine started');
+
+	if (this.onStarted) {
+		this.onStarted();
+	}
 };
 
 /**
@@ -730,7 +734,7 @@ Engine.prototype.loadFiles = function (filePaths) {
 			eval.call(window, codeString);
 		}
 		catch (e) {
-			throw new Error('Failed loading "' + filePaths[i] + '": ' + e.type + ' "' + e.arguments[0] + '"');
+			throw new Error('Failed loading "' + filePaths[i]);
 		}
 	}
 
@@ -782,7 +786,7 @@ Engine.prototype.ajaxRequest = function (url, params, async, callback, caller) {
 			callback(req.responseText);
 		}
 		else {
-			console.log('XMLHttpRequest failed: ' + url);
+			throw new Error('XMLHttpRequest failed: ' + url);
 		}
 	}
 };
