@@ -15,9 +15,13 @@ Keyboard.prototype.Keyboard = function () {
 
 	document.addEventListener('keydown', function (event) {
 		keyboard.onKeyDown(event);
+		event.preventDefault();
+		return false;
 	}, false);
 	document.addEventListener('keyup', function (event) {
 		keyboard.onKeyUp(event);
+		event.preventDefault();
+		return false;
 	}, false);
 
 	// Create key array
