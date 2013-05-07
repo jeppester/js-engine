@@ -15,7 +15,7 @@ echo "\n";
 
 if (in_array("--help",$argv)) {
 	echo "
-packProject.php
+packProject.php [option 1] [option 2] [...]
 Minifies and packs a jsEngine project's code to one single file.
 
 Options:
@@ -188,8 +188,6 @@ if (!$options['keepLogs']) {
 	$filesContent=preg_replace ('/console\.log[^\n|;]*(\n|;)?/', '', $filesContent);
 };
 
-require dirname(__FILE__) . '/jsmin.php';
-
 if ($options['nominify']) {
 	echo "Nominify option used, saving concatenated files\n";
 
@@ -197,7 +195,7 @@ if ($options['nominify']) {
 }
 else {
 	echo "Minifying files\n";
-
+	require dirname(__FILE__) . '/jsmin.php';
 	$packedJS = JSMin::minify($filesContent);
 }
 
