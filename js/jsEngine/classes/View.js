@@ -151,19 +151,32 @@ View.prototype.applyToThisAndChildren = function (func) {
 
 /**
  * Removes the View from the arena and everywhere where it is registered. If the object has children, the children will be removed aswell.
+ * 
+ * @param {boolean} purgeChildren Whether or not to purge all children, meaning that their scheduled functions and loop-attached functions will be removed. (true by default)
  */
-View.prototype.remove = function () {
-	this.removeAllChildren();
+View.prototype.remove = function (purgeChildren) {
+	this.removeAllChildren(purgeChildren);
+	
 	engine.purge(this);
 };
 
 /**
  * Removes all children from the View.
+ * 
+ * @param {boolean} purge Whether or not to purge the removed children, meaning that their scheduled functions and loop-attached functions will be removed. (true by default)
  */
-View.prototype.removeAllChildren = function () {
-	if (this.children.length) {
-		this.removeChildren.apply(this, this.children);
-	}
+View.prototype.removeAllChildren = function (purge) {
+	purge = purge !== undefined ? purge : true;
+	
+	var rmChild;
+
+	rmChild = this.children.splice(0, this.children.length);
+	rmChild.forEach(function () {
+		this.parent = undefined;
+		if (purge) {
+			engine.purge(this);
+		}
+	});
 };
 
 /**
@@ -214,9 +227,7 @@ View.prototype.drawChildren = function (ctx) {
 			this.drawMask(ctx);
 		}
 	}
-
-	if (!this.children) {console.log(this); return; }
-
+	
 	for (i = 0;i < this.children.length;i ++) {
 		if (this.children[i].drawChildren) {
 			this.children[i].drawChildren(ctx);
