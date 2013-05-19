@@ -1,6 +1,6 @@
 /**
  * Loader:
- * Class for loading and storing ressources.
+ * Class for loading and storing resources.
  * On engine startup a Loader object is instantiated to the global variable "loader". This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed untill the loader.hideOverlay() is called.
  */
 
@@ -67,97 +67,97 @@ Loader.prototype.hideOverlay = function (callback) {
 /**
  * Fetches an image from the Loader. This function will automatically be called by objects that implements the Sprite object.
  * 
- * @param {string} ressource The ressource string of the image that should be fetched
+ * @param {string} resource The resource string of the image that should be fetched
  * @param {string} themeName The name of the theme from which the image should be fetched. If unset, the engine's default theme will be used
- * @return {object} The DOM Image element corresponding to the ressource string and theme
+ * @return {object} The DOM Image element corresponding to the resource string and theme
  */
-Loader.prototype.getImage = function (ressource, themeName) {
-	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
+Loader.prototype.getImage = function (resource, themeName) {
+	if (resource === undefined) {throw new Error('Missing argument: resource'); }
 	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
-	return this.getRessource(ressource, 'images', themeName);
+	return this.getResource(resource, 'images', themeName);
 };
 
 /**
  * Fetches a sound from the Loader.
  * 
- * @param {string} ressource The ressource string of the sound that should be fetched
+ * @param {string} resource The resource string of the sound that should be fetched
  * @param {string} themeName The name of the theme from which the sound should be fetched. If unset, the engine's default theme will be used
- * @return {object} A Sound object corresponding to the ressource string and theme
+ * @return {object} A Sound object corresponding to the resource string and theme
  */
-Loader.prototype.getSound = function (ressource, themeName) {
-	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
+Loader.prototype.getSound = function (resource, themeName) {
+	if (resource === undefined) {throw new Error('Missing argument: resource'); }
 	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
-	return this.getRessource(ressource, 'sfx', themeName);
+	return this.getResource(resource, 'sfx', themeName);
 };
 
 /**
  * Fetches a music track from the Loader.
  * 
- * @param {string} ressource The ressource string of the track that should be fetched
+ * @param {string} resource The resource string of the track that should be fetched
  * @param {string} themeName The name of the theme from which the track should be fetched. If unset, the engine's default theme will be used
- * @return {object} A Music object corresponding to the ressource string and theme
+ * @return {object} A Music object corresponding to the resource string and theme
  */
-Loader.prototype.getMusic = function (ressource, themeName) {
-	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
+Loader.prototype.getMusic = function (resource, themeName) {
+	if (resource === undefined) {throw new Error('Missing argument: resource'); }
 	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
-	return this.getRessource(ressource, 'music', themeName);
+	return this.getResource(resource, 'music', themeName);
 };
 
 /**
  * Creates (or loads from cache) a mask for an image which is loaded by the Loader.
  * This function is automatically used by the Collidable object for fetching masks for collision checking.
  * 
- * @param {string} ressource The ressource string of the image that should be fetched
+ * @param {string} resource The resource string of the image that should be fetched
  * @param {string} themeName The name of the theme from which the image should be fetched. If unset, the engine's default theme will be used
- * @return {object} A generated mask (canvas element) for the image element corresponding to the ressource string and theme
+ * @return {object} A generated mask (canvas element) for the image element corresponding to the resource string and theme
  */
-Loader.prototype.getMask = function (ressource, themeName) {
-	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
+Loader.prototype.getMask = function (resource, themeName) {
+	if (resource === undefined) {throw new Error('Missing argument: resource'); }
 	themeName = themeName !== undefined ? themeName : engine.defaultTheme;
 
 	var mask;
 
 	// Check if the mask has been generated
-	mask = this.getRessource(ressource, 'masks', themeName);
+	mask = this.getResource(resource, 'masks', themeName);
 	if (mask) {
 		// If yes, return the mask
 		return mask;
 	}
 	// Otherwise, generate the mask and return it
 	else {
-		mask = this.generateMask(ressource);
-		this.themes[themeName].masks[ressource] = mask;
+		mask = this.generateMask(resource);
+		this.themes[themeName].masks[resource] = mask;
 		return mask;
 	}
 };
 
 /**
- * Fetches a ressource from the Loader's cache. Used by the getImage-, getImage- and getMusic functions.
+ * Fetches a resource from the Loader's cache. Used by the getImage-, getImage- and getMusic functions.
  * 
  * @private
- * @param {string} ressource The ressource string of the ressource that should be fetched
- * @param {string} typeString A string representing the ressource type, possible values are: "image", "sfx" and "music"
+ * @param {string} resource The resource string of the resource that should be fetched
+ * @param {string} typeString A string representing the resource type, possible values are: "image", "sfx" and "music"
  * @param {string} themeName The name of the theme from which the image should be fetched. If unset, the engine's default theme will be used
- * @return {mixed} The ressource corresponding to the provided ressource string, ressource type and theme name
+ * @return {mixed} The resource corresponding to the provided resource string, resource type and theme name
  */
-Loader.prototype.getRessource = function (ressource, typeString, themeName) {
-	if (ressource === undefined) {throw new Error('Missing argument: ressource'); }
+Loader.prototype.getResource = function (resource, typeString, themeName) {
+	if (resource === undefined) {throw new Error('Missing argument: resource'); }
 	if (typeString === undefined) {throw new Error('Missing argument: typeString'); }
 	if (themeName === undefined) {throw new Error('Missing argument: themeName'); }
 	var res, inh, i;
 
-	if (ressource.indexOf('/') !== -1) {
-		ressource = ressource.replace(/\//g, '.');
+	if (resource.indexOf('/') !== -1) {
+		resource = resource.replace(/\//g, '.');
 	}
 
-	res = this.themes[themeName][typeString][ressource];
+	res = this.themes[themeName][typeString][resource];
 
-	// Search for the ressource in inherited themes
+	// Search for the resource in inherited themes
 	if (res === undefined) {
 		for (i = 0; i < this.themes[themeName].inherit.length; i ++) {
 			inh = this.themes[themeName].inherit[i];
 			if (this.themes[inh]) {
-				res = this.themes[inh][typeString][ressource];
+				res = this.themes[inh][typeString][resource];
 
 				if (res) {
 					break;
@@ -170,9 +170,9 @@ Loader.prototype.getRessource = function (ressource, typeString, themeName) {
 };
 
 /**
- * Fetches all loaded images' ressource strings (from all themes).
+ * Fetches all loaded images' resource strings (from all themes).
  * 
- * @return {array} An array containing all loaded images' ressource strings
+ * @return {array} An array containing all loaded images' resource strings
  */
 Loader.prototype.getImageSources = function () {
 	var object, sourceStrings, currentDir, loopThrough, inheritTheme, i;
@@ -212,12 +212,12 @@ Loader.prototype.getImageSources = function () {
 };
 
 /**
- * Fetches all loaded sounds' ressource strings (from all themes).
+ * Fetches all loaded sounds' resource strings (from all themes).
  * 
- * @return {array} An array containing all loaded sounds' ressource strings
+ * @return {array} An array containing all loaded sounds' resource strings
  */
 Loader.prototype.getAllSounds = function () {
-	var res, themeName, theme, ressourceString, ressource;
+	var res, themeName, theme, resourceString, resource;
 
 	res = [];
 
@@ -225,9 +225,9 @@ Loader.prototype.getAllSounds = function () {
 		if (this.themes.hasOwnProperty(themeName)) {
 			theme = this.themes[themeName];
 
-			for (ressourceString in theme.sfx) {
-				if (theme.sfx.hasOwnProperty(ressourceString)) {
-					res.push(theme.sfx[ressourceString]);
+			for (resourceString in theme.sfx) {
+				if (theme.sfx.hasOwnProperty(resourceString)) {
+					res.push(theme.sfx[resourceString]);
 				}
 			}
 		}
@@ -237,12 +237,12 @@ Loader.prototype.getAllSounds = function () {
 };
 
 /**
- * Fetches all loaded music tracks' ressource strings (from all themes).
+ * Fetches all loaded music tracks' resource strings (from all themes).
  * 
- * @return {array} An array containing all loaded music tracks' ressource strings
+ * @return {array} An array containing all loaded music tracks' resource strings
  */
 Loader.prototype.getAllMusic = function () {
-	var res, themeName, theme, ressourceString, ressource;
+	var res, themeName, theme, resourceString, resource;
 
 	res = [];
 
@@ -250,9 +250,9 @@ Loader.prototype.getAllMusic = function () {
 		if (this.themes.hasOwnProperty(themeName)) {
 			theme = this.themes[themeName];
 
-			for (ressourceString in theme.music) {
-				if (theme.music.hasOwnProperty(ressourceString)) {
-					res.push(theme.music[ressourceString]);
+			for (resourceString in theme.music) {
+				if (theme.music.hasOwnProperty(resourceString)) {
+					res.push(theme.music[resourceString]);
 				}
 			}
 		}
@@ -262,10 +262,10 @@ Loader.prototype.getAllMusic = function () {
 };
 
 /**
- * Loads javascript objects from files. The loaded objects' names must follow the following format: [ObjectName].js 
+ * Loads javascript classes from files. The loaded classes' names must follow the following format: [ClassName].js 
  * 
- * @param {array} paths An array of paths to javascript - containing objects - that should be loaded
- * @return {boolean} True, when the objects has been loaded without any errors
+ * @param {array} paths An array of paths to javascript - containing classes - that should be loaded
+ * @return {boolean} True, when the classes has been loaded without any errors
  */
 Loader.prototype.loadClasses = function (paths) {
 	if (paths === undefined) {throw new Error('Missing argument: paths'); }
@@ -298,7 +298,7 @@ Loader.prototype.reloadAllClasses = function () {
 };
 
 /**
- * Loads a list of themes. This function is automatically called by the Eninge during its startup, for loading the themes specified bh the launch options.
+ * Loads a list of themes. This function is automatically called by the Engine during its startup, for loading the themes specified by the launch options.
  * 
  * @private
  * @param {array} themeNames An array of theme names (as strings) to load
@@ -335,22 +335,22 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 
 		// Create new theme
 		this.themes[name] = theme;
-		theme.ressourcesCount = 0;
-		theme.ressourcesLoaded = 0;
+		theme.resourcesCount = 0;
+		theme.resourcesLoaded = 0;
 		theme.masks = {};
 		theme.bBoxes = {};
 
 		// Load all images
-		this.loadRessources(theme, theme.images, 'images');
-		this.loadRessources(theme, theme.sfx, 'sfx');
-		this.loadRessources(theme, theme.music, 'music');
+		this.loadResources(theme, theme.images, 'images');
+		this.loadResources(theme, theme.sfx, 'sfx');
+		this.loadResources(theme, theme.music, 'music');
 	}
 
 	// Check if the theme was empty, if so, run callback
 	total = 0;
 	for (i in this.themes) {
 		if (this.themes.hasOwnProperty(i)) {
-			total += this.themes[i].ressourcesCount;
+			total += this.themes[i].resourcesCount;
 		}
 	}
 	if (total === 0) {
@@ -361,14 +361,14 @@ Loader.prototype.loadThemes = function (themeNames, callback) {
 };
 
 /**
- * Loads ressources to a theme. This function is used by loadThemes for caching the theme ressources.
+ * Loads resources to a theme. This function is used by loadThemes for caching the theme resources.
  * 
  * @private
- * @param {object} theme A theme object to load the ressources to
- * @param {object} object An object containing references to theme ressources (like the subcategories of theme files)
- * @param {string} typeString A string defining the ressource type. Supported types are: "images", "sfx" and "music"
+ * @param {object} theme A theme object to load the resources to
+ * @param {object} object An object containing references to theme resources (like the subcategories of theme files)
+ * @param {string} typeString A string defining the resource type. Supported types are: "images", "sfx" and "music"
  */
-Loader.prototype.loadRessources = function (theme, object, typeString) {
+Loader.prototype.loadResources = function (theme, object, typeString) {
 	if (theme === undefined) {throw new Error('Missing argument: theme'); }
 	if (object === undefined) {throw new Error('Missing argument: object'); }
 	if (typeString === undefined) {throw new Error('Missing argument: typeString'); }
@@ -376,23 +376,23 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 	var onload, res, path, i, format, images;
 
 	onload = function () {
-		var ressourceString, theme, i;
+		var resourceString, theme, i;
 		if (this.hasAttribute('data-loaded')) {return; }
 
 
 		if (engine.preGenerateBoundingBoxes && this.toString() === '[object HTMLImageElement]') {
-			ressourceString = this.getAttribute('data-ressourceString');
+			resourceString = this.getAttribute('data-resourceString');
 			theme = this.getAttribute('data-theme');
 
-			console.log('Pre-generating bounding box: ' + ressourceString);
+			console.log('Pre-generating bounding box: ' + resourceString);
 			for (i = 0; i < 100; i++) {
-				loader.getBBox(ressourceString, theme, i / 50 * Math.PI);
+				loader.getBBox(resourceString, theme, i / 50 * Math.PI);
 			}
 		}
 
 		this.setAttribute('data-loaded', 'true');
 		theme = loader.themes[this.getAttribute('data-theme')];
-		theme.ressourcesLoaded ++;
+		theme.resourcesLoaded ++;
 
 		loader.checkAllLoaded();
 	};
@@ -422,7 +422,7 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 				}
 
 				res.onload = onload;
-				theme.ressourcesCount ++;
+				theme.resourcesCount ++;
 				break;
 
 			case 'sfx':
@@ -442,7 +442,7 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 				if (engine.preloadSounds) {
 					res.setAttribute('preload', 'auto');
 					res.addEventListener("canplaythrough", onload, false);
-					theme.ressourcesCount ++;
+					theme.resourcesCount ++;
 				}
 				break;
 
@@ -463,32 +463,32 @@ Loader.prototype.loadRessources = function (theme, object, typeString) {
 				if (engine.preloadSounds) {
 					res.setAttribute('preload', 'auto');
 					res.addEventListener("canplaythrough", onload, false);
-					theme.ressourcesCount ++;
+					theme.resourcesCount ++;
 				}
 				break;
 			}
 
 			res.setAttribute('data-theme', theme.name);
-			res.setAttribute('data-ressourceString', path.replace(/\./g, '/'));
+			res.setAttribute('data-resourceString', path.replace(/\./g, '/'));
 		}
 	}
 };
 
 /**
- * Generates a mask for an image specified by its ressource string.
+ * Generates a mask for an image specified by its resource string.
  * This function is used by getMask to fetch and cache masks for each of the loaded images.
  * 
- * @param {string} ressourceString A ressource string specifying the image to generate a mask for
+ * @param {string} resourceString A resource string specifying the image to generate a mask for
  * @param {number} alphaLimit An alpha value (0-255). Pixel having this alpha value or larger will become black on the mask, pixels with a value below the limit will become completely transparent
  * @return {object} A canvas element with the generated mask
  */
-Loader.prototype.generateMask = function (ressourceString, alphaLimit) {
-	if (ressourceString === undefined) {throw new Error('Missing argument: ressourceString'); }
+Loader.prototype.generateMask = function (resourceString, alphaLimit) {
+	if (resourceString === undefined) {throw new Error('Missing argument: resourceString'); }
 	alphaLimit = alphaLimit !== undefined ? alphaLimit : 255;
 
 	var image, canvas, ctx, bitmap, data, length, pixel, top, bottom, left, right, x, y;
 
-	image = loader.getImage(ressourceString);
+	image = loader.getImage(resourceString);
 
 	canvas = document.createElement('canvas');
 	canvas.width = image.width;
@@ -496,7 +496,7 @@ Loader.prototype.generateMask = function (ressourceString, alphaLimit) {
 	ctx = canvas.getContext('2d');
 
 	if (image === false) {
-		throw new Error('Trying to create mask for non-existing ressource: ' + ressourceString);
+		throw new Error('Trying to create mask for non-existing resource: ' + resourceString);
 	}
 	ctx.drawImage(
 		image,
@@ -552,10 +552,10 @@ Loader.prototype.generateMask = function (ressourceString, alphaLimit) {
 };
 
 /**
- * Checks if all ressources - of all themes - has been loaded. This check is automatically called any time a single ressource has finished loading.
+ * Checks if all resources - of all themes - has been loaded. This check is automatically called any time a single resource has finished loading.
  * 
  * @private
- * @return {boolean} Whether or not all themes' ressources has been succesfully loaded
+ * @return {boolean} Whether or not all themes' resources has been succesfully loaded
  */
 Loader.prototype.checkAllLoaded = function () {
 	var i, total, loaded, theme;
@@ -566,8 +566,8 @@ Loader.prototype.checkAllLoaded = function () {
 	for (i in this.themes) {
 		if (this.themes.hasOwnProperty(i)) {
 			theme = this.themes[i];
-			total += theme.ressourcesCount;
-			loaded += theme.ressourcesLoaded;
+			total += theme.resourcesCount;
+			loaded += theme.resourcesLoaded;
 		}
 	}
 	if (loaded === total) {

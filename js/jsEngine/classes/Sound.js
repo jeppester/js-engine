@@ -15,13 +15,26 @@ Sound.prototype.Sound = function (audioElement) {
 	if (audioElement === undefined) {throw new Error('Missing argument: audioElement'); }
 	if (audioElement.toString() !== "[object HTMLAudioElement]") {throw new Error('Argument audioElement has to be of type HTMLAudioElement'); }
 
-	var i;
+	var i, snd;
 
 	this.source = audioElement;
 	this.playbackId = 0;
 
-	// Prepare copies of the element, to be used for simultaneous playback
+	// When ready for playback, prepare copies of the element, to be used for simultaneous playback
 	this.elements = [];
+	snd = this;
+	this.source.addEventListener("canplaythrough", function () {
+		snd.cacheCopies();
+	}, false);
+};
+
+/**
+ * Caches copies of the sound element, to enable simultaneous playback of the sound.
+ * This function is automatically called when the source sound is ready for playback.
+ * 
+ * @private
+ */
+Sound.prototype.cacheCopies = function () {
 	for (i = 0; i < engine.cachedSoundCopies; i ++) {
 		this.elements.push(this.source.cloneNode());
 		this.elements[i].started = false;

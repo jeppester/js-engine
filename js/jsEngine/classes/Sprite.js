@@ -110,7 +110,7 @@ Sprite.prototype.refreshSource = function () {
 /**
  * Sets the bitmap-source of the object. For more information about bitmaps and themes, see themes.
  * 
- * @param {string} The ressource string of the bitmap-source to use for the object
+ * @param {string} The resource string of the bitmap-source to use for the object
  */
 Sprite.prototype.setSource = function (source) {
 	if (source === undefined) {throw new Error('Missing argument: source'); }

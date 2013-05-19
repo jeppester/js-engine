@@ -9,7 +9,7 @@ NewClass('Collidable', [Sprite]);
 /**
  * The constructor for the Collidable class
  * 
- * @param {string} source A ressource string for the sprite of the created object.
+ * @param {string} source A resource string for the sprite of the created object.
  * @param {number} x The x-position of the created object.
  * @param {number} y The y-position of the created object.
  * @param {number} dir The direction of the created object. Defaults to 0
