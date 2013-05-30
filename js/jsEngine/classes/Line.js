@@ -3,7 +3,7 @@
  * A math class which is used for handling lines
  */
 
-NewClass('Line', [View]);
+NewClass('Line');
 
 /**
  * Constructor for the Line class. Uses setFromVectors to create the line.
@@ -15,7 +15,6 @@ Line.prototype.Line = function (startVector, endVector) {
 	startVector = startVector !== undefined ? startVector : new Vector(0, 0);
 	endVector = endVector !== undefined ? endVector : new Vector(0, 0);
 
-	this.View();
 	this.setFromVectors(startVector, endVector);
 };
 
@@ -261,9 +260,10 @@ Line.prototype.getDistance = function (object) {
  * @private
  * @param {object} c A canvas 2D context on which to draw the Line
  */
-Line.prototype.drawCanvas = function (c) {
+Line.prototype.drawCanvas = function (c, cameraOffset) {
 	c.save();
 
+	c.translate(-cameraOffset.x, -cameraOffset.y);
 	c.strokeStyle = "#f00";
 	c.beginPath();
 

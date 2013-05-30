@@ -3,7 +3,7 @@
  * A math class which is used for handling two-dimensional vectors
  */
 
-NewClass('Vector', [Animatable, View]);
+NewClass('Vector', [Animatable]);
 
 /**
  * Constructor for the Vector class. Uses set-function to set the vector from x- and y values.
@@ -12,7 +12,6 @@ NewClass('Vector', [Animatable, View]);
  * @param {number} y The y-value to set for the vector
  */
 Vector.prototype.Vector = function (x, y) {
-	this.View();
 	this.set(x, y);
 };
 
@@ -266,14 +265,15 @@ Vector.prototype.getDistance = function (object) {
 };
 
 /**
- * Draws the Vector object on the canvas, as a point (if added as a child of a View)
- *
+ * Draws the Vector object on a canvas, as a point
+ * 
  * @private
  * @param {object} c A canvas 2D context on which to draw the Vector
  */
-Vector.prototype.drawCanvas = function (c) {
+Vector.prototype.drawCanvas = function (c, cameraOffset) {
 	c.save();
 
+	c.translate(-cameraOffset.x, -cameraOffset.y);
 	c.fillStyle = '#f00';
 	c.beginPath();
 

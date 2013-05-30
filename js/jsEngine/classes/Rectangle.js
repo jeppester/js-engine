@@ -3,7 +3,7 @@
  * A math class which is used for handling non-rotated rectangles
  */
 
-NewClass('Rectangle', [Animatable, View]);
+NewClass('Rectangle', [Animatable]);
 
 /**
  * The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
@@ -14,7 +14,6 @@ NewClass('Rectangle', [Animatable, View]);
  * @param {number} height The height of the rectangle
  */
 Rectangle.prototype.Rectangle = function (x, y, width, height) {
-	this.View();
 	this.set(x, y, width, height);
 };
 
@@ -115,6 +114,21 @@ Rectangle.prototype.scale = function (factor) {
 };
 
 /**
+ * Combines the rectangle with another rectangle, returning the bounding rectangle of the for the two rectangles
+ *
+ * @param {object} The rectangle to combine with
+ * @return {object} The bounding rectangle for the two combined rectangles
+ */
+Rectangle.prototype.combine = function (rectangle) {
+	if (!rectangle.implements(Rectangle)) {throw new Error('Argument rectangle should be of type Rectangle'); }
+
+	var pol = this.getPolygon();
+	pol.points = pol.points.concat(rectangle.getPolygon().points);
+
+	return pol.getBoundingRectangle();
+}
+
+/**
  * Creates a polygon with the same points as the rectangle.
  * 
  * @return {object} The created Polygon object
@@ -191,10 +205,12 @@ Rectangle.prototype.intersects = function (object) {
  * @private
  * @param {object} c A canvas 2D context on which to draw the Rectangle
  */
-Rectangle.prototype.drawCanvas = function (c) {
+Rectangle.prototype.drawCanvas = function (c, cameraOffset) {
 	c.save();
 
+	c.translate(-cameraOffset.x, -cameraOffset.y);
 	c.strokeStyle = "#f00";
+
 	c.beginPath();
 
 	c.moveTo(this.x, this.y);

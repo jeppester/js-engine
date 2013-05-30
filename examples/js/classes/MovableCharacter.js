@@ -14,8 +14,8 @@ MovableCharacter.prototype.MovableCharacter = function(x, y) {
 	// Call the sprite constructor to fully extend the sprite and set all sprite properties
 	this.Sprite('Character', x, y, 0);
 
-	// Add step function to 'eachFrame'-loop
-	engine.loops.eachFrame.attachFunction(
+	// Add step function to the current room's eachFrame'-loop
+	engine.currentRoom.loops.eachFrame.attachFunction(
 		this, // This object (an instance reference is needed by the engine)
 		this.step // The function to call each time the loop executes
 	);
@@ -44,7 +44,7 @@ MovableCharacter.prototype.step = function() {
 	}
 
 	// Space
-	if (keyboard.isPressed(32)) {
+	if (keyboard.isPressed(KEY_SPACE)) {
 		// Turn the character around
 		this.animate(
 			{

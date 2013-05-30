@@ -6,7 +6,7 @@ GeometricObjectCollision.prototype.GeometricObjectCollision = function () {
 
 	// Add a circle
 	circle = new Circle(300, 200, 80);
-		
+	
 	// Add different objects to calculate the distance to
 	line = new Line().setFromCoordinates(20, 320, 80, 380);
 	polygon = new Polygon().setFromCoordinates(540, 40, 535, 70.5, 560, 70.5, 540, 50, 560, 35);
@@ -20,7 +20,7 @@ GeometricObjectCollision.prototype.GeometricObjectCollision = function () {
 	text4 = new TextBlock('Distance to circle: 0', 10, 70, 600);
 	text5 = new TextBlock('Distance to rectangle: 0', 10, 90, 600);
 
-	engine.depth[0].addChildren(circle, line, polygon, rectangle, circle2, text, text2, text3, text4, text5);
+	engine.currentRoom.addChildren(circle, line, polygon, rectangle, circle2, text, text2, text3, text4, text5);
 
 	loader.hideOverlay(function () {
 		game.onLoaded();
@@ -28,7 +28,7 @@ GeometricObjectCollision.prototype.GeometricObjectCollision = function () {
 };
 
 GeometricObjectCollision.prototype.onLoaded = function () {
-	engine.loops.eachFrame.attachFunction(this, this.step);
+	engine.currentRoom.loops.eachFrame.attachFunction(this, this.step);
 };
 
 GeometricObjectCollision.prototype.step = function () {

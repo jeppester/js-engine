@@ -3,7 +3,7 @@
  * A math class which is used for handling polygons
  */
 
-NewClass('Polygon', [View]);
+NewClass('Polygon');
 
 /**
  * The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
@@ -11,7 +11,6 @@ NewClass('Polygon', [View]);
  * @param {array} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
  */
 Polygon.prototype.Polygon = function (points) {
-	this.View();
 	this.setFromPoints(points);
 };
 
@@ -153,6 +152,30 @@ Polygon.prototype.getLines = function () {
 	}
 
 	return lines;
+};
+
+/**
+ * Calculates the bounding rectangle of the polygon
+ * 
+ * @return {object} The bounding rectangle
+ */
+Polygon.prototype.getBoundingRectangle = function () {
+	if (this.points.length === 0) {throw new Error('Cannot create bounding rectangle for pointless polygon'); }
+
+	var startVector, endVector, i;
+
+	startVector = new Vector(this.points[0].x, this.points[0].y);
+	endVector = startVector.copy();
+
+	for (i = 0; i < this.points.length; i ++) {
+		startVector.x = Math.min(this.points[i].x, startVector.x);
+		startVector.y = Math.min(this.points[i].y, startVector.y);
+
+		endVector.x = Math.max(this.points[i].x, endVector.x);
+		endVector.y = Math.max(this.points[i].y, endVector.y);
+	}
+
+	return new Rectangle().setFromVectors(startVector, endVector.subtract(startVector));
 };
 
 /**
@@ -349,11 +372,12 @@ Polygon.prototype.intersects = function (object, countIntersections) {
  * @private
  * @param {object} c A canvas 2D context on which to draw the Polygon
  */
-Polygon.prototype.drawCanvas = function (c) {
+Polygon.prototype.drawCanvas = function (c, cameraOffset) {
 	var i, len;
 
 	c.save();
 
+	c.translate(-cameraOffset.x, -cameraOffset.y);
 	c.strokeStyle = "#f00";
 	c.beginPath();
 

@@ -38,8 +38,8 @@ GameObject.prototype.GameObject = function (source, x, y, dir, additionalPropert
 	this.mask = this.mask ? this.mask : loader.getMask(source, this.getTheme());
 
 	// Add object to right loop
-	this.loop = this.loop ? this.loop : 'eachFrame';
-	engine.loops[this.loop].attachFunction(this, this.updatePosition);
+	this.loop = this.loop ? this.loop : engine.currentRoom.loops.eachFrame;
+	this.loop.attachFunction(this, this.updatePosition);
 
 	this.speed = this.speed ? this.speed : new Vector(0, 0);
 	this.alive = true;

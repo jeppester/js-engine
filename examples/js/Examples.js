@@ -29,8 +29,10 @@ Examples.prototype.Examples = function () {
 Examples.prototype.onLoaded=function() {
 	var text, sprite, movable;
 
-	// Hide loader overlay
-	loader.hideOverlay();
+	// Create two views and add them to the room
+	this.bgView = new View();
+	this.fgView = new View();
+	engine.currentRoom.addChildren(this.bgView, this.fgView);
 
 	// TEXT EXAMPLE
 	// Make a hello world text
@@ -45,12 +47,11 @@ Examples.prototype.onLoaded=function() {
 		}
 	);
 
-	// To draw the text, add it to a depth
-	engine.depth[0].addChildren(text);
+	// To draw the text, add it to the bgView
+	this.bgView.addChildren(text);
 
-	// Since depth[0] is not automatically redrawn (look at the "new JsEngine"-call in game.html), redraw the depth
-	engine.redraw(true);
-
+	// Cache the bgView to save resources (this will cache the view's objects, and stop redrawing them separately)
+	//this.bgView.setDrawCache(true);
 
 	// SPRITE EXAMPLE
 	// Make a sprite object
@@ -61,10 +62,8 @@ Examples.prototype.onLoaded=function() {
 		0 // Direction (in radians)
 	);
 
-	// Add sprite to depth[1] for it to be drawn
-	// (since depth[1] is automatically redrawn, there's no need to call the engine.redraw-function)
-	engine.depth[1].addChildren(sprite);
-
+	// Add sprite to the fg view for it to be drawn
+	this.fgView.addChildren(sprite);
 
 	// ANIMATION EXAMPLE
 	// Animate a rotation of the sprite
@@ -95,10 +94,14 @@ Examples.prototype.onLoaded=function() {
 		200 // y-position
 	);
 
-	// And lets add the new object to depth[1]
-	engine.depth[1].addChildren(movable);
+	// And lets add the new object out fgView
+	this.fgView.addChildren(movable);
 
 	// You should now have a character that you can move around width the arrow keys :)
 
 	// If you want to dig into how to create and extend objects, take a look at the MovableCharacter-object's source (/js/objects/MovableCharacter.js)
+
+
+	// Hide loader overlay now that everything is ready
+	loader.hideOverlay();
 }

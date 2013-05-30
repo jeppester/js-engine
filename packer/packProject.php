@@ -108,14 +108,15 @@ else {
 
 		$e . 'Engine.js',
 
-		$e . "classes/Animator.js",
 		$e . "classes/Animatable.js",
 		$e . "classes/View.js",
+		$e . "classes/Room.js",
 		$e . "classes/Vector.js",
 		$e . "classes/Line.js",
 		$e . "classes/Rectangle.js",
 		$e . "classes/Polygon.js",
 		$e . "classes/Circle.js",
+		$e . "classes/Camera.js",
 		$e . "classes/Loader.js",
 		$e . "classes/CustomLoop.js",
 		$e . "classes/Sprite.js",

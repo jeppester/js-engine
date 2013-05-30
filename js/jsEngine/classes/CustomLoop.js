@@ -2,7 +2,7 @@
  * CustomLoop:
  * A loop class.
  * Contains a list of functions to run each time the loop executes.
- * For the loop to be executed, it will have to be added to the engine via the Engine.addLoop.
+ * For the loop to be executed, it will have to be added to the current room via the Engine.currentRoom.addLoop.
  * A loop also has it's own time that is stopped whenever the loop is not executed. This makes it possible to schedule a function execution that will be "postphoned" if the loop gets paused.
  */
 
@@ -88,6 +88,42 @@ CustomLoop.prototype.detachFunction = function (caller, func) {
 };
 
 /**
+ * Queues a function for being added to the executed functions. The queue works as a buffer which prevent functions, that have just been added, from being executed before the next frame.
+ *
+ * @private
+ */
+CustomLoop.prototype.addQueue = function () {
+	this.activities = this.activities.concat(this.activitiesQueue);
+	this.activitiesQueue = [];
+};
+
+/**
+ * Detaches all attached functions with a specific caller
+ * 
+ * @param {object} caller The caller
+ */
+CustomLoop.prototype.detachFunctionsByCaller = function (caller) {
+	if (caller === undefined) {throw new Error('Missing argument: caller'); }
+	var i;
+
+	// From activities
+	i = this.activities.length;
+	while (i--) {
+		if (caller === this.activities[i].object) {
+			this.activities.splice(i, 1);
+		}
+	}
+
+	// From activities queue
+	i = this.activitiesQueue.length;
+	while (i--) {
+		if (caller === this.activitiesQueue[i].object) {
+			this.activitiesQueue.splice(i, 1);
+		}
+	}
+};
+
+/**
  * Schedules a function to be run after a given amount of time in the loop.
  * If the loop is paused before the execution has happened, the loop's time will stand still, and therefore the scheduled execution will not happen untill the loop is started again.
  * 
@@ -137,18 +173,114 @@ CustomLoop.prototype.unSchedule = function (func, caller) {
 };
 
 /**
- * Queues a function for being added to the executed functions. The queue works as a buffer which prevent functions, that have just been added, from being executed before the next frame.
- *
+ * Unschedule all execution scheduled by a specific caller
+ * 
+ * @param {object} caller The caller
+ */
+CustomLoop.prototype.unScheduleByCaller = function (caller) {
+	if (caller === undefined) {throw new Error('Missing argument: caller'); }
+
+	for (i = 0; i < this.scheduledExecutions.length; i++) {
+		exec = this.scheduledExecutions[i];
+
+		if (caller === exec.caller) {
+			this.scheduledExecutions.splice(i, 1);
+			break;
+		}
+	}
+};
+
+/**
+ * Adds a new animation to the animator class (done automatically when running the animate-function).
+ * 
+ * @private
+ * @param {object} animation An animation object
+ */
+CustomLoop.prototype.addAnimation = function (animation) {
+	if (animation === undefined) {throw new Error('Missing argument: animation'); }
+	var anim, propList, currentAnimations, i, cur, propName;
+
+	anim = animation;
+	anim.start = this.time;
+
+	// If there are other animations of the same properties, stop the current animation of these properties
+	propList = Object.keys(anim.prop);
+	currentAnimations = anim.obj.getAnimations();
+	for (i = 0; i < currentAnimations.length; i ++) {
+		cur = currentAnimations[i];
+		for (propName in cur.prop) {
+			if (cur.prop.hasOwnProperty(propName)) {
+				if (propList.indexOf(propName) !== -1) {
+					delete cur.prop[propName];
+				}
+			}
+		}
+	}
+
+	this.animations.push(anim);
+};
+
+/**
+ * Stop all animations of a specific object from the loop
+ * 
+ * @param {object} object The object to stop all animations of
+ */
+CustomLoop.prototype.removeAnimationsOfObject = function (object) {
+	i = this.animations.length;
+	while (i--) {
+		if (object === this.animations[i].obj) {
+			this.animations.splice(i, 1);
+		}
+	}
+};
+
+/**
+ * Update the loop's animations in a single loop (called by updateAllLoops)
+ * 
  * @private
  */
-CustomLoop.prototype.addQueue = function () {
-	this.activities = this.activities.concat(this.activitiesQueue);
-	this.activitiesQueue = [];
+CustomLoop.prototype.updateAnimations = function () {
+	var animId, a, propId, t;
+	
+	// Run through the animations to update them
+	for (animId = this.animations.length - 1; animId > -1; animId --) {
+		a = this.animations[animId];
+
+		if (a === undefined) {
+			continue;
+		}
+
+		t = this.time - a.start;
+
+		if (t > a.dur) {
+			// Delete animation
+			this.animations.splice(animId, 1);
+
+			// If the animation has ended: delete it and set the animated properties to their end values
+			for (propId in a.prop) {
+				if (a.prop.hasOwnProperty(propId)) {
+					a.obj[propId] = a.prop[propId].end;
+				}
+			}
+			if (typeof a.callback === "string") {
+				eval(a.callback);
+			} else {
+				a.callback.call(a.obj);
+			}
+		} else {
+			// If the animation is still running: Ease the animation of each property
+			for (propId in a.prop) {
+				if (a.prop.hasOwnProperty(propId)) {
+					a.obj[propId] = engine.ease(a.easing, t, a.prop[propId].begin, a.prop[propId].end - a.prop[propId].begin, a.dur);
+				}
+			}
+		}
+	}
 };
 
 /**
  * Executes the custom loop. This will execute all the functions that have been added to the loop, and checks all scheduled executions to see if they should fire.
- * This function will automatically be executed, if the loop has been added to the engine with Engine.addLoop.
+ * This function will automatically be executed, if the loop has been added to the current room, or the engine's masterRoom
  */
 CustomLoop.prototype.execute = function () {
 	var timer, i, exec;
@@ -158,11 +290,14 @@ CustomLoop.prototype.execute = function () {
 	if (!this.maskFunction() || engine.frames % this.framesPerExecution) {return; }
 
 	if (engine.frames - this.lastFrame === this.framesPerExecution) {
-		this.time += engine.timeIncrease;
+		this.time += engine.gameTimeIncrease;
 	}
 
 	this.lastFrame = engine.frames;
 	this.last = engine.now;
+
+	// Update animations
+	this.updateAnimations();
 
 	// Execute scheduled executions
 	for (i = 0; i < this.scheduledExecutions.length; i++) {
@@ -186,6 +321,7 @@ CustomLoop.prototype.execute = function () {
 		exec.activity.call(exec.object);
 	}
 
+	// Add queued attach functions
 	this.addQueue();
 
 	this.execTime = (new Date().getTime()) - timer;

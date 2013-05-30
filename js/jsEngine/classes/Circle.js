@@ -3,7 +3,7 @@
  * A math class which is used for handling circles
  */
 
-NewClass('Circle', [Animatable, View]);
+NewClass('Circle', [Animatable]);
 
 /**
  * Constructor for Circle class, uses the set function, to set the properties of the circle.
@@ -13,7 +13,6 @@ NewClass('Circle', [Animatable, View]);
  * @param {number} radius The radius for the circle
  */
 Circle.prototype.Circle = function (x, y, radius) {
-	this.View();
 	this.set(x, y, radius);
 };
 
@@ -201,9 +200,10 @@ Circle.prototype.intersects = function (object) {
  * @private
  * @param {object} c A canvas 2D context on which to draw the Circle
  */
-Circle.prototype.drawCanvas = function (c) {
+Circle.prototype.drawCanvas = function (c, cameraOffset) {
 	c.save();
 
+	c.translate(-cameraOffset.x, -cameraOffset.y);
 	c.strokeStyle = "#f00";
 	c.beginPath();
 

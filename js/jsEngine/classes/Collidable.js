@@ -315,14 +315,14 @@ Collidable.prototype.drawBBox = function () {
  * @private
  * @param {object} c A canvas 2D context on which to draw the bbox
  */
-Collidable.prototype.drawRotatedBBox = function (c) {
+Collidable.prototype.drawRotatedBBox = function (c, cameraOffset) {
 	var pol;
 
 	pol = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.size);
 
 	c.save();
 	c.strokeStyle = "#0F0";
-	c.translate(this.x, this.y);
+	c.translate(this.x - cameraOffset.x, this.y - cameraOffset.y);
 
 	c.beginPath();
 	c.moveTo(pol.points[0].x, pol.points[0].y);
@@ -341,7 +341,7 @@ Collidable.prototype.drawRotatedBBox = function (c) {
  * @private
  * @param {object} c A canvas 2D context on which to draw the mask
  */
-Collidable.prototype.drawMask = function (c) {
+Collidable.prototype.drawMask = function (c, cameraOffset) {
 	// Draw Sprite on canvas
 	var mask;
 
@@ -353,7 +353,7 @@ Collidable.prototype.drawMask = function (c) {
 	}
 
 	c.save();
-	c.translate(this.x, this.y);
+	c.translate(this.x - cameraOffset.x, this.y - cameraOffset.y);
 	c.rotate(this.dir);
 	try {
 		c.drawImage(

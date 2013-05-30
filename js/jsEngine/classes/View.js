@@ -11,10 +11,14 @@ NewClass('View');
  */
 View.prototype.View = function () {
 	this.children = [];
+	this.drawCacheCanvas = document.createElement('canvas');
+	this.drawCacheCtx = this.drawCacheCanvas.getContext('2d');
+	this.drawCacheEnabled = false;
+	this.drawCacheOffset = new Vector();
 };
 
 /**
- * Adds children to a View object. If the object that the children are added to, is a grandchild of a depth layer, the children will be drawn on the stage when added. The added children will be drawn above the current children.
+ * Adds children to a View object. If the object that the children are added to, is a decendant of the current room, the children will be drawn on the stage when added. The added children will be drawn above the current children.
  * 
  * @param {object} child1 A child to add to the View object
  * @param {object} child2 Another child to add...
@@ -32,9 +36,6 @@ View.prototype.addChildren = function (child1, child2) {
 		this.children.push(child);
 		child.parent = this;
 
-		if (child.setDepth && this.depth !== undefined) {
-			child.setDepth(this.depth);
-		}
 		if (child.refreshSource) {
 			child.refreshSource();
 		}
@@ -68,9 +69,6 @@ View.prototype.insertBelow = function (insertChildren, child) {
 		child = insertChildren[i];
 
 		child.parent = this;
-		if (child.setDepth && this.depth !== undefined) {
-			child.setDepth(this.depth);
-		}
 		if (child.refreshSource) {
 			child.refreshSource();
 		}
@@ -180,6 +178,67 @@ View.prototype.removeAllChildren = function (purge) {
 };
 
 /**
+ * Sets whether or not the view should be cached (and only redrawn when called directly).
+ * If a view is set to static, the view's canvas will be used for caching a drawing of the view's children.
+ * 
+ * @param {boolean} enabled Whether or not draw caching should be enabled or disabled
+ */
+View.prototype.setDrawCache = function (enabled) {
+	enabled = enabled === true;
+	if (enabled === this.drawCacheEnabled) {return; }
+
+
+	if (enabled) {
+		this.cacheDrawing();
+	}
+	this.drawCacheEnabled = enabled;
+};
+
+/**
+ * Caches a drawing of the View's children (and itself)
+ */
+View.prototype.cacheDrawing = function () {
+	// Calculate the size of the canvas and its offset
+	var drawRegion;
+	drawRegion = this.getCombinedRedrawRegion();
+	if (drawRegion) {
+		this.drawCacheOffset = new Vector(drawRegion.x, drawRegion.y);
+		this.drawCacheCanvas.width = drawRegion.width;
+		this.drawCacheCanvas.height = drawRegion.height;
+
+		// Draw all children to the cache canvas
+		this.drawChildren(this.drawCacheCtx, this.drawCacheOffset.copy(), true);
+	}
+};
+
+/**
+ * Gets the complete region that will used for drawing on next redraw
+ * 
+ * @return {object} A rectangle representing the region
+ */
+View.prototype.getCombinedRedrawRegion = function () {
+	var box, addBox, i;
+
+	if (this.getRedrawRegion) {
+		box = this.getRedrawRegion();
+	}
+
+	for (i = 0; i < this.children.length; i ++) {
+		addBox = this.children[i].getCombinedRedrawRegion();
+
+		if (addBox) {
+			if (box) {
+				box = box.combine(addBox);
+			}
+			else {
+				box = addBox;
+			}
+		}
+	}
+	return box;
+};
+
+/**
  * Removes one or more children from the View.
  * 
  * @param {object} child1 A child to add to the View object
@@ -210,27 +269,38 @@ View.prototype.removeChildren = function (child1, child2) {
  * 
  * @param {object} ctx A canvas' 2d context to draw the children on
  */
-View.prototype.drawChildren = function (ctx) {
+View.prototype.drawChildren = function (c, cameraOffset, forceRedraw) {
 	var i;
 
-	if (this.drawCanvas) {
-		this.drawCanvas(ctx);
-		if (engine.drawBBoxes && this.drawBBox) {
-			if (engine.useRotatedBoundingBoxes) {
-				this.drawRotatedBBox(ctx);
-			}
-			else {
-				this.drawBBox(ctx);
-			}
-		}
-		if (engine.drawMasks && this.drawMask) {
-			this.drawMask(ctx);
-		}
+	if (this.drawCacheEnabled && !forceRedraw) {
+		c.save();
+		c.drawImage(this.drawCacheCanvas, this.drawCacheOffset.x, this.drawCacheOffset.y, this.drawCacheCanvas.width, this.drawCacheCanvas.height);
+		c.restore();
 	}
-	
-	for (i = 0;i < this.children.length;i ++) {
-		if (this.children[i].drawChildren) {
-			this.children[i].drawChildren(ctx);
+	else {
+		if (this.drawCanvas) {
+			this.drawCanvas(c, cameraOffset);
+			if (engine.drawBBoxes && this.drawBBox) {
+				if (engine.useRotatedBoundingBoxes) {
+					this.drawRotatedBBox(c, cameraOffset);
+				}
+				else {
+					this.drawBBox(c, cameraOffset);
+				}
+			}
+
+			if (engine.drawMasks && this.drawMask) {
+				this.drawMask(c, cameraOffset);
+			}
+		}
+		
+		for (i = 0;i < this.children.length;i ++) {
+			if (this.children[i].drawChildren) {
+				this.children[i].drawChildren(c, cameraOffset, forceRedraw);
+			}
+			else if (this.children[i].drawCanvas) {
+				this.children[i].drawCanvas(c, cameraOffset, forceRedraw);
+			}
 		}
 	}
 };

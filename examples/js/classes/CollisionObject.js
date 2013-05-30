@@ -29,13 +29,13 @@ CollisionObject.prototype.CollisionObject = function (source, x, y, additionalPr
 			this.rightKey = this.rightKey.toUpperCase().charCodeAt(0);
 		}
 
-		engine.loops.eachFrame.attachFunction(
+		engine.currentRoom.loops.eachFrame.attachFunction(
 			this, // This object (an instance reference is needed by the engine)
 			this.step // The function to call each time the loop executes
 		);
 	}
 
-	engine.loops.collisionChecking.attachFunction(
+	engine.currentRoom.loops.collisionChecking.attachFunction(
 		this, // This object (an instance reference is needed by the engine)
 		this.collisionCheck // The function to call each time the loop executes
 	);

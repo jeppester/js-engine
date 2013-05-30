@@ -51,10 +51,10 @@ TextBlock.prototype.TextBlock = function (string, x, y, width, additionalPropert
 
 	this.lines = [];
 	this.lineWidth = [];
-	this.cache = document.createElement('canvas');
-	this.cacheCtx = this.cache.getContext('2d');
-	this.cache.width = this.width;
-	this.cache.height = 1000;
+	this.bm = document.createElement('canvas');
+	this.bmCtx = this.bm.getContext('2d');
+	this.bm.width = this.width;
+	this.bm.height = 1000;
 	engine.registerObject(this);
 
 	this.setString(string);
@@ -117,9 +117,9 @@ TextBlock.prototype.setColor = function (colorString) {
 TextBlock.prototype.cacheRendering = function () {
 	var xOffset, i;
 
-	this.cacheCtx.clearRect(0, 0, this.cache.width, this.cache.height);
-	this.cacheCtx.font = this.font;
-	this.cacheCtx.fillStyle = this.color;
+	this.bmCtx.clearRect(0, 0, this.bm.width, this.bm.height);
+	this.bmCtx.font = this.font;
+	this.bmCtx.fillStyle = this.color;
 	for (i = 0; i < this.lines.length; i ++) {
 		xOffset = 0;
 
@@ -136,7 +136,7 @@ TextBlock.prototype.cacheRendering = function () {
 		}
 
 		if (this.lines[i]) {
-			this.cacheCtx.fillText(this.lines[i], xOffset, this.lineHeight * (1 + i));
+			this.bmCtx.fillText(this.lines[i], xOffset, this.lineHeight * (1 + i));
 		}
 	}
 };
@@ -189,26 +189,48 @@ TextBlock.prototype.stringToLines = function () {
 };
 
 /**
- * Draws the cached rendering of the TextBlock object to the canvas. Usually there is no reason to call this function manually since it is automatically called by the engine's redraw loop. To redraw depths that are not automatically redrawn, use the engine's redraw function.
+ * Draws the cached rendering of the TextBlock object to the canvas.
  * 
  * @private
  * @param {object} c A canvas 2D context on which to draw the TextBlock
  */
-TextBlock.prototype.drawCanvas = function (c) {
+TextBlock.prototype.drawCanvas = function (c, cameraOffset) {
 	// Draw on canvas
 	if (/^\s*$/.test(this.string)) {return; }
 	c.save();
 
 	if (engine.avoidSubPixelRendering) {
-		c.translate(Math.round(this.x), Math.round(this.y));
+		c.translate(Math.round(this.x - cameraOffset.x), Math.round(this.y - cameraOffset.y));
 	}
 	else {
-		c.translate(this.x, this.y);
+		c.translate(this.x - cameraOffset.x, this.y - cameraOffset.y);
 	}
 
 	c.rotate(this.dir);
 	c.globalAlpha = this.opacity;
 	c.globalCompositeOperation = this.composite;
-	c.drawImage(this.cache, - this.offset.x * this.size, - this.offset.y * this.size, this.cache.width * this.size, this.cache.height * this.size);
+	c.drawImage(this.bm, - this.offset.x * this.size, - this.offset.y * this.size, this.bm.width * this.size, this.bm.height * this.size);
 	c.restore();
 };
+
+/**
+ * Calculates a bounding non-rotated rectangle that the text block will fill when drawn.
+ * 
+ * @private
+ * @return {object} The bounding rectangle of the text block when drawn.
+ */
+TextBlock.prototype.getRedrawRegion = function () {
+	var ret;
+
+	ret = new Rectangle(-this.offset.x, -this.offset.y, this.bm.width, this.bm.height);
+	ret = ret.getPolygon();
+	ret = ret.scale(this.size);
+	ret = ret.rotate(this.dir)
+	ret = ret.getBoundingRectangle().move(this.x, this.y);
+	ret.x = Math.floor(ret.x - 1);
+	ret.y = Math.floor(ret.y - 1);
+	ret.width = Math.ceil(ret.width + 2);
+	ret.height = Math.ceil(ret.height + 2);
+
+	return ret;
+}

@@ -47,7 +47,7 @@ MasksAndBBoxes.prototype.onLoaded=function() {
 
 	text = new TextBlock('', 6, 4, 80);
 
-	engine.loops.eachFrame.attachFunction(object2, object2.checkCollision);
+	engine.currentRoom.loops.eachFrame.attachFunction(object2, object2.checkCollision);
 
-	engine.depth[0].addChildren(object, object2, text);
+	engine.currentRoom.addChildren(object, object2, text);
 }

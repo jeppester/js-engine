@@ -1,7 +1,7 @@
 /**
  * Engine:
  * The main game engine class.
- * Responsible for depths, custom loops, the main loop, the main canvas, etc.
+ * Responsible for the main loop, the main canvas, etc.
  */
 
 /**
@@ -61,14 +61,13 @@ NewClass('Engine');
  * 	"cachedSoundCopies": 5, // How many times sounds should be ducplicated to allow multiple playbacks
  * 	"canvasResX": 800, // The horizontal resolution to set for the game's main canvas
  * 	"canvasResY": 600, // The vertical resolution to set for the game's main canvas
- * 	"compositedDepths": [], // Id's of depth's for which compositing effects should be available
  * 	"disableRightClick": true, // If right clicks inside the arena should be disabled
  * 	"disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
  * 	"drawBBoxes": false, // If Collidable object's bounding boxes should be drawn (good for debugging)
  * 	"drawMasks": false, // If Collidable object's masks should be drawn (good for debugging)
  * 	"enginePath": "js/jsEngine", // The path for the engine classes' directory
  * 	"gameClassPath": "js/Game.js", // The path for the game's main class
- * 	"manualRedrawDepths": [], // Id's of depth's which should not be automatically redrawn
+ * 	"loadText": 'jsEngine loading...'
  * 	"musicMuted": false, // If all music playback should be initially muted
  * 	"pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
  * 	"soundsMuted": false, // If all sound effects should be initially muted
@@ -148,7 +147,6 @@ Engine.prototype.load = function () {
 	}
 
 	this.running = false;
-	this.manualRedrawDepths = [];
 	this.canvasResX = 800;
 	this.canvasResY = 600;
 	this.enginePath = 'js/jsEngine';
@@ -161,18 +159,19 @@ Engine.prototype.load = function () {
 	this.arena = document.getElementById('arena');
 	this.autoResize = true;
 	this.autoResizeLimitToResolution = true;
-	this.compositedDepths = [];
 	this.cachedSoundCopies = 5;
 	this.gameClassPath = "js/Game.js";
+	this.loadText = "jsEngine loading...";
 	this.backgroundColor = "#FFF";
 	this.timeFactor = 1;
 	this.disableTouchScroll = true;
+	this.cameras = [];
 
 	this.soundsMuted = false;
 	this.musicMuted = false;
 
 	// Copy options to engine (except those which are only used for engine initialization)
-	copyOpt = ['backgroundColor', 'disableTouchScroll', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'manualRedrawDepths', 'compositedDepths', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'disableTouchScroll', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -238,13 +237,14 @@ Engine.prototype.load = function () {
 	// Load engine classes
 	loader.loadClasses([
 		this.enginePath + '/classes/Animatable.js',
-		this.enginePath + '/classes/Animator.js',
-		this.enginePath + '/classes/View.js',
+		this.enginePath + '/classes/View.js',	
+		this.enginePath + '/classes/Room.js',
 		this.enginePath + '/classes/Vector.js',
 		this.enginePath + '/classes/Line.js',
 		this.enginePath + '/classes/Polygon.js',
 		this.enginePath + '/classes/Rectangle.js',
 		this.enginePath + '/classes/Circle.js',
+		this.enginePath + '/classes/Camera.js',
 		this.enginePath + '/classes/CustomLoop.js',
 		this.enginePath + '/classes/Sprite.js',
 		this.enginePath + '/classes/Collidable.js',
@@ -284,42 +284,33 @@ Engine.prototype.initialize = function () {
 	this.last = new Date().getTime();
 	this.now = this.last;
 	this.gameTime = 0;
-	this.executingLoops = false;
 	this.currentId = 0;
 	this.drawing = 0;
-	this.loops = {};
 
 	this.fps = 0;
 	this.fpsCounter = 0;
 	this.fpsSecCounter = 0;
 
-	// Depth layers for drawing operations
-	this.depth = [];
+	// Create a room list (All rooms will add themselves to this list)
+	this.roomList = [];
 
-	// Setup default loop
-	this.addLoop('eachFrame', new CustomLoop());
-	this.defaultAnimationLoop = 'eachFrame';
-	this.defaultActivityLoop = 'eachFrame';
+	// Create master room
+	this.masterRoom = new Room('master');
 
-	// Create the depths
-	this.depthMap = [];
+	// Make main room
+	this.currentRoom = new Room('main');
 
-	// Create canvases for each depth and set the depth's main canvas, based on their composite- and manualRedraw settings
-	this.options.depths = this.options.depths !== undefined ? this.options.depths : 1;
-	for (i = 0; i < this.options.depths; i ++) {
-		d = new View();
-		d.manualRedraw = this.manualRedrawDepths.indexOf(i) !== -1;
-		d.composited = this.compositedDepths.indexOf(i) !== -1;
-		d.ownCanvas = this.makeCanvas();
+	// Set default custom loops
+	this.defaultAnimationLoop = this.masterRoom.loops.eachFrame;
+	this.defaultActivityLoop = this.masterRoom.loops.eachFrame;
 
-		if (d.manualRedraw || d.composited) {
-			d.ctx = d.ownCanvas.getContext('2d');
-		}
-		else {
-			d.ctx = this.mainCanvas.getContext('2d');
-		}
-		this.depth.push(d);
-	}
+	// Make main camera
+	this.cameras.push(
+		new Camera(
+			new Rectangle(0, 0, this.canvasResX, this.canvasResY), 
+			new Rectangle(0, 0, this.canvasResX, this.canvasResY)
+		)
+	);
 
 	// Disable right click inside arena
 	if (this.disableRightClick) {
@@ -331,7 +322,6 @@ Engine.prototype.initialize = function () {
 	// Create objects required by the engine
 	keyboard = new Keyboard();
 	pointer = new Pointer();
-	animator = new Animator();
 
 	// Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
 	if (this.pauseOnBlur) {
@@ -424,22 +414,6 @@ Engine.prototype.autoResizeCanvas = function () {
 };
 
 /**
- * Function for creating canvases for the engine depths.
- * 
- * @private
- * @return {object} The created canvas
- */
-Engine.prototype.makeCanvas = function () {
-	var c;
-
-	c = document.createElement("canvas");
-	c.width = this.canvasResX;
-	c.height = this.canvasResY;
-
-	return c;
-};
-
-/**
  * Function for converting between speed units
  * 
  * @param {number} speed The value to convert
@@ -459,7 +433,7 @@ Engine.prototype.convertSpeed = function (speed, from, to) {
 	// Convert all formats to pixels per frame
 	switch (from) {
 	case SPEED_PIXELS_PER_SECOND:
-		speed = speed * this.timeIncrease / 1000;
+		speed = speed * this.gameTimeIncrease / 1000;
 		break;
 	case SPEED_PIXELS_PER_FRAME:
 		break;
@@ -468,25 +442,13 @@ Engine.prototype.convertSpeed = function (speed, from, to) {
 	// Convert pixels per frame to the output format
 	switch (to) {
 	case SPEED_PIXELS_PER_SECOND:
-		speed = speed / this.timeIncrease * 1000;
+		speed = speed / this.gameTimeIncrease * 1000;
 		break;
 	case SPEED_PIXELS_PER_FRAME:
 		break;
 	}
 
 	return speed;
-};
-
-/**
- * Removes all objects from the stage
- */
-Engine.prototype.clearStage = function () {
-	// Clear all layers
-	var depthId;
-
-	for (depthId = 0; depthId < this.depth.length; depthId ++) {
-		this.depth[depthId].removeAllChildren();
-	}
 };
 
 /**
@@ -506,6 +468,78 @@ Engine.prototype.setSoundsMuted = function (muted) {
 
 	this.soundsMuted = muted;
 };
+
+/**
+ * Leaves the current room and opens another room
+ * 
+ * @param {mixed} room A pointer to the desired room, or a string representing the name of the room
+ */
+Engine.prototype.goToRoom = function (room) {
+	if (room === undefined) {throw new Error ('Missing argument: room'); }
+
+	// If a string has been specified, find the room by name
+	if (typeof room === "string") {
+		room = this.roomList.getElementByPropertyValue('name', room);
+		if (!room) {throw new Error('Could not find a room with the specified name')}
+	}
+	// Else, check if the room exists on the room list, and if not, throw an error
+	else {
+		if (this.roomList.indexOf(room) === -1) {
+			throw new Error('Room is not on room list, has it been removed?');
+		}
+	}
+
+	this.currentRoom.onLeave();
+	this.currentRoom = room;
+	this.currentRoom.onEnter();
+}
+
+/**
+ * Adds a room to the room list. This function is automatically called by the Room class' constructor.
+ * 
+ * @private
+ * @param {object} room The room which should be added
+ */
+Engine.prototype.addRoom = function (room) {
+	if (room === undefined) {throw new Error ('Missing argument: room'); }
+	if (this.roomList.indexOf(room) !== -1) {
+		throw new Error('Room is already on room list, rooms are automatically added upon instantiation');
+	}
+
+	this.roomList.push(room);
+}
+
+/**
+ * Removes a room from the room list.
+ * 
+ * @param {mixed} room A pointer to the room, or a string representing the name of the room, which should be removed
+ */
+Engine.prototype.removeRoom = function(room) {
+	if (room === undefined) {throw new Error ('Missing argument: room'); }
+	var index;
+
+	// If a string has been specified, find the room by name
+	if (typeof room === "string") {
+		room = this.roomList.getElementByPropertyValue('name', room);
+		if (!room) {throw new Error('Could not find a room with the specified name')}
+	}
+	// Else, check if the room exists on the room list, and if not, throw an error
+	index = this.roomList.indexOf(room);
+
+	if (index === -1) {
+		throw new Error('Room is not on room list, has it been removed?');
+	}
+
+	// Make sure we are not removing the current room, or the master room
+	if (room === this.masterRoom) {
+		throw new Error('Cannot remove master room');
+	}
+	else if (room === this.currentRoom) {
+		throw new Error('Cannot remove current room, remember to leave the room first, by entering another room (use engine.goToRoom)');
+	}
+
+	this.roomList.splice(i, 1);
+}
 
 /**
  * Toggles if all music should be muted.
@@ -540,49 +574,13 @@ Engine.prototype.setDefaultTheme = function (themeName, enforce) {
 
 	this.defaultTheme = themeName;
 
-	i = this.depth.length;
-
 	refreshSource = function () {
 		if (this.refreshSource) {
 			this.refreshSource();
 		}
 	};
 
-	while (i--) {
-		if (enforce) {
-			this.depth[i].setTheme(undefined, enforce);
-		}
-		else {
-			this.depth[i].applyToThisAndChildren(refreshSource);
-		}
-	}
-
-	this.redraw(1);
-};
-
-/**
- * Adds a custom loop to the engine.
- * After being added, the loop will be executed in each frame.
- * 
- * @param {string} name The name the use for the custom loop within the engine. When added the loop can be accessed with: engine.loops[name]
- * @param {object} loop The loop to add
- */
-Engine.prototype.addLoop = function (name, loop) {
-	if (loop === undefined) {throw new Error('Missing argument: loop'); }
-	if (name === undefined) {throw new Error('Missing argument: name'); }
-
-	this.loops[name] = loop;
-};
-
-/**
- * Removes a custom loop from the engine.
- * 
- * @param {string} name The name that the custom loop has been added as
- */
-Engine.prototype.removeLoop = function (name) {
-	if (name === undefined) {throw new Error('Missing argument: name'); }
-
-	delete this.loops[name];
+	this.currentRoom.setTheme(undefined, enforce);
 };
 
 /**
@@ -618,38 +616,26 @@ Engine.prototype.mainLoop = function () {
 	if (!this.running) {return; }
 
 	// Get the current time (for calculating movement based on the precise time change)
+	this.last = this.now;
 	this.now = new Date().getTime();
-	this.timeIncrease = (this.now - this.last) * this.timeFactor;
+	this.timeIncrease = this.now - this.last;
+	this.gameTimeIncrease = this.timeIncrease * this.timeFactor;
 
-	this.executingLoops = true;
+	// Update the game time and frames
+	this.gameTime += this.gameTimeIncrease;
 	this.frames ++;
 
-	// Update animations
-	animator.updateAllLoops();
-
-	// Do loops
-	for (name in this.loops) {
-		if (this.loops.hasOwnProperty(name)) {
-			this.loops[name].execute();
-		}
-	}
-
-	// Update the game time
-	this.gameTime += this.timeIncrease;
-
-	this.executingLoops = false;
-
-	// Set last loop time, for next loop
-	this.lastLoopTime = this.now - this.last;
-	this.last = this.now;
+	// Execute loops
+	this.masterRoom.update();
+	this.currentRoom.update();
 
 	// Draw game objects
-	this.redraw(0);
+	this.redraw();
 
 	// Count frames per second
 	if (this.fpsMsCounter < 1000) {
 		this.fpsCounter ++;
-		this.fpsMsCounter += this.lastLoopTime;
+		this.fpsMsCounter += this.timeIncrease;
 	}
 	else {
 		this.fps = this.fpsCounter;
@@ -797,40 +783,23 @@ Engine.prototype.ajaxRequest = function (url, params, async, callback, caller) {
  * param {object} obj The object to remove
  */
 Engine.prototype.purge = function (obj) {
-	var name, loop, i;
+	var name, loop, roomId, room, i;
 
 	if (obj === undefined) {throw new Error(obj); }
 	if (typeof obj === "string") {
 		obj = this.objectIndex[obj];
 	}
 
-	// Delete all references from loops
-	for (name in this.loops) {
-		if (this.loops.hasOwnProperty(name)) {
-			loop = this.loops[name];
+	// Delete all references from rooms and their loops
+	for (roomId = 0; roomId < this.roomList.length; roomId ++) {
+		room = this.roomList[roomId];
+		for (name in room.loops) {
+			if (room.loops.hasOwnProperty(name)) {
+				loop = room.loops[name];
 
-			// From activities
-			i = loop.activities.length;
-			while (i--) {
-				if (obj === loop.activities[i].object) {
-					loop.activities.splice(i, 1);
-				}
-			}
-
-			// From activities queue
-			i = loop.activitiesQueue.length;
-			while (i--) {
-				if (obj === loop.activitiesQueue[i].object) {
-					loop.activitiesQueue.splice(i, 1);
-				}
-			}
-
-			// From animations
-			i = loop.animations.length;
-			while (i--) {
-				if (obj === loop.animations[i].obj) {
-					loop.animations.splice(i, 1);
-				}
+				loop.detachFunctionsByCaller(obj);
+				loop.removeAnimationsOfObject(obj);
+				loop.unScheduleByCaller(obj);
 			}
 		}
 	}
@@ -844,41 +813,19 @@ Engine.prototype.purge = function (obj) {
 };
 
 /**
- * Redraws all automatically redrawn depths (will be called by the engine), or all manually redrawn depths.
- * 
- * @param {boolean} drawManualRedrawDepths Whether or not the manually redrawn depths should be drawn instead of the automaticaly redrawn depths
+ * Redraws the canvas by redrawing all cameras
  */
-Engine.prototype.redraw = function (drawManualRedrawDepths) {
-	if (drawManualRedrawDepths === undefined) {throw new Error('Missing argument: manualRedrawDepths'); }
-	var i, d;
-
-	this.mainCanvas.getContext('2d').fillStyle = this.backgroundColor;
-	this.mainCanvas.getContext('2d').fillRect(0, 0, this.canvasResX, this.canvasResY);
-	for (i = 0; i < this.depth.length; i ++) {
-		d = this.depth[i];
-
-		if (d.manualRedraw || d.composited) {
-			if (d.manualRedraw) {
-				if (drawManualRedrawDepths) {
-					d.ctx.clearRect(0, 0, this.canvasResX, this.canvasResY);
-					d.drawChildren(d.ctx);
-				}
-			}
-			else {
-				d.ctx.clearRect(0, 0, this.canvasResX, this.canvasResY);
-				d.drawChildren(d.ctx);
-			}
-
-			this.mainCanvas.getContext('2d').drawImage(d.ownCanvas, 0, 0, this.canvasResX, this.canvasResY);
-		}
-		else {
-			d.drawChildren(d.ctx);
-		}
+Engine.prototype.redraw = function () {
+	var i;
+	
+	for (var i = 0; i < this.cameras.length; i++) {
+		this.cameras[i].capture();
+		this.cameras[i].draw(this.mainCanvas.getContext('2d'));
 	}
 };
 
 /**
- * Downloads a screen dump of the arena. Very usable for creating game screenshots from browser consoles.
+ * Downloads a screen dump of the main canvas. Very usable for creating game screenshots directly from browser consoles.
  */
 Engine.prototype.dumpScreen = function () {
 	var dataString, a;
@@ -891,4 +838,71 @@ Engine.prototype.dumpScreen = function () {
 	document.body.appendChild(a);
 	a.click();
 	document.body.removeChild(a, document.body);
+};
+
+/**
+ * Tweens an animation of a number between a start point and an end point
+ *
+ * @param {string} type The easing function to use. Available functions are:
+ * "linear"
+ * "quadIn"
+ * "quadOut"
+ * "quadInOut"
+ * "powerIn"
+ * "powerOut"
+ * "powerInOut"
+ * "sinusInOut"
+ * 
+ * @param {number} t The current time (of the animation)
+ * @param {number} b The start value
+ * @param {number} c The end value
+ * @param {number} d The animation time
+ * @return {number} The current value (at the given time in the animation)
+ */
+Engine.prototype.ease = function (type, t, b, c, d) {
+	var a;
+
+	switch (type) {
+	case "linear":
+		t /= d;
+		return b + c * t;
+	case "quadIn":
+		t /= d;
+		return b + c * t * t;
+	case "quadOut":
+		t /= d;
+		return b - c * t * (t - 2);
+	case "quadInOut":
+		t = t / d * 2;
+		if (t < 1) {
+			return b + c * t * t / 2;
+		} else {
+			t --;
+			return b + c * (1 - t * (t - 2)) / 2;
+		}
+	case "powerIn":
+		t /= d;
+		// a determines if c is positive or negative
+		a = c / Math.abs(c);
+		return b + a * Math.pow(Math.abs(c), t);
+	case "powerOut":
+		t /= d;
+		// a determines if c is positive or negative
+		a = c / Math.abs(c);
+		return b + c - a * Math.pow(Math.abs(c), 1 - t);
+	case "powerInOut":
+		t = t / d * 2;
+		// a determines if c is positive or negative
+		a = c / Math.abs(c);
+		if (t < 1) {
+			return b + a * Math.pow(Math.abs(c), t) / 2;
+		} else {
+			t --;
+			return b + c - a * Math.pow(Math.abs(c), 1 - t) / 2;
+		}
+	case "sinusInOut":
+		t /= d;
+		return b + c * (1 + Math.cos(Math.PI * (1 + t))) / 2;
+	}
+	return b + c;
 };

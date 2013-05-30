@@ -40,8 +40,6 @@ Pointer.prototype.Pointer = function () {
 
 		// Set mouse cursor
 		if (engine.options.cursor) {
-			/* this.cursor = engine.depth[8].addChildren(new Sprite(engine.options.cursor, 0, 0, 0, {offset: new Vector()}));
-			engine.arena.style.cursor = 'none';*/
 			engine.arena.style.cursor = "url('" + loader.getImage(engine.options.cursor).src + "') 0 0, auto";
 		}
 	}

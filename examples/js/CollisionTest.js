@@ -10,7 +10,7 @@ CollisionTest.prototype.CollisionTest = function () {
 	]);
 
 	// Add collision checking loop
-	engine.addLoop('collisionChecking', new CustomLoop(2));
+	engine.currentRoom.addLoop('collisionChecking', new CustomLoop(2));
 
 	// Make two collision objects
 	ball = new CollisionObject(
@@ -31,7 +31,7 @@ CollisionTest.prototype.CollisionTest = function () {
 		}
 	);
 
-	engine.depth[0].addChildren(ball, player);
+	engine.currentRoom.addChildren(ball, player);
 
 	// Hide loader overlay
 	loader.hideOverlay(function () {

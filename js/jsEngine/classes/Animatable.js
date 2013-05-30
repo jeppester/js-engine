@@ -46,7 +46,8 @@ Animatable.prototype.animate = function (properties, options) {
 
 	anim.obj = this;
 
-	loop = opt.loop !== undefined  ?  opt.loop : engine.defaultAnimationLoop;
+	loop = opt.loop !== undefined  ?  opt.loop : (this.loop !== undefined ? this.loop : engine.defaultAnimationLoop);
+
 	anim.callback = opt.callback !== undefined  ?  opt.callback : function () {};
 	anim.easing = opt.easing !== undefined ?  opt.easing : "quadInOut";
 	anim.dur = opt.dur !== undefined ?  opt.dur : 1000;
@@ -77,7 +78,7 @@ Animatable.prototype.animate = function (properties, options) {
 		return;
 	}
 
-	animator.addAnimation(anim, loop);
+	loop.addAnimation(anim);
 };
 
 /**
@@ -86,15 +87,20 @@ Animatable.prototype.animate = function (properties, options) {
  * @return {boolean} Wether or not the object is being animated
  */
 Animatable.prototype.isAnimated = function () {
-	var name, loop, animId, animation;
+	var roomId, room, name, loop, animId, animation;
 
-	for (name in engine.loops) {
-		if (engine.loops.hasOwnProperty(name)) {
-			loop = engine.loops[name];
-			for (animId = loop.animations.length - 1; animId > -1; animId --) {
-				animation = loop.animations[animId];
-				if (animation.obj === this) {
-					return true;
+	// Look through all room on the room list, to see if one of the rooms' loops contains an animation of the object
+	for (roomId = 0; roomId < engine.roomList.length; roomId ++) {
+		room = engine.roomList[roomId];
+
+		for (name in room.loops) {
+			if (room.loops.hasOwnProperty(name)) {
+				loop = room.loops[name];
+				for (animId = loop.animations.length - 1; animId > -1; animId --) {
+					animation = loop.animations[animId];
+					if (animation.obj === this) {
+						return true;
+					}
 				}
 			}
 		}
@@ -104,19 +110,24 @@ Animatable.prototype.isAnimated = function () {
 
 /**
  * Fetches all current animations of the object.
+ * 
  * @return {array} An array of all the current animations of the object
  */
 Animatable.prototype.getAnimations = function () {
-	var animations, name, loop, animId, animation;
+	var animations, roomId, room, name, loop, animId, animation;
 
 	animations = [];
-	for (name in engine.loops) {
-		if (engine.loops.hasOwnProperty(name)) {
-			loop = engine.loops[name];
-			for (animId = loop.animations.length - 1; animId > -1; animId --) {
-				animation = loop.animations[animId];
-				if (animation.obj === this) {
-					animations.push(animation);
+	for (roomId = 0; roomId < engine.roomList.length; roomId ++) {
+		room = engine.roomList[roomId];
+
+		for (name in room.loops) {
+			if (room.loops.hasOwnProperty(name)) {
+				loop = room.loops[name];
+				for (animId = loop.animations.length - 1; animId > -1; animId --) {
+					animation = loop.animations[animId];
+					if (animation.obj === this) {
+						animations.push(animation);
+					}
 				}
 			}
 		}
@@ -128,17 +139,15 @@ Animatable.prototype.getAnimations = function () {
  * Stops all current animations of the object.
  */
 Animatable.prototype.stopAnimations = function () {
-	var animations, name, loop, animId, animation;
+	var animations, roomId, room;
 
 	animations = [];
-	for (name in engine.loops) {
-		if (engine.loops.hasOwnProperty(name)) {
-			loop = engine.loops[name];
-			for (animId = loop.animations.length - 1; animId > -1; animId --) {
-				animation = loop.animations[animId];
-				if (animation.obj === this) {
-					loop.animations.splice(animId, 1);
-				}
+	for (roomId = 0; roomId < engine.roomList.length; roomId ++) {
+		room = engine.roomList[roomId];
+
+		for (name in room.loops) {
+			if (room.loops.hasOwnProperty(name)) {
+				room.loops[name].removeAnimationsOfObject(this);
 			}
 		}
 	}

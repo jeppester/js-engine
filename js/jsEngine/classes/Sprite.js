@@ -121,29 +121,74 @@ Sprite.prototype.setSource = function (source) {
 };
 
 /**
- * Draws the object to the canvas. Usually there is no reason to call this function manually since it is automatically called by the engine's redraw loop. To redraw depths that are not automatically redrawn, use redraw.
+ * Draws the object to the canvas.
  * 
  * @private
  * @param {object} c A canvas 2D context on which to draw the Sprite
  */
-Sprite.prototype.drawCanvas = function (c) {
+Sprite.prototype.drawCanvas = function (c, cameraOffset) {
 	// Draw Sprite on canvas
-	c.save();
+	var x, y;
 
 	if (engine.avoidSubPixelRendering) {
-		c.translate(Math.round(this.x), Math.round(this.y));
+		x = Math.round(this.x - cameraOffset.x);
+		y = Math.round(this.y - cameraOffset.y);
 	}
 	else {
-		c.translate(this.x, this.y);
+		x = this.x - cameraOffset.x;
+		y = this.y - cameraOffset.y;
 	}
 
+	// Set the right subimage
 	if (this.imageLength !== 1) {
 		this.currentImage = Math.floor((engine.gameTime - this.imageTimeOffset) / 1000 * this.imageSpeed) % this.imageLength;
 	}
 
 	c.globalAlpha = this.opacity;
-	c.rotate(this.dir);
-	c.globalCompositeOperation = this.composite;
-	c.drawImage(this.bm, (this.width + this.bm.spacing) * this.currentImage, 0, this.width, this.height, - this.offset.x * this.size, - this.offset.y * this.size, this.width * this.size, this.height * this.size);
-	c.restore();
+	if (this.composite !== 'source-over') {
+		c.globalCompositeOperation = this.composite;
+	}
+	
+	// If rotation is used, translate the context and rotate it (much slower than using no rotation)
+	if (this.dir !== 0) {
+		c.translate(x, y);
+		c.rotate(this.dir);
+		
+		// Draw images
+		c.drawImage(this.bm, (this.width + this.bm.spacing) * this.currentImage, 0, this.width, this.height, - this.offset.x * this.size, - this.offset.y * this.size, this.width * this.size, this.height * this.size);
+		
+		c.rotate(-this.dir);
+		c.translate(-x, -y);
+	}
+	// If the image is not rotated, draw it without rotation (much faster)
+	else {
+		c.drawImage(this.bm, (this.width + this.bm.spacing) * this.currentImage, 0, this.width, this.height, x - this.offset.x * this.size, y - this.offset.y * this.size, this.width * this.size, this.height * this.size);
+	}
+
+	if (this.composite !== 'source-over') {
+		c.globalCompositeOperation = 'source-over';
+	}
+	c.globalAlpha = 1;
 };
+
+/**
+ * Calculates the region which the sprite will fill out when redrawn.
+ * 
+ * @private
+ * @return {object} The bounding rectangle of the sprite's redraw
+ */
+Sprite.prototype.getRedrawRegion = function () {
+	var ret;
+
+	ret = new Rectangle(-this.offset.x, -this.offset.y, Math.floor(this.bm.width / this.imageLength), this.bm.height);
+	ret = ret.getPolygon();
+	ret = ret.scale(this.size);
+	ret = ret.rotate(this.dir)
+	ret = ret.getBoundingRectangle().move(this.x, this.y);
+	ret.x = Math.floor(ret.x - 1);
+	ret.y = Math.floor(ret.y - 1);
+	ret.width = Math.ceil(ret.width + 2);
+	ret.height = Math.ceil(ret.height + 2);
+
+	return ret;
+}

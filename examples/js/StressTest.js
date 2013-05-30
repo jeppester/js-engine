@@ -8,25 +8,28 @@ StressTest.prototype.StressTest = function () {
 		game.onLoaded();
 	});
 
+	this.objectView = new View();
+	this.hudView = new View();
+	engine.currentRoom.addChildren(this.objectView, this.hudView);
+
 	fpsCounter = new TextBlock('FPS: 0', 10, 10, 100, {color: '#FFF'});
 	objectCounter = new TextBlock('Objects: 0', 10, 30, 100, {color: '#FFF'});
-
-	engine.depth[1].addChildren(fpsCounter, objectCounter);
+	this.hudView.addChildren(fpsCounter, objectCounter);
 	
-	engine.addLoop('each20Frames', new CustomLoop(20));
-	engine.loops.each20Frames.attachFunction(this, this.updateFPS);
-	engine.loops.eachFrame.attachFunction(this, this.controls);
+	engine.currentRoom.addLoop('each20Frames', new CustomLoop(20));
+	engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
+	engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
 }
 
 StressTest.prototype.onLoaded=function() {
 	var sprite, i, ii, movable;
 
-	this.addObjects(100);
+	this.addObjects(1000);
 }
 
 StressTest.prototype.updateFPS = function () {
 	fpsCounter.setString('FPS: ' + engine.fps);
-	objectCounter.setString('Objects: '+Object.keys(engine.objectIndex).length);
+	objectCounter.setString('Objects: ' + (Object.keys(engine.objectIndex).length - 2));
 }
 
 StressTest.prototype.addObjects = function (count) {
@@ -39,19 +42,18 @@ StressTest.prototype.addObjects = function (count) {
 			Math.random() * 400,
 			Math.random() * Math.PI * 2
 		);
-
-		engine.depth[0].addChildren(sprite);
+		
+		this.objectView.addChildren(sprite);
 	}
 }
 
 StressTest.prototype.removeObjects = function (count) {
 	count = count !== undefined ? count : 1;
+	objects = this.objectView.getChildren();
+	count = Math.min(count, objects.length);
 
 	for (i = 0; i < count; i++) {
-		var arr = Object.keys(engine.objectIndex);
-		if (arr.length > 2) {
-			engine.purge(engine.objectIndex[arr[2]]);
-		}
+		objects.shift().remove();
 	}
 }
 
