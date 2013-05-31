@@ -149,7 +149,7 @@ Sprite.prototype.drawCanvas = function (c, cameraOffset) {
 		c.globalCompositeOperation = this.composite;
 	}
 	
-	// If rotation is used, translate the context and rotate it (much slower than using no rotation)
+	// If a rotation is used, translate the context and rotate it (much slower than using no rotation)
 	if (this.dir !== 0) {
 		c.translate(x, y);
 		c.rotate(this.dir);

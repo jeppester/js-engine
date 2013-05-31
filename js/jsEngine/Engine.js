@@ -590,7 +590,7 @@ Engine.prototype.startMainLoop = function () {
 	if (this.running) {return; }
 
 	// Restart the now - last cycle
-	this.last = new Date().getTime();
+	this.now = new Date().getTime();
 	this.running = true;
 
 	// Start mainLoop
