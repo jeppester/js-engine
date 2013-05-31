@@ -17,6 +17,9 @@ NewClass('Collidable', [Sprite]);
  */
 Collidable.prototype.Collidable = function (source, x, y, dir, additionalProperties) {
 	this.Sprite(source, x, y, dir, additionalProperties);
+
+	this.mask = this.mask ? this.mask : loader.getMask(source, this.getTheme());
+	this.collisionResolution = this.collisionResolution ? this.collisionResolution : engine.defaultCollisionResolution;
 };
 
 /**
@@ -136,13 +139,12 @@ Collidable.prototype.bBoxCollidesWith = function (objects, getCollidingObjects) 
  * @param {boolean} checkBBox If true: Run a bbox collision check before the mask based collision check. Makes the check much faster under most circumstances. Defaults to true. 
  * @return {mixed} If getCollisionPosition is false: a boolean representing whether or not a collision was detected. If getCollisionPosition is true: An object representing the position of the detected collision.
  */
-Collidable.prototype.collidesWith = function (objects, resolution, getCollisionPosition, checkBBox) {
+Collidable.prototype.collidesWith = function (objects, getCollisionPosition, checkBBox) {
 	if (objects === undefined) {throw new Error('Missing argument: objects'); }
 	if (!Array.prototype.isPrototypeOf(objects)) {
 		objects = [objects];
 	}
 
-	resolution = resolution !== undefined ? resolution : 2;
 	getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
 	checkBBox = checkBBox !== undefined ? checkBBox : true;
 
@@ -237,7 +239,7 @@ Collidable.prototype.collidesWith = function (objects, resolution, getCollisionP
 
 	pxArr = [];
 
-	for (pixel = 0; pixel < length; pixel += resolution) {
+	for (pixel = 0; pixel < length; pixel += this.collisionResolution) {
 		if (data[pixel * 4] < 127) {
 			if (getCollisionPosition) {
 				y = Math.floor(pixel / bitmap.width);

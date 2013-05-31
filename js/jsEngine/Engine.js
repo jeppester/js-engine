@@ -61,6 +61,7 @@ NewClass('Engine');
  * 	"cachedSoundCopies": 5, // How many times sounds should be ducplicated to allow multiple playbacks
  * 	"canvasResX": 800, // The horizontal resolution to set for the game's main canvas
  * 	"canvasResY": 600, // The vertical resolution to set for the game's main canvas
+ * 	"defaultCollisionResolution": 10, // Res. of collision checking, by default every 10th px is checked
  * 	"disableRightClick": true, // If right clicks inside the arena should be disabled
  * 	"disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
  * 	"drawBBoxes": false, // If Collidable object's bounding boxes should be drawn (good for debugging)
@@ -166,12 +167,13 @@ Engine.prototype.load = function () {
 	this.timeFactor = 1;
 	this.disableTouchScroll = true;
 	this.cameras = [];
+	this.defaultCollisionResolution = 10;
 
 	this.soundsMuted = false;
 	this.musicMuted = false;
 
 	// Copy options to engine (except those which are only used for engine initialization)
-	copyOpt = ['backgroundColor', 'disableTouchScroll', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'disableTouchScroll', 'defaultCollisionResolution', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -183,6 +185,9 @@ Engine.prototype.load = function () {
 	// Set style for arena
 	this.arena.style.position = "absolute";
 	this.arena.style.background = "#fff";
+	this.arena.style.userSelect = "none";
+	this.arena.style.webkitUserSelect = "none";
+	this.arena.style.MozUserSelect = "none";
 
 	// Make main canvas
 	this.mainCanvas = document.createElement("canvas");

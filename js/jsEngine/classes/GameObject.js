@@ -34,9 +34,7 @@ GameObject.prototype.GameObject = function (source, x, y, dir, additionalPropert
 	if (y === undefined) {throw new Error('Missing argument: y'); }
 
 	this.Collidable(source, x, y, dir, additionalProperties);
-
-	this.mask = this.mask ? this.mask : loader.getMask(source, this.getTheme());
-
+	
 	// Add object to right loop
 	this.loop = this.loop ? this.loop : engine.currentRoom.loops.eachFrame;
 	this.loop.attachFunction(this, this.updatePosition);
