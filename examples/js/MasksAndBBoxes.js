@@ -32,7 +32,7 @@ MasksAndBBoxes.prototype.onLoaded=function() {
 
 	object2 = new GameObject(
 		'Rock', // Image ID (See "/themes/Example/theme.json" for an explanation of themes)
-		15, // x-position
+		16, // x-position
 		50, // y-position
 		0 // Direction (in radians)
 	);

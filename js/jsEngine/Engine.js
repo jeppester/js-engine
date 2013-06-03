@@ -61,11 +61,11 @@ NewClass('Engine');
  * 	"cachedSoundCopies": 5, // How many times sounds should be ducplicated to allow multiple playbacks
  * 	"canvasResX": 800, // The horizontal resolution to set for the game's main canvas
  * 	"canvasResY": 600, // The vertical resolution to set for the game's main canvas
- * 	"defaultCollisionResolution": 10, // Res. of collision checking, by default every 10th px is checked
+ * 	"defaultCollisionResolution": 10, // Res. of collision checking, by default every 5th px is checked
  * 	"disableRightClick": true, // If right clicks inside the arena should be disabled
  * 	"disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
- * 	"drawBBoxes": false, // If Collidable object's bounding boxes should be drawn (good for debugging)
- * 	"drawMasks": false, // If Collidable object's masks should be drawn (good for debugging)
+ * 	"drawBoundingBoxes": false, // If Collidable object's bounding boxes should be drawn
+ * 	"drawMasks": false, // If Collidable object's masks should be drawn
  * 	"enginePath": "js/jsEngine", // The path for the engine classes' directory
  * 	"gameClassPath": "js/Game.js", // The path for the game's main class
  * 	"loadText": 'jsEngine loading...'
@@ -73,7 +73,6 @@ NewClass('Engine');
  * 	"pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
  * 	"soundsMuted": false, // If all sound effects should be initially muted
  * 	"themesPath": "themes", // The path to the themes-directory
- * 	"useRotatedBoundingBoxes": true, // If the engine should use rotated bounding boxes
  * }</code>
  */
 Engine.prototype.Engine = function (options) {
@@ -126,24 +125,10 @@ Engine.prototype.load = function () {
 	this.avoidSubPixelRendering = true;
 	this.preloadSounds = true;
 
-	switch (this.host.browserEngine) {
-	case 'Gecko':
-		break;
-	case 'WebKit':
-		// WebKit renders subpixels much better (and faster) than the other browsers
-		this.avoidSubPixelRendering = false;
-		break;
-	case 'Trident':
-		break;
-	}
-
 	switch (this.host.device) {
 	case 'iDevice':
 		// iDevices cannot preload sounds (which is utter crap), so disable preloading to make the engine load without sounds
 		this.preloadSounds = false;
-		break;
-	case 'Android':
-		this.avoidSubPixelRendering = true;
 		break;
 	}
 
@@ -152,9 +137,8 @@ Engine.prototype.load = function () {
 	this.canvasResY = 600;
 	this.enginePath = 'js/jsEngine';
 	this.themesPath = 'themes';
-	this.drawBBoxes = false;
+	this.drawBoundingBoxes = false;
 	this.drawMasks = false;
-	this.useRotatedBoundingBoxes = true;
 	this.pauseOnBlur = true;
 	this.disableRightClick = true;
 	this.arena = document.getElementById('arena');
@@ -167,13 +151,13 @@ Engine.prototype.load = function () {
 	this.timeFactor = 1;
 	this.disableTouchScroll = true;
 	this.cameras = [];
-	this.defaultCollisionResolution = 10;
+	this.defaultCollisionResolution = 5;
 
 	this.soundsMuted = false;
 	this.musicMuted = false;
 
 	// Copy options to engine (except those which are only used for engine initialization)
-	copyOpt = ['backgroundColor', 'disableTouchScroll', 'defaultCollisionResolution', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'useRotatedBoundingBoxes', 'pauseOnBlur', 'drawBBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'disableTouchScroll', 'defaultCollisionResolution', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'pauseOnBlur', 'drawBoundingBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {

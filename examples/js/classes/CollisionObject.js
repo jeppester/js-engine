@@ -16,27 +16,14 @@ CollisionObject.prototype.CollisionObject = function (source, x, y, additionalPr
 
 	// Add step function to 'eachFrame'-loop
 	if (this.leftKey !== undefined) {
-		if (typeof this.upKey === 'string') {
-			this.upKey = this.upKey.toUpperCase().charCodeAt(0);
-		}
-		if (typeof this.downKey === 'string') {
-			this.downKey = this.downKey.toUpperCase().charCodeAt(0);
-		}
-		if (typeof this.leftKey === 'string') {
-			this.leftKey = this.leftKey.toUpperCase().charCodeAt(0);
-		}
-		if (typeof this.rightKey === 'string') {
-			this.rightKey = this.rightKey.toUpperCase().charCodeAt(0);
-		}
-
 		engine.currentRoom.loops.eachFrame.attachFunction(
-			this, // This object (an instance reference is needed by the engine)
+			this, // This object (an instance reference is needed by the loop)
 			this.step // The function to call each time the loop executes
 		);
 	}
 
 	engine.currentRoom.loops.collisionChecking.attachFunction(
-		this, // This object (an instance reference is needed by the engine)
+		this, // This object (an instance reference is needed by the loop)
 		this.collisionCheck // The function to call each time the loop executes
 	);
 };
@@ -65,25 +52,26 @@ CollisionObject.prototype.step = function () {
 };
 
 CollisionObject.prototype.collisionCheck = function () {
-	var col, speed, sound;
+	var i, col, ball, colPos, speed;
 
-	if (this !== window.ball) {
-		if (col = this.collidesWith(window.ball, 1, true)) {
-			// Use the direction to the collision, and the direction of the object to calculate obj1's bounce
-			this.speed.x = 0;
-			this.speed.y = 0;
+	if (col = this.collidesWith(window.balls, true, true)) {
+		for (i = 0; i < col.objects.length; i ++) {
+			ball = col.objects[i];
+			colPos = col.positions[i];
 
 			// Move to contact position
-			while (this.collidesWith(window.ball, 1)) {
-				this.x += 1 * Math.cos(col.dir - Math.PI);
-				this.y += 1 * Math.sin(col.dir - Math.PI);
+			do {
+				this.x += 1 * Math.cos(colPos.direction - Math.PI);
+				this.y += 1 * Math.sin(colPos.direction - Math.PI);
 
-				window.ball.x += 1 * Math.cos(col.dir);
-				window.ball.y += 1 * Math.sin(col.dir);
+				ball.x += 1 * Math.cos(colPos.direction);
+				ball.y += 1 * Math.sin(colPos.direction);
 			}
+			while (this.collidesWith(ball, true));
 
 			speed = ball.speed.getLength();
-			ball.speed.setFromDirection(col.dir, speed);
+			ball.speed.setFromDirection(colPos.direction, speed);
+			this.speed.setFromDirection(colPos.direction - Math.PI, speed);
 		}
 	}
 

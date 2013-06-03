@@ -26,19 +26,21 @@
 <!-- Start engine -->
 <script type="text/javascript">
 	new Engine({
-		// Set main class to load
-		gameClassPath: 'js/MasksAndBBoxes.js',
+		// Set game-class path (Look at this file to start programming your game)
+		gameClassPath:'js/CollisionStressTest.js',
 
 		// Set themes to load
 		themes:['Example'],
+		
+		// Set arena background-color
+		backgroundColor: "#000",
 
-		// Enable debugging of collision checks
-		drawBoundingBoxes: true,
-		drawMasks: true,
+		// Disable pause on blur (so that JavaScript profiling can be done easier)
+		pauseOnBlur: false,
 
 		// Set resolution of the game
-		canvasResX:100,
-		canvasResY:100,
+		canvasResX:600,
+		canvasResY:400,
 	});
 </script>
 

@@ -269,37 +269,33 @@ View.prototype.removeChildren = function (child1, child2) {
  * 
  * @param {object} ctx A canvas' 2d context to draw the children on
  */
-View.prototype.drawChildren = function (c, cameraOffset, forceRedraw) {
-	var i;
+View.prototype.drawChildren = function (c, cameraOffset) {
+	var i, child;
 
-	if (this.drawCacheEnabled && !forceRedraw) {
+	if (this.drawCacheEnabled) {
 		c.save();
 		c.drawImage(this.drawCacheCanvas, this.drawCacheOffset.x, this.drawCacheOffset.y, this.drawCacheCanvas.width, this.drawCacheCanvas.height);
 		c.restore();
 	}
 	else {
-		if (this.drawCanvas) {
-			this.drawCanvas(c, cameraOffset);
-			if (engine.drawBBoxes && this.drawBBox) {
-				if (engine.useRotatedBoundingBoxes) {
-					this.drawRotatedBBox(c, cameraOffset);
+		for (i = 0; i < this.children.length; i ++) {
+			child = this.children[i];
+
+			// If the child can be drawn, draw them
+			if (child.drawCanvas) {
+				child.drawCanvas(c, cameraOffset);
+
+				if (engine.drawBoundingBoxes && child.drawBoundingBox) {
+					child.drawBoundingBox(c, cameraOffset);
 				}
-				else {
-					this.drawBBox(c, cameraOffset);
+				if (engine.drawMasks && child.drawMask) {
+					child.drawMask(c, cameraOffset);
 				}
 			}
 
-			if (engine.drawMasks && this.drawMask) {
-				this.drawMask(c, cameraOffset);
-			}
-		}
-		
-		for (i = 0;i < this.children.length;i ++) {
-			if (this.children[i].drawChildren) {
-				this.children[i].drawChildren(c, cameraOffset, forceRedraw);
-			}
-			else if (this.children[i].drawCanvas) {
-				this.children[i].drawCanvas(c, cameraOffset, forceRedraw);
+			// If the child has children that can be drawn (the child is a view), draw them
+			if (child.drawChildren) {
+				child.drawChildren(c, cameraOffset);
 			}
 		}
 	}

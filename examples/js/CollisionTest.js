@@ -10,14 +10,11 @@ CollisionTest.prototype.CollisionTest = function () {
 	]);
 
 	// Add collision checking loop
-	engine.currentRoom.addLoop('collisionChecking', new CustomLoop(2));
+	engine.currentRoom.addLoop('collisionChecking', new CustomLoop(5));
 
 	// Make two collision objects
-	ball = new CollisionObject(
-		"Rock",
-		100, // x-position
-		100 // y-position
-	);
+	window.balls = [];
+	this.addBalls(15);
 
 	player = new CollisionObject(
 		"Character",
@@ -31,14 +28,24 @@ CollisionTest.prototype.CollisionTest = function () {
 		}
 	);
 
-	engine.currentRoom.addChildren(ball, player);
+	engine.currentRoom.addChildren(player);
 
 	// Hide loader overlay
-	loader.hideOverlay(function () {
-		game.onLoaded();
-	});
+	loader.hideOverlay();
 };
 
-CollisionTest.prototype.onLoaded = function () {
-	ball.speed = new Vector(-100, -100);
+CollisionTest.prototype.addBalls = function (number) {
+	number = number !== undefined ? number : 1;
+	var ball, i;
+
+	for (i = 0; i < number; i ++) {
+		ball = new CollisionObject(
+			"Rock",
+			20 + Math.random() * 560, // x-position
+			20 + Math.random() * 360 // y-position
+		);
+		ball.speed.setFromDirection(Math.PI * 2 * Math.random(), 150);
+		window.balls.push(ball);
+		engine.currentRoom.addChildren(ball);
+	}
 };

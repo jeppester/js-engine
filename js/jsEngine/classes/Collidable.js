@@ -29,7 +29,7 @@ Collidable.prototype.Collidable = function (source, x, y, dir, additionalPropert
  * @param {boolean} getCollidingObjects Whether or not to return an array of colliding objects (is slower because the check cannot stop when a single collission has been detected)
  * @return {mixed} If getCollidingObjects is set to true, an array of colliding object, else a boolean representing whether or not a collission was detected.
  */
-Collidable.prototype.polygonCollidesWith = function (objects, getCollidingObjects) {
+Collidable.prototype.boundingBoxCollidesWith = function (objects, getCollidingObjects) {
 	if (objects === undefined) {throw new Error('Missing argument: objects'); }
 	if (!Array.prototype.isPrototypeOf(objects)) {
 		objects = [objects];
@@ -68,106 +68,27 @@ Collidable.prototype.polygonCollidesWith = function (objects, getCollidingObject
 };
 
 /**
- * Checks for a collision with other objects' non-rotated bounding boxes.
+ * Checks for a mask based collisions with other Collidable objects.
  * 
  * @param {mixed} objects Target object, or array of target objects
- * @param {boolean} getCollidingObjects Whether or not to return an array of colliding objects (is slower because the check cannot stop when a single collission has been detected)
- * @return {mixed} If getCollidingObjects is set to true, an array of colliding object, else a boolean representing whether or not a collission was detected.
+ * @param {boolean} getCollisionPosition If true, the function returns an object representing the position of the detected collision. Defaults to false
+ * @return {mixed} If getCollisionPosition is false, a boolean representing whether or not a collision was detected, else an object of the following type:
+ * 	<code>{
+ * 		"x": [The average horisontal distance from the Collidable to the detected collision],
+ * 		"y": [The average vertical distance from the Collidable to the detected collision],
+ * 		"direction": [The average direction from the Collidable to the detected collision]
+ * 	}</code>
  */
-Collidable.prototype.bBoxCollidesWith = function (objects, getCollidingObjects) {
+Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition) {
 	if (objects === undefined) {throw new Error('Missing argument: objects'); }
-	if (!Array.prototype.isPrototypeOf(objects)) {
-		objects = [objects];
-	}
-
-	getCollidingObjects = getCollidingObjects !== undefined ? getCollidingObjects : false;
-
-	var obj, rVect, bb1, bb2, i, collidingObjects;
-
-	rVect = new Vector(this.bm.width / 2 - this.offset.x, this.bm.height / 2 - this.offset.y).rotate(this.dir);
-	bb1 = this.mask.bBox.copy().rotate(this.dir).move(rVect.x + this.x, rVect.y + this.y).scale(this.size);
-	bb1 = {
-		x1: Math.min(bb1.points[0].x, bb1.points[1].x, bb1.points[2].x, bb1.points[3].x),
-		x2: Math.max(bb1.points[0].x, bb1.points[1].x, bb1.points[2].x, bb1.points[3].x),
-		y1: Math.min(bb1.points[0].y, bb1.points[1].y, bb1.points[2].y, bb1.points[3].y),
-		y2: Math.max(bb1.points[0].y, bb1.points[1].y, bb1.points[2].y, bb1.points[3].y)
-	};
-
-	collidingObjects = [];
-
-	for (i = 0; i < objects.length; i++) {
-		obj = objects[i];
-
-		rVect = new Vector(obj.bm.width / 2 - obj.offset.x, obj.bm.height / 2 - obj.offset.y).rotate(obj.dir);
-		bb2 = obj.mask.bBox.copy().rotate(obj.dir).move(rVect.x + obj.x, rVect.y + obj.y).scale(obj.size);
-		bb2 = {
-			x1: Math.min(bb2.points[0].x, bb2.points[1].x, bb2.points[2].x, bb2.points[3].x),
-			x2: Math.max(bb2.points[0].x, bb2.points[1].x, bb2.points[2].x, bb2.points[3].x),
-			y1: Math.min(bb2.points[0].y, bb2.points[1].y, bb2.points[2].y, bb2.points[3].y),
-			y2: Math.max(bb2.points[0].y, bb2.points[1].y, bb2.points[2].y, bb2.points[3].y)
-		};
-
-		// Find out if the two objects' bounding boxes intersect
-		if (bb1.x1 < bb2.x2 &&
-			bb1.x2 > bb2.x1 &&
-
-			bb1.y1 < bb2.y2 &&
-			bb1.y2 > bb2.y1) {
-
-			if (getCollidingObjects) {
-				collidingObjects.push(obj);
-			}
-			else {
-				return true;
-			}
-		}
-	}
-
-	if (collidingObjects.length) {
-		return collidingObjects;
-	}
-	else {
-		return false;
-	}
-};
-
-/**
- * Checks for a mask based collisions with other Collidable objects.
- * @param {mixed} objects Target object, or array of target objects
- * @param {number} resolution The resolution of the collision check. 1: check every pixel, 2: check every second pixel, etc. Defaults to 2.
- * @param {boolean} getCollisionPosition If true, the function returns an object representing the position of the detected collision. Defaults to false.
- * @param {boolean} checkBBox If true: Run a bbox collision check before the mask based collision check. Makes the check much faster under most circumstances. Defaults to true. 
- * @return {mixed} If getCollisionPosition is false: a boolean representing whether or not a collision was detected. If getCollisionPosition is true: An object representing the position of the detected collision.
- */
-Collidable.prototype.collidesWith = function (objects, getCollisionPosition, checkBBox) {
-	if (objects === undefined) {throw new Error('Missing argument: objects'); }
-	if (!Array.prototype.isPrototypeOf(objects)) {
-		objects = [objects];
-	}
-
-	getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
-	checkBBox = checkBBox !== undefined ? checkBBox : true;
-
 	var canvas, mask, ctx, obj, bitmap, i, data, length, pixel, pxArr, x, y, avX, avY, avDist, avDir;
 
-	if (this.size === 0) {
-		return false;
+	if (!Array.prototype.isPrototypeOf(objects)) {
+		objects = [objects];
 	}
+	getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
 
-	if (checkBBox) {
-		if (engine.useRotatedBoundingBoxes) {
-			objects = this.polygonCollidesWith(objects, true);
-		}
-		else {
-			objects = this.bBoxCollidesWith(objects, true);
-		}
-
-		if (objects === false) {
-			return false;
-		}
-	}
-
-	// Get mask from loader object
+ 	// Get mask from loader object
 	mask = loader.getMask(this.source, this.getTheme());
 
 	// Create a new canvas for checking for a collision
@@ -205,6 +126,9 @@ Collidable.prototype.collidesWith = function (objects, getCollisionPosition, che
 	// Draw other objects
 	for (i = 0; i < objects.length; i++) {
 		obj = objects[i];
+
+		// If the checked object is "this", do nothing (this situation should maybe result in an error)
+		if (obj === this) {continue; }
 
 		// Get mask from loader object
 		mask = loader.getMask(obj.source, obj.getTheme());
@@ -278,46 +202,104 @@ Collidable.prototype.collidesWith = function (objects, getCollisionPosition, che
 		avX = Math.cos(avDir) * avDist;
 		avY = Math.sin(avDir) * avDist;
 
-		return {x: avX, y: avY, dir: avDir};
+		return {x: avX, y: avY, direction: avDir};
 	}
 
 	return false;
-};
+ }
+
 
 /**
- * Draws the object's BBox to the arena. Does only work (and is only relevant) if engine option "useRotatedBoundingBoxes" is set to false. Use engine option "drawBBoxes" to draw all BBoxes.
+ * A "metafunction" for checking if the Collidable collides with another object of the same type.
+ * This function uses boundingBoxCollidesWith for narrowing down the number of objects to check, then uses maskCollidesWith for doing a precise collision check on the remaining objects.
  * 
- * @private
+ * @param {mixed} objects Target object, or array of target objects
+ * @param {boolean} getCollisionPosition If true, the function returns an object representing the position of the detected collision. Defaults to false
+ * @param {boolean} getCollidingObjects If true, the function returns all colliding objects
+ * @return {mixed} If not getCollisionPosition or getCollidingObjects is true, a boolean representing wether or not a collision was detected. If getCollisionPosition and or getCollidingObjects is true, returns an object of the following type:
+ * 	<code>{
+ * 		"objects": [Array of colliding objects],
+ * 		"positions": [Array of collision positions]
+ * 	}</code>
+ * If getCollidingObjects is false, the objects-array will be empty and the positions-array will only contain one position which is the average collision position for all colliding objects.
+ * If getCollisionPosition is false, the positions-array will be empty
+ * If both getCollisionPosition and getCollidingObjects are true, the objects-array will contain all colliding objects, and the positions-array will contain each colliding object's collision position
  */
-Collidable.prototype.drawBBox = function () {
-	var c, pol, rVect, x1, y1, x2, y2;
+Collidable.prototype.collidesWith = function (objects, getCollisionPosition, getCollidingObjects) {
+	if (objects === undefined) {throw new Error('Missing argument: objects'); }
+	var ret, i, position;
 
+	if (!Array.prototype.isPrototypeOf(objects)) {
+		objects = [objects];
+	}
 
-	rVect = new Vector(this.bm.width / 2 - this.offset.x, this.bm.height / 2 - this.offset.y).rotate(this.dir);
-	pol = this.mask.bBox.copy().rotate(this.dir).move(rVect.x, rVect.y).scale(this.size);
+	getCollidingObjects = getCollidingObjects !== undefined ? getCollidingObjects : false;
 
-	x1 = Math.min(pol.points[0].x, pol.points[1].x, pol.points[2].x, pol.points[3].x);
-	x2 = Math.max(pol.points[0].x, pol.points[1].x, pol.points[2].x, pol.points[3].x);
-	y1 = Math.min(pol.points[0].y, pol.points[1].y, pol.points[2].y, pol.points[3].y);
-	y2 = Math.max(pol.points[0].y, pol.points[1].y, pol.points[2].y, pol.points[3].y);
+	if (this.size === 0) {
+		return false;
+	}
 
-	c = this.ctx;
-	c.save();
-	c.strokeStyle = "#00F";
-	c.translate(this.x, this.y);
+	// First, do a bounding box based collision check
+	objects = this.boundingBoxCollidesWith(objects, true);
+	if (objects === false) {
+		return false;
+	}
+	
+	// If a bounding box collision is detected, do a precise collision check with maskCollidesWith
+	if (!getCollisionPosition && !getCollidingObjects) {
+		return this.maskCollidesWith(objects);
+	}
+	else {
+		// Create an object to return
+		ret = {
+			objects: [],
+			positions: []
+		}
 
-	c.strokeRect(x1, y1, x2 - x1, y2 - y1);
+		// If getCollidingObjects is false, only getCollisionPosition is true. Therefore return an average position of all checked objects
+		if (getCollidingObjects === false) {
+			position = this.maskCollidesWith(objects, true);
+			if (position) {
+				ret.positions.push(position);
+			}
+		}
+		else {
+			// If both getCollidingObjects and getCollisionPosition is true, both return an array of objects and positions (this is very slow)
+			if (getCollisionPosition) {
+				for (i = 0; i < objects.length; i ++) {
+					position = this.maskCollidesWith(objects[i], true);
 
-	c.restore();
+					if (position) {
+						ret.objects.push(objects[i]);
+						ret.positions.push(position);
+					}
+				}
+			}
+			// If only getCollidingObjects is true, return an array of colliding objects
+			else {
+				for (i = 0; i < objects.length; i ++) {
+					if (this.maskCollidesWith(objects[i])) {
+						ret.objects.push(objects[i]);
+					}
+				}
+			}
+		}
+	}
+	if (ret.positions.length + ret.objects.length !== 0) {
+		return ret;
+	}
+	else {
+		return false;
+	}
 };
 
 /**
- * Draws the object's rotated BBox to the arena. Does only work (and is only relevant) if engine option "useRotatedBoundingBoxes" is not set to false. Use engine option "drawBBoxes" to draw all BBoxes.
+ * Draws the collidable object's bounding box to the arena. Use engine option "drawBoundingBoxes" to draw all BBoxes.
  * 
  * @private
  * @param {object} c A canvas 2D context on which to draw the bbox
  */
-Collidable.prototype.drawRotatedBBox = function (c, cameraOffset) {
+Collidable.prototype.drawBoundingBox = function (c, cameraOffset) {
 	var pol;
 
 	pol = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.size);
