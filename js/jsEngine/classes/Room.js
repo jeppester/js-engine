@@ -5,12 +5,13 @@
  * If a room is set as the engine's current rooom (engine.currentRoom); its objects will be drawn, and its custom loops will be executed each time the engine's main loop executes.
  * The engine also has a master room (engine.masterRoom), which is persistent throughout a game (this is the room where you would add persistent objects and custom loops)
  * 
- * By default, the engine creates to empty rooms and master room and current room.
+ * By default, the engine creates two empty rooms a master room and a current room.
  */
 
 NewClass('Room', [View]);
 
 /**
+ * @param {string} name The name of the room. You can use this name later, to enter the room or to remove it
  * @param {function} onEntered A function to run when the room is entered (set as the engine's current room)
  * @param {function} onLeft A function to run when the room is left
  */
@@ -61,7 +62,7 @@ Room.prototype.addLoop = function (name, loop) {
  */
 Room.prototype.removeLoop = function (name) {
 	if (name === undefined) {throw new Error('Missing argument: name'); }
-	if (name === 'eachFrame') {throw new Error('The "eachFrame" loop cannot be removed')}
+	if (name === 'eachFrame') {throw new Error('The "eachFrame" loop cannot be removed'); }
 
 	delete this.loops[name];
 };

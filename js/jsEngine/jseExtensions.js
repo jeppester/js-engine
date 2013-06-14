@@ -5,7 +5,7 @@
  */
 
 /**
- * Returns the first object in an array, that has a specific property with a specific value.
+ * Returns the first object - in the array - which has a specific property with a specific value.
  * 
  * @param {string} property The name of the property
  * @param {mixed} value The value of the property (can be of any type)
@@ -22,7 +22,7 @@ Array.prototype.getElementByPropertyValue = function (property, value) {
 };
 
 /**
- * Sorts an array of objects (with the same properties) after a numeric property.
+ * Sorts an array of objects after a numeric property which all objects have.
  * 
  * @param {string} property The name of the property
  * @param {boolean} desc Whether of not sorting should be descending (instead of ascending); False by default.
@@ -61,12 +61,21 @@ Array.prototype.sortByNumericProperty = function (property, desc) {
 
 /**
  * Executes a function as each object in an array.
+ * Using "this" inside the function will refer to the object on which the function is executed.
  * 
  * @param {function} func The function to execute
  */
 Array.prototype.forEach = function (func) {
-	for (var i = 0; i < this.length; i ++) {
-		func.call(this[i], i);
+	if (typeof func !== 'function') {throw new Error('Argument func should be of type: function'); }
+
+	// Copy the array (to avoid errors if the original array is altered by the function)
+	var cp;
+
+	cp = [];
+	cp.push.apply(cp, this);
+
+	for (var i = 0; i < cp.length; i ++) {
+		func.call(cp[i], i);
 	}
 };
 
@@ -96,7 +105,7 @@ Object.prototype.implements = function (checkClass) {
 };
 
 /**
- * Checks if the object's class inherits the another class.
+ * Checks if the object's class inherits another class.
  * 
  * @param {class} checkClass The class to check if the object's class has inherited
  * @return {boolean} Whether or not the object's class inherits the checked class

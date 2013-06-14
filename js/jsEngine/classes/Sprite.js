@@ -4,7 +4,7 @@
  * Usually all graphical objects in a game are sprites or extends this class.
  */
 
-NewClass('Sprite', [View, Animatable, Vector]);
+NewClass('Sprite', [View, Animatable]);
 
 /**
  * The constructor for Sprite objects.
@@ -27,7 +27,8 @@ Sprite.prototype.Sprite = function (source, x, y, dir, additionalProperties) {
 
 	// Call Vector's and view's constructors
 	this.View();
-	this.Vector(x, y);
+	this.x = x !== undefined ? x : 0;
+	this.y = y !== undefined ? y : 0;
 
 	// Load default options
 	this.source = source;
@@ -35,9 +36,11 @@ Sprite.prototype.Sprite = function (source, x, y, dir, additionalProperties) {
 
 	engine.registerObject(this);
 
-	this.imageSpeed = 10;
-	this.currentImage = 0;
-	this.imageTimeOffset = engine.gameTime;
+	this.imageNumber = 0;
+	this.imageLength = 1;
+	this.animationSpeed = 30;
+	this.animationLastSwitch = engine.gameTime;
+	this.animationLoops = true;
 
 	this.size = 1;
 	this.opacity = 1;
@@ -101,7 +104,7 @@ Sprite.prototype.refreshSource = function () {
 
 	this.bm = loader.getImage(this.source, theme);
 	this.imageLength = this.bm.imageLength * 1;
-	this.currentImage = Math.min(this.imageLength - 1, this.currentImage);
+	this.imageNumber = Math.min(this.imageLength - 1, this.imageNumber);
 	this.width = Math.floor(this.bm.width / this.imageLength);
 	this.height = this.bm.height;
 	return this.bm;
@@ -125,6 +128,7 @@ Sprite.prototype.setSource = function (source) {
  * 
  * @private
  * @param {object} c A canvas 2D context on which to draw the Sprite
+ * @param {object} cameraOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
  */
 Sprite.prototype.drawCanvas = function (c, cameraOffset) {
 	// Draw Sprite on canvas
@@ -140,8 +144,19 @@ Sprite.prototype.drawCanvas = function (c, cameraOffset) {
 	}
 
 	// Set the right subimage
-	if (this.imageLength !== 1) {
-		this.currentImage = Math.floor((engine.gameTime - this.imageTimeOffset) / 1000 * this.imageSpeed) % this.imageLength;
+	if (this.imageLength !== 1 && this.animationSpeed !== 0) {
+		if (engine.gameTime - this.animationLastSwitch > 1000 / this.animationSpeed) {
+			this.imageNumber = this.imageNumber + (this.animationSpeed > 0 ? 1 : -1);
+
+			this.animationLastSwitch = engine.gameTime;
+
+			if (this.imageNumber === this.imageLength) {
+				this.imageNumber = this.animationLoops ? 0 : this.imageLength - 1;
+			}
+			else if (this.imageNumber === -1) {
+				this.imageNumber = this.animationLoops ? this.imageLength - 1 : 0;
+			}
+		}
 	}
 
 	c.globalAlpha = this.opacity;
@@ -155,14 +170,14 @@ Sprite.prototype.drawCanvas = function (c, cameraOffset) {
 		c.rotate(this.dir);
 		
 		// Draw images
-		c.drawImage(this.bm, (this.width + this.bm.spacing) * this.currentImage, 0, this.width, this.height, - this.offset.x * this.size, - this.offset.y * this.size, this.width * this.size, this.height * this.size);
+		c.drawImage(this.bm, (this.width + this.bm.spacing) * this.imageNumber, 0, this.width, this.height, - this.offset.x * this.size, - this.offset.y * this.size, this.width * this.size, this.height * this.size);
 		
 		c.rotate(-this.dir);
 		c.translate(-x, -y);
 	}
-	// If the image is not rotated, draw it without rotation (much faster)
+	// If the image is not rotated, draw it without rotation
 	else {
-		c.drawImage(this.bm, (this.width + this.bm.spacing) * this.currentImage, 0, this.width, this.height, x - this.offset.x * this.size, y - this.offset.y * this.size, this.width * this.size, this.height * this.size);
+		c.drawImage(this.bm, (this.width + this.bm.spacing) * this.imageNumber, 0, this.width, this.height, x - this.offset.x * this.size, y - this.offset.y * this.size, this.width * this.size, this.height * this.size);
 	}
 
 	if (this.composite !== 'source-over') {
@@ -183,12 +198,12 @@ Sprite.prototype.getRedrawRegion = function () {
 	ret = new Rectangle(-this.offset.x, -this.offset.y, Math.floor(this.bm.width / this.imageLength), this.bm.height);
 	ret = ret.getPolygon();
 	ret = ret.scale(this.size);
-	ret = ret.rotate(this.dir)
-	ret = ret.getBoundingRectangle().move(this.x, this.y);
+	ret = ret.rotate(this.dir);
+	ret = ret.getBoundingRectangle().add(this.getRoomPosition());
 	ret.x = Math.floor(ret.x - 1);
 	ret.y = Math.floor(ret.y - 1);
 	ret.width = Math.ceil(ret.width + 2);
 	ret.height = Math.ceil(ret.height + 2);
 
 	return ret;
-}
+};

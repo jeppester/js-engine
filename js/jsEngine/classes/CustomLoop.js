@@ -18,14 +18,22 @@ CustomLoop.prototype.CustomLoop = function (framesPerExecution, maskFunction) {
 	this.framesPerExecution = framesPerExecution === undefined ? 1 : framesPerExecution;
 	this.maskFunction = maskFunction === undefined ? function () {return true; } : maskFunction;
 
-	this.activitiesQueue = [];
-	this.activities = [];
+	// Attached functions
+	this.functionsQueue = [];
+	this.functions = [];
+
+	// Scheduled executions
+	this.executionsQueue = [];
+	this.executions = [];
+
+	// Animations
 	this.animations = [];
+
+	// Time tracking
 	this.lastFrame = engine.frames;
 	this.last = engine.now ? engine.now : new Date().getTime();
 	this.time = 0;
 	this.execTime = 0;
-	this.scheduledExecutions = [];
 };
 
 /**
@@ -33,49 +41,87 @@ CustomLoop.prototype.CustomLoop = function (framesPerExecution, maskFunction) {
  * 
  * @param {object} caller The object to run the function as
  * @param {function} func The function to run on each execution of the custom loop
- * @param {string} loop A string representing the loop to add the function to
  */
 CustomLoop.prototype.attachFunction = function (caller, func) {
 	if (caller === undefined) {throw new Error('Missing argument: caller'); }
 	if (func === undefined) {throw new Error('Missing argument: func'); }
 	if (typeof func !== "function") {throw new Error('Argument func must be of type function'); }
 
-	this.activitiesQueue.push({
+	this.functionsQueue.push({
 		object: caller,
 		activity: func
 	});
 };
 
 /**
- * Detaches a function from the loop
+ * Queues a function for being added to the executed functions. The queue works as a buffer which prevent functions, that have just been added, from being executed before the next frame.
+ *
+ * @private
+ */
+CustomLoop.prototype.addFunctionsQueue = function () {
+	this.functions = this.functions.concat(this.functionsQueue);
+	this.functionsQueue = [];
+};
+
+/**
+ * Detaches a function from the loop. If the same function is attached multiple times (which is never a good idea), only the first occurence is detached.
  * 
  * @param {object} caller The object the function was run as
  * @param {function} func The function to detach from the loop
- * @param {string} loop A string representing the loop to remove the function from
- * @return {object} The detached function
+ * @return {boolean} Whether or not the function was found and detached
  */
 CustomLoop.prototype.detachFunction = function (caller, func) {
 	if (caller === undefined) {throw new Error('Missing argument: caller'); }
 	if (func === undefined) {throw new Error('Missing argument: func'); }
 
-	var removeArray, i, a;
-
-	removeArray = [];
+	var i, a;
 
 	// Search activities and remove function
-	for (i = 0; i < this.activities.length; i ++) {
-		a = this.activities[i];
+	for (i = 0; i < this.functions.length; i ++) {
+		a = this.functions[i];
 
 		if (a.object === caller && a.activity === func) {
-			removeArray.push(this.activities.splice(i, 1));
+			this.functions.splice(i, 1);
+			return true;
 		}
 	}
 	// Search activities queue and remove function
-	for (i = 0; i < this.activitiesQueue.length; i ++) {
-		a = this.activitiesQueue[i];
+	for (i = 0; i < this.functionsQueue.length; i ++) {
+		a = this.functionsQueue[i];
 
 		if (a.object === caller && a.activity === func) {
-			removeArray.push(this.activitiesQueue.splice(i, 1));
+			this.functionsQueue.splice(i, 1);
+			return true;
+		}
+	}
+
+	return false;
+};
+
+/**
+ * Detaches all occurences of a specific function, no matter the caller.
+ * 
+ * @param {function} func The function to detach from the loop
+ * @return {array} An array of detached functions
+ */
+CustomLoop.prototype.detachFunctionsByFunction = function (func) {
+	if (func === undefined) {throw new Error('Missing argument: func'); }
+
+	var removeArray, i;
+
+	removeArray = [];
+	// Search activities and remove function
+	i = this.functions.length;
+	while (i--) {
+		if (func === this.functions[i].func) {
+			removeArray.push(this.functions.splice(i, 1));
+		}
+	}
+	// Search activities queue and remove function
+	i = this.functionsQueue.length;
+	while (i--) {
+		if (func === this.functions[i].func) {
+			removeArray.push(this.functionsQueue.splice(i, 1));
 		}
 	}
 
@@ -88,38 +134,38 @@ CustomLoop.prototype.detachFunction = function (caller, func) {
 };
 
 /**
- * Queues a function for being added to the executed functions. The queue works as a buffer which prevent functions, that have just been added, from being executed before the next frame.
- *
- * @private
- */
-CustomLoop.prototype.addQueue = function () {
-	this.activities = this.activities.concat(this.activitiesQueue);
-	this.activitiesQueue = [];
-};
-
-/**
  * Detaches all attached functions with a specific caller
  * 
- * @param {object} caller The caller
+ * @param {object} caller The object the function was run as
+ * @return {array} An array of detached functions
  */
 CustomLoop.prototype.detachFunctionsByCaller = function (caller) {
 	if (caller === undefined) {throw new Error('Missing argument: caller'); }
-	var i;
+	
+	var removeArray, i;
 
+	removeArray = [];
 	// From activities
-	i = this.activities.length;
+	i = this.functions.length;
 	while (i--) {
-		if (caller === this.activities[i].object) {
-			this.activities.splice(i, 1);
+		if (caller === this.functions[i].object) {
+			removeArray.push(this.functions.splice(i, 1));
 		}
 	}
 
 	// From activities queue
-	i = this.activitiesQueue.length;
+	i = this.functionsQueue.length;
 	while (i--) {
-		if (caller === this.activitiesQueue[i].object) {
-			this.activitiesQueue.splice(i, 1);
+		if (caller === this.functionsQueue[i].object) {
+			removeArray.push(this.functionsQueue.splice(i, 1));
 		}
+	}
+
+	if (removeArray.length) {
+		return removeArray;
+	}
+	else {
+		return false;
 	}
 };
 
@@ -127,16 +173,16 @@ CustomLoop.prototype.detachFunctionsByCaller = function (caller) {
  * Schedules a function to be run after a given amount of time in the loop.
  * If the loop is paused before the execution has happened, the loop's time will stand still, and therefore the scheduled execution will not happen untill the loop is started again.
  * 
+ * @caller {object} caller The object with which to run the function (by default the custom loop itself)
  * @param {function} func The function to execute
  * @param {number} delay The delay in ms
- * @caller {object} caller The object with which to run the function (by default the custom loop itself)
  */
-CustomLoop.prototype.schedule = function (func, delay, caller) {
+CustomLoop.prototype.schedule = function (caller, func, delay) {
+	if (caller === undefined) {throw new Error('Missing argument: caller'); }
 	if (func === undefined) {throw new Error('Missing argument: function'); }
 	if (delay === undefined) {throw new Error('Missing argument: delay'); }
-	caller = caller !== undefined ? caller : this;
 
-	this.scheduledExecutions.push({
+	this.executionsQueue.push({
 		func: func,
 		execTime: this.time + delay,
 		caller: caller,
@@ -144,50 +190,141 @@ CustomLoop.prototype.schedule = function (func, delay, caller) {
 };
 
 /**
- * Unschedules all scheduled executions
+ * Queues a function for being added to the executed functions. The queue works as a buffer which prevent functions, that have just been added, from being executed before the next frame.
+ *
+ * @private
  */
-CustomLoop.prototype.unScheduleAll = function () {
-	this.scheduledExecutions = [];
+CustomLoop.prototype.addExecutionsQueue = function () {
+	this.executions = this.executions.concat(this.executionsQueue);
+	this.executionsQueue = [];
 };
 
 /**
- * Unschedules a single scheduled execution
+ * Unschedules a single scheduled execution. If multiple similar executions exists, only the first will be unscheduled.
  * 
  * @param {function} func The function to unschedule an execution of
  * @param {object} caller The object with which the function was to be executed (by default the custom loop itself)
+ * @return {boolean} Whether or not the function was found and unscheduled
  */
-CustomLoop.prototype.unSchedule = function (func, caller) {
+CustomLoop.prototype.unSchedule = function (caller, func) {
+	if (caller === undefined) {throw new Error('Missing argument: caller'); }
 	if (func === undefined) {throw new Error('Missing argument: function'); }
-	caller = caller !== undefined ? caller : this;
 
 	var i, exec;
 
-	for (i = 0; i < this.scheduledExecutions.length; i++) {
-		exec = this.scheduledExecutions[i];
+	// Remove from executions
+	for (i = 0; i < this.executions.length; i++) {
+		exec = this.executions[i];
 
 		if (caller === exec.caller && (exec.func === func || exec.func.toString() === func)) {
-			this.scheduledExecutions.splice(i, 1);
-			break;
+			this.executions.splice(i, 1);
+			return true;
 		}
+	}
+
+	// Remove from executions queue
+	for (i = 0; i < this.executionsQueue.length; i++) {
+		exec = this.executionsQueue[i];
+
+		if (caller === exec.caller && (exec.func === func || exec.func.toString() === func)) {
+			this.executionsQueue.splice(i, 1);
+			return true;
+		}
+	}
+
+	return false;
+};
+
+/**
+ * Unschedule all scheduled executions of a specific function, no matter the caller.
+ * 
+ * @param {function} func The function to unschedule all executions of
+ * @return {mixed} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
+ */
+CustomLoop.prototype.unScheduleByFunction = function (func) {
+	if (func === undefined) {throw new Error('Missing argument: func'); }
+
+	var unscheduledArray, i;
+
+	unscheduledArray = [];
+	i = this.executions.length;
+	while (i--) {
+		exec = this.executions[i];
+
+		if (func === exec.func) {
+			unscheduledArray.push(this.executions.splice(i, 1));
+		}
+	}
+
+	i = this.executionsQueue.length;
+	while (i--) {
+		exec = this.executionsQueue[i];
+
+		if (func === exec.func) {
+			unscheduledArray.push(this.executionsQueue.splice(i, 1));
+		}
+	}
+
+	if (unscheduledArray.length) {
+		return unscheduledArray;
+	}
+	else {
+		return false;
 	}
 };
 
 /**
- * Unschedule all execution scheduled by a specific caller
+ * Unschedule all executions scheduled with a specific caller
  * 
  * @param {object} caller The caller
+ * @return {mixed} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
  */
 CustomLoop.prototype.unScheduleByCaller = function (caller) {
 	if (caller === undefined) {throw new Error('Missing argument: caller'); }
 
-	for (i = 0; i < this.scheduledExecutions.length; i++) {
-		exec = this.scheduledExecutions[i];
+	var unscheduledArray, i;
+
+	unscheduledArray = [];
+	i = this.executions.length;
+	while (i--) {
+		exec = this.executions[i];
 
 		if (caller === exec.caller) {
-			this.scheduledExecutions.splice(i, 1);
-			break;
+			unscheduledArray.push(this.executions.splice(i, 1));
 		}
 	}
+
+	i = this.executionsQueue.length;
+	while (i--) {
+		exec = this.executionsQueue[i];
+
+		if (caller === exec.caller) {
+			unscheduledArray.push(this.executionsQueue.splice(i, 1));
+		}
+	}
+
+	if (unscheduledArray.length) {
+		return unscheduledArray;
+	}
+	else {
+		return false;
+	}
+};
+
+/**
+ * Unschedules all scheduled executions
+ * 
+ * @return {array} An array of all the unscheduled functions
+ */
+CustomLoop.prototype.unScheduleAll = function () {
+	var removeArray;
+
+	removeArray = [].concat(this.executions, this.executionsQueue);
+
+	this.executions = [];
+	this.executionsQueue = [];
+
+	return removeArray;
 };
 
 /**
@@ -300,29 +437,34 @@ CustomLoop.prototype.execute = function () {
 	this.updateAnimations();
 
 	// Execute scheduled executions
-	for (i = 0; i < this.scheduledExecutions.length; i++) {
-		exec = this.scheduledExecutions[i];
+	i = this.executions.length;
+	while (i--) {
+		if (i >= this.executions.length) {continue; }
+
+		exec = this.executions[i];
 
 		if (this.time >= exec.execTime) {
 			exec.func.call(exec.caller);
-			this.scheduledExecutions.splice(i, 1);
+			this.executions.splice(i, 1);
 		}
 	}
 
 	// Execute attached functions
-	for (i = 0; i < this.activities.length; i++) {
-		exec = this.activities[i];
+	for (i = 0; i < this.functions.length; i++) {
+		exec = this.functions[i];
 
 		if (!exec.activity) {
 			throw new Error('Trying to exec non-existent attached function');
-			return;
 		}
 
 		exec.activity.call(exec.object);
 	}
 
-	// Add queued attach functions
-	this.addQueue();
+	// Add queued attached functions
+	this.addFunctionsQueue();
+
+	// Add queued executions
+	this.addExecutionsQueue();
 
 	this.execTime = (new Date().getTime()) - timer;
 };

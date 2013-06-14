@@ -39,13 +39,13 @@ Collidable.prototype.boundingBoxCollidesWith = function (objects, getCollidingOb
 
 	var pol1, pol2, i, collidingObjects, obj;
 
-	pol1 = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.size).move(this.x, this.y);
+	pol1 = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.size).add(this.getRoomPosition());
 
 	collidingObjects = [];
 	for (i = 0; i < objects.length; i++) {
 		obj = objects[i];
 
-		pol2 = obj.mask.bBox.copy().move(obj.mask.width / 2 - obj.offset.x, obj.mask.height / 2 - obj.offset.y).rotate(obj.dir).scale(obj.size).move(obj.x, obj.y);
+		pol2 = obj.mask.bBox.copy().move(obj.mask.width / 2 - obj.offset.x, obj.mask.height / 2 - obj.offset.y).rotate(obj.dir).scale(obj.size).add(obj.getRoomPosition());
 
 		// Find out if the two objects' bounding boxes intersect
 		// If not, check if one of the points of each object is inside the other's polygon. This will ensure that one of the objects does not contain the other
@@ -81,7 +81,7 @@ Collidable.prototype.boundingBoxCollidesWith = function (objects, getCollidingOb
  */
 Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition) {
 	if (objects === undefined) {throw new Error('Missing argument: objects'); }
-	var canvas, mask, ctx, obj, bitmap, i, data, length, pixel, pxArr, x, y, avX, avY, avDist, avDir;
+	var canvas, mask, ctx, roomPos, obj, bitmap, i, data, length, pixel, pxArr, x, y, avX, avY, avDist, avDir;
 
 	if (!Array.prototype.isPrototypeOf(objects)) {
 		objects = [objects];
@@ -109,7 +109,7 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 		mask,
 
 		// Define image cutout
-		(this.width + this.bm.spacing) * this.currentImage,
+		(this.width + this.bm.spacing) * this.imageNumber,
 		0,
 		this.width,
 		this.height,
@@ -124,6 +124,7 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 	ctx.rotate(-this.dir);
 
 	// Draw other objects
+	roomPos = this.getRoomPosition();
 	for (i = 0; i < objects.length; i++) {
 		obj = objects[i];
 
@@ -133,14 +134,14 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 		// Get mask from loader object
 		mask = loader.getMask(obj.source, obj.getTheme());
 
-		ctx.translate(obj.x - this.x, obj.y - this.y);
+		ctx.translate(obj.x - roomPos.x, obj.y - roomPos.y);
 		ctx.rotate(obj.dir);
 
 		ctx.drawImage(
 			obj.mask,
 
 			// Define image cutout
-			(obj.width + obj.bm.spacing) * obj.currentImage,
+			(obj.width + obj.bm.spacing) * obj.imageNumber,
 			0,
 			obj.width,
 			obj.height,
@@ -152,11 +153,10 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 			obj.height * obj.size
 		);
 
-		ctx.translate(this.x - obj.x, this.y - obj.y);
 		ctx.rotate(-obj.dir);
+		ctx.translate(roomPos.x - obj.x, roomPos.y - obj.y);
 	}
-	ctx.restore();
-
+	
 	bitmap = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	data = bitmap.data;
 	length = data.length / 4;
@@ -206,7 +206,7 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 	}
 
 	return false;
- }
+ };
 
 
 /**
@@ -254,7 +254,7 @@ Collidable.prototype.collidesWith = function (objects, getCollisionPosition, get
 		ret = {
 			objects: [],
 			positions: []
-		}
+		};
 
 		// If getCollidingObjects is false, only getCollisionPosition is true. Therefore return an average position of all checked objects
 		if (getCollidingObjects === false) {
@@ -343,7 +343,7 @@ Collidable.prototype.drawMask = function (c, cameraOffset) {
 		c.drawImage(
 			this.mask,
 
-			(this.width + this.bm.spacing) * this.currentImage,
+			(this.width + this.bm.spacing) * this.imageNumber,
 			0,
 			this.width,
 			this.height,

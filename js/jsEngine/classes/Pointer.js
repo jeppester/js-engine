@@ -120,7 +120,7 @@ Pointer.prototype.onMouseMove = function (event) {
 	this.mouse.buttons.forEach(function () {
 		this.x = pointer.mouse.x;
 		this.y = pointer.mouse.y;
-	})
+	});
 
 	this.mouse.lastMoved = new Date().getTime();
 
@@ -475,7 +475,7 @@ Pointer.prototype.findTouchNumber = function () {
 			return i;
 		}
 	}
-}
+};
 
 /**
  * Checks if an area defined by a geometric shape, or its outside, is hovered by the mouse pointer.

@@ -1,39 +1,40 @@
 /**
  * Camera:
  * A camera represents a part of the arena which is "projected" on to the engines main canvas.
- * The camera contains both a capture rectangle and a projection rectangle, the capture rectangle decides which part of the arena to "capture".
- * The projection rectangle decides where the captured rectangle will be drawn on the main canvas.
+ * The camera contains both a capture region and a projection region, the capture region decides which part of the arena to "capture".
+ * The projection region decides where the captured region will be drawn on the main canvas.
  */
 NewClass('Camera');
 
 /**
- * @param {object} captureRectangle A rectangle which defines the area, from which to capture the current room
- * @param {object} projectionRectangle A rectangle which defines the area on the main canvas where the captured rectangle should be drawn
+ * @param {object} captureRegion A rectangle which defines the region, from which to capture the current room
+ * @param {object} projectionRegion A rectangle which defines the region on the main canvas where the captured region should be drawn
  */
-Camera.prototype.Camera = function (captureRectangle, projectionRectangle) {
-	if (!captureRectangle.implements(Rectangle)) {throw new Error('Argument captureRectangle should be of type: Rectangle'); }
-	if (!projectionRectangle.implements(Rectangle)) {throw new Error('Argument projectionRectangle should be of type: Rectangle'); }
+Camera.prototype.Camera = function (captureRegion, projectionRegion) {
+	if (!captureRegion.implements(Rectangle)) {throw new Error('Argument captureRegion should be of type: Rectangle'); }
+	if (!projectionRegion.implements(Rectangle)) {throw new Error('Argument projectionRegion should be of type: Rectangle'); }
 
-	this.captureRectangle = captureRectangle;
-	this.projectionRectangle = projectionRectangle;
+	this.captureRegion = captureRegion;
+	this.projectionRegion = projectionRegion;
 	this.canvas = document.createElement('canvas');
-	this.canvas.width = this.captureRectangle.width;
-	this.canvas.height = this.captureRectangle.height;
+	this.canvas.width = this.captureRegion.width;
+	this.canvas.height = this.captureRegion.height;
+	this.room = engine.currentRoom;
 	this.ctx = this.canvas.getContext('2d');
 };
 
 /**
- * Updates the capture canvas' width and height to correspond to the captureRectangle's width and height.
+ * Updates the capture canvas' width and height to correspond to the captureRegion's width and height.
  * Called by Camera.capture, to always keep the canvas' size updated.
  * 
  * @private
  */
 Camera.prototype.updateCaptureCanvas = function () {
-	if (this.captureRectangle.width !== this.canvas.width) {
-		this.canvas.width = this.captureRectangle.width;
+	if (this.captureRegion.width !== this.canvas.width) {
+		this.canvas.width = this.captureRegion.width;
 	}
-	if (this.captureRectangle.height !== this.canvas.height) {
-		this.canvas.height = this.captureRectangle.height;
+	if (this.captureRegion.height !== this.canvas.height) {
+		this.canvas.height = this.captureRegion.height;
 	}
 };
 
@@ -47,10 +48,10 @@ Camera.prototype.capture = function () {
 	// Clear camera canvas
 	this.updateCaptureCanvas();
 	this.ctx.fillStyle = engine.backgroundColor;
-	this.ctx.fillRect(0, 0, this.captureRectangle.width, this.captureRectangle.height);
+	this.ctx.fillRect(0, 0, this.captureRegion.width, this.captureRegion.height);
 
-	engine.masterRoom.drawChildren(this.ctx, this.captureRectangle.copy());
-	engine.currentRoom.drawChildren(this.ctx, this.captureRectangle.copy());
+	engine.masterRoom.draw(this.ctx, this.captureRegion.copy());
+	this.room.draw(this.ctx, this.captureRegion.copy());
 };
 
 /**
@@ -63,6 +64,6 @@ Camera.prototype.capture = function () {
 Camera.prototype.draw = function (c) {
 	// Camera on canvas
 	c.save();
-	c.drawImage(this.canvas, this.projectionRectangle.x, this.projectionRectangle.y, this.projectionRectangle.width, this.projectionRectangle.height);
+	c.drawImage(this.canvas, this.projectionRegion.x, this.projectionRegion.y, this.projectionRegion.width, this.projectionRegion.height);
 	c.restore();
 };

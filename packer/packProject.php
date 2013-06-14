@@ -109,9 +109,9 @@ else {
 		$e . 'Engine.js',
 
 		$e . "classes/Animatable.js",
+		$e . "classes/Vector.js",
 		$e . "classes/View.js",
 		$e . "classes/Room.js",
-		$e . "classes/Vector.js",
 		$e . "classes/Line.js",
 		$e . "classes/Rectangle.js",
 		$e . "classes/Polygon.js",

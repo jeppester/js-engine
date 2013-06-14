@@ -1,6 +1,6 @@
 /**
  * Animatable:
- * A class which has functions for tweening of its numeric properties.
+ * A class which has functions for tweening its numeric properties.
  * This class' main purpose is to be inherited by other classes which should be animatable.
  */
 
@@ -36,8 +36,8 @@ Animatable.prototype.animate = function (properties, options) {
 	if (options === undefined) {throw new Error('Missing argument: options'); }
 	var anim, i, c, loop, map, opt;
 
-	anim = {},
-	map = properties,
+	anim = {};
+	map = properties;
 	opt = options ? options : {};
 
 	if (!map) {
@@ -139,7 +139,7 @@ Animatable.prototype.getAnimations = function () {
  * Stops all current animations of the object.
  */
 Animatable.prototype.stopAnimations = function () {
-	var animations, roomId, room;
+	var animations, roomId, room, name;
 
 	animations = [];
 	for (roomId = 0; roomId < engine.roomList.length; roomId ++) {

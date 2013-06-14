@@ -3,7 +3,7 @@
  * A math class which is used for handling non-rotated rectangles
  */
 
-NewClass('Rectangle', [Animatable]);
+NewClass('Rectangle', [Animatable, Vector]);
 
 /**
  * The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
@@ -126,7 +126,7 @@ Rectangle.prototype.combine = function (rectangle) {
 	pol.points = pol.points.concat(rectangle.getPolygon().points);
 
 	return pol.getBoundingRectangle();
-}
+};
 
 /**
  * Creates a polygon with the same points as the rectangle.

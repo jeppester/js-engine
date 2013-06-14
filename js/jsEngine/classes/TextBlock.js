@@ -3,7 +3,7 @@
  * A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
  */
 
-NewClass('TextBlock', [Animatable, View, Vector]);
+NewClass('TextBlock', [Animatable, View]);
 
 /**
  * The constructor for the TextBlock class.
@@ -30,7 +30,8 @@ TextBlock.prototype.TextBlock = function (string, x, y, width, additionalPropert
 
 	// Call Vector's and view's constructors
 	this.View();
-	this.Vector(x, y);
+	this.x = x !== undefined ? x : 0;
+	this.y = y !== undefined ? y : 0;
 
 	// Load default options
 	this.width = width;
@@ -186,6 +187,7 @@ TextBlock.prototype.stringToLines = function () {
 		this.lines[line] = '';
 	}
 	lt.parentNode.removeChild(lt);
+	this.bm.height = this.lines.length * this.lineHeight;
 };
 
 /**
@@ -193,24 +195,48 @@ TextBlock.prototype.stringToLines = function () {
  * 
  * @private
  * @param {object} c A canvas 2D context on which to draw the TextBlock
+ * @param {object} cameraOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
  */
 TextBlock.prototype.drawCanvas = function (c, cameraOffset) {
-	// Draw on canvas
+	// Draw Sprite on canvas
+	var x, y;
+
 	if (/^\s*$/.test(this.string)) {return; }
-	c.save();
 
 	if (engine.avoidSubPixelRendering) {
-		c.translate(Math.round(this.x - cameraOffset.x), Math.round(this.y - cameraOffset.y));
+		x = Math.round(this.x - cameraOffset.x);
+		y = Math.round(this.y - cameraOffset.y);
 	}
 	else {
-		c.translate(this.x - cameraOffset.x, this.y - cameraOffset.y);
+		x = this.x - cameraOffset.x;
+		y = this.y - cameraOffset.y;
 	}
 
-	c.rotate(this.dir);
 	c.globalAlpha = this.opacity;
-	c.globalCompositeOperation = this.composite;
-	c.drawImage(this.bm, - this.offset.x * this.size, - this.offset.y * this.size, this.bm.width * this.size, this.bm.height * this.size);
-	c.restore();
+	if (this.composite !== 'source-over') {
+		c.globalCompositeOperation = this.composite;
+	}
+	
+	// If a rotation is used, translate the context and rotate it (much slower than using no rotation)
+	if (this.dir !== 0) {
+		c.save();
+		c.translate(x, y);
+		c.rotate(this.dir);
+		
+		// Draw images
+		c.drawImage(this.bm, - this.offset.x * this.size, - this.offset.y * this.size, this.bm.width * this.size, this.bm.height * this.size);		
+		c.rotate(-this.dir);
+		c.translate(-x, -y);
+	}
+	// If the image is not rotated, draw it without rotation
+	else {
+		c.drawImage(this.bm, x - this.offset.x * this.size, y - this.offset.y * this.size, this.bm.width * this.size, this.bm.height * this.size);
+	}
+
+	if (this.composite !== 'source-over') {
+		c.globalCompositeOperation = 'source-over';
+	}
+	c.globalAlpha = 1;
 };
 
 /**
@@ -225,12 +251,12 @@ TextBlock.prototype.getRedrawRegion = function () {
 	ret = new Rectangle(-this.offset.x, -this.offset.y, this.bm.width, this.bm.height);
 	ret = ret.getPolygon();
 	ret = ret.scale(this.size);
-	ret = ret.rotate(this.dir)
-	ret = ret.getBoundingRectangle().move(this.x, this.y);
+	ret = ret.rotate(this.dir);
+	ret = ret.getBoundingRectangle().add(this.getRoomPosition());
 	ret.x = Math.floor(ret.x - 1);
 	ret.y = Math.floor(ret.y - 1);
 	ret.width = Math.ceil(ret.width + 2);
 	ret.height = Math.ceil(ret.height + 2);
 
 	return ret;
-}
+};

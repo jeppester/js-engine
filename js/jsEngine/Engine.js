@@ -226,9 +226,9 @@ Engine.prototype.load = function () {
 	// Load engine classes
 	loader.loadClasses([
 		this.enginePath + '/classes/Animatable.js',
+		this.enginePath + '/classes/Vector.js',
 		this.enginePath + '/classes/View.js',	
 		this.enginePath + '/classes/Room.js',
-		this.enginePath + '/classes/Vector.js',
 		this.enginePath + '/classes/Line.js',
 		this.enginePath + '/classes/Polygon.js',
 		this.enginePath + '/classes/Rectangle.js',
@@ -441,24 +441,6 @@ Engine.prototype.convertSpeed = function (speed, from, to) {
 };
 
 /**
- * Toggles if all sound effects should be muted.
- * 
- * @param {boolean} muted Wether of not the sound effects should be muted
- */
-Engine.prototype.setSoundsMuted = function (muted) {
-	muted = muted !== undefined ? muted : true;
-
-	// If muting, check all sounds whether they are being played, if so stop the playback
-	if (muted) {
-		loader.getAllSounds().forEach(function () {
-			this.stopAll();
-		});
-	}
-
-	this.soundsMuted = muted;
-};
-
-/**
  * Leaves the current room and opens another room
  * 
  * @param {mixed} room A pointer to the desired room, or a string representing the name of the room
@@ -469,7 +451,7 @@ Engine.prototype.goToRoom = function (room) {
 	// If a string has been specified, find the room by name
 	if (typeof room === "string") {
 		room = this.roomList.getElementByPropertyValue('name', room);
-		if (!room) {throw new Error('Could not find a room with the specified name')}
+		if (!room) {throw new Error('Could not find a room with the specified name'); }
 	}
 	// Else, check if the room exists on the room list, and if not, throw an error
 	else {
@@ -481,7 +463,7 @@ Engine.prototype.goToRoom = function (room) {
 	this.currentRoom.onLeave();
 	this.currentRoom = room;
 	this.currentRoom.onEnter();
-}
+};
 
 /**
  * Adds a room to the room list. This function is automatically called by the Room class' constructor.
@@ -496,7 +478,7 @@ Engine.prototype.addRoom = function (room) {
 	}
 
 	this.roomList.push(room);
-}
+};
 
 /**
  * Removes a room from the room list.
@@ -510,7 +492,7 @@ Engine.prototype.removeRoom = function(room) {
 	// If a string has been specified, find the room by name
 	if (typeof room === "string") {
 		room = this.roomList.getElementByPropertyValue('name', room);
-		if (!room) {throw new Error('Could not find a room with the specified name')}
+		if (!room) {throw new Error('Could not find a room with the specified name'); }
 	}
 	// Else, check if the room exists on the room list, and if not, throw an error
 	index = this.roomList.indexOf(room);
@@ -528,7 +510,25 @@ Engine.prototype.removeRoom = function(room) {
 	}
 
 	this.roomList.splice(i, 1);
-}
+};
+
+/**
+ * Toggles if all sound effects should be muted.
+ * 
+ * @param {boolean} muted Wether of not the sound effects should be muted
+ */
+Engine.prototype.setSoundsMuted = function (muted) {
+	muted = muted !== undefined ? muted : true;
+
+	// If muting, check all sounds whether they are being played, if so stop the playback
+	if (muted) {
+		loader.getAllSounds().forEach(function () {
+			this.stopAll();
+		});
+	}
+
+	this.soundsMuted = muted;
+};
 
 /**
  * Toggles if all music should be muted.
@@ -772,11 +772,19 @@ Engine.prototype.ajaxRequest = function (url, params, async, callback, caller) {
  * param {object} obj The object to remove
  */
 Engine.prototype.purge = function (obj) {
-	var name, loop, roomId, room, i;
+	var len, name, loop, roomId, room, i;
 
 	if (obj === undefined) {throw new Error(obj); }
 	if (typeof obj === "string") {
 		obj = this.objectIndex[obj];
+	}
+
+	// Purge ALL children
+	if (obj.children) {
+		len = obj.children.length;
+		while (len --) {
+			engine.purge(obj.children[len]);
+		}
 	}
 
 	// Delete all references from rooms and their loops
@@ -787,8 +795,8 @@ Engine.prototype.purge = function (obj) {
 				loop = room.loops[name];
 
 				loop.detachFunctionsByCaller(obj);
-				loop.removeAnimationsOfObject(obj);
 				loop.unScheduleByCaller(obj);
+				loop.removeAnimationsOfObject(obj);
 			}
 		}
 	}
@@ -798,6 +806,7 @@ Engine.prototype.purge = function (obj) {
 		obj.parent.removeChildren(obj);
 	}
 
+	// Delete from object index
 	delete this.objectIndex[obj.id];
 };
 
@@ -807,7 +816,8 @@ Engine.prototype.purge = function (obj) {
 Engine.prototype.redraw = function () {
 	var i;
 	
-	for (var i = 0; i < this.cameras.length; i++) {
+	for (i = 0; i < this.cameras.length; i++) {
+		//this.mainCanvas.getContext('2d').clearRect(0, 0, this.canvasResX, this.canvasResY);
 		this.cameras[i].capture();
 		this.cameras[i].draw(this.mainCanvas.getContext('2d'));
 	}

@@ -63,12 +63,25 @@ Polygon.prototype.setFromCoordinates = function (x1, y1, x2, y2, x3, y3) {
  * @return {object} The resulting Polygon object (itself)
  */
 Polygon.prototype.move = function (x, y) {
-	var moveVect, i;
+	if (typeof x !== 'number') {throw new Error('Argument x should be of type Number'); }
+	if (typeof y !== 'number') {throw new Error('Argument y should be of type Number'); }
 
-	moveVect = new Vector(x, y);
+	return this.add(new Vector(x, y));
+};
+
+/**
+ * Adds a vector to all points.
+ * 
+ * @param {object} vector A Vector to add to all points
+ * @return {object} The resulting Polygon object (itself)
+ */
+Polygon.prototype.add = function (vector) {
+	if (!vector.implements(Vector)) {throw new Error('Argument vector should be of type Vector'); }
+
+	var i;
 
 	for (i = 0; i < this.points.length; i++) {
-		this.points[i].add(moveVect);
+		this.points[i].add(vector);
 	}
 
 	return this;
@@ -81,6 +94,8 @@ Polygon.prototype.move = function (x, y) {
  * @return {object} The resulting Polygon object (itself)
  */
 Polygon.prototype.rotate = function (dir) {
+	if (typeof dir !== 'number') {throw new Error('Argument dir should be of type Number'); }
+
 	var i;
 
 	for (i = 0; i < this.points.length; i++) {

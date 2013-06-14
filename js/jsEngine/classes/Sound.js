@@ -1,7 +1,6 @@
 /**
  * Sound:
- * A wrapper-class for audio-elements that stores multiple copies of the audio-element.
- * Makes it possible to control (start, stop) multiple playbacks of the same sound.
+ * A wrapper-class for audio-elements. A Sound object stores multiple copies of the same sound to enable multiple simultaneous playbacks, and provides functions for controlling (start, stop) each playback.
  */
 
 NewClass('Sound');

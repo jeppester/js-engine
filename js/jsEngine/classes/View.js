@@ -4,17 +4,34 @@
  * All objects which are drawn on the game's canvas extends the View-class.
  */
 
-NewClass('View');
+NewClass('View', [Vector]);
 
 /**
  * Constructor for the View class.
  */
 View.prototype.View = function () {
+	this.Vector();
 	this.children = [];
 	this.drawCacheCanvas = document.createElement('canvas');
 	this.drawCacheCtx = this.drawCacheCanvas.getContext('2d');
 	this.drawCacheEnabled = false;
 	this.drawCacheOffset = new Vector();
+};
+
+/**
+ * Fetches the position of the view inside the room
+ */
+View.prototype.getRoomPosition = function () {
+	var pos;
+
+	pos = this.copy();
+	
+	parent = this;
+	while ((parent = parent.parent) !== undefined) {
+		pos.move(parent.x, parent.y);
+	}
+
+	return pos;
 };
 
 /**
@@ -33,14 +50,21 @@ View.prototype.addChildren = function (child1, child2) {
 
 		if (typeof child !== 'object') {throw new Error('Argument "child" has to be of type "object"'); }
 
+		// If the child already has a parent, remove the child from that parent
+		if (child.parent) {
+			child.parent.removeChildren(child);
+		}
+
+		// Add the child
 		this.children.push(child);
 		child.parent = this;
 
+		// Refresh the child's sprite (it might have changed)
 		if (child.refreshSource) {
 			child.refreshSource();
 		}
 	}
-	return arguments;
+	return arguments; 
 };
 
 /**
@@ -148,36 +172,6 @@ View.prototype.applyToThisAndChildren = function (func) {
 };
 
 /**
- * Removes the View from the arena and everywhere where it is registered. If the object has children, the children will be removed aswell.
- * 
- * @param {boolean} purgeChildren Whether or not to purge all children, meaning that their scheduled functions and loop-attached functions will be removed. (true by default)
- */
-View.prototype.remove = function (purgeChildren) {
-	this.removeAllChildren(purgeChildren);
-	
-	engine.purge(this);
-};
-
-/**
- * Removes all children from the View.
- * 
- * @param {boolean} purge Whether or not to purge the removed children, meaning that their scheduled functions and loop-attached functions will be removed. (true by default)
- */
-View.prototype.removeAllChildren = function (purge) {
-	purge = purge !== undefined ? purge : true;
-	
-	var rmChild;
-
-	rmChild = this.children.splice(0, this.children.length);
-	rmChild.forEach(function () {
-		this.parent = undefined;
-		if (purge) {
-			engine.purge(this);
-		}
-	});
-};
-
-/**
  * Sets whether or not the view should be cached (and only redrawn when called directly).
  * If a view is set to static, the view's canvas will be used for caching a drawing of the view's children.
  * 
@@ -201,13 +195,15 @@ View.prototype.cacheDrawing = function () {
 	// Calculate the size of the canvas and its offset
 	var drawRegion;
 	drawRegion = this.getCombinedRedrawRegion();
+	drawRegion.move(-this.x, -this.y);
+
 	if (drawRegion) {
 		this.drawCacheOffset = new Vector(drawRegion.x, drawRegion.y);
 		this.drawCacheCanvas.width = drawRegion.width;
 		this.drawCacheCanvas.height = drawRegion.height;
 
 		// Draw all children to the cache canvas
-		this.drawChildren(this.drawCacheCtx, this.drawCacheOffset.copy(), true);
+		this.draw(this.drawCacheCtx, this.drawCacheOffset.copy().move(this.x, this.y), true);
 	}
 };
 
@@ -235,6 +231,7 @@ View.prototype.getCombinedRedrawRegion = function () {
 			}
 		}
 	}
+
 	return box;
 };
 
@@ -265,38 +262,68 @@ View.prototype.removeChildren = function (child1, child2) {
 };
 
 /**
+ * Removes all children from the View.
+ * 
+ * @param {boolean} purge Whether or not to purge the removed children, meaning that their scheduled functions and loop-attached functions will be removed. (true by default)
+ */
+View.prototype.removeAllChildren = function (purge) {
+	purge = purge !== undefined ? purge : true;
+	
+	var rmChild;
+
+	rmChild = this.children.splice(0, this.children.length);
+	rmChild.forEach(function () {
+		this.parent = undefined;
+		if (purge) {
+			this.remove(purge);
+		}
+	});
+};
+
+/**
  * Draws all children and grandchildren of an object that inherits the View class. It is usually not necessary to call this function since it is automatically called by the engine's redraw loop.
  * 
  * @param {object} ctx A canvas' 2d context to draw the children on
+ * @param {object} cameraOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
+ * @param {boolean} forceRedraw Whether or not to force a redraw even though draw caching is enabled (this option is actually used when caching the view)
  */
-View.prototype.drawChildren = function (c, cameraOffset) {
-	var i, child;
+View.prototype.draw = function (c, cameraOffset, forceRedraw) {
+	var i, len, child, newOffset;
 
-	if (this.drawCacheEnabled) {
-		c.save();
-		c.drawImage(this.drawCacheCanvas, this.drawCacheOffset.x, this.drawCacheOffset.y, this.drawCacheCanvas.width, this.drawCacheCanvas.height);
-		c.restore();
+	if (this.drawCacheEnabled && !forceRedraw) {
+		c.drawImage(this.drawCacheCanvas, this.x + this.drawCacheOffset.x - cameraOffset.x, this.y + this.drawCacheOffset.y - cameraOffset.y, this.drawCacheCanvas.width, this.drawCacheCanvas.height);
 	}
 	else {
-		for (i = 0; i < this.children.length; i ++) {
-			child = this.children[i];
+		// Draw this
+		if (this.drawCanvas) {
+			this.drawCanvas(c, cameraOffset);
 
-			// If the child can be drawn, draw them
-			if (child.drawCanvas) {
-				child.drawCanvas(c, cameraOffset);
-
-				if (engine.drawBoundingBoxes && child.drawBoundingBox) {
-					child.drawBoundingBox(c, cameraOffset);
-				}
-				if (engine.drawMasks && child.drawMask) {
-					child.drawMask(c, cameraOffset);
-				}
+			if (engine.drawBoundingBoxes && child.drawBoundingBox) {
+				this.drawBoundingBox(c, cameraOffset);
 			}
+			if (engine.drawMasks && child.drawMask) {
+				this.drawMask(c, cameraOffset);
+			}
+		}
 
-			// If the child has children that can be drawn (the child is a view), draw them
-			if (child.drawChildren) {
-				child.drawChildren(c, cameraOffset);
+		// Draw children
+		len = this.children.length;
+
+		newOffset = cameraOffset.copy().move(-this.x, -this.y);
+
+		for (i = 0; i < len; i ++) {
+			child = this.children[i];
+			if (child.draw) {
+				child.draw(c, newOffset);
+			}
+			else if (child.drawCanvas) {
+				child.draw(c, newOffset);
 			}
 		}
 	}
 };
+
+/**
+ * Remove drawCanvas function which was inherited from View
+ */
+View.prototype.drawCanvas = undefined;

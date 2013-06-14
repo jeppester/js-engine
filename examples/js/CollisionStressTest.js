@@ -45,7 +45,7 @@ CollisionStressTest.prototype.updateFPS = function () {
 }
 
 CollisionStressTest.prototype.addObjects = function (count) {
-	count = count !== undefined ? count : 1;
+	count = count !== undefined ? count : 10;
 
 	for (i = 0; i < count; i++) {
 		sprite = new GameObject(
@@ -59,12 +59,14 @@ CollisionStressTest.prototype.addObjects = function (count) {
 }
 
 CollisionStressTest.prototype.removeObjects = function (count) {
-	count = count !== undefined ? count : 1;
+	var i;
+
+	count = count !== undefined ? count : 10;
 	objects = this.objectView.getChildren();
 	count = Math.min(count, objects.length);
 
 	for (i = 0; i < count; i++) {
-		objects.shift().remove();
+		engine.purge(objects.shift());
 	}
 }
 

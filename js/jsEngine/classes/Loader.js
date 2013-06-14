@@ -262,9 +262,9 @@ Loader.prototype.getAllMusic = function () {
 };
 
 /**
- * Loads javascript classes from files. The loaded classes' names must follow the following format: [ClassName].js 
+ * Loads JavaScript classes from files. The loaded classes' names must follow the following format: [ClassName].js 
  * 
- * @param {array} paths An array of paths to javascript - containing classes - that should be loaded
+ * @param {array} paths An array of paths to JavaScripts - containing classes - which should be loaded
  * @return {boolean} True, when the classes has been loaded without any errors
  */
 Loader.prototype.loadClasses = function (paths) {
@@ -403,13 +403,16 @@ Loader.prototype.loadResources = function (theme, object, typeString) {
 			case 'images':
 				res = new Image();
 				res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, '/') + '.png';
-				if (images = object[path].match(/; *(\d+) *images?/)) {
+
+				images = object[path].match(/; *(\d+) *images?/);
+				if (images) {
 					res.imageLength = images[1];
 				}
 				else {
 					res.imageLength = 1;
 				}
-				if (images = object[path].match(/; *bordered/)) {
+
+				if (object[path].match(/; *bordered/)) {
 					res.spacing = 1;
 				}
 				else {
