@@ -39,13 +39,13 @@ Collidable.prototype.boundingBoxCollidesWith = function (objects, getCollidingOb
 
 	var pol1, pol2, i, collidingObjects, obj;
 
-	pol1 = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.size).add(this.getRoomPosition());
+	pol1 = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).scale(this.size * this.widthModifier, this.size * this.heightModifier).rotate(this.dir).add(this.getRoomPosition());
 
 	collidingObjects = [];
 	for (i = 0; i < objects.length; i++) {
 		obj = objects[i];
 
-		pol2 = obj.mask.bBox.copy().move(obj.mask.width / 2 - obj.offset.x, obj.mask.height / 2 - obj.offset.y).rotate(obj.dir).scale(obj.size).add(obj.getRoomPosition());
+		pol2 = obj.mask.bBox.copy().move(obj.mask.width / 2 - obj.offset.x, obj.mask.height / 2 - obj.offset.y).scale(obj.size * obj.widthModifier, obj.size * obj.heightModifier).rotate(obj.dir).add(obj.getRoomPosition());
 
 		// Find out if the two objects' bounding boxes intersect
 		// If not, check if one of the points of each object is inside the other's polygon. This will ensure that one of the objects does not contain the other
@@ -93,8 +93,8 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 
 	// Create a new canvas for checking for a collision
 	canvas = document.createElement('canvas');
-	canvas.width = Math.ceil(mask.width * this.size);
-	canvas.height = Math.ceil(mask.height * this.size);
+	canvas.width = Math.ceil(mask.width * this.size * this.widthModifier);
+	canvas.height = Math.ceil(mask.height * this.size * this.heightModifier);
 
 	ctx = canvas.getContext('2d');
 
@@ -117,10 +117,10 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 		// Define position and width on canvas
 		0,
 		0,
-		this.width * this.size,
-		this.height * this.size
+		this.width * this.size * this.widthModifier,
+		this.height * this.size * this.heightModifier
 	);
-	ctx.translate(this.offset.x * this.size, this.offset.y * this.size);
+	ctx.translate(this.offset.x * this.size * this.widthModifier, this.offset.y * this.size * this.heightModifier);
 	ctx.rotate(-this.dir);
 
 	// Draw other objects
@@ -147,10 +147,10 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 			obj.height,
 
 			// Define position and width on canvas
-			- obj.offset.x * obj.size,
-			- obj.offset.y * obj.size,
-			obj.width * obj.size,
-			obj.height * obj.size
+			- obj.offset.x * obj.size * obj.widthModifier,
+			- obj.offset.y * obj.size * obj.heightModifier,
+			obj.width * obj.size * obj.widthModifier,
+			obj.height * obj.size * obj.heightModifier
 		);
 
 		ctx.rotate(-obj.dir);
@@ -191,8 +191,8 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 		avY = (pxArr[0].y + pxArr[pxArr.length - 1].y) / 2;
 
 		// Translate the position according to the object's sprite offset
-		avX -= this.offset.x * this.size;
-		avY -= this.offset.y * this.size;
+		avX -= this.offset.x * this.size * this.widthModifier;
+		avY -= this.offset.y * this.size * this.heightModifier;
 
 		// Rotate the position according to the object's direction
 		avDir = Math.atan2(avY, avX);
@@ -235,7 +235,7 @@ Collidable.prototype.collidesWith = function (objects, getCollisionPosition, get
 
 	getCollidingObjects = getCollidingObjects !== undefined ? getCollidingObjects : false;
 
-	if (this.size === 0) {
+	if (this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0) {
 		return false;
 	}
 
@@ -302,7 +302,7 @@ Collidable.prototype.collidesWith = function (objects, getCollisionPosition, get
 Collidable.prototype.drawBoundingBox = function (c, cameraOffset) {
 	var pol;
 
-	pol = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).rotate(this.dir).scale(this.size);
+	pol = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).scale(this.size * this.widthModifier, this.size * this.heightModifier).rotate(this.dir);
 
 	c.save();
 	c.strokeStyle = "#0F0";
@@ -348,10 +348,10 @@ Collidable.prototype.drawMask = function (c, cameraOffset) {
 			this.width,
 			this.height,
 
-			- this.offset.x * this.size,
-			- this.offset.y * this.size,
-			this.width * this.size,
-			this.height * this.size);
+			- this.offset.x * this.size * this.widthModifier,
+			- this.offset.y * this.size * this.heightModifier,
+			this.width * this.size * this.widthModifier,
+			this.height * this.size * this.heightModifier);
 	} catch (e) {
 		console.log(this.source);
 		console.log(this.bm);

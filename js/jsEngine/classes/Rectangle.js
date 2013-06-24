@@ -98,17 +98,19 @@ Rectangle.prototype.moveTo = function (x, y) {
 };
 
 /**
- * Scales the Rectangle by multiplying the width and height values with a factor.
- * Please notice that, opposite to the Polygon and Line objects, the position of the Rectangle will not be changed by scaling it, since the position of the top left corner will not be scaled.
+ * Scales the Rectangle by multiplying the width and height values.
+ * Please notice that, opposed to the Polygon and Line objects, the position of the Rectangle will not be changed by scaling it, since the position of the top left corner will not be scaled.
  * 
- * @param {number} factor A factor with which to scale the Rectangle
+ * @param {number} scaleH A factor with which to scale the Rectangle horizontally. If scaleH is undefined, both width and height will be scaled after this factor
+ * @param {number} scaleV A factor with which to scale the Rectangle vertically
  * @return {object} The resulting Rectangle object (itself)
  */
-Rectangle.prototype.scale = function (factor) {
-	if (typeof factor !== 'number') {throw new Error('Argument factor should be of type Number'); }
+Rectangle.prototype.scale = function (scaleH, scaleV) {
+	if (typeof scaleH !== 'number') {throw new Error('Argument scaleH should be of type Number'); }
+	scaleV = scaleV !== undefined ? scaleV : scaleH;
 
-	this.width *= factor;
-	this.height *= factor;
+	this.width *= scaleH;
+	this.height *= scaleV;
 
 	return this;
 };

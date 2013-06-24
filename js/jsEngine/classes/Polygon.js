@@ -106,18 +106,17 @@ Polygon.prototype.rotate = function (dir) {
 };
 
 /**
- * Scales the polygon by multiplying all of its points with a factor
+ * Scales the polygon by multiplying all of its points
  * 
- * @param {number} factor A factor with which to scale the polygon
+ * @param {number} scaleH A factor with which to scale the Polygon horizontally. If scaleH is undefined, both width and height will be scaled after this factor
+ * @param {number} scaleV A factor with which to scale the Polygon vertically
  * @return {object} The resulting Polygon object (itself)
  */
-Polygon.prototype.scale = function (factor) {
-	if (typeof factor !== 'number') {throw new Error('Argument factor should be of type Number'); }
-
+Polygon.prototype.scale = function (scaleH, scaleV) {
 	var i;
 
 	for (i = 0; i < this.points.length; i++) {
-		this.points[i].scale(factor);
+		this.points[i].scale(scaleH, scaleV);
 	}
 
 	return this;

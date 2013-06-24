@@ -298,10 +298,10 @@ View.prototype.draw = function (c, cameraOffset, forceRedraw) {
 		if (this.drawCanvas) {
 			this.drawCanvas(c, cameraOffset);
 
-			if (engine.drawBoundingBoxes && child.drawBoundingBox) {
+			if (engine.drawBoundingBoxes && this.drawBoundingBox) {
 				this.drawBoundingBox(c, cameraOffset);
 			}
-			if (engine.drawMasks && child.drawMask) {
+			if (engine.drawMasks && this.drawMask) {
 				this.drawMask(c, cameraOffset);
 			}
 		}

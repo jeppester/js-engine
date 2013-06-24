@@ -43,6 +43,8 @@ TextBlock.prototype.TextBlock = function (string, x, y, width, additionalPropert
 	this.color = "#000000";
 	this.opacity = 1;
 	this.size = 1;
+	this.widthModifier = 1;
+	this.heightModifier = 1;
 	this.dir = 0;
 	this.composite = 'source-over';
 
@@ -224,13 +226,13 @@ TextBlock.prototype.drawCanvas = function (c, cameraOffset) {
 		c.rotate(this.dir);
 		
 		// Draw images
-		c.drawImage(this.bm, - this.offset.x * this.size, - this.offset.y * this.size, this.bm.width * this.size, this.bm.height * this.size);		
+		c.drawImage(this.bm, - this.offset.x * this.size * this.widthModifier, - this.offset.y * this.size * this.heightModifier, this.bm.width * this.size * this.widthModifier, this.bm.height * this.size * this.heightModifier);		
 		c.rotate(-this.dir);
 		c.translate(-x, -y);
 	}
 	// If the image is not rotated, draw it without rotation
 	else {
-		c.drawImage(this.bm, x - this.offset.x * this.size, y - this.offset.y * this.size, this.bm.width * this.size, this.bm.height * this.size);
+		c.drawImage(this.bm, x - this.offset.x * this.size * this.widthModifier, y - this.offset.y * this.size * this.heightModifier, this.bm.width * this.size * this.widthModifier, this.bm.height * this.size * this.heightModifier);
 	}
 
 	if (this.composite !== 'source-over') {
@@ -250,7 +252,7 @@ TextBlock.prototype.getRedrawRegion = function () {
 
 	ret = new Rectangle(-this.offset.x, -this.offset.y, this.bm.width, this.bm.height);
 	ret = ret.getPolygon();
-	ret = ret.scale(this.size);
+	ret = ret.scale(this.size * this.widthModifier, this.size * this.heightModifier);
 	ret = ret.rotate(this.dir);
 	ret = ret.getBoundingRectangle().add(this.getRoomPosition());
 	ret.x = Math.floor(ret.x - 1);

@@ -87,16 +87,18 @@ Vector.prototype.rotate = function (dir) {
 };
 
 /**
- * Scales the vector by multiplying the x- and y values with a factor.
+ * Scales the vector by multiplying the x- and y values.
  * 
- * @param {number} factor A factor with which to scale the vector
+ * @param {number} scaleH A factor with which to scale the Vector horizontally. If scaleH is undefined, both width and height will be scaled after this factor
+ * @param {number} scaleV A factor with which to scale the Vector vertically
  * @return {object} The resulting Vector object (itself)
  */
-Vector.prototype.scale = function (factor) {
-	if (typeof factor !== 'number') {throw new Error('Argument factor should be of type Number'); }
+Vector.prototype.scale = function (scaleH, scaleV) {
+	if (typeof scaleH !== 'number') {throw new Error('Argument scaleH should be of type Number'); }
+	scaleV = scaleV !== undefined ? scaleV : scaleH;
 
-	this.x *= factor;
-	this.y *= factor;
+	this.x *= scaleH;
+	this.y *= scaleV;
 
 	return this;
 };

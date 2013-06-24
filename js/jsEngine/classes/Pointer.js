@@ -326,7 +326,7 @@ Pointer.prototype.shapeIsPressed = function (button, shape, outside) {
 	button = button !== undefined ? button : MOUSE_TOUCH_ANY;
 	if (shape === undefined) {throw new Error('Missing argument: shape'); }
 	if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); }
-	var i, pointers, ret, check;
+	var i, pointers, pointer, ret, check;
 
 	// Narrow possible presses down to the pressed pointers within the selected buttons
 	pointers = this.isPressed(button);
@@ -362,7 +362,7 @@ Pointer.prototype.shapeIsReleased = function (button, shape, outside) {
 	button = button !== undefined ? button : MOUSE_TOUCH_ANY;
 	if (shape === undefined) {throw new Error('Missing argument: shape'); }
 	if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); }
-	var i, pointers, ret, check;
+	var i, pointers, pointer, ret, check;
 
 	// Narrow possible presses down to the pressed pointers within the selected buttons
 	pointers = this.isReleased(button);

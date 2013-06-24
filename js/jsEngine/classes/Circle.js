@@ -82,6 +82,7 @@ Circle.prototype.moveTo = function (x, y) {
 /**
  * Scales the Circle object by multiplying it radius with a factor.
  * Please notice that, opposite to the Polygon and Line objects, the position of the Circle will not be changed by scaling it, since the center of the circle will not be scaled.
+ * Also: since ellipses are not supported yet, circles cannot be scaled with various factors horizontally and vertically, like the other geometric objects.
  * 
  * @param {number} factor A factor with which to scale the Circle
  * @return {object} The resulting Circle object (itself)

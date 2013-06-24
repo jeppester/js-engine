@@ -95,16 +95,15 @@ Line.prototype.rotate = function (dir) {
 };
 
 /**
- * Scales the line by multiplying the start- and end points with a factor
+ * Scales the line by multiplying the start- and end points
  * 
- * @param {number} factor A factor with which to scale the line
+ * @param {number} scaleH A factor with which to scale the Line horizontally. If scaleH is undefined, both width and height will be scaled after this factor
+ * @param {number} scaleV A factor with which to scale the Line vertically
  * @return {object} The resulting Line object (itself)
  */
-Line.prototype.scale = function (factor) {
-	if (typeof factor !== 'number') {throw new Error('Argument factor should be of type: Number'); }
-
-	this.a.scale(factor);
-	this.b.scale(factor);
+Line.prototype.scale = function (scaleH, scaleV) {
+	this.a.scale(scaleH, scaleV);
+	this.b.scale(scaleH, scaleV);
 
 	return this;
 };
