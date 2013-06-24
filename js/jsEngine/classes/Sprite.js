@@ -129,6 +129,24 @@ Sprite.prototype.setSource = function (source) {
 };
 
 /**
+ * Calculates and sets the width modifier to fit a targetted width.
+ * 
+ * @param {number} width The targetted width in pixels
+ */
+Sprite.prototype.setWidth = function (width) {
+	this.widthModifier = width / (this.width * this.size);
+};
+
+/**
+ * Calculates and sets the height modifier to fit a targetted height.
+ * 
+ * @param {number} height The targetted height in pixels
+ */
+Sprite.prototype.setHeight = function (height) {
+	this.heightModifier = height / (this.height * this.size);
+};
+
+/**
  * Draws the object to the canvas.
  * 
  * @private

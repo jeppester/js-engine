@@ -192,6 +192,25 @@ TextBlock.prototype.stringToLines = function () {
 	this.bm.height = this.lines.length * this.lineHeight;
 };
 
+
+/**
+ * Calculates and sets the width modifier to fit a targetted width.
+ * 
+ * @param {number} width The targetted width in pixels
+ */
+TextBlock.prototype.setWidth = function (width) {
+	this.widthModifier = width / (this.bm.width * this.size);
+};
+
+/**
+ * Calculates and sets the height modifier to fit a targetted height.
+ * 
+ * @param {number} height The targetted height in pixels
+ */
+TextBlock.prototype.setHeight = function (height) {
+	this.heightModifier = height / (this.bm.height * this.size);
+};
+
 /**
  * Draws the cached rendering of the TextBlock object to the canvas.
  * 
