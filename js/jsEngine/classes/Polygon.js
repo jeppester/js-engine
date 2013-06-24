@@ -259,7 +259,7 @@ Polygon.prototype.getDistance = function (object) {
  */
 Polygon.prototype.contains = function (object) {
 	if (object.implements(Vector)) {
-		if (this.intersects(new Line().setFromCoordinates(-100000, -100000, object.x, object.y), true) % 2) {
+		if (this.intersects(new Line().setFromCoordinates(-123456, -98765, object.x, object.y), true) % 2) {
 			return true;
 		}
 		else {
@@ -334,6 +334,7 @@ Polygon.prototype.intersects = function (object, countIntersections) {
 	else if (object.implements(Circle)) {
 		// Check if each line intersects with the circle
 		lines = this.getLines();
+
 		for (i = 0; i < lines.length; i++) {
 			if (object.intersects(lines[i])) {
 				if (countIntersections) {

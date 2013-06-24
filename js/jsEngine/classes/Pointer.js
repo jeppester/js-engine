@@ -112,11 +112,20 @@ Pointer.prototype.onMouseUp = function (event) {
 Pointer.prototype.onMouseMove = function (event) {
 	if (event === undefined) {throw new Error('Missing argument: event'); }
 
+	var roomPos;
+
 	this.mouse.window.set(event.pageX, event.pageY);
 	this.mouse.set(this.mouse.window.x - engine.arena.offsetLeft - engine.mainCanvas.offsetLeft + document.body.scrollLeft, this.mouse.window.y - engine.arena.offsetTop - engine.mainCanvas.offsetTop + document.body.scrollTop);
 
+	// Find the mouse position relative to the arena
 	this.mouse.x = this.mouse.x / engine.arena.offsetWidth * engine.canvasResX;
 	this.mouse.y = this.mouse.y / engine.arena.offsetHeight * engine.canvasResY;
+
+	// Convert the position to make it relative to the room
+	roomPos = this.calculateRoomPosition(this.mouse);
+	this.mouse.x = roomPos.x;
+	this.mouse.y = roomPos.y;
+
 	this.mouse.buttons.forEach(function () {
 		this.x = pointer.mouse.x;
 		this.y = pointer.mouse.y;
@@ -217,6 +226,11 @@ Pointer.prototype.onTouchMove = function (event) {
 		pointerTouch.set(eventTouch.pageX - engine.arena.offsetLeft - engine.mainCanvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - engine.arena.offsetTop - engine.mainCanvas.offsetTop + document.body.scrollTop);
 		pointerTouch.x = pointerTouch.x / engine.arena.offsetWidth * engine.canvasResX;
 		pointerTouch.y = pointerTouch.y / engine.arena.offsetHeight * engine.canvasResY;
+
+		// Convert the position to make it relative to the room
+		roomPos = this.calculateRoomPosition(this.pointerTouch);
+		pointerTouch.x = roomPos.x;
+		pointerTouch.y = roomPos.y;
 	}
 };
 
@@ -322,11 +336,14 @@ Pointer.prototype.shapeIsPressed = function (button, shape, outside) {
 	// Check each of the pointers to see if they are inside the shape
 	ret = [];
 	for (i = 0; i < pointers.length; i++) {
-		if (!outside && shape.contains(pointers[i])) {
-			ret.push(pointers[i]);
+		pointer = pointers[i];
+		if (pointer.x === false || pointer.y === false) {continue; }
+
+		if (!outside && shape.contains(pointer)) {
+			ret.push(pointer);
 		}
-		else if (outside && !shape.contains(pointers[i])) {
-			ret.push(pointers[i]);
+		else if (outside && !shape.contains(pointer)) {
+			ret.push(pointer);
 		}
 	}
 
@@ -355,11 +372,14 @@ Pointer.prototype.shapeIsReleased = function (button, shape, outside) {
 	// Check each of the pointers to see if they are inside the shape
 	ret = [];
 	for (i = 0; i < pointers.length; i++) {
-		if (!outside && shape.contains(pointers[i])) {
-			ret.push(pointers[i]);
+		pointer = pointers[i];
+		if (pointer.x === false || pointer.y === false) {continue; }
+
+		if (!outside && shape.contains(pointer)) {
+			ret.push(pointer);
 		}
-		else if (outside && !shape.contains(pointers[i])) {
-			ret.push(pointers[i]);
+		else if (outside && !shape.contains(pointer)) {
+			ret.push(pointer);
 		}
 	}
 
@@ -378,7 +398,7 @@ Pointer.prototype.shapeIsDown = function (button, shape, outside) {
 	button = button !== undefined ? button : MOUSE_TOUCH_ANY;
 	if (shape === undefined) {throw new Error('Missing argument: shape'); }
 	if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); }
-	var i, pointers, ret, check;
+	var i, pointers, pointer, ret, check;
 
 	// Narrow possible pointers down to the pointers which are down within the selected buttons
 	pointers = this.isDown(button);
@@ -387,11 +407,14 @@ Pointer.prototype.shapeIsDown = function (button, shape, outside) {
 	// Check each of the pointers to see if they are inside the shape
 	ret = [];
 	for (i = 0; i < pointers.length; i++) {
-		if (!outside && shape.contains(pointers[i])) {
-			ret.push(pointers[i]);
+		pointer = pointers[i];
+		if (pointer.x === false || pointer.y === false) {continue; }
+
+		if (!outside && shape.contains(pointer)) {
+			ret.push(pointer);
 		}
-		else if (outside && !shape.contains(pointers[i])) {
-			ret.push(pointers[i]);
+		else if (outside && !shape.contains(pointer)) {
+			ret.push(pointer);
 		}
 	}
 
@@ -458,6 +481,45 @@ Pointer.prototype.checkPointer = function (pointers, state) {
 	}
 
 	return ret.length ? ret : false;
+};
+
+/**
+ * Converts a coordinate which is relative to the main canvas to a position in the room (based on the room's cameras)
+ * 
+ * @private
+ * @param {object} vector A vector representing a position which is relative to the main canvas
+ * @return {object} vector A vector representing the calculated position relative to the room
+ */
+Pointer.prototype.calculateRoomPosition = function (vector) {
+	var ret, len, camera;
+
+	ret = vector.copy();
+
+	// Find the first camera which covers the position
+	len = engine.cameras.length;
+	while (len --) {
+		camera = engine.cameras[len];
+
+		// If the position is covered by the camera, base the calculation on that camera
+		if (camera.projectionRegion.contains(vector)) {
+			// Find the position relative to the projection region
+			ret.subtract(camera.projectionRegion);
+
+			// Transform the position, based on the relation between the capture region and the projection region
+			ret.x *= camera.captureRegion.width / camera.projectionRegion.width;
+			ret.y *= camera.captureRegion.height / camera.projectionRegion.height;
+
+			// The position is now relative to the capture region, move it to make it relative to the room
+			ret.add(camera.captureRegion);
+
+			// Return the calculated room position
+			return ret;
+		}
+	}
+
+	// If a camera covering the position was not found, return a "false" vector, which cannot be compared to numbers.
+	ret.set(false, false);
+	return ret;
 };
 
 /**
@@ -533,5 +595,5 @@ Pointer.prototype.unPress = function (button) {
  * @return {boolean} True if the pointer is outside, false if not
  */
 Pointer.prototype.outside = function () {
-	return this.mouse.x < 0 || this.mouse.x > engine.arena.offsetWidth || this.mouse.y < 0 || this.mouse.y > engine.arena.offsetHeight;
+	return this.mouse.x === false || this.mouse.y === false;
 };
