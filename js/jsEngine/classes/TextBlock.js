@@ -192,7 +192,6 @@ TextBlock.prototype.stringToLines = function () {
 	this.bm.height = this.lines.length * this.lineHeight;
 };
 
-
 /**
  * Calculates and sets the width modifier to fit a targetted width.
  * 
