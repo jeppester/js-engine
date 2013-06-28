@@ -22,7 +22,7 @@ View.prototype.View = function () {
  * Fetches the position of the view inside the room
  */
 View.prototype.getRoomPosition = function () {
-	var pos;
+	var pos, parent;
 
 	pos = this.copy();
 	

@@ -241,11 +241,13 @@ Collidable.prototype.collidesWith = function (objects, getCollisionPosition, get
 
 	// First, do a bounding box based collision check
 	objects = this.boundingBoxCollidesWith(objects, true);
+	
 	if (objects === false) {
 		return false;
 	}
 	
 	// If a bounding box collision is detected, do a precise collision check with maskCollidesWith
+	// If getCollisionPosition and getCollidingObjects are both false, just return a boolean
 	if (!getCollisionPosition && !getCollidingObjects) {
 		return this.maskCollidesWith(objects);
 	}

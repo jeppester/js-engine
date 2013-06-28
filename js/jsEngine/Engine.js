@@ -814,12 +814,14 @@ Engine.prototype.purge = function (obj) {
  * Redraws the canvas by redrawing all cameras
  */
 Engine.prototype.redraw = function () {
-	var i;
+	var i, c;
 	
+	c = this.mainCanvas.getContext('2d');
+
 	for (i = 0; i < this.cameras.length; i++) {
 		//this.mainCanvas.getContext('2d').clearRect(0, 0, this.canvasResX, this.canvasResY);
 		this.cameras[i].capture();
-		this.cameras[i].draw(this.mainCanvas.getContext('2d'));
+		this.cameras[i].draw(c);
 	}
 };
 

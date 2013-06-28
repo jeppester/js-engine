@@ -46,9 +46,11 @@ Camera.prototype.updateCaptureCanvas = function () {
  */
 Camera.prototype.capture = function () {
 	// Clear camera canvas
+
 	this.updateCaptureCanvas();
+
 	this.ctx.fillStyle = engine.backgroundColor;
-	this.ctx.fillRect(0, 0, this.captureRegion.width, this.captureRegion.height);
+	this.ctx.clearRect(0, 0, this.captureRegion.width, this.captureRegion.height);
 
 	engine.masterRoom.draw(this.ctx, this.captureRegion.copy());
 	this.room.draw(this.ctx, this.captureRegion.copy());
