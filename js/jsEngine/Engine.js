@@ -67,6 +67,7 @@ NewClass('Engine');
  * 	"drawBoundingBoxes": false, // If Collidable object's bounding boxes should be drawn
  * 	"drawMasks": false, // If Collidable object's masks should be drawn
  * 	"enginePath": "js/jsEngine", // The path for the engine classes' directory
+ * 	"focusOnLoad": true, // Whether or not to focus the engine's window when the engine is ready
  * 	"gameClassPath": "js/Game.js", // The path for the game's main class
  * 	"loadText": 'jsEngine loading...'
  * 	"musicMuted": false, // If all music playback should be initially muted
@@ -136,6 +137,7 @@ Engine.prototype.load = function () {
 	this.canvasResX = 800;
 	this.canvasResY = 600;
 	this.enginePath = 'js/jsEngine';
+	this.focusOnLoad = true;
 	this.themesPath = 'themes';
 	this.drawBoundingBoxes = false;
 	this.drawMasks = false;
@@ -157,7 +159,7 @@ Engine.prototype.load = function () {
 	this.musicMuted = false;
 
 	// Copy options to engine (except those which are only used for engine initialization)
-	copyOpt = ['backgroundColor', 'disableTouchScroll', 'defaultCollisionResolution', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'pauseOnBlur', 'drawBoundingBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+	copyOpt = ['backgroundColor', 'disableTouchScroll', 'defaultCollisionResolution', 'focusOnLoad', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'pauseOnBlur', 'drawBoundingBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 	for (i = 0; i < copyOpt.length; i ++) {
 		opt = copyOpt[i];
 		if (this.options[opt] !== undefined) {
@@ -333,11 +335,16 @@ Engine.prototype.initialize = function () {
 	}
 
 	this.startMainLoop();
-	console.log('jsEngine started');
 
-	if (this.onStarted) {
-		this.onStarted();
+	if (this.focusOnLoad) {
+		window.focus();
 	}
+
+	if (this.onload) {
+		this.onload();
+	}
+
+	console.log('jsEngine started');
 };
 
 /**
