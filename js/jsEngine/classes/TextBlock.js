@@ -239,18 +239,26 @@ TextBlock.prototype.drawCanvas = function (c, cameraOffset) {
 	
 	// If a rotation is used, translate the context and rotate it (much slower than using no rotation)
 	if (this.dir !== 0) {
-		c.save();
 		c.translate(x, y);
 		c.rotate(this.dir);
+		c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
 		
 		// Draw images
-		c.drawImage(this.bm, - this.offset.x * this.size * this.widthModifier, - this.offset.y * this.size * this.heightModifier, this.bm.width * this.size * this.widthModifier, this.bm.height * this.size * this.heightModifier);		
+		c.drawImage(this.bm, this.width, 0, this.width, this.height, - this.offset.x, - this.offset.y, this.width, this.height);
+		
+		c.scale(1 / (this.widthModifier * this.size), 1 / (this.heightModifier * this.size));
 		c.rotate(-this.dir);
 		c.translate(-x, -y);
 	}
 	// If the image is not rotated, draw it without rotation
 	else {
-		c.drawImage(this.bm, x - this.offset.x * this.size * this.widthModifier, y - this.offset.y * this.size * this.heightModifier, this.bm.width * this.size * this.widthModifier, this.bm.height * this.size * this.heightModifier);
+		c.translate(x, y);
+		c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
+		
+		c.drawImage(this.bm, this.width, 0, this.width, this.height, - this.offset.x, - this.offset.y, this.width, this.height);
+		
+		c.scale(1 / (this.widthModifier * this.size), 1 / (this.heightModifier * this.size));
+		c.translate(-x, -y);
 	}
 
 	if (this.composite !== 'source-over') {

@@ -39,13 +39,13 @@ Collidable.prototype.boundingBoxCollidesWith = function (objects, getCollidingOb
 
 	var pol1, pol2, i, collidingObjects, obj;
 
-	pol1 = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).scale(this.size * this.widthModifier, this.size * this.heightModifier).rotate(this.dir).add(this.getRoomPosition());
+	pol1 = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).scale(Math.abs(this.size * Math.abs(this.widthModifier)), Math.abs(this.size * this.heightModifier)).rotate(this.dir).add(this.getRoomPosition());
 
 	collidingObjects = [];
 	for (i = 0; i < objects.length; i++) {
 		obj = objects[i];
 
-		pol2 = obj.mask.bBox.copy().move(obj.mask.width / 2 - obj.offset.x, obj.mask.height / 2 - obj.offset.y).scale(obj.size * obj.widthModifier, obj.size * obj.heightModifier).rotate(obj.dir).add(obj.getRoomPosition());
+		pol2 = obj.mask.bBox.copy().move(obj.mask.width / 2 - obj.offset.x, obj.mask.height / 2 - obj.offset.y).scale(Math.abs(obj.size * obj.widthModifier), Math.abs(obj.size * obj.heightModifier)).rotate(obj.dir).add(obj.getRoomPosition());
 
 		// Find out if the two objects' bounding boxes intersect
 		// If not, check if one of the points of each object is inside the other's polygon. This will ensure that one of the objects does not contain the other
@@ -89,20 +89,61 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 	getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
 
  	// Get mask from loader object
-	mask = loader.getMask(this.source, this.getTheme());
+	mask = this.mask;
 
 	// Create a new canvas for checking for a collision
 	canvas = document.createElement('canvas');
-	canvas.width = Math.ceil(mask.width * this.size * this.widthModifier);
-	canvas.height = Math.ceil(mask.height * this.size * this.heightModifier);
+	canvas.width = Math.ceil(mask.width / mask.imageLength * Math.abs(this.size * this.widthModifier));
+	canvas.height = Math.ceil(mask.height * Math.abs(this.size * this.heightModifier));
 
 	ctx = canvas.getContext('2d');
 
 	ctx.fillStyle = "#FFF";
 
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	ctx.globalAlpha = 0.5;
 	ctx.save();
+
+	ctx.translate(this.offset.x * Math.abs(this.size * this.widthModifier), this.offset.y * Math.abs(this.size * this.heightModifier));
+	ctx.rotate(-this.dir);
+
+	// Draw other objects
+	roomPos = this.getRoomPosition();
+	for (i = 0; i < objects.length; i++) {
+		obj = objects[i];
+
+		// If the checked object is "this", do nothing (this situation should maybe result in an error)
+		if (obj === this) {continue; }
+
+		ctx.translate(obj.x - roomPos.x, obj.y - roomPos.y);
+		ctx.rotate(obj.dir);
+		ctx.scale(obj.widthModifier * obj.size, obj.heightModifier * obj.size);
+
+		ctx.drawImage(
+			obj.mask,
+
+			// Define image cutout
+			(obj.width + obj.bm.spacing) * obj.imageNumber,
+			0,
+			obj.width,
+			obj.height,
+
+			// Define position and width on canvas
+			- obj.offset.x,
+			- obj.offset.y,
+			obj.width,
+			obj.height
+		);
+
+		ctx.scale(1 / (obj.widthModifier * obj.size), 1 / (obj.heightModifier * obj.size));
+		ctx.rotate(-obj.dir);
+		ctx.translate(roomPos.x - obj.x, roomPos.y - obj.y);
+	}
+
+	ctx.restore();
+	ctx.globalAlpha = 0.5;
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	ctx.translate(canvas.width / 2, canvas.height / 2);
+	ctx.scale(this.widthModifier * this.size, this.heightModifier * this.size);
 
 	// Draw checked object
 	ctx.drawImage(
@@ -115,47 +156,11 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 		this.height,
 
 		// Define position and width on canvas
-		0,
-		0,
-		this.width * this.size * this.widthModifier,
-		this.height * this.size * this.heightModifier
+		-this.width / 2,
+		-this.height / 2,
+		this.width,
+		this.height
 	);
-	ctx.translate(this.offset.x * this.size * this.widthModifier, this.offset.y * this.size * this.heightModifier);
-	ctx.rotate(-this.dir);
-
-	// Draw other objects
-	roomPos = this.getRoomPosition();
-	for (i = 0; i < objects.length; i++) {
-		obj = objects[i];
-
-		// If the checked object is "this", do nothing (this situation should maybe result in an error)
-		if (obj === this) {continue; }
-
-		// Get mask from loader object
-		mask = loader.getMask(obj.source, obj.getTheme());
-
-		ctx.translate(obj.x - roomPos.x, obj.y - roomPos.y);
-		ctx.rotate(obj.dir);
-
-		ctx.drawImage(
-			obj.mask,
-
-			// Define image cutout
-			(obj.width + obj.bm.spacing) * obj.imageNumber,
-			0,
-			obj.width,
-			obj.height,
-
-			// Define position and width on canvas
-			- obj.offset.x * obj.size * obj.widthModifier,
-			- obj.offset.y * obj.size * obj.heightModifier,
-			obj.width * obj.size * obj.widthModifier,
-			obj.height * obj.size * obj.heightModifier
-		);
-
-		ctx.rotate(-obj.dir);
-		ctx.translate(roomPos.x - obj.x, roomPos.y - obj.y);
-	}
 	
 	bitmap = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	data = bitmap.data;
@@ -191,8 +196,8 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 		avY = (pxArr[0].y + pxArr[pxArr.length - 1].y) / 2;
 
 		// Translate the position according to the object's sprite offset
-		avX -= this.offset.x * this.size * this.widthModifier;
-		avY -= this.offset.y * this.size * this.heightModifier;
+		avX -= this.offset.x * Math.abs(this.size * this.widthModifier);
+		avY -= this.offset.y * Math.abs(this.size * this.heightModifier);
 
 		// Rotate the position according to the object's direction
 		avDir = Math.atan2(avY, avX);
@@ -341,6 +346,8 @@ Collidable.prototype.drawMask = function (c, cameraOffset) {
 	c.save();
 	c.translate(this.x - cameraOffset.x, this.y - cameraOffset.y);
 	c.rotate(this.dir);
+	c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
+
 	try {
 		c.drawImage(
 			this.mask,
@@ -350,15 +357,16 @@ Collidable.prototype.drawMask = function (c, cameraOffset) {
 			this.width,
 			this.height,
 
-			- this.offset.x * this.size * this.widthModifier,
-			- this.offset.y * this.size * this.heightModifier,
-			this.width * this.size * this.widthModifier,
-			this.height * this.size * this.heightModifier);
+			- this.offset.x,
+			- this.offset.y,
+			this.width,
+			this.height);
 	} catch (e) {
 		console.log(this.source);
 		console.log(this.bm);
 		engine.stopMainLoop();
 		throw new Error(e);
 	}
+
 	c.restore();
 };

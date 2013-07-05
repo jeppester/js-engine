@@ -106,12 +106,12 @@ Sprite.prototype.refreshSource = function () {
 	var theme;
 
 	theme = this.getTheme();
-
 	this.bm = loader.getImage(this.source, theme);
-	this.imageLength = this.bm.imageLength * 1;
+	this.imageLength = this.bm.imageLength;
 	this.imageNumber = Math.min(this.imageLength - 1, this.imageNumber);
 	this.width = Math.floor(this.bm.width / this.imageLength);
 	this.height = this.bm.height;
+
 	return this.bm;
 };
 
@@ -157,6 +157,11 @@ Sprite.prototype.drawCanvas = function (c, cameraOffset) {
 	// Draw Sprite on canvas
 	var x, y;
 
+	// If sprites size has been modified to zero, do nothing
+	if (this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0 || this.opacity === 0) {
+		return;
+	}
+
 	if (engine.avoidSubPixelRendering) {
 		x = Math.round(this.x - cameraOffset.x);
 		y = Math.round(this.y - cameraOffset.y);
@@ -191,16 +196,24 @@ Sprite.prototype.drawCanvas = function (c, cameraOffset) {
 	if (this.dir !== 0) {
 		c.translate(x, y);
 		c.rotate(this.dir);
+		c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
 		
 		// Draw images
-		c.drawImage(this.bm, (this.width + this.bm.spacing) * this.imageNumber, 0, this.width, this.height, - this.offset.x * this.size * this.widthModifier, - this.offset.y * this.size * this.heightModifier, this.width * this.size * this.widthModifier, this.height * this.size * this.heightModifier);
+		c.drawImage(this.bm, (this.width + this.bm.spacing) * this.imageNumber, 0, this.width, this.height, - this.offset.x, - this.offset.y, this.width, this.height);
 		
+		c.scale(1 / (this.widthModifier * this.size), 1 / (this.heightModifier * this.size));
 		c.rotate(-this.dir);
 		c.translate(-x, -y);
 	}
 	// If the image is not rotated, draw it without rotation
 	else {
-		c.drawImage(this.bm, (this.width + this.bm.spacing) * this.imageNumber, 0, this.width, this.height, x - this.offset.x * this.size * this.widthModifier, y - this.offset.y * this.size * this.heightModifier, this.width * this.size * this.widthModifier, this.height * this.size * this.heightModifier);
+		c.translate(x, y);
+		c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
+		
+		c.drawImage(this.bm, (this.width + this.bm.spacing) * this.imageNumber, 0, this.width, this.height, - this.offset.x, - this.offset.y, this.width, this.height);
+		
+		c.scale(1 / (this.widthModifier * this.size), 1 / (this.heightModifier * this.size));
+		c.translate(-x, -y);
 	}
 
 	if (this.composite !== 'source-over') {
