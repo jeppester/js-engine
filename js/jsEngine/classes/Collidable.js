@@ -39,13 +39,13 @@ Collidable.prototype.boundingBoxCollidesWith = function (objects, getCollidingOb
 
 	var pol1, pol2, i, collidingObjects, obj;
 
-	pol1 = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).scale(Math.abs(this.size * Math.abs(this.widthModifier)), Math.abs(this.size * this.heightModifier)).rotate(this.dir).add(this.getRoomPosition());
+	pol1 = this.mask.bBox.copy().move(this.mask.width / 2 - this.offset.x, this.mask.height / 2 - this.offset.y).scale(this.size * this.widthModifier, this.size * this.heightModifier).rotate(this.dir).add(this.getRoomPosition());
 
 	collidingObjects = [];
 	for (i = 0; i < objects.length; i++) {
 		obj = objects[i];
 
-		pol2 = obj.mask.bBox.copy().move(obj.mask.width / 2 - obj.offset.x, obj.mask.height / 2 - obj.offset.y).scale(Math.abs(obj.size * obj.widthModifier), Math.abs(obj.size * obj.heightModifier)).rotate(obj.dir).add(obj.getRoomPosition());
+		pol2 = obj.mask.bBox.copy().move(obj.mask.width / 2 - obj.offset.x, obj.mask.height / 2 - obj.offset.y).scale(obj.size * obj.widthModifier, obj.size * obj.heightModifier).rotate(obj.dir).add(obj.getRoomPosition());
 
 		// Find out if the two objects' bounding boxes intersect
 		// If not, check if one of the points of each object is inside the other's polygon. This will ensure that one of the objects does not contain the other
@@ -93,8 +93,16 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 
 	// Create a new canvas for checking for a collision
 	canvas = document.createElement('canvas');
-	canvas.width = Math.ceil(mask.width / mask.imageLength * Math.abs(this.size * this.widthModifier));
-	canvas.height = Math.ceil(mask.height * Math.abs(this.size * this.heightModifier));
+	canvas.width = Math.ceil(this.width);
+	canvas.height = Math.ceil(this.height);
+
+	// Add canvas for debugging
+	/*if (document.getElementById('colCanvas')) {
+		document.body.removeChild(document.getElementById('colCanvas'));
+	}
+	document.body.appendChild(canvas);*/
+
+	canvas.id = 'colCanvas';
 
 	ctx = canvas.getContext('2d');
 
@@ -103,7 +111,8 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	ctx.save();
 
-	ctx.translate(this.offset.x * Math.abs(this.size * this.widthModifier), this.offset.y * Math.abs(this.size * this.heightModifier));
+	ctx.scale(1 / (this.size * this.widthModifier), 1 / (this.size * this.heightModifier));
+	ctx.translate(this.offset.x * this.size * this.widthModifier, this.offset.y * this.size * this.heightModifier);
 	ctx.rotate(-this.dir);
 
 	// Draw other objects
@@ -115,8 +124,8 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 		if (obj === this) {continue; }
 
 		ctx.translate(obj.x - roomPos.x, obj.y - roomPos.y);
-		ctx.rotate(obj.dir);
 		ctx.scale(obj.widthModifier * obj.size, obj.heightModifier * obj.size);
+		ctx.rotate(obj.dir);
 
 		ctx.drawImage(
 			obj.mask,
@@ -134,8 +143,8 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 			obj.height
 		);
 
-		ctx.scale(1 / (obj.widthModifier * obj.size), 1 / (obj.heightModifier * obj.size));
 		ctx.rotate(-obj.dir);
+		ctx.scale(1 / (obj.widthModifier * obj.size), 1 / (obj.heightModifier * obj.size));
 		ctx.translate(roomPos.x - obj.x, roomPos.y - obj.y);
 	}
 
@@ -143,7 +152,6 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 	ctx.globalAlpha = 0.5;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	ctx.translate(canvas.width / 2, canvas.height / 2);
-	ctx.scale(this.widthModifier * this.size, this.heightModifier * this.size);
 
 	// Draw checked object
 	ctx.drawImage(
@@ -178,11 +186,9 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 					x: x,
 					y: y
 				});
-				// document.body.appendChild(canvas);
 			}
 			else {
 				return true;
-				// document.body.appendChild(canvas);
 			}
 		}
 	}
@@ -196,8 +202,12 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 		avY = (pxArr[0].y + pxArr[pxArr.length - 1].y) / 2;
 
 		// Translate the position according to the object's sprite offset
-		avX -= this.offset.x * Math.abs(this.size * this.widthModifier);
-		avY -= this.offset.y * Math.abs(this.size * this.heightModifier);
+		avX -= this.offset.x;
+		avY -= this.offset.y;
+
+		// Scale the position according to the object's size modifiers
+		avX /= this.size * this.widthModifier;
+		avY /= this.size * this.heightModifier;
 
 		// Rotate the position according to the object's direction
 		avDir = Math.atan2(avY, avX);
