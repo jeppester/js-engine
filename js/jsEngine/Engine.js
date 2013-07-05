@@ -765,7 +765,7 @@ Engine.prototype.ajaxRequest = function (url, params, async, callback, caller) {
 
 	if (!async) {
 		if (req.readyState === 4 && req.status === 200) {
-			callback(req.responseText);
+			callback.call(caller, req.responseText);
 		}
 		else {
 			throw new Error('XMLHttpRequest failed: ' + url);
