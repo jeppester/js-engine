@@ -406,7 +406,7 @@ Loader.prototype.loadResources = function (theme, object, typeString) {
 
 				images = object[path].match(/; *(\d+) *images?/);
 				if (images) {
-					res.imageLength = images[1];
+					res.imageLength = images[1] * 1;
 				}
 				else {
 					res.imageLength = 1;
@@ -496,6 +496,7 @@ Loader.prototype.generateMask = function (resourceString, alphaLimit) {
 	canvas = document.createElement('canvas');
 	canvas.width = image.width;
 	canvas.height = image.height;
+	canvas.imageLength = image.imageLength;
 	ctx = canvas.getContext('2d');
 
 	if (image === false) {
