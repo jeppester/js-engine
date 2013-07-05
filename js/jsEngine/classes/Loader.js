@@ -379,17 +379,6 @@ Loader.prototype.loadResources = function (theme, object, typeString) {
 		var resourceString, theme, i;
 		if (this.hasAttribute('data-loaded')) {return; }
 
-
-		if (engine.preGenerateBoundingBoxes && this.toString() === '[object HTMLImageElement]') {
-			resourceString = this.getAttribute('data-resourceString');
-			theme = this.getAttribute('data-theme');
-
-			console.log('Pre-generating bounding box: ' + resourceString);
-			for (i = 0; i < 100; i++) {
-				loader.getBBox(resourceString, theme, i / 50 * Math.PI);
-			}
-		}
-
 		this.setAttribute('data-loaded', 'true');
 		theme = loader.themes[this.getAttribute('data-theme')];
 		theme.resourcesLoaded ++;
