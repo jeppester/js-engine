@@ -244,9 +244,9 @@ Pointer.prototype.mouseHasMoved = function () {
 };
 
 /**
- * Checks if a mouse button is currently down. Touch events are always registered as button 1.
+ * Checks if a mouse button or touch is currently down.
  * 
- * @param {number} button The button to check
+ * @param {number} button A pointer constant representing the pointer to check
  * @return {mixed} Returns an array containing the pointers that are currently down, or false if no pointers are down
  */
 Pointer.prototype.isDown = function (button) {
@@ -270,7 +270,7 @@ Pointer.prototype.isDown = function (button) {
 /**
  * Checks if a mouse button or touch has just been pressed (between the last and the current frame).
  * 
- * @param {number} button The button to check
+ * @param {number} button A pointer constant representing the pointer to check
  * @return {mixed} Returns an array containing the pointers that have just been pressed, or false if no pressed pointers where detected
  */
 Pointer.prototype.isPressed = function (button) {
@@ -294,7 +294,7 @@ Pointer.prototype.isPressed = function (button) {
 /**
  * Checks if a mouse button or touch just been released (between the last and the current frame).
  * 
- * @param {number} button The button to check
+ * @param {number} button A pointer constant representing the pointer to check
  * @return {mixed} Returns an array containing the pointers that have just been released, or false if no released pointers where detected
  */
 Pointer.prototype.isReleased = function (button) {
