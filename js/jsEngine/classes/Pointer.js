@@ -15,10 +15,10 @@ Pointer.prototype.Pointer = function () {
 
 	if (engine.host.hasTouch) {
 		// Add listeners for touch events
-		engine.arena.addEventListener('touchstart', function (event) {
+		document.addEventListener('touchstart', function (event) {
 			pointer.onTouchStart(event);
 		}, false);
-		engine.arena.addEventListener('touchend', function (event) {
+		document.addEventListener('touchend', function (event) {
 			pointer.onTouchEnd(event);
 		}, false);
 		document.addEventListener('touchmove', function (event) {
@@ -27,10 +27,10 @@ Pointer.prototype.Pointer = function () {
 	}
 	else {
 		// Add listeners for mouse events
-		engine.arena.addEventListener('mousedown', function (event) {
+		document.addEventListener('mousedown', function (event) {
 			pointer.onMouseDown(event);
 		}, false);
-		engine.arena.addEventListener('mouseup', function (event) {
+		document.addEventListener('mouseup', function (event) {
 			pointer.onMouseUp(event);
 		}, false);
 		document.addEventListener('mousemove', function (event) {
@@ -47,7 +47,6 @@ Pointer.prototype.Pointer = function () {
 	// Setup mouse device
 	this.mouse = new Vector();
 	this.mouse.window = new Vector();
-	this.mouse.screen = new Vector();
 	this.mouse.buttons = new Array(11);
 	for (button = 0; button < this.mouse.buttons.length; button++) {
 		this.mouse.buttons[button] = new Vector();
@@ -210,7 +209,7 @@ Pointer.prototype.onTouchEnd = function (event) {
  */
 Pointer.prototype.onTouchMove = function (event) {
 	if (event === undefined) {throw new Error('Missing argument: event'); }
-	var i, eventTouch, pointerTouch;
+	var i, eventTouch, pointerTouch, roomPos;
 
 	for (i = 0; i < event.touches.length; i++) {
 		eventTouch = event.touches[i];
@@ -228,7 +227,7 @@ Pointer.prototype.onTouchMove = function (event) {
 		pointerTouch.y = pointerTouch.y / engine.arena.offsetHeight * engine.canvasResY;
 
 		// Convert the position to make it relative to the room
-		roomPos = this.calculateRoomPosition(this.pointerTouch);
+		roomPos = this.calculateRoomPosition(pointerTouch);
 		pointerTouch.x = roomPos.x;
 		pointerTouch.y = roomPos.y;
 	}
@@ -500,8 +499,8 @@ Pointer.prototype.calculateRoomPosition = function (vector) {
 	while (len --) {
 		camera = engine.cameras[len];
 
-		// If the position is covered by the camera, base the calculation on that camera
-		if (camera.projectionRegion.contains(vector)) {
+		// If the position is covered by the camera, or we have reached the last camera, base the calculation on that camera
+		if (camera.projectionRegion.contains(vector) || len === 0) {
 			// Find the position relative to the projection region
 			ret.subtract(camera.projectionRegion);
 
@@ -517,8 +516,6 @@ Pointer.prototype.calculateRoomPosition = function (vector) {
 		}
 	}
 
-	// If a camera covering the position was not found, return a "false" vector, which cannot be compared to numbers.
-	ret.set(false, false);
 	return ret;
 };
 
@@ -595,5 +592,5 @@ Pointer.prototype.unPress = function (button) {
  * @return {boolean} True if the pointer is outside, false if not
  */
 Pointer.prototype.outside = function () {
-	return this.mouse.x === false || this.mouse.y === false;
+	return new Rectangle(engine.arena.offsetLeft, engine.arena.offsetTop, engine.arena.offsetWidth, engine.arena.offsetHeight).contains(this.mouse.window) === false;
 };

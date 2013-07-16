@@ -76,12 +76,12 @@ Collidable.prototype.boundingBoxCollidesWith = function (objects, getCollidingOb
  * 	<code>{
  * 		"x": [The average horisontal distance from the Collidable to the detected collision],
  * 		"y": [The average vertical distance from the Collidable to the detected collision],
- * 		"direction": [The average direction from the Collidable to the detected collision]
+ * 		"pixelCount": [The number of colliding pixels]
  * 	}</code>
  */
 Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition) {
 	if (objects === undefined) {throw new Error('Missing argument: objects'); }
-	var canvas, mask, ctx, roomPos, obj, bitmap, i, data, length, pixel, pxArr, x, y, avX, avY, avDist, avDir;
+	var canvas, mask, ctx, roomPos, obj, bitmap, i, data, length, pixel, pxArr, x, y, avX, avY, avDist, avDir, retVector;
 
 	if (!Array.prototype.isPrototypeOf(objects)) {
 		objects = [objects];
@@ -177,11 +177,24 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 	pxArr = [];
 
 	for (pixel = 0; pixel < length; pixel += this.collisionResolution) {
+		// To get better spread of the checked pixels, increase the pixel each time we're on a new line
+		x = pixel % bitmap.width;
+		if (this.collisionResolution > 1 && x < this.collisionResolution) {
+			y = Math.floor(pixel / bitmap.width);
+			pixel -= x;
+			if (y % 2) {
+				pixel += Math.floor(this.collisionResolution / 2);
+			}
+		}
+
+		// Log the checked pixel
+		//console.log(pixel % canvas.width, Math.floor(pixel / canvas.width));
+
 		if (data[pixel * 4] < 127) {
 			if (getCollisionPosition) {
-				y = Math.floor(pixel / bitmap.width);
-				x = pixel - y * bitmap.width;
-
+				if (y === undefined) {
+					y = Math.floor(pixel / bitmap.width);
+				}
 				pxArr.push({
 					x: x,
 					y: y
@@ -210,14 +223,13 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
 		avY /= this.size * this.heightModifier;
 
 		// Rotate the position according to the object's direction
-		avDir = Math.atan2(avY, avX);
-		avDist = Math.sqrt(Math.pow(avX, 2) + Math.pow(avY, 2));
+		retVector = new Vector(avX, avY);
+		retVector.rotate(this.dir);
 
-		avDir += this.dir;
-		avX = Math.cos(avDir) * avDist;
-		avY = Math.sin(avDir) * avDist;
+		// Save the number of colliding pixels
+		retVector.pixelCount = pxArr.length;
 
-		return {x: avX, y: avY, direction: avDir};
+		return retVector;
 	}
 
 	return false;
@@ -234,7 +246,8 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
  * @return {mixed} If not getCollisionPosition or getCollidingObjects is true, a boolean representing wether or not a collision was detected. If getCollisionPosition and or getCollidingObjects is true, returns an object of the following type:
  * 	<code>{
  * 		"objects": [Array of colliding objects],
- * 		"positions": [Array of collision positions]
+ * 		"positions": [Array of collision positions for each object]
+ * 		"combinedPosition": [The combined position of the collision]
  * 	}</code>
  * If getCollidingObjects is false, the objects-array will be empty and the positions-array will only contain one position which is the average collision position for all colliding objects.
  * If getCollisionPosition is false, the positions-array will be empty
@@ -242,7 +255,7 @@ Collidable.prototype.maskCollidesWith = function (objects, getCollisionPosition)
  */
 Collidable.prototype.collidesWith = function (objects, getCollisionPosition, getCollidingObjects) {
 	if (objects === undefined) {throw new Error('Missing argument: objects'); }
-	var ret, i, position;
+	var ret, i, position, totalPixels;
 
 	if (!Array.prototype.isPrototypeOf(objects)) {
 		objects = [objects];
@@ -270,7 +283,8 @@ Collidable.prototype.collidesWith = function (objects, getCollisionPosition, get
 		// Create an object to return
 		ret = {
 			objects: [],
-			positions: []
+			positions: [],
+			combinedPosition: false
 		};
 
 		// If getCollidingObjects is false, only getCollisionPosition is true. Therefore return an average position of all checked objects
@@ -278,10 +292,13 @@ Collidable.prototype.collidesWith = function (objects, getCollisionPosition, get
 			position = this.maskCollidesWith(objects, true);
 			if (position) {
 				ret.positions.push(position);
+
+				ret.combinedPosition = position.copy();
+				ret.combinedPosition.pixelCount = 0;
 			}
 		}
 		else {
-			// If both getCollidingObjects and getCollisionPosition is true, both return an array of objects and positions (this is very slow)
+			// If both getCollidingObjects and getCollisionPosition is true, both return an array of objects and positions (this is slower)
 			if (getCollisionPosition) {
 				for (i = 0; i < objects.length; i ++) {
 					position = this.maskCollidesWith(objects[i], true);
@@ -290,6 +307,17 @@ Collidable.prototype.collidesWith = function (objects, getCollisionPosition, get
 						ret.objects.push(objects[i]);
 						ret.positions.push(position);
 					}
+				}
+
+				// Calculate a combined position
+				if (ret.positions.length) {
+					ret.combinedPosition = new Vector();
+					ret.combinedPosition.pixelCount = 0;
+					ret.positions.forEach(function () {
+						ret.combinedPosition.add(this.scale(this.pixelCount));
+						ret.combinedPosition.pixelCount += this.pixelCount;
+					})
+					ret.combinedPosition.scale(1 / ret.combinedPosition.pixelCount);
 				}
 			}
 			// If only getCollidingObjects is true, return an array of colliding objects
@@ -302,6 +330,7 @@ Collidable.prototype.collidesWith = function (objects, getCollisionPosition, get
 			}
 		}
 	}
+
 	if (ret.positions.length + ret.objects.length !== 0) {
 		return ret;
 	}

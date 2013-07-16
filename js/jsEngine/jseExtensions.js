@@ -83,13 +83,29 @@ Array.prototype.forEach = function (func) {
  * Imports all properties of another object.
  * 
  * @param {object} from The object from which to copy the properties
+ * @param {object} copyIfPossible If possible, copy properties which are actually pointers. This option will look for and use a copy()- or clone() function inside the properties
  */
-Object.prototype.importProperties = function (from) {
+Object.prototype.importProperties = function (from, copyIfPossible) {
 	var i;
+
 	for (i in from) {
 		if (from.hasOwnProperty(i)) {
 			if (i === undefined) {continue; }
-			this[i] = from[i];
+
+			if (!copyIfPossible || typeof from[i] !== 'object') {
+				this[i] = from[i];
+			}
+			else {
+				if (from[i].copy) {
+					this[i] = from[i].copy();
+				}
+				else if (from[i].clone) {
+					this[i] = from[i].clone();
+				}
+				else {
+					this[i] = from[i];
+				}
+			}
 		}
 	}
 };
