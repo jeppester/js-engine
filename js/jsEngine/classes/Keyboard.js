@@ -1,118 +1,115 @@
-/**
- * Keyboard:
- * An class that eases checking of the current state of all keys.
- */
+new Class('Keyboard', {
+	/**
+	 * Constructor for the Keyboard class
+	 *
+     * @name Keyboard
+     * @class A class that eases checking of the current state of all keys.
+	 */
+	Keyboard: function () {
+		var key;
 
-NewClass('Keyboard');
+		document.addEventListener('keydown', function (event) {
+			keyboard.onKeyDown(event);
+			event.preventDefault();
+			return false;
+		}, false);
+		document.addEventListener('keyup', function (event) {
+			keyboard.onKeyUp(event);
+			event.preventDefault();
+			return false;
+		}, false);
 
-/**
- * Constructor for the Keyboard class (which is automatically created by the engine on launch)
- * 
- * @private
- */
-Keyboard.prototype.Keyboard = function () {
-	var key;
+		// Create key array
+		this.keys = new Array(200);
+		for (key = 0; key < this.keys.length; key ++) {
+			this.keys[key] = {
+				events: []
+			};
+		}
+	},
+    /** @scope Keyboard */
 
-	document.addEventListener('keydown', function (event) {
-		keyboard.onKeyDown(event);
-		event.preventDefault();
-		return false;
-	}, false);
-	document.addEventListener('keyup', function (event) {
-		keyboard.onKeyUp(event);
-		event.preventDefault();
-		return false;
-	}, false);
+	/**
+	 * Registers every onkeydown event to the Keyboard object.
+	 * 
+	 * @private
+	 * @param {KeyboardEvent} event Event object passed by the onkeydown event
+	 */
+	onKeyDown: function (event) {
+		var key;
 
-	// Create key array
-	this.keys = new Array(200);
-	for (key = 0; key < this.keys.length; key ++) {
-		this.keys[key] = {
-			events: []
-		};
-	}
-};
+		if (event === undefined) {throw new Error('Missing argument: event'); }
 
-/**
- * Registers every onkeydown event to the Keyboard object.
- * 
- * @private
- * @param {object} event Event object passed by the onkeydown event
- */
-Keyboard.prototype.onKeyDown = function (event) {
-	var key;
+		if (!this.isDown(event.keyCode)) {
+			key = this.keys[event.keyCode];
+			key.events = key.events.slice(0, 1);
+			key.events.unshift(new Date().getTime());
+		}
+	},
 
-	if (event === undefined) {throw new Error('Missing argument: event'); }
+	/**
+	 * Registers every onkeyup event to the Keyboard object.
+	 * 
+	 * @private
+	 * @param {KeyboardEvent} event Event object passed by the onkeyup event
+	 */
+	onKeyUp: function (event) {
+		var key;
 
-	if (!this.isDown(event.keyCode)) {
-		key = this.keys[event.keyCode];
-		key.events = key.events.slice(0, 1);
-		key.events.unshift(new Date().getTime());
-	}
-};
+		if (event === undefined) {throw new Error('Missing argument: event'); }
 
-/**
- * Registers every onkeyup event to the Keyboard object.
- * 
- * @private
- * @param {object} event Event object passed by the onkeyup event
- */
-Keyboard.prototype.onKeyUp = function (event) {
-	var key;
+		if (this.isDown(event.keyCode)) {
+			key = this.keys[event.keyCode];
+			key.events = key.events.slice(0, 1);
+			key.events.unshift(-new Date().getTime());
+		}
+	},
 
-	if (event === undefined) {throw new Error('Missing argument: event'); }
+	/**
+	 * Checks if a given key is down.
+	 * 
+	 * @param {number|string} key A charcode or a string representing the key
+	 * @return {boolean} True if the key is down, false if not
+	 */
+	isDown: function (key) {
+		if (key === undefined) {throw new Error('Missing argument: key'); }
 
-	if (this.isDown(event.keyCode)) {
-		key = this.keys[event.keyCode];
-		key.events = key.events.slice(0, 1);
-		key.events.unshift(-new Date().getTime());
-	}
-};
+		if (typeof key === 'string') {
+			key = key.toUpperCase().charCodeAt(0);
+		}
 
-/**
- * Checks if a given key is down.
- * 
- * @param {mixed} key A charcode or a string representing the key
- * @return {boolean} True if the key is down, false if not
- */
-Keyboard.prototype.isDown = function (key) {
-	if (key === undefined) {throw new Error('Missing argument: key'); }
+		return this.keys[key].events.length && this.keys[key].events[0] > 0;
+	},
 
-	if (typeof key === 'string') {
-		key = key.toUpperCase().charCodeAt(0);
-	}
+	/**
+	 * Checks if a given key has been pressed (between last and current frame).
+	 * 
+	 * @param {number|string} key A charcode or a string representing the key
+	 * @return {boolean} True if the key has been pressed, false if not
+	 */
+	isPressed: function (key) {
+		if (key === undefined) {throw new Error('Missing argument: key'); }
 
-	return this.keys[key].events.length && this.keys[key].events[0] > 0;
-};
+		if (typeof key === 'string') {
+			key = key.toUpperCase().charCodeAt(0);
+		}
 
-/**
- * Checks if a given key has been pressed (between last and current frame).
- * 
- * @param {mixed} key A charcode or a string representing the key
- * @return {boolean} True if the key has been pressed, false if not
- */
-Keyboard.prototype.isPressed = function (key) {
-	if (key === undefined) {throw new Error('Missing argument: key'); }
+		return this.keys[key].events.length && this.keys[key].events[0] > engine.last;
+	},
 
-	if (typeof key === 'string') {
-		key = key.toUpperCase().charCodeAt(0);
-	}
+	/**
+	 * Checks if a given key has been released (between last and current frame).
+	 * 
+	 * @param {number|string} key A charcode or a string representing the key
+	 * @return {boolean} True if the key has been pressed, false if not
+	 */
+	isReleased: function (key) {
+		if (key === undefined) {throw new Error('Missing argument: key'); }
 
-	return this.keys[key].events.length && this.keys[key].events[0] > engine.last;
-};
+		if (typeof key === 'string') {
+			key = key.toUpperCase().charCodeAt(0);
+		}
 
-/**
- * Checks if a given key has been released (between last and current frame).
- * 
- * @param {mixed} key A charcode or a string representing the key
- * @return {boolean} True if the key has been pressed, false if not
- */
-Keyboard.prototype.isReleased = function (key) {
-	if (key === undefined) {throw new Error('Missing argument: key'); }
-
-	if (typeof key === 'string') {
-		key = key.toUpperCase().charCodeAt(0);
-	}
-
-	return this.keys[key].events.length && -this.keys[key].events[0] > engine.last;
-};
+		return this.keys[key].events.length && -this.keys[key].events[0] > engine.last;
+	},
+});
