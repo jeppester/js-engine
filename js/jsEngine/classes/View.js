@@ -10,10 +10,14 @@ new Class('View', [Vector], {
      * @property {Child[]} children The view's children
      * @property {View} parent The parent of the view or undefined if the view is an orphan
      * @property {boolean} drawCacheEnabled Whether or not draw caching is enabled
+     *
+     * @param {Child} child1 A child to add to the view upon creation
+     * @param {Child} child2 An other child to add to the view upon creation
+     * @param {Child} child3 A third ...
 	 */
-	View: function () {
+	View: function (child1, child2, child3) {
 		this.Vector();
-		this.children = [];
+		this.children = Array.prototype.slice.call(arguments);
         this.parent = undefined;
 		this.drawCacheCanvas = document.createElement('canvas');
 		this.drawCacheCtx = this.drawCacheCanvas.getContext('2d');
