@@ -4,6 +4,14 @@ new Class('Rectangle', [Animatable, Vector], {
 	 *
      * @name Rectangle
      * @class A math class which is used for handling non-rotated rectangles
+     * @augments Animatable
+     * @augments Vector
+     *
+     * @property {number} x The top left corner's x-coordinate
+     * @property {number} y The top left corner's y-coordinate
+     * @property {number} width The width of the rectangle
+     * @property {number} height The height of the rectangle
+     *
 	 * @param {number} x The x-coordinate for the rectangle's top left corner
 	 * @param {number} y The y-coordinate for the rectangle's top left corner
 	 * @param {number} width The width of the rectangle
@@ -38,6 +46,7 @@ new Class('Rectangle', [Animatable, Vector], {
 	 * @param {Vector} position A Vector representing the position of the top left corner to set for the Rectangle
 	 * @param {Vector} size A Vector representing the size (width and height) to set for the Rectangle
 	 * @return {Rectangle} The resulting Rectangle object (itself)
+     *
 	 */
 	setFromVectors: function (position, size) {
 		position = position !== undefined ? position : new Vector();
@@ -139,7 +148,7 @@ new Class('Rectangle', [Animatable, Vector], {
 	/**
 	 * Fetches the Rectangles points.
 	 * 
-	 * @return {Array.<Vector>} Array of points, in the following order: top left corner, top right corner, bottom right corner, bottom left corner
+	 * @return {Vector[]} Array of points, in the following order: top left corner, top right corner, bottom right corner, bottom left corner
 	 */
 	getPoints: function () {
 		return [
@@ -223,5 +232,5 @@ new Class('Rectangle', [Animatable, Vector], {
 		c.closePath();
 
 		c.restore();
-	},
+	}
 });

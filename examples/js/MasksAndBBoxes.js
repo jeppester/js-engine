@@ -1,53 +1,51 @@
-NewClass('MasksAndBBoxes');
+new Class('MasksAndBBoxes', {
+    MasksAndBBoxes: function () {
+        // Make a global reference to the game object
+        game = this;
 
-MasksAndBBoxes.prototype.MasksAndBBoxes = function () {
-	// Make a global reference to the game object
-	game = this;
+        this.onLoaded();
+    },
 
-	this.onLoaded();
-}
+    onLoaded: function() {
+        // Hide loader overlay
+        loader.hideOverlay();
 
-MasksAndBBoxes.prototype.onLoaded=function() {
-	var animation;
+        object = new GameObject(
+            'Character', // Image ID (See "/themes/Example/theme.json" for an explanation of themes)
+            50, // x-position
+            50, // y-position
+            0 // Direction (in radians)
+        );
 
-	// Hide loader overlay
-	loader.hideOverlay();
+        object.animation = function () {
+            this.animate({
+                dir: this.dir + Math.PI * 2
+            }, {
+                dur: 10000,
+                callback: this.animation
+            })
+        };
+        object.animation();
 
-	object = new GameObject(
-		'Character', // Image ID (See "/themes/Example/theme.json" for an explanation of themes)
-		50, // x-position
-		50, // y-position
-		0 // Direction (in radians)
-	);
+        object2 = new GameObject(
+            'Rock', // Image ID (See "/themes/Example/theme.json" for an explanation of themes)
+            16, // x-position
+            50, // y-position
+            0 // Direction (in radians)
+        );
+        object2.checkCollision = function () {
+            if (this.collidesWith(object)) {
+                text.setString('Collides');
+            }
+            else {
+                text.setString('');
+            }
+        };
 
-	object.animation = function () {
-		this.animate({
-			dir: this.dir + Math.PI * 2
-		}, {
-			dur: 10000,
-			callback: this.animation
-		})
-	}
-	object.animation();
+        text = new TextBlock('', 6, 4, 80);
 
-	object2 = new GameObject(
-		'Rock', // Image ID (See "/themes/Example/theme.json" for an explanation of themes)
-		16, // x-position
-		50, // y-position
-		0 // Direction (in radians)
-	);
-	object2.checkCollision = function () {
-		if (this.collidesWith(object)) {
-			text.setString('Collides');
-		}
-		else {
-			text.setString('');
-		}
-	}
+        engine.currentRoom.loops.eachFrame.attachFunction(object2, object2.checkCollision);
 
-	text = new TextBlock('', 6, 4, 80);
-
-	engine.currentRoom.loops.eachFrame.attachFunction(object2, object2.checkCollision);
-
-	engine.currentRoom.addChildren(object, object2, text);
-}
+        engine.currentRoom.addChildren(object, object2, text);
+    }
+});

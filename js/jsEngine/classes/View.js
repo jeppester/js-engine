@@ -5,10 +5,16 @@ new Class('View', [Vector], {
      * @name View
      * @class A class for objects that are to be drawn on the canvas (or to contain drawn objects)
      *        All objects which are drawn on the game's canvas extends the View-class.
+     * @augments Vector
+     *
+     * @property {Child[]} children The view's children
+     * @property {View} parent The parent of the view or undefined if the view is an orphan
+     * @property {boolean} drawCacheEnabled Whether or not draw caching is enabled
 	 */
 	View: function () {
 		this.Vector();
 		this.children = [];
+        this.parent = undefined;
 		this.drawCacheCanvas = document.createElement('canvas');
 		this.drawCacheCtx = this.drawCacheCanvas.getContext('2d');
 		this.drawCacheEnabled = false;
@@ -33,11 +39,11 @@ new Class('View', [Vector], {
 	},
 
 	/**
-	 * Adds children to a View object. If the object that the children are added to, is a decendant of the current room, the children will be drawn on the stage when added. The added children will be drawn above the current children.
+	 * Adds children to a View object. If the object that the children are added to, is a descendant of the current room, the children will be drawn on the stage when added. The added children will be drawn above the current children.
 	 * 
-	 * @param {object} child1 A child to add to the View object
-	 * @param {object} child2 Another child to add...
-	 * @return {Array.<object>} An array containing the added children
+	 * @param {Child} child1 A child to add to the View object
+	 * @param {Child} child2 Another child to add...
+	 * @return {Child[]} An array containing the added children
 	 */
 	addChildren: function (child1, child2) {
 		if (arguments.length === 0) {throw new Error('This function needs at least one argument'); }
@@ -46,7 +52,7 @@ new Class('View', [Vector], {
 		for (i = 0; i < arguments.length; i ++) {
 			child = arguments[i];
 
-			if (typeof child !== 'object') {throw new Error('Argument "child" has to be of type "object"'); }
+			if (!child.implements(Child)) {throw new Error('Argument child has to be of type: Child'); }
 
 			// If the child already has a parent, remove the child from that parent
 			if (child.parent) {
@@ -68,9 +74,9 @@ new Class('View', [Vector], {
 	/**
 	 * Adds a child to a View object, below an already added child. This means that the inserted child (or children) will be drawn below the child which they are inserted below.
 	 * 
-	 * @param {object|Array.<object>} insertChildren Object or array of objects to insert before an existing child
-	 * @param {object} child Current child to insert other children before
-	 * @return {Array.<object>} Array of the inserted children
+	 * @param {Child|Child[]} insertChildren Object or array of objects to insert before an existing child
+	 * @param {Child} child Current child to insert other children before
+	 * @return {Child[]} Array of the inserted children
 	 */
 	insertBelow: function (insertChildren, child) {
 		if (insertChildren === undefined) {throw new Error('Missing argument: insertChildren'); }
@@ -90,6 +96,8 @@ new Class('View', [Vector], {
 		for (i = 0; i < insertChildren.length; i ++) {
 			child = insertChildren[i];
 
+            if (!child.implements(Child)) {throw new Error('Argument child has to be of type: Child'); }
+
 			child.parent = this;
 			if (child.refreshSource) {
 				child.refreshSource();
@@ -103,7 +111,7 @@ new Class('View', [Vector], {
 	 * Fetches an array of all the View's children.
 	 * This will not return a pointer, so changing the returned array will not change the View's children.
 	 * 
-	 * @return {array} Array containing all of the View's children
+	 * @return {Child[]} Array containing all of the View's children
 	 */
 	getChildren: function () {
 		var ret, i;
@@ -118,14 +126,14 @@ new Class('View', [Vector], {
 	},
 
 	/**
-	 * Sets theme of an View. Children whoose theme is not already set, will inherit the set theme. To enforce the theme to all children, use the recursive argument.
+	 * Sets theme of an View. Children whose theme is not already set, will inherit the set theme. To enforce the theme to all children, use the recursive argument.
 	 * 
 	 * @param {string} themeName The name of the theme to apply as the object's theme
-	 * @param {boolean} Whether or not the set theme will be applied to children for which a theme has already been set. If this argument is unset, it will default to false
+	 * @param {boolean} [recursive=false] Whether or not the set theme will be applied to children for which a theme has already been set. If this argument is unset, it will default to false
 	 */
 	setTheme: function (themeName, recursive) {
 		if (themeName) {
-			if (loader.themes[themeName] === undefined) {throw new Error('Trying to set unexisting theme: ' + themeName); }
+			if (loader.themes[themeName] === undefined) {throw new Error('Trying to set nonexistent theme: ' + themeName); }
 		}
 		else {
 			themeName = undefined;
@@ -208,7 +216,7 @@ new Class('View', [Vector], {
 	/**
 	 * Gets the complete region that will used for drawing on next redraw
 	 * 
-	 * @return {object} A rectangle representing the region
+	 * @return {Rectangle} A rectangle representing the region
 	 */
 	getCombinedRedrawRegion: function () {
 		var box, addBox, i;
@@ -236,9 +244,9 @@ new Class('View', [Vector], {
 	/**
 	 * Removes one or more children from the View.
 	 * 
-	 * @param {object} child1 A child to add to the View object
-	 * @param {object} child2 Another child to remove...
-	 * @return {Array.<object>} An array of the children which was removed. If an object, which was supplied as argument, was not a child of the View, it will not appear in the returned array
+	 * @param {Child} child1 A child to add to the View object
+	 * @param {Child} child2 Another child to remove...
+	 * @return {Child[]} An array of the children which was removed. If an object, which was supplied as argument, was not a child of the View, it will not appear in the returned array
 	 */
 	removeChildren: function (child1, child2) {
 		if (arguments.length === 0) {throw new Error('This function needs at least one argument'); }
@@ -324,5 +332,5 @@ new Class('View', [Vector], {
 	/**
 	 * Remove drawCanvas function which was inherited from View
 	 */
-	drawCanvas: undefined,
+	drawCanvas: undefined
 });

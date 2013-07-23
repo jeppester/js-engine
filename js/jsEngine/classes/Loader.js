@@ -8,17 +8,13 @@ new Class('Loader', {
      * @class Class for loading and storing resources.
      *        On engine startup a Loader object is instantiated to the global variable "loader".
      *        This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
-     * @property {object.<HTMLAudioElement>}
 	 */
 	Loader: function () {
-		this.sounds = {};
 		this.images = {};
-		this.scripts = {};
 		this.loaded = {
 			classes: []
 		};
 		this.themes = {};
-		this.callback = false;
 
 		// Make load overlay
 		this.loadOverlay = document.createElement('div');
@@ -170,7 +166,7 @@ new Class('Loader', {
 	/**
 	 * Fetches all loaded images' resource strings (from all themes).
 	 * 
-	 * @return {Array.<string>} An array containing all loaded images' resource strings
+	 * @return {string[]} An array containing all loaded images' resource strings
 	 */
 	getImageSources: function () {
 		var object, sourceStrings, currentDir, loopThrough, inheritTheme, i;
@@ -212,10 +208,10 @@ new Class('Loader', {
 	/**
 	 * Fetches all loaded sounds' resource strings (from all themes).
 	 *
-	 * @return {Array.<string>} An array containing all loaded sounds' resource strings
+	 * @return {string[]} An array containing all loaded sounds' resource strings
 	 */
 	getAllSounds: function () {
-		var res, themeName, theme, resourceString, resource;
+		var res, themeName, theme, resourceString;
 
 		res = [];
 
@@ -237,10 +233,10 @@ new Class('Loader', {
 	/**
 	 * Fetches all loaded music tracks' resource strings (from all themes).
 	 * 
-	 * @return {Array.<string>} An array containing all loaded music tracks' resource strings
+	 * @return {string[]} An array containing all loaded music tracks' resource strings
 	 */
 	getAllMusic: function () {
-		var res, themeName, theme, resourceString, resource;
+		var res, themeName, theme, resourceString;
 
 		res = [];
 
@@ -262,7 +258,7 @@ new Class('Loader', {
 	/**
 	 * Loads JavaScript classes from files. The loaded classes' names must follow the following format: [ClassName].js 
 	 * 
-	 * @param {Array.<string>} paths An array of paths to JavaScripts - containing classes - which should be loaded
+	 * @param {string[]} paths An array of paths to JavaScripts - containing classes - which should be loaded
 	 * @return {boolean} True, when the classes has been loaded without any errors
 	 */
 	loadClasses: function (paths) {
@@ -299,7 +295,7 @@ new Class('Loader', {
 	 * Loads a list of themes. This function is automatically called by the Engine during its startup, for loading the themes specified by the launch options.
 	 * 
 	 * @private
-	 * @param {Array.<string>} themeNames An array of theme names (as strings) to load
+	 * @param {string[]} themeNames An array of theme names (as strings) to load
 	 * @param {function} callback A callback function to run when all the themes has been loaded
 	 */
 	loadThemes: function (themeNames, callback) {
@@ -323,8 +319,8 @@ new Class('Loader', {
 			if (req.status === 404) {console.log('Theme not found: ' + name); continue; }
 
 			// Get theme details
-			codeString = 'theme = ' + req.responseText + "\n//@ sourceURL=/" + engine.themesPath + '/' + name + '/theme.json';
-			eval(codeString);
+			codeString = req.responseText + "\n//@ sourceURL=/" + engine.themesPath + '/' + name + '/theme.json';
+            eval('theme = ' + codeString);
 
 			// Load inherited themes
 			if (theme.inherit.length) {
@@ -374,7 +370,7 @@ new Class('Loader', {
 		var onload, res, path, i, format, images;
 
 		onload = function () {
-			var resourceString, theme, i;
+			var theme;
 			if (this.hasAttribute('data-loaded')) {return; }
 
 			this.setAttribute('data-loaded', 'true');
@@ -546,7 +542,7 @@ new Class('Loader', {
 	 * Checks if all resources - of all themes - has been loaded. This check is automatically called any time a single resource has finished loading.
 	 * 
 	 * @private
-	 * @return {boolean} Whether or not all themes' resources has been succesfully loaded
+	 * @return {boolean} Whether or not all themes' resources has been successfully loaded
 	 */
 	checkAllLoaded: function () {
 		var i, total, loaded, theme;
@@ -568,5 +564,5 @@ new Class('Loader', {
 			return true;
 		}
 		return false;
-	},	
+	}
 });

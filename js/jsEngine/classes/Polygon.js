@@ -1,10 +1,13 @@
-new Class('Polygon', {
+new Class('Polygon',[Child], {
 	/**
 	 * The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
 	 *
      * @name Polygon
      * @class A math class which is used for handling polygons
-	 * @param {Array.<Vector>} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
+     *
+     * @property {Vector[]} points An array of the polygon's points. Each point is connect to the previous- and next points, and the first and last points are connected
+     *
+	 * @param {Vector[]} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
 	 */
 	Polygon: function (points) {
 		this.setFromPoints(points);
@@ -131,7 +134,7 @@ new Class('Polygon', {
 	/**
 	 * Fetches all of the polygon's points as Vector objects
 	 * 
-	 * @return {Array.<Vector>} An array containing all the points of the polygon, as Vector objects
+	 * @return {Vector} An array containing all the points of the polygon, as Vector objects
 	 */
 	getPoints: function () {
 		var points, i;
@@ -148,7 +151,7 @@ new Class('Polygon', {
 	/**
 	 * Fetches all of the polygon's sides as Line objects.
 	 * 
-	 * @return {Array.<Line>} An array containing all of the polygon's sides as Line objects
+	 * @return {Vector} An array containing all of the polygon's sides as Line objects
 	 */
 	getLines: function () {
 		var lines, points, i, to;
@@ -243,7 +246,7 @@ new Class('Polygon', {
 			return dist;
 		}
 		else {
-			throw new Error('Agument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
+			throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
 		}
 	},
 
@@ -255,20 +258,10 @@ new Class('Polygon', {
 	 */
 	contains: function (object) {
 		if (object.implements(Vector)) {
-			if (this.intersects(new Line().setFromCoordinates(-123456, -98765, object.x, object.y), true) % 2) {
-				return true;
-			}
-			else {
-				return false;
-			}
+			return this.intersects(new Line().setFromCoordinates(-123456, -98765, object.x, object.y), true) % 2;
 		}
 		else if (object.implements(Line)) {
-			if (!this.intersects(object) && this.contains(object.a)) {
-				return true;
-			}
-			else {
-				return false;
-			}
+			return !this.intersects(object) && this.contains(object.a);
 		}
 		else if (object.implements(Circle)) {
 			// Check that the circle's center is placed inside the Polygon
@@ -299,9 +292,8 @@ new Class('Polygon', {
 	 * @return {boolean} True if the Polygon intersects with the checked object, false if not
 	 */
 	intersects: function (object, countIntersections) {
-		var intersects, intersectionCount, lines, line, oLines, oLine, i, ii;
+		var intersectionCount, lines, line, oLines, oLine, i, ii;
 
-		intersects = false;
 		countIntersections = countIntersections !== undefined ? countIntersections : false;
 		if (countIntersections) {
 			intersectionCount = 0;
@@ -399,5 +391,5 @@ new Class('Polygon', {
 		c.stroke();
 
 		c.restore();
-	},
+	}
 });

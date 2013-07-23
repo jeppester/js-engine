@@ -5,11 +5,26 @@ new Class('Sprite', [View, Animatable], {
      * @name Sprite
      * @class Class for drawing bitmaps with rotation and size.
      *        Usually all graphical objects in a game are sprites or extends this class.
+     * @augments View
+     * @augments Animatable
+     *
+     * @property {string} source A resource string representing the bitmap source of the sprite, use setSource() to set the source (do not set it directly)
+     * @property {number} dir The direction of the sprite (in radians)
+     * @property {int} imageNumber The current image in the animation (0 the source is not an animation)
+     * @property {int} imageLength The number of images in the source (1 the source is not an animation)
+     * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
+     * @property {number} animationSpeed The number of images / second in the animation (only relevant if the source is an animation)
+     * @property {boolean} animationLoops Whether or not the animation should loop (only relevant if the source is an animation)
+     * @property {number} size A size modifier which modifies both the width and the height of the sprite
+     * @property {number} widthModifier A size modifier which modifies the width of the sprite
+     * @property {number} heightModifier A size modifier which modifies the height of the object
+     * @property {number} opacity The opacity of the sprite
+     *
 	 * @param {string} source A string representing the source of the object's bitmap
 	 * @param {number} [x=0] The x-position of the object in the game arena, in pixels
 	 * @param {number} [y=0] The y-position of the object in the game arena, in pixels
 	 * @param {number} [dir=0] The rotation (in radians) of the object when drawn in the game arena
-	 * @param {object} [additionalProperties] An object containing additional properties to assign to the created object.
+	 * @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
 	 *                 The default is:<code>
      *                 {
 	 *                  size: 1,
@@ -168,7 +183,7 @@ new Class('Sprite', [View, Animatable], {
 			y = this.y - cameraOffset.y;
 		}
 
-		// Set the right subimage
+		// Set the right sub image
 		if (this.imageLength !== 1 && this.animationSpeed !== 0) {
 			if (engine.gameTime - this.animationLastSwitch > 1000 / this.animationSpeed) {
 				this.imageNumber = this.imageNumber + (this.animationSpeed > 0 ? 1 : -1);
@@ -223,7 +238,7 @@ new Class('Sprite', [View, Animatable], {
 	 * Calculates the region which the sprite will fill out when redrawn.
 	 * 
 	 * @private
-	 * @return {object} The bounding rectangle of the sprite's redraw
+	 * @return {Rectangle} The bounding rectangle of the sprite's redraw
 	 */
 	getRedrawRegion: function () {
 		var ret;
@@ -239,5 +254,5 @@ new Class('Sprite', [View, Animatable], {
 		ret.height = Math.ceil(ret.height + 2);
 
 		return ret;
-	},
+	}
 });

@@ -81,7 +81,7 @@ new Class('Animatable', {
 	/**
 	 * Checks if the object is currently being animated.
 	 * 
-	 * @return {boolean} Wether or not the object is being animated
+	 * @return {boolean} Whether or not the object is being animated
 	 */
 	isAnimated: function () {
 		var roomId, room, name, loop, animId, animation;
@@ -108,7 +108,7 @@ new Class('Animatable', {
 	/**
 	 * Fetches all current animations of the object.
 	 * 
-	 * @return {Array.<object>} An array of all the current animations of the object
+	 * @return {Object[]} An array of all the current animations of the object
 	 */
 	getAnimations: function () {
 		var animations, roomId, room, name, loop, animId, animation;
@@ -136,9 +136,8 @@ new Class('Animatable', {
 	 * Stops all current animations of the object.
 	 */
 	stopAnimations: function () {
-		var animations, roomId, room, name;
+		var roomId, room, name;
 
-		animations = [];
 		for (roomId = 0; roomId < engine.roomList.length; roomId ++) {
 			room = engine.roomList[roomId];
 

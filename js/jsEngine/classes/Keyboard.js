@@ -111,5 +111,5 @@ new Class('Keyboard', {
 		}
 
 		return this.keys[key].events.length && -this.keys[key].events[0] > engine.last;
-	},
+	}
 });

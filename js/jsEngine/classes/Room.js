@@ -5,16 +5,23 @@ new Class('Room', [View], {
      * @name Room
      * @class A room is the space wherein game objects reside.
      *        A room holds a list of objects to draw, and a list of custom loops.
-     *        If a room is set as the engine's current rooom (engine.currentRoom); its objects will be drawn, and its custom loops will be executed each time the engine's main loop executes.
+     *        If a room is set as the engine's current room (engine.currentRoom); its objects will be drawn, and its custom loops will be executed each time the engine's main loop executes.
      *        The engine also has a master room (engine.masterRoom), which is persistent throughout a game (this is the room where you would add persistent objects and custom loops)
+     * @augments View
+     *
+     * @property {string} name The name of the room
+     * @property {function} onEntered A function which will be executed when the room is entered
+     * @property {function} onLeft A function which will be executed when the room is left
+     * @property {object} loops An object containing the custom loops which has been added to the room
+     *
 	 * @param {string} name The name of the room. You can use this name later, to enter the room or to remove it
-	 * @param {function} onEntered A function to run when the room is entered (set as the engine's current room)
-	 * @param {function} onLeft A function to run when the room is left
+	 * @param {function} [onEntered=function () {}] A function to run when the room is entered (set as the engine's current room)
+	 * @param {function} [onLeft=function () {}] A function to run when the room is left
 	 */
 	Room: function (name, onEntered, onLeft) {
 		this.View();
 		this.name = name ? name : engine.roomList.length;
-		this.onEntere = onEntered !== undefined ? onEntered : function () {};
+		this.onEntered = onEntered !== undefined ? onEntered : function () {};
 		this.onLeft = onLeft !== undefined ? onLeft : function () {};
 		this.loops = {};
 		this.addLoop('eachFrame', new CustomLoop());
@@ -67,5 +74,5 @@ new Class('Room', [View], {
 	/**
 	 * Delete the remove-method which was inherited from View
 	 */
-	remove: undefined,
+	remove: undefined
 });

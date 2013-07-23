@@ -1,9 +1,13 @@
-new Class('Line', {
+new Class('Line',[Child], {
 	/**
 	 * Constructor for the Line class. Uses setFromVectors to create the line.
 	 *
      * @name Line
      * @class A math class which is used for handling lines
+     *
+     * @property {Vector} a The line's starting point
+     * @property {Vector} b The line's ending point
+     *
 	 * @param {Vector} startVector A Vector representing the start point of the line
 	 * @param {Vector} endVector A Vector representing the end point of the line
 	 */
@@ -188,7 +192,7 @@ new Class('Line', {
 			return object.intersects(this);
 		}
 		else {
-			throw new Error('Agument object should be of type: Line, Rectangle, Circle or Polygon');
+			throw new Error('Argument object should be of type: Line, Rectangle, Circle or Polygon');
 		}
 	},
 
@@ -270,5 +274,5 @@ new Class('Line', {
 		c.stroke();
 
 		c.restore();
-	},
+	}
 });

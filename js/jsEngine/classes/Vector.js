@@ -1,11 +1,17 @@
-new Class('Vector', [Animatable], {
+new Class('Vector', [Animatable, Child], {
 	/**
 	 * Constructor for the Vector class. Uses set-function to set the vector from x- and y values.
 	 *
      * @name Vector
      * @class A math class which is used for handling two-dimensional vectors
-	 * @param {number} x The x-value to set for the vector
-	 * @param {number} y The y-value to set for the vector
+     * @augments Animatable
+     * @augments Child
+     *
+     * @property {number} x The x-value of the vector
+     * @property {number} y The y-value of the vector
+     *
+	 * @param {number} [x=0] The x-value to set for the vector
+	 * @param {number} [y=0] The y-value to set for the vector
 	 */
 	Vector: function (x, y) {
 		this.set(x, y);
@@ -15,8 +21,8 @@ new Class('Vector', [Animatable], {
 	/**
 	 * Sets the vector from x- and y values.
 	 * 
-	 * @param {number} x The x-value to set for the vector
-	 * @param {number} y The y-value to set for the vector
+	 * @param {number} [x=0] The x-value to set for the vector
+	 * @param {number} [y=0] The y-value to set for the vector
 	 * @return {Vector} The resulting Vector object (itself)
 	 */
 	set: function (x, y) {
@@ -259,7 +265,7 @@ new Class('Vector', [Animatable], {
 			return object.getDistance(this);
 		}
 		else {
-			throw new Error('Agument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
+			throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
 		}
 	},
 
@@ -283,5 +289,5 @@ new Class('Vector', [Animatable], {
 		c.fill();
 
 		c.restore();
-	},
+	}
 });

@@ -242,11 +242,11 @@ new Class('Pointer', {
 	 * Checks if a mouse button or touch is currently down.
 	 * 
 	 * @param {number} button A pointer constant representing the pointer to check
-	 * @return {Array.<object>|boolean} Returns an array containing the pointers that are currently down, or false if no pointers are down
+	 * @return {Object[]|boolean} Returns an array containing the pointers that are currently down, or false if no pointers are down
 	 */
 	isDown: function (button) {
 		if (button === undefined) {throw new Error('Missing argument: button'); }
-		var i, pointers;
+		var pointers;
 
 		switch (this.getButtonType(button)) {
 		case "mouse":
@@ -266,11 +266,11 @@ new Class('Pointer', {
 	 * Checks if a mouse button or touch has just been pressed (between the last and the current frame).
 	 * 
 	 * @param {number} button A pointer constant representing the pointer to check
-	 * @return {Array.<object>|boolean} Returns an array containing the pointers that have just been pressed, or false if no pressed pointers where detected
+	 * @return {Object[]|boolean} Returns an array containing the pointers that have just been pressed, or false if no pressed pointers where detected
 	 */
 	isPressed: function (button) {
 		if (button === undefined) {throw new Error('Missing argument: button'); }
-		var i, pointers;
+		var pointers;
 
 		switch (this.getButtonType(button)) {
 		case "mouse":
@@ -290,11 +290,11 @@ new Class('Pointer', {
 	 * Checks if a mouse button or touch just been released (between the last and the current frame).
 	 *
 	 * @param {number} button A pointer constant representing the pointer to check
-	 * @return {Array.<object>|boolean} Returns an array containing the pointers that have just been released, or false if no released pointers where detected
+	 * @return {Object[]|boolean} Returns an array containing the pointers that have just been released, or false if no released pointers where detected
 	 */
 	isReleased: function (button) {
 		if (button === undefined) {throw new Error('Missing argument: button'); }
-		var i, pointers;
+		var pointers;
 
 		switch (this.getButtonType(button)) {
 		case "mouse":
@@ -317,13 +317,13 @@ new Class('Pointer', {
      * @param {button} button A pointer constant representing the pointers to check
      * @param {Rectangle|Polygon|Circle} shape A geometric shape defining the area to check
      * @param {boolean} outside [Whether or not to check the outside of the specified area]
-     * @return {Array.<object>|boolean} An array containing the pointers that have pressed the shape, or false if no presses inside the shape were detected
+     * @return {Object[]|boolean} An array containing the pointers that have pressed the shape, or false if no presses inside the shape were detected
      */
     shapeIsPressed: function (button, shape, outside) {
 		button = button !== undefined ? button : MOUSE_TOUCH_ANY;
 		if (shape === undefined) {throw new Error('Missing argument: shape'); }
 		if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); }
-		var i, pointers, pointer, ret, check;
+		var i, pointers, pointer, ret;
 
 		// Narrow possible presses down to the pressed pointers within the selected buttons
 		pointers = this.isPressed(button);
@@ -355,13 +355,13 @@ new Class('Pointer', {
      * @param {button} button A pointer constant representing the pointers to check
      * @param {Rectangle|Polygon|Circle} shape A geometric shape defining the area to check
      * @param {boolean} outside [Whether or not to check the outside of the specified area]
-     * @return {Array.<object>|boolean} An array containing the pointers that have released the shape, or false if no releases inside the shape were detected
+     * @return {Object[]|boolean} An array containing the pointers that have released the shape, or false if no releases inside the shape were detected
 	 */
 	shapeIsReleased: function (button, shape, outside) {
 		button = button !== undefined ? button : MOUSE_TOUCH_ANY;
 		if (shape === undefined) {throw new Error('Missing argument: shape'); }
 		if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); }
-		var i, pointers, pointer, ret, check;
+		var i, pointers, pointer, ret;
 
 		// Narrow possible presses down to the pressed pointers within the selected buttons
 		pointers = this.isReleased(button);
@@ -393,13 +393,13 @@ new Class('Pointer', {
      * @param {button} button A pointer constant representing the pointers to check
      * @param {Rectangle|Polygon|Circle} shape A geometric shape defining the area to check
      * @param {boolean} outside [Whether or not to check the outside of the specified area]
-     * @return {Array.<object>|boolean} An array containing the pointers that are currently pressing the shape, or false if no pointers inside the shape were detected
+     * @return {Object[]|boolean} An array containing the pointers that are currently pressing the shape, or false if no pointers inside the shape were detected
 	 */
 	shapeIsDown: function (button, shape, outside) {
 		button = button !== undefined ? button : MOUSE_TOUCH_ANY;
 		if (shape === undefined) {throw new Error('Missing argument: shape'); }
 		if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); }
-		var i, pointers, pointer, ret, check;
+		var i, pointers, pointer, ret;
 
 		// Narrow possible pointers down to the pointers which are down within the selected buttons
 		pointers = this.isDown(button);
@@ -449,7 +449,7 @@ new Class('Pointer', {
 	 * Checks the state of a pointer object
 	 * 
 	 * @private
-	 * @param {object|Array.<object>} pointers A pointer object or an array of pointer objects to check the state of
+	 * @param {Object|Object[]} pointers A pointer object or an array of pointer objects to check the state of
 	 * @param {string} state A state to check for "pressed", "released" or "down"
 	 * @return {boolean} Whether or not the pointer or one of the pointers has the provided state
 	 */
@@ -567,7 +567,7 @@ new Class('Pointer', {
 	 */
 	release: function (button) {
 		if (button === undefined) {throw new Error('Missing argument: button'); }
-		var i, ii, pointers;
+		var i, pointers, events, unpressed;
 
 		// Find pressed pointers that are covered by the given button
 		pointers = this.isPressed(button);
@@ -587,7 +587,7 @@ new Class('Pointer', {
 				unpressed = true;
 			}
 		}
-		return true;
+		return unpressed;
 	},
 
 	/**
@@ -597,5 +597,5 @@ new Class('Pointer', {
 	 */
 	outside: function () {
 		return new Rectangle(engine.arena.offsetLeft, engine.arena.offsetTop, engine.arena.offsetWidth, engine.arena.offsetHeight).contains(this.mouse.window) === false;
-	},
+	}
 });

@@ -6,11 +6,16 @@ new Class('Camera', {
      * @class A camera represents a part of the arena which is "projected" on to the engines main canvas.
      *        The camera contains both a capture region and a projection region, the capture region decides which part of the arena to "capture".
      *        The projection region decides where the captured region will be drawn on the main canvas.
-	 * @param {Rectangle} captureRegion A rectangle which defines the region, from which to capture the current room
-	 * @param {Rectangle} projectionRegion A rectangle which defines the region on the main canvas where the captured region should be drawn
-	 */
-	Camera: function (captureRegion, projectionRegion) {
-		if (!captureRegion.implements(Rectangle)) {throw new Error('Argument captureRegion should be of type: Rectangle'); }
+     *
+     * @property {Rectangle} captureRegion A rectangle which defines the region of the current room to capture
+     * @property {Rectangle} projectionRegion A rectangle which defines the region on the main canvas where the captured region should be drawn
+     * @property {Room} room The room to capture from
+     *
+     * @param {Rectangle} captureRegion A rectangle which defines the region of the current room to capture
+     * @param {Rectangle} projectionRegion A rectangle which defines the region on the main canvas where the captured region should be drawn
+     */
+    Camera: function (captureRegion, projectionRegion) {
+        if (!captureRegion.implements(Rectangle)) {throw new Error('Argument captureRegion should be of type: Rectangle'); }
 		if (!projectionRegion.implements(Rectangle)) {throw new Error('Argument projectionRegion should be of type: Rectangle'); }
 
 		this.captureRegion = captureRegion;
@@ -66,5 +71,5 @@ new Class('Camera', {
 		c.save();
 		c.drawImage(this.canvas, this.projectionRegion.x, this.projectionRegion.y, this.projectionRegion.width, this.projectionRegion.height);
 		c.restore();
-	},
+	}
 });

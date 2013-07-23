@@ -4,6 +4,10 @@ new Class('Music', {
 	 *
      * @name Music
      * @class A wrapper-class for audio-elements which are to be used as music.
+     *
+     * @property {boolean} paused Whether or not the music object is currently paused
+     * @property {HTMLAudioElement} source The audio element which is used as the source of the music object
+     *
 	 * @param {HTMLAudioElement} audioElement The Audio element to use as source for the music object
 	 */
 	Music: function (audioElement) {
@@ -25,7 +29,7 @@ new Class('Music', {
 		if (engine.musicMuted) {return false; }
 
 		this.source.play();
-		this.source.paused = false;
+		this.paused = false;
 
 		if (loop) {
 			this.source.loop = "loop";
@@ -66,5 +70,5 @@ new Class('Music', {
 		}
 
 		return false;
-	},
+	}
 });

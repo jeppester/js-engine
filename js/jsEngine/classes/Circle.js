@@ -1,9 +1,15 @@
-new Class('Circle', [Animatable], {
+new Class('Circle', [Animatable, Child], {
 	/**
 	 * Constructor for Circle class, uses the set function, to set the properties of the circle.
 	 *
      * @name Circle
      * @class A math class which is used for handling circles
+     * @augments Animatable
+     *
+     * @property {number} x The circle's horizontal position
+     * @property {number} y The circle's vertical position
+     * @property {number} radius The circle's radius
+     *
 	 * @param {number} x The x-coordinate for the center of the circle
 	 * @param {number} y The y-coordinate for the center of the circle
 	 * @param {number} radius The radius for the circle
@@ -124,7 +130,7 @@ new Class('Circle', [Animatable], {
 			return object.getDistance(this);
 		}
 		else {
-			throw new Error('Agument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
+			throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
 		}
 	},
 
@@ -210,5 +216,5 @@ new Class('Circle', [Animatable], {
 		c.stroke();
 
 		c.restore();
-	},
+	}
 });

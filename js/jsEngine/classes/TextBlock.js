@@ -4,11 +4,25 @@ new Class('TextBlock', [Animatable, View], {
 	 *
      * @name TextBlock
      * @class A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
+     * @augments Animatable
+     * @augments View
+     *
+     * @property {string} font A css string representing the font of the text block
+     * @property {number} width The width of the text block
+     * @property {string} alignment The text alignment of the text block, possible values are: "left", "center", "right"
+     * @property {string} color A css string representing the text's color
+     * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
+     * @property {number} dir The direction of the sprite (in radians)
+     * @property {number} size A size modifier which modifies both the width and the height of the sprite
+     * @property {number} widthModifier A size modifier which modifies the width of the sprite
+     * @property {number} heightModifier A size modifier which modifies the height of the object
+     * @property {number} opacity The opacity of the sprite
+     *
 	 * @param {string} string The string to display inside the TextBlock
-	 * @param {number} x The x-position of the object in the game arena, in pixels
-	 * @param {number} y The y-position of the object in the game arena, in pixels
-	 * @param {number} width The width of the textblock, in pixels. When the text reaches the width, it will break into a new line
-	 * @param {object} additionalProperties An object containing additional properties to assign to the created object.
+	 * @param {number} [x=0] The x-position of the object in the game arena, in pixels
+	 * @param {number} [y=0] The y-position of the object in the game arena, in pixels
+	 * @param {number} [width=200] The width of the text block, in pixels. When the text reaches the width, it will break into a new line
+	 * @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
 	 *                 The default is:<code>
      *                 {
 	 * 	                font: 'normal 14px Verdana',
@@ -22,7 +36,6 @@ new Class('TextBlock', [Animatable, View], {
 	 */
 	TextBlock: function (string, x, y, width, additionalProperties) {
 		if (string === undefined) {throw new Error('Missing argument: string'); }
-		if (width === undefined) {throw new Error('Missing argument: width'); }
 
 		// Call Vector's and view's constructors
 		this.View();
@@ -30,7 +43,7 @@ new Class('TextBlock', [Animatable, View], {
 		this.y = y !== undefined ? y : 0;
 
 		// Load default options
-		this.width = width;
+		this.width = width !== undefined ? width : 200;
 
 		// Load default options
 		this.font = 'normal 14px Verdana';
@@ -284,5 +297,5 @@ new Class('TextBlock', [Animatable, View], {
 		ret.height = Math.ceil(ret.height + 2);
 
 		return ret;
-	},
+	}
 });

@@ -7,12 +7,17 @@ new Class('GameObject', [Collidable], {
      *        - Is drawn as a sprite
      *        - Has movement vector
      *        - Has collision checking
+     * @augments Collidable
+     *
+     * @property {CustomLoop} loop The loop to which movement of the object has been assigned
+     * @property {boolean} alive Whether or not the object is alive. If the object is not alive, it will not move
+     * @property {Vector} speed The two-directional velocity of the object in px/second
 	 *
 	 * @param {string} source A string representing the source of the object's bitmap
-	 * @param {number} x The x-position of the object in the game arena, in pixels
-	 * @param {number} y The y-position of the object in the game arena, in pixels
-	 * @param {number} dir The rotation (in radians) of the object when drawn in the game arena
-	 * @param {object} additionalProperties An object containing additional properties to assign to the created object.
+	 * @param {number} [x=0] The x-position of the object in the game arena, in pixels
+	 * @param {number} [y=0] The y-position of the object in the game arena, in pixels
+	 * @param {number} [dir=0] The rotation (in radians) of the object when drawn in the game arena
+	 * @param {object} [additionalProperties] An object containing additional properties to assign to the created object.
 	 *                                      The default is:
 	 *                                      <code>
 	 *                                      {
@@ -33,7 +38,7 @@ new Class('GameObject', [Collidable], {
 		this.Collidable(source, x, y, dir, additionalProperties);
 		
 		// Add object to right loop
-		this.loop = this.loop ? this.loop : engine.currentRoom.loops.eachFrame;
+		this.loop = this.loop ? this.loop : engine.defaultActivityLoop;
 		this.loop.attachFunction(this, this.updatePosition);
 
 		this.speed = this.speed ? this.speed : new Vector(0, 0);
@@ -51,5 +56,5 @@ new Class('GameObject', [Collidable], {
 		if (this.alive) {
 			this.add(engine.convertSpeed(this.speed));
 		}
-	},
+	}
 });

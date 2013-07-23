@@ -2,8 +2,8 @@
  * Creates a new jsEngine class
  *
  * @param {string} className The name of the new class
- * @param {object|Array.<object>} [inherits] A class or an array of classes to inherit functions from (to actually extend an inherited class, run the class' constructor from inside the extending class)
- * @param {object} functions A map of functions to add to the new class, functions can also be added by using [Class name].prototype.[Function name] = function () {}
+ * @param {Class|Class[]|Object} [inherits] A class or an array of classes to inherit functions from (to actually extend an inherited class, run the class' constructor from inside the extending class)
+ * @param {Object} functions A map of functions to add to the new class, functions can also be added by using [Class name].prototype.[Function name] = function () {}
  */
 Class = function (className, inherits, functions) {
 	var i, inheritClass, newClass, propName;
@@ -31,9 +31,11 @@ Class = function (className, inherits, functions) {
 		Array.prototype.push.apply(newClass.prototype.inheritedClasses, inheritClass.prototype.inheritedClasses);
 
 		for (functionName in inheritClass.prototype) {
-			if (typeof inheritClass.prototype[functionName] === "function") {
-				newClass.prototype[functionName] = inheritClass.prototype[functionName];
-			}
+            if (inheritClass.prototype.hasOwnProperty(functionName)) {
+                if (typeof inheritClass.prototype[functionName] === "function") {
+                    newClass.prototype[functionName] = inheritClass.prototype[functionName];
+                }
+            }
 		}
 	}
 
@@ -49,7 +51,9 @@ Class = function (className, inherits, functions) {
 
 	// Define functions and properties
 	for (propName in functions) {
-		newClass.prototype[propName] = functions[propName];
+        if (functions.hasOwnProperty(propName)) {
+            newClass.prototype[propName] = functions[propName];
+        }
 	}
 };
 
@@ -60,6 +64,31 @@ new Class('Engine', {
      * @name Engine
      * @class The main game engine class.
      *        Responsible for the main loop, the main canvas, etc.
+     *
+     * @property {boolean} running Whether or not the engine is currently running
+     * @property {int} canvasResX The main canvas horizontal resolution
+     * @property {int} canvasResY The main canvas vertical resolution
+     * @property {string} enginePath The url to jsEngine's source folder
+     * @property {boolean} focusOnLoad If the engine should focus itself when loaded
+     * @property {string} themesPath The url to jsEngine's theme folder
+     * @property {boolean} drawBoundingBoxes Whether or not the bounding boxes of all collidable objects are drawn
+     * @property {boolean} drawMasks Whether or not the masks of all collidable objects are drawn
+     * @property {boolean} pauseOnBlur Whether or the engine will pause itself when the window is blurred
+     * @property {boolean} disableRightClick Whether or not right click context menu is disabled inside the main canvas
+     * @property {HTMLElement} arena The HTML element to use as parent to the main canvas
+     * @property {boolean} autoResize Whether or not the arena will autoresize itself to fit the window
+     * @property {boolean} autoResizeLimitToResolution Whether or not the arena should not autoresize itself to be bigger than the main canvas' resolution
+     * @property {int} cachedSoundCopies The number of copies each sound object caches of it's source to enable multiple playbacks
+     * @property {string} gameClassPath The URL of the game's main class
+     * @property {string} loadText The text shown while loading the engine
+     * @property {string} backgroundColor A CSS color string which is used as the background color of the main canvas
+     * @property {number} timeFactor The factor to multiply the time increase with. A factor of 2 will make everything happen with double speed
+     * @property {boolean} disableTouchScroll Whether or not touch scroll has been disabled
+     * @property {Camera[]} cameras An array containing the engine's cameras
+     * @property {int} defaultCollisionResolution The collision resolution set for all created collidable objects
+     * @property {boolean} soundsMuted Whether or not all sound effects are currently muted
+     * @property {boolean} musicMuted Whether or not all music is currently muted
+     *
 	 * @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
 	 *                 The default options are:
 	 *                 <code>{
@@ -68,7 +97,7 @@ new Class('Engine', {
 	 * 	                "autoResize": true, // If the arena should autoresize to fit the window (or iframe)
 	 * 	                "autoResizeLimitToResolution": true, // If the autoresizing should be limited to the game's resolution
 	 * 	                "backgroundColor": "#FFF", // The color of the arena's background
-	 * 	                "cachedSoundCopies": 5, // How many times sounds should be ducplicated to allow multiple playbacks
+	 * 	                "cachedSoundCopies": 5, // How many times sounds should be duplicated to allow multiple playbacks
 	 * 	                "canvasResX": 800, // The horizontal resolution to set for the game's main canvas
 	 * 	                "canvasResY": 600, // The vertical resolution to set for the game's main canvas
 	 * 	                "defaultCollisionResolution": 6, // Res. of collision checking, by default every 6th px is checked
@@ -102,6 +131,7 @@ new Class('Engine', {
 		var copyOpt, audioFormats, i, opt, gc;
 
 		// Set global engine variable
+        /** @global */
 		engine = this;
 
 		// Detect host information
@@ -234,11 +264,13 @@ new Class('Engine', {
 		}
 
 		// Create loader object
+        /** @global */
 		loader = new Loader();
 
 		// Load engine classes
 		loader.loadClasses([
 			this.enginePath + '/classes/Animatable.js',
+            this.enginePath + '/classes/Child.js',
 			this.enginePath + '/classes/Vector.js',
 			this.enginePath + '/classes/View.js',	
 			this.enginePath + '/classes/Room.js',
@@ -276,7 +308,7 @@ new Class('Engine', {
 	 * @private
 	 */
 	initialize: function () {
-		var i, d, objectName;
+		var objectName;
 
 		// Make array for containing references to all game objects
 		this.objectIndex = {};
@@ -287,11 +319,9 @@ new Class('Engine', {
 		this.now = this.last;
 		this.gameTime = 0;
 		this.currentId = 0;
-		this.drawing = 0;
 
 		this.fps = 0;
 		this.fpsCounter = 0;
-		this.fpsSecCounter = 0;
 
 		// Create a room list (All rooms will add themselves to this list)
 		this.roomList = [];
@@ -322,7 +352,9 @@ new Class('Engine', {
 		}
 
 		// Create objects required by the engine
+        /** @global */
 		keyboard = new Keyboard();
+        /** @global */
 		pointer = new Pointer();
 
 		// Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
@@ -395,7 +427,7 @@ new Class('Engine', {
 
 		var h, w, windowWH, gameWH;
 
-		// Check if the window is wider og heigher than the game's canvas
+		// Check if the window is wider og higher than the game's canvas
 		windowWH = window.innerWidth / window.innerHeight;
 		gameWH = this.canvasResX / this.canvasResY;
 
@@ -501,7 +533,7 @@ new Class('Engine', {
 	/**
 	 * Removes a room from the room list.
 	 * 
-	 * @param {Room} room A pointer to the room, or a string representing the name of the room, which should be removed
+	 * @param {Room|string} room A pointer to the room, or a string representing the name of the room, which should be removed
 	 */
 	removeRoom: function(room) {
 		if (room === undefined) {throw new Error ('Missing argument: room'); }
@@ -574,19 +606,11 @@ new Class('Engine', {
 	 */
 	setDefaultTheme: function (themeName, enforce) {
 		if (themeName === undefined) {throw new Error('Missing argument: themeName'); }
-		if (loader.themes[themeName] === undefined) {throw new Error('Trying to set unexisting theme: ' + themeName); }
-		var i, refreshSource;
+		if (loader.themes[themeName] === undefined) {throw new Error('Trying to set nonexistent theme: ' + themeName); }
 
 		enforce = enforce !== undefined ? enforce : false;
 
 		this.defaultTheme = themeName;
-
-		refreshSource = function () {
-			if (this.refreshSource) {
-				this.refreshSource();
-			}
-		};
-
 		this.currentRoom.setTheme(undefined, enforce);
 	},
 
@@ -618,8 +642,6 @@ new Class('Engine', {
 	 * @private
 	 */
 	mainLoop: function () {
-		var name;
-
 		if (!this.running) {return; }
 
 		// Get the current time (for calculating movement based on the precise time change)
@@ -687,7 +709,7 @@ new Class('Engine', {
 	 * Registers an object to the engine. This will give the object an id which can be used for accessing it at a later time.
 	 * Sprites, TextBlock and objects inheriting those objects, are automatically registered when created.
 	 * 
-	 * @param {object} obj The object to register in the engine
+	 * @param {Object} obj The object to register in the engine
 	 * @param {string} id A string with the desired id
 	 * @return {string} The registered id
 	 */
@@ -706,9 +728,9 @@ new Class('Engine', {
 	},
 
 	/**
-	 * Loads and executes one or multiple JavaScript file synchroneously
+	 * Loads and executes one or multiple JavaScript file synchronously
 	 * 
-	 * @param {string|Array.<string>} filePaths A file path (string), or an array of file paths to load and execute as JavaScript
+	 * @param {string|string[]} filePaths A file path (string), or an array of file paths to load and execute as JavaScript
 	 */
 	loadFiles: function (filePaths) {
 		var i, req, codeString;
@@ -739,8 +761,8 @@ new Class('Engine', {
 	 * Uses an http request to fetch the data from a file and runs a callback function with the file data as first parameter
 	 * 
 	 * @param {string} url A URL path for the file to load
-	 * @param {string|object} params A parameter string or an object to JSON-stringify and use as URL parameter (will be send as "data=[JSON String]")
-	 * @param {boolean} async Whether or not the request should be synchroneous.
+	 * @param {string|Object} params A parameter string or an object to JSON-stringify and use as URL parameter (will be send as "data=[JSON String]")
+	 * @param {boolean} async Whether or not the request should be synchronous.
 	 * @param {function} callback A callback function to run when the request has finished
 	 * @param {object} caller An object to call the callback function as.
 	 */
@@ -787,10 +809,10 @@ new Class('Engine', {
 	/**
 	 * Removes an object from all engine loops, views, and from the object index
 	 *
-	 * param {object} obj The object to remove
+	 * param {Object} obj The object to remove
 	 */
 	purge: function (obj) {
-		var len, name, loop, roomId, room, i;
+		var len, name, loop, roomId, room;
 
 		if (obj === undefined) {throw new Error(obj); }
 		if (typeof obj === "string") {
@@ -924,5 +946,5 @@ new Class('Engine', {
 			return b + c * (1 + Math.cos(Math.PI * (1 + t))) / 2;
 		}
 		return b + c;
-	},
+	}
 });
