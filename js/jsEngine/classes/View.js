@@ -327,7 +327,7 @@ new Class('View', [Vector], {
 					child.draw(c, newOffset);
 				}
 				else if (child.drawCanvas) {
-					child.draw(c, newOffset);
+					child.drawCanvas(c, newOffset);
 				}
 			}
 		}
