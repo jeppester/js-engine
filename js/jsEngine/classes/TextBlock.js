@@ -9,6 +9,7 @@ new Class('TextBlock', [Animatable, View], {
      *
      * @property {string} font A css string representing the font of the text block
      * @property {number} width The width of the text block
+     * @property {number} height The height of the text block
      * @property {string} alignment The text alignment of the text block, possible values are: "left", "center", "right"
      * @property {string} color A css string representing the text's color
      * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
@@ -199,7 +200,9 @@ new Class('TextBlock', [Animatable, View], {
 			this.lines[line] = '';
 		}
 		lt.parentNode.removeChild(lt);
-		this.bm.height = this.lines.length * this.lineHeight;
+
+        this.height = this.lines.length * this.lineHeight;
+		this.bm.height = this.height;
 	},
 
 	/**
@@ -242,39 +245,29 @@ new Class('TextBlock', [Animatable, View], {
 			y = this.y - cameraOffset.y;
 		}
 
-		c.globalAlpha = this.opacity;
-		if (this.composite !== 'source-over') {
-			c.globalCompositeOperation = this.composite;
-		}
-		
-		// If a rotation is used, translate the context and rotate it (much slower than using no rotation)
-		if (this.dir !== 0) {
-			c.translate(x, y);
-			c.rotate(this.dir);
-			c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
-			
-			// Draw images
-			c.drawImage(this.bm, this.width, 0, this.width, this.height, - this.offset.x, - this.offset.y, this.width, this.height);
-			
-			c.scale(1 / (this.widthModifier * this.size), 1 / (this.heightModifier * this.size));
-			c.rotate(-this.dir);
-			c.translate(-x, -y);
-		}
-		// If the image is not rotated, draw it without rotation
-		else {
-			c.translate(x, y);
-			c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
-			
-			c.drawImage(this.bm, this.width, 0, this.width, this.height, - this.offset.x, - this.offset.y, this.width, this.height);
-			
-			c.scale(1 / (this.widthModifier * this.size), 1 / (this.heightModifier * this.size));
-			c.translate(-x, -y);
-		}
+        // Save context (it has proven to be faster to use save-restore compared to resetting the below options manually)
+        c.save();
 
-		if (this.composite !== 'source-over') {
-			c.globalCompositeOperation = 'source-over';
-		}
-		c.globalAlpha = 1;
+        // Apply drawing options if they are needed (this saves a lot of resources)
+        c.globalAlpha = this.opacity;
+        if (this.composite !== 'source-over') {
+            c.globalCompositeOperation = this.composite;
+        }
+        if (x !== 0 || y !== 0) {
+            c.translate(x, y);
+        }
+        if (this.dir !== 0) {
+            c.rotate(this.dir);
+        }
+        if (this.size !== 1 || this.widthModifier !== 1 || this.heightModifier !== 1) {
+            c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
+        }
+
+        // Draw bm
+        c.drawImage(this.bm, - this.offset.x, - this.offset.y, this.width, this.height);
+
+        // Restore the context
+        c.restore()
 	},
 
 	/**
