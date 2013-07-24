@@ -1,19 +1,28 @@
-new Class('Line',[Child], {
+new Class('Line',[Child, Animatable], {
 	/**
-	 * Constructor for the Line class. Uses setFromVectors to create the line.
+	 * Constructor for the Line class. Uses setFromVectors to create the line's start and end points
 	 *
      * @name Line
      * @class A math class which is used for handling lines
+     * @augments Child
+     * @augments Animatable
      *
      * @property {Vector} a The line's starting point
      * @property {Vector} b The line's ending point
+     * @property {string} strokeColor The line's color, if added to a view
      *
 	 * @param {Vector} startVector A Vector representing the start point of the line
 	 * @param {Vector} endVector A Vector representing the end point of the line
+	 * @param {string} [strokeStyle="#000"] The line's color if added to a view (css color string)
+	 * @param {string} [lineWidth=1] The line's width if added to a view (in px)
 	 */
-	Line: function (startVector, endVector) {
+	Line: function (startVector, endVector, strokeStyle, lineWidth) {
 		startVector = startVector !== undefined ? startVector : new Vector(0, 0);
 		endVector = endVector !== undefined ? endVector : new Vector(0, 0);
+        this.strokeStyle = strokeStyle || "#000";
+        this.lineWidth = lineWidth || 1;
+        this.opacity = 1;
+
 
 		this.setFromVectors(startVector, endVector);
 	},
@@ -265,12 +274,14 @@ new Class('Line',[Child], {
 		c.save();
 
 		c.translate(-cameraOffset.x, -cameraOffset.y);
-		c.strokeStyle = "#f00";
+		c.strokeStyle = this.strokeStyle;
+        c.globalAlpha = this.opacity;
 		c.beginPath();
 
 		c.moveTo(this.a.x, this.a.y);
 		c.lineTo(this.b.x, this.b.y);
 
+        c.lineWidth = this.lineWidth;
 		c.stroke();
 
 		c.restore();
