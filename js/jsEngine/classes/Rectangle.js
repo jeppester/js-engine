@@ -194,7 +194,23 @@ new Class('Rectangle', [Animatable, Vector], {
 	 * @return {boolean} True if the Rectangle contains the checked object, false if not
 	 */
 	contains: function (object) {
-		return this.getPolygon().contains(object);
+        // If checked object is a vector, line or rectangle, do fast calculation otherwise convert to polygon and do calculation
+        if (object.implements(Rectangle)) {
+            return this.contains(new Vector(object.x, object.y)) && this.contains(new Vector(object.x + object.width, object.y + object.height));
+        }
+        if (object.implements(Line)) {
+            return this.contains(object.a) && this.contains(object.b);
+        }
+        if (object.implements(Vector)) {
+            return (
+                object.x > this.x &&
+                object.x < this.x + this.width &&
+                object.y > this.y &&
+                object.y < this.y + this.height
+            )
+        }
+
+        return this.getPolygon().contains(object);
 	},
 
 	/**
