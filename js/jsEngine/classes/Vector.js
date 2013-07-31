@@ -252,21 +252,19 @@ new Class('Vector', [Animatable, Child], {
 		if (object.implements(Vector)) {
 			return object.copy().subtract(this).getLength();
 		}
-		else if (object.implements(Line)) {
+		if (object.implements(Line)) {
 			return object.getDistance(this);
 		}
-		else if (object.implements(Circle)) {
+		if (object.implements(Circle)) {
 			return object.getDistance(this);
 		}
-		else if (object.implements(Rectangle)) {
+		if (object.implements(Rectangle)) {
 			return object.getDistance(this);
 		}
-		else if (object.implements(Polygon)) {
+		if (object.implements(Polygon)) {
 			return object.getDistance(this);
 		}
-		else {
-			throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
-		}
+		throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
 	},
 
 	/**
