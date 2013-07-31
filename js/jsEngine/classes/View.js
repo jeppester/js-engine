@@ -366,5 +366,6 @@ new Class('View', [Vector], {
 	/**
 	 * Remove drawCanvas function which was inherited from View
 	 */
-	drawCanvas: undefined
+	drawCanvas: undefined,
+    getRedrawRegion: undefined
 });
