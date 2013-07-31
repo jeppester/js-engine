@@ -203,6 +203,28 @@ new Class('Polygon',[Child], {
 		return new Rectangle().setFromVectors(startVector, endVector.subtract(startVector));
 	},
 
+    /**
+     * Calculates the region which the object will fill out when redrawn.
+     *
+     * @private
+     * @return {Rectangle} The bounding rectangle of the redraw
+     */
+    getRedrawRegion: function () {
+        var ln;
+
+        // Get bounding rectangle
+        var rect = this.getBoundingRectangle();
+
+        // line width
+        ln = Math.ceil(this.lineWidth / 2);
+        rect.x -= ln;
+        rect.y -= ln;
+        rect.width += ln * 2;
+        rect.height += ln * 2;
+
+        return rect;
+    },
+
 	/**
 	 * Calculates the shortest distance from the Polygon object to another geometric object
 	 * 

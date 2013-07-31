@@ -11,14 +11,25 @@ new Class('Rectangle', [Animatable, Vector], {
      * @property {number} y The top left corner's y-coordinate
      * @property {number} width The width of the rectangle
      * @property {number} height The height of the rectangle
+     * @property {string} strokeStyle The rectangle's color if added to a view (css color string)
+     * @property {number} lineWidth The rectangle's width if added to a view (in px)
+     * @property {string} fillStyle The rectangle's fill color if added to a view (css color string)
      *
 	 * @param {number} x The x-coordinate for the rectangle's top left corner
 	 * @param {number} y The y-coordinate for the rectangle's top left corner
 	 * @param {number} width The width of the rectangle
 	 * @param {number} height The height of the rectangle
+     * @param {string} [fillStyle = "#000"] The rectangle's fill color if added to a view (css color string)
+     * @param {string} [strokeStyle = "#000"] The rectangle's color if added to a view (css color string)
+     * @param {number} [lineWidth = 1] The rectangle's width if added to a view (in px)
 	 */
-	Rectangle: function (x, y, width, height) {
+	Rectangle: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
 		this.set(x, y, width, height);
+
+        this.fillStyle = fillStyle || "#000";
+        this.strokeStyle = strokeStyle || "#000";
+        this.lineWidth = lineWidth || 1;
+        this.opacity = 1;
 	},
     /** @scope Rectangle */
 
@@ -187,6 +198,28 @@ new Class('Rectangle', [Animatable, Vector], {
 		return this.getPolygon().getDistance(object);
 	},
 
+    /**
+     * Calculates the region which the object will fill out when redrawn.
+     *
+     * @private
+     * @return {Rectangle} The bounding rectangle of the redraw
+     */
+    getRedrawRegion: function () {
+        var ln;
+
+        // Get bounding rectangle
+        var rect = this.copy();
+
+        // line width
+        ln = Math.ceil(this.lineWidth / 2);
+        rect.x -= ln;
+        rect.y -= ln;
+        rect.width += ln * 2;
+        rect.height += ln * 2;
+
+        return rect;
+    },
+
 	/**
 	 * Checks whether or not the Rectangle contains another geometric object.
 	 * 
@@ -234,7 +267,9 @@ new Class('Rectangle', [Animatable, Vector], {
 		c.save();
 
 		c.translate(-cameraOffset.x, -cameraOffset.y);
-		c.strokeStyle = "#f00";
+
+        c.strokeStyle = this.strokeStyle;
+        c.fillStyle = this.fillStyle;
 
 		c.beginPath();
 
@@ -244,7 +279,11 @@ new Class('Rectangle', [Animatable, Vector], {
 		c.lineTo(this.x, this.y + this.height);
 		c.lineTo(this.x, this.y);
 
-		c.stroke();
+        c.lineWidth = this.lineWidth;
+        c.globalAlpha = this.opacity;
+        c.stroke();
+        c.fill();
+
 		c.closePath();
 
 		c.restore();
