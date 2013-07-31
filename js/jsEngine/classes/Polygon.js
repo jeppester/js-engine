@@ -6,11 +6,22 @@ new Class('Polygon',[Child], {
      * @class A math class which is used for handling polygons
      *
      * @property {Vector[]} points An array of the polygon's points. Each point is connect to the previous- and next points, and the first and last points are connected
+     * @property {string} strokeStyle The polygon's color if added to a view (css color string)
+     * @property {number} lineWidth The polygon's width if added to a view (in px)
+     * @property {string} fillStyle The polygon's fill color if added to a view (css color string)
      *
 	 * @param {Vector[]} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
+     * @param {string} [fillStyle = "#000"] The polygon's fill color if added to a view (css color string)
+     * @param {string} [strokeStyle = "#000"] The polygon's color if added to a view (css color string)
+     * @param {number} [lineWidth = 1] The polygon's width if added to a view (in px)
 	 */
-	Polygon: function (points) {
+	Polygon: function (points, fillStyle, strokeStyle, lineWidth) {
 		this.setFromPoints(points);
+
+        this.fillStyle = fillStyle || "#000";
+        this.strokeStyle = strokeStyle || "#000";
+        this.lineWidth = lineWidth || 1;
+        this.opacity = 1;
 	},
     /** @scope Polygon */
 
@@ -371,24 +382,30 @@ new Class('Polygon',[Child], {
 	 *
 	 * @private
 	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Polygon
-     * @param {Vector} cameraOffset A vector defining the offset with which to draw the object
+     * @param {Vector} drawOffset A vector defining the offset with which to draw the object
      */
-	drawCanvas: function (c, cameraOffset) {
+	drawCanvas: function (c, drawOffset) {
 		var i, len;
 
 		c.save();
 
-		c.translate(-cameraOffset.x, -cameraOffset.y);
-		c.strokeStyle = "#f00";
+		c.translate(-drawOffset.x, -drawOffset.y);
+
+        c.strokeStyle = this.strokeStyle;
+        c.fillStyle = this.fillStyle;
+
 		c.beginPath();
 
-		len = this.points.length;
-		c.moveTo(this.points[len - 1].x, this.points[len - 1].y);
-		for (i = 0; i < len; i ++) {
-			c.lineTo(this.points[i].x, this.points[i].y);
-		}
+        len = this.points.length;
+        c.moveTo(this.points[len - 1].x, this.points[len - 1].y);
+        for (i = 0; i < len; i ++) {
+            c.lineTo(this.points[i].x, this.points[i].y);
+        }
 
-		c.stroke();
+        c.lineWidth = this.lineWidth;
+        c.globalAlpha = this.opacity;
+        c.stroke();
+        c.fill();
 
 		c.restore();
 	}

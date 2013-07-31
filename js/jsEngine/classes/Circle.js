@@ -16,9 +16,9 @@ new Class('Circle', [Animatable, Child], {
 	 * @param {number} x The x-coordinate for the center of the circle
 	 * @param {number} y The y-coordinate for the center of the circle
 	 * @param {number} radius The radius for the circle
-     * @param {string} [fillStyle] The circle's fill color if added to a view (css color string)
-     * @param {string} [strokeStyle] The circle's color if added to a view (css color string)
-     * @param {number} [lineWidth] The circle's width if added to a view (in px)
+     * @param {string} [fillStyle = "#000"] The circle's fill color if added to a view (css color string)
+     * @param {string} [strokeStyle = "#000"] The circle's color if added to a view (css color string)
+     * @param {number} [lineWidth = 1] The circle's width if added to a view (in px)
 	 */
 	Circle: function (x, y, radius, fillStyle, strokeStyle, lineWidth) {
 		this.set(x, y, radius);
@@ -228,14 +228,16 @@ new Class('Circle', [Animatable, Child], {
 	 *
 	 * @private
 	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Circle
-	 * @param {Vector} cameraOffset A vector defining the offset with which to draw the object
+	 * @param {Vector} drawOffset A vector defining the offset with which to draw the object
 	 */
-	drawCanvas: function (c, cameraOffset) {
+	drawCanvas: function (c, drawOffset) {
 		c.save();
 
-		c.translate(-cameraOffset.x, -cameraOffset.y);
+		c.translate(-drawOffset.x, -drawOffset.y);
+
 		c.strokeStyle = this.strokeStyle;
         c.fillStyle = this.fillStyle;
+
 		c.beginPath();
 
 		c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
