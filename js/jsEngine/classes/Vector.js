@@ -9,12 +9,20 @@ new Class('Vector', [Animatable, Child], {
      *
      * @property {number} x The x-value of the vector
      * @property {number} y The y-value of the vector
+     * @property {string} strokeStyle The vector's color if added to a view (css color string)
+     * @property {string} lineWidth The vector's width if added to a view (in px)
      *
 	 * @param {number} [x=0] The x-value to set for the vector
 	 * @param {number} [y=0] The y-value to set for the vector
+     * @param {string} [strokeStyle="#000"] The vector's color if added to a view (css color string)
+     * @param {number} [lineWidth=1] The vector's width if added to a view (in px)
 	 */
-	Vector: function (x, y) {
+	Vector: function (x, y, strokeStyle, lineWidth) {
 		this.set(x, y);
+
+        this.strokeStyle = strokeStyle || "#000";
+        this.lineWidth = lineWidth || 1;
+        this.opacity = 1;
 	},
     /** @scope Vector */
 
@@ -267,6 +275,28 @@ new Class('Vector', [Animatable, Child], {
 		throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
 	},
 
+    /**
+     * Calculates the region which the object will fill out when redrawn.
+     *
+     * @private
+     * @return {Rectangle} The bounding rectangle of the redraw
+     */
+    getRedrawRegion: function () {
+        var ln;
+
+        // Get bounding rectangle
+        var rect = new Rectangle(this.x, this.y, 0, 0);
+
+        // line width
+        ln = Math.ceil(this.lineWidth / 2);
+        rect.x -= ln;
+        rect.y -= ln;
+        rect.width += ln * 2;
+        rect.height += ln * 2;
+
+        return rect.add(this.parent.getRoomPosition());
+    },
+
 	/**
 	 * Draws the Vector object on a canvas, as a point
 	 * 
@@ -278,11 +308,15 @@ new Class('Vector', [Animatable, Child], {
 		c.save();
 
 		c.translate(-cameraOffset.x, -cameraOffset.y);
-		c.fillStyle = '#f00';
+
+        c.strokeStyle = this.strokeStyle;
+        c.globalAlpha = this.opacity;
+        c.lineWidth = this.lineWidth;
+
 		c.beginPath();
 
 		c.moveTo(this.x, this.y);
-		c.arc(this.x, this.y, 2, 0, Math.PI * 2, true);
+		c.arc(this.x, this.y, 0, 0, Math.PI * 2, true);
 
 		c.fill();
 
