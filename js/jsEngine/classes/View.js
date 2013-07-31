@@ -207,13 +207,15 @@ new Class('View', [Vector], {
 		drawRegion = this.getCombinedRedrawRegion();
 		drawRegion.move(-this.x, -this.y);
 
+        //console.log(drawRegion);
+
 		if (drawRegion) {
 			this.drawCacheOffset = new Vector(drawRegion.x, drawRegion.y);
 			this.drawCacheCanvas.width = drawRegion.width;
 			this.drawCacheCanvas.height = drawRegion.height;
 
 			// Draw all children to the cache canvas
-			this.draw(this.drawCacheCtx, this.drawCacheOffset.copy().move(this.x, this.y), true);
+			this.draw(this.drawCacheCtx, this.drawCacheOffset.copy().move(this.x, this.y), drawRegion, true);
 		}
 	},
 
@@ -223,14 +225,21 @@ new Class('View', [Vector], {
 	 * @return {Rectangle} A rectangle representing the region
 	 */
 	getCombinedRedrawRegion: function () {
-		var box, addBox, i;
+		var box, addBox, i, child;
 
 		if (this.getRedrawRegion) {
 			box = this.getRedrawRegion();
 		}
 
 		for (i = 0; i < this.children.length; i ++) {
-			addBox = this.children[i].getCombinedRedrawRegion();
+            child = this.children[i];
+
+            if (child.getCombinedRedrawRegion) {
+                addBox = child.getCombinedRedrawRegion();
+            }
+            else {
+                addBox = child.getRedrawRegion();
+            }
 
 			if (addBox) {
 				if (box) {
@@ -294,42 +303,63 @@ new Class('View', [Vector], {
 	 * Draws all children and grandchildren of an object that inherits the View class. It is usually not necessary to call this function since it is automatically called by the engine's redraw loop.
 	 * 
 	 * @param {CanvasRenderingContext2D} c A canvas' 2d context to draw the children on
-	 * @param {Vector} cameraOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
+	 * @param {Vector} drawOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
+     * @param {Rectangle} area A rectangle specifying the area to draw
 	 * @param {boolean} forceRedraw Whether or not to force a redraw even though draw caching is enabled (this option is actually used when caching the view)
 	 */
-	draw: function (c, cameraOffset, forceRedraw) {
-		var i, len, child, newOffset;
+	draw: function (c, drawOffset, area, forceRedraw) {
+		var i, len, child, newOffset, redrawRegion;
 
 		if (this.drawCacheEnabled && !forceRedraw) {
-			c.drawImage(this.drawCacheCanvas, this.x + this.drawCacheOffset.x - cameraOffset.x, this.y + this.drawCacheOffset.y - cameraOffset.y, this.drawCacheCanvas.width, this.drawCacheCanvas.height);
+            var clipWidth, clipHeight, x, y, clipX, clipY, captureRegion;
+
+            x = this.x + this.drawCacheOffset.x - drawOffset.x;
+            y = this.y + this.drawCacheOffset.y - drawOffset.y;
+
+            clipX = (x < 0 ? 0 - x : 0);
+            clipY = (y < 0 ? 0 - y : 0);
+
+            clipWidth = Math.min(this.drawCacheCanvas.width, area.width - x) - clipX;
+            clipHeight = Math.min(this.drawCacheCanvas.height, area.height - y) - clipY;
+            //engine.frames % 180 || console.log(clipX, clipY, clipWidth, clipHeight);
+
+			c.drawImage(this.drawCacheCanvas, clipX, clipY, clipWidth, clipHeight, x + clipX, y + clipY, clipWidth, clipHeight);
+            //engine.stopMainLoop();
 		}
 		else {
-			// Draw this
-			if (this.drawCanvas) {
-				this.drawCanvas(c, cameraOffset);
+            // If this object has a redraw region, check if the region is inside the camera, and only draw it if that is the case
+            if (this.drawCanvas) {
+                if (engine.debug) {
+                    engine.drawCalls ++;
+                }
+                this.drawCanvas(c, drawOffset);
 
-				if (engine.drawBoundingBoxes && this.drawBoundingBox) {
-					this.drawBoundingBox(c, cameraOffset);
-				}
-				if (engine.drawMasks && this.drawMask) {
-					this.drawMask(c, cameraOffset);
-				}
-			}
+                if (engine.drawBoundingBoxes && this.drawBoundingBox) {
+                    this.drawBoundingBox(c, drawOffset);
+                }
+                if (engine.drawMasks && this.drawMask) {
+                    this.drawMask(c, drawOffset);
+                }
+            }
 
 			// Draw children
 			len = this.children.length;
 
-			newOffset = cameraOffset.copy().move(-this.x, -this.y);
+            drawOffset.move(-this.x, -this.y);
 
 			for (i = 0; i < len; i ++) {
 				child = this.children[i];
 				if (child.draw) {
-					child.draw(c, newOffset);
+					child.draw(c, drawOffset, area);
 				}
 				else if (child.drawCanvas) {
-					child.drawCanvas(c, newOffset);
+                    if (engine.debug) {
+                        engine.drawCalls ++;
+                    }
+					child.drawCanvas(c, drawOffset);
 				}
 			}
+            drawOffset.move(this.x, this.y);
 		}
 	},
 

@@ -9,13 +9,24 @@ new Class('Circle', [Animatable, Child], {
      * @property {number} x The circle's horizontal position
      * @property {number} y The circle's vertical position
      * @property {number} radius The circle's radius
+     * @property {string} strokeStyle The circle's color if added to a view (css color string)
+     * @property {number} lineWidth The circle's width if added to a view (in px)
+     * @property {string} fillStyle The circle's fill color if added to a view (css color string)
      *
 	 * @param {number} x The x-coordinate for the center of the circle
 	 * @param {number} y The y-coordinate for the center of the circle
 	 * @param {number} radius The radius for the circle
+     * @param {string} [fillStyle] The circle's fill color if added to a view (css color string)
+     * @param {string} [strokeStyle] The circle's color if added to a view (css color string)
+     * @param {number} [lineWidth] The circle's width if added to a view (in px)
 	 */
-	Circle: function (x, y, radius) {
+	Circle: function (x, y, radius, fillStyle, strokeStyle, lineWidth) {
 		this.set(x, y, radius);
+
+        this.fillStyle = fillStyle || "#000";
+        this.strokeStyle = strokeStyle || "#000";
+        this.lineWidth = lineWidth || 1;
+        this.opacity = 1;
 	},
     /** @scope Circle */
 
@@ -198,6 +209,20 @@ new Class('Circle', [Animatable, Child], {
 		}
 	},
 
+    /**
+     * Calculates the region which the object will fill out when redrawn.
+     *
+     * @private
+     * @return {Rectangle} The bounding rectangle of the redraw
+     */
+    getRedrawRegion: function () {
+        var rect, ln;
+        ln = Math.ceil(this.lineWidth / 2);
+        rect = new Rectangle(this.x - this.radius - ln, this.y - this.radius - ln, (this.radius + ln) * 2, (this.radius + ln) * 2);
+
+        return rect.add(this.parent.getRoomPosition());
+    },
+
 	/**
 	 * Draws the Circle object on the canvas (if added as a child of a View)
 	 *
@@ -209,11 +234,16 @@ new Class('Circle', [Animatable, Child], {
 		c.save();
 
 		c.translate(-cameraOffset.x, -cameraOffset.y);
-		c.strokeStyle = "#f00";
+		c.strokeStyle = this.strokeStyle;
+        c.fillStyle = this.fillStyle;
 		c.beginPath();
 
 		c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+
+        c.lineWidth = this.lineWidth;
+        c.globalAlpha = this.opacity;
 		c.stroke();
+        c.fill();
 
 		c.restore();
 	}

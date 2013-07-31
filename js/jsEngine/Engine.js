@@ -5,7 +5,7 @@
  * @param {Class|Class[]|Object} [inherits] A class or an array of classes to inherit functions from (to actually extend an inherited class, run the class' constructor from inside the extending class)
  * @param {Object} functions A map of functions to add to the new class, functions can also be added by using [Class name].prototype.[Function name] = function () {}
  */
-Class = function (className, inherits, functions) {
+function Class(className, inherits, functions) {
 	var i, inheritClass, newClass, propName;
 
 	// Check that the class name only consists of letters
@@ -17,12 +17,14 @@ Class = function (className, inherits, functions) {
 		inherits = undefined;
 	}
 
-	eval('window.' + className + ' = function () {this.' + className + '.apply(this, arguments); }');
-	window[className].prototype[className] = function () {};
-
+    window[className] = function () {
+        this[this.className].apply(this, arguments);
+    }
 	newClass = window[className];
-	newClass.prototype.className = className;
-	newClass.prototype.inheritedClasses = [];
+
+    newClass.prototype[className] = function () {};
+    newClass.prototype.className = className;
+    newClass.prototype.inheritedClasses = [];
 
 	function inherit(newClass, inheritClass) {
 		var functionName;
@@ -36,21 +38,21 @@ Class = function (className, inherits, functions) {
                     newClass.prototype[functionName] = inheritClass.prototype[functionName];
                 }
             }
-		}
-	}
-
+        }
+    }
 	// Inherit functions
-	if (inherits) {
-		if (!Array.prototype.isPrototypeOf(inherits)) {throw new Error("Arguments inherits is not an array"); }
 
-		for (i = 0; i < inherits.length; i ++) {
-			inheritClass = inherits[i];
-			inherit(newClass, inheritClass);
-		}
-	}
+    if (inherits) {
+        if (!Array.prototype.isPrototypeOf(inherits)) {throw new Error("Arguments inherits is not an array"); }
 
+        for (i = 0; i < inherits.length; i ++) {
+            inheritClass = inherits[i];
+            inherit(newClass, inheritClass);
+        }
+    }
 	// Define functions and properties
-	for (propName in functions) {
+
+    for (propName in functions) {
         if (functions.hasOwnProperty(propName)) {
             newClass.prototype[propName] = functions[propName];
         }
@@ -88,6 +90,7 @@ new Class('Engine', {
      * @property {int} defaultCollisionResolution The collision resolution set for all created collidable objects
      * @property {boolean} soundsMuted Whether or not all sound effects are currently muted
      * @property {boolean} musicMuted Whether or not all music is currently muted
+     * @property {boolean} debug Whether or not debug information is collected (fps, draw times)
      *
 	 * @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
 	 *                 The default options are:
@@ -113,6 +116,7 @@ new Class('Engine', {
 	 * 	                "pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
 	 * 	                "soundsMuted": false, // If all sound effects should be initially muted
 	 * 	                "themesPath": "themes", // The path to the themes-directory
+	 * 	                "debug": false, // Whether or not debug information should be collected (fps, draw times)
 	 *                 }</code>
 	 */
 	Engine: function (options) {
@@ -195,12 +199,13 @@ new Class('Engine', {
 		this.disableTouchScroll = true;
 		this.cameras = [];
 		this.defaultCollisionResolution = 6;
+        this.debug = false;
 
 		this.soundsMuted = false;
 		this.musicMuted = false;
 
 		// Copy options to engine (except those which are only used for engine initialization)
-		copyOpt = ['backgroundColor', 'disableTouchScroll', 'defaultCollisionResolution', 'focusOnLoad', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'pauseOnBlur', 'drawBoundingBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+		copyOpt = ['backgroundColor', 'debug', 'disableTouchScroll', 'defaultCollisionResolution', 'focusOnLoad', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'pauseOnBlur', 'drawBoundingBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 		for (i = 0; i < copyOpt.length; i ++) {
 			opt = copyOpt[i];
 			if (this.options[opt] !== undefined) {
@@ -322,6 +327,9 @@ new Class('Engine', {
 
 		this.fps = 0;
 		this.fpsCounter = 0;
+        this.drawTime = 0;
+        this.drawTimeCounter = 0;
+        this.drawCalls = 0;
 
 		// Create a room list (All rooms will add themselves to this list)
 		this.roomList = [];
@@ -644,6 +652,8 @@ new Class('Engine', {
 	mainLoop: function () {
 		if (!this.running) {return; }
 
+        var drawTime;
+
 		// Get the current time (for calculating movement based on the precise time change)
 		this.last = this.now;
 		this.now = new Date().getTime();
@@ -659,18 +669,29 @@ new Class('Engine', {
 		this.currentRoom.update();
 
 		// Draw game objects
-		this.redraw();
+        if (!this.debug) {
+            this.redraw();
+        }
+        else {
+            this.drawCalls = 0;
+            drawTime = new Date().getTime();
+            this.redraw();
+            drawTime = new Date().getTime() - drawTime;
 
-		// Count frames per second
-		if (this.fpsMsCounter < 1000) {
-			this.fpsCounter ++;
-			this.fpsMsCounter += this.timeIncrease;
-		}
-		else {
-			this.fps = this.fpsCounter;
-			this.fpsCounter = 0;
-			this.fpsMsCounter = 0;
-		}
+            // Count frames per second and calculate mean redraw time
+            if (this.fpsMsCounter < 1000) {
+                this.fpsCounter ++;
+                this.drawTimeCounter += drawTime;
+                this.fpsMsCounter += this.timeIncrease;
+            }
+            else {
+                this.fps = this.fpsCounter;
+                this.drawTime = this.drawTimeCounter / this.fpsCounter;
+                this.fpsCounter = 0;
+                this.drawTimeCounter = 0;
+                this.fpsMsCounter = 0;
+            }
+        }
 
 		// Schedule the loop to run again
 		requestAnimationFrame(function (time) {
@@ -835,7 +856,7 @@ new Class('Engine', {
 					loop = room.loops[name];
 
 					loop.detachFunctionsByCaller(obj);
-					loop.unScheduleByCaller(obj);
+					loop.unscheduleByCaller(obj);
 					loop.removeAnimationsOfObject(obj);
 				}
 			}

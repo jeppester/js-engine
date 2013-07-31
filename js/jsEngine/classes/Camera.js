@@ -55,8 +55,8 @@ new Class('Camera', {
 		this.updateCaptureCanvas();
 		this.ctx.clearRect(0, 0, this.captureRegion.width, this.captureRegion.height);
 
-		engine.masterRoom.draw(this.ctx, this.captureRegion.copy());
-		this.room.draw(this.ctx, this.captureRegion.copy());
+		engine.masterRoom.draw(this.ctx, new Vector(this.captureRegion.x, this.captureRegion.y), this.captureRegion.copy());
+		this.room.draw(this.ctx, new Vector(this.captureRegion.x, this.captureRegion.y), this.captureRegion.copy());
 	},
 
 	/**

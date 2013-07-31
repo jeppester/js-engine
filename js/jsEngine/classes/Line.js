@@ -9,20 +9,23 @@ new Class('Line',[Child, Animatable], {
      *
      * @property {Vector} a The line's starting point
      * @property {Vector} b The line's ending point
-     * @property {string} strokeColor The line's color, if added to a view
+     * @property {string} strokeStyle The line's color if added to a view (css color string)
+     * @property {string} lineWidth The line's width if added to a view (in px)
+     * @property {string} lineCap The line's cap style if added to a view
      *
 	 * @param {Vector} startVector A Vector representing the start point of the line
 	 * @param {Vector} endVector A Vector representing the end point of the line
 	 * @param {string} [strokeStyle="#000"] The line's color if added to a view (css color string)
-	 * @param {string} [lineWidth=1] The line's width if added to a view (in px)
+	 * @param {number} [lineWidth=1] The line's width if added to a view (in px)
+     * @param {string} [lineCap='butt'] The line's cap style if added to a view
 	 */
-	Line: function (startVector, endVector, strokeStyle, lineWidth) {
+	Line: function (startVector, endVector, strokeStyle, lineWidth, lineCap) {
 		startVector = startVector !== undefined ? startVector : new Vector(0, 0);
 		endVector = endVector !== undefined ? endVector : new Vector(0, 0);
         this.strokeStyle = strokeStyle || "#000";
         this.lineWidth = lineWidth || 1;
         this.opacity = 1;
-
+        this.lineCap = lineCap || 'butt';
 
 		this.setFromVectors(startVector, endVector);
 	},
@@ -263,6 +266,33 @@ new Class('Line',[Child, Animatable], {
 		}
 	},
 
+    /**
+     * Creates a polygon with the same points as the line.
+     *
+     * @return {object} The created Polygon object
+     */
+    getPolygon: function () {
+        return new Polygon([this.a.copy(), this.b.copy()]);
+    },
+
+    /**
+     * Calculates the region which the object will fill out when redrawn.
+     *
+     * @private
+     * @return {Rectangle} The bounding rectangle of the redraw
+     */
+    getRedrawRegion: function () {
+        var rect, ln;
+
+        rect = this.getPolygon().getBoundingRectangle();
+        ln = Math.ceil(this.lineWidth / 2);
+        rect.move(-ln, -ln);
+        rect.height += ln * 2;
+        rect.width += ln * 2;
+
+        return rect.add(this.parent.getRoomPosition());
+    },
+
 	/**
 	 * Draws the Line object on the canvas (if added as a child of a View)
 	 *
@@ -271,6 +301,10 @@ new Class('Line',[Child, Animatable], {
      * @param {Vector} cameraOffset A vector defining the offset with which to draw the object
 	 */
 	drawCanvas: function (c, cameraOffset) {
+        if (this.lineWidth === 0 || this.opacity === 0) {
+            return;
+        }
+
 		c.save();
 
 		c.translate(-cameraOffset.x, -cameraOffset.y);
@@ -282,6 +316,7 @@ new Class('Line',[Child, Animatable], {
 		c.lineTo(this.b.x, this.b.y);
 
         c.lineWidth = this.lineWidth;
+        c.lineCap = this.lineCap;
 		c.stroke();
 
 		c.restore();

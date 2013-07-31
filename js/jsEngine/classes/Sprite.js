@@ -167,7 +167,7 @@ new Class('Sprite', [View, Animatable], {
 	 */
 	drawCanvas: function (c, cameraOffset) {
 		// Draw Sprite on canvas
-		var x, y;
+		var x, y, offX, offY;
 
 		// If sprites size has been modified to zero, do nothing
 		if (this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0 || this.opacity === 0) {
@@ -177,10 +177,14 @@ new Class('Sprite', [View, Animatable], {
 		if (engine.avoidSubPixelRendering) {
 			x = Math.round(this.x - cameraOffset.x);
 			y = Math.round(this.y - cameraOffset.y);
+            offX = Math.round(this.offset.x);
+            offY = Math.round(this.offset.y);
 		}
 		else {
 			x = this.x - cameraOffset.x;
 			y = this.y - cameraOffset.y;
+            offX = this.offset.x;
+            offY = this.offset.y;
 		}
 
 		// Set the right sub image
@@ -218,7 +222,7 @@ new Class('Sprite', [View, Animatable], {
         }
 
         // Draw bm
-        c.drawImage(this.bm, (this.width + this.bm.spacing) * this.imageNumber, 0, this.width, this.height, - this.offset.x, - this.offset.y, this.width, this.height);
+        c.drawImage(this.bm, (this.width + this.bm.spacing) * this.imageNumber, 0, this.width, this.height, - offX, - offY, this.width, this.height);
 
         // Restore the context
         c.restore()
