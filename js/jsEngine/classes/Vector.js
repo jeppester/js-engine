@@ -9,19 +9,16 @@ new Class('Vector', [Animatable, Child], {
      *
      * @property {number} x The x-value of the vector
      * @property {number} y The y-value of the vector
-     * @property {string} strokeStyle The vector's color if added to a view (css color string)
-     * @property {string} lineWidth The vector's width if added to a view (in px)
+     * @property {string} fillStyle The vector's color if added to a view (css color string)
      *
 	 * @param {number} [x=0] The x-value to set for the vector
 	 * @param {number} [y=0] The y-value to set for the vector
-     * @param {string} [strokeStyle="#000"] The vector's color if added to a view (css color string)
-     * @param {number} [lineWidth=1] The vector's width if added to a view (in px)
+     * @param {string} [fillStyle="#000"] The vector's color if added to a view (css color string)
 	 */
-	Vector: function (x, y, strokeStyle, lineWidth) {
+	Vector: function (x, y, fillStyle) {
 		this.set(x, y);
 
-        this.strokeStyle = strokeStyle || "#000";
-        this.lineWidth = lineWidth || 1;
+        this.fillStyle = fillStyle || "#000";
         this.opacity = 1;
 	},
     /** @scope Vector */
@@ -309,14 +306,13 @@ new Class('Vector', [Animatable, Child], {
 
 		c.translate(-cameraOffset.x, -cameraOffset.y);
 
-        c.strokeStyle = this.strokeStyle;
+        c.fillStyle = this.fillStyle;
         c.globalAlpha = this.opacity;
-        c.lineWidth = this.lineWidth;
 
 		c.beginPath();
 
 		c.moveTo(this.x, this.y);
-		c.arc(this.x, this.y, 0, 0, Math.PI * 2, true);
+		c.arc(this.x, this.y, 1, 0, Math.PI * 2, true);
 
 		c.fill();
 
