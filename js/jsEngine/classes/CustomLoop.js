@@ -214,7 +214,7 @@ new Class('CustomLoop', {
 	 * @param {Object} caller The object with which the function was to be executed (by default the custom loop itself)
 	 * @return {boolean} Whether or not the function was found and unscheduled
 	 */
-	unSchedule: function (caller, func) {
+	unschedule: function (caller, func) {
 		if (caller === undefined) {throw new Error('Missing argument: caller'); }
 		if (func === undefined) {throw new Error('Missing argument: function'); }
 
@@ -249,7 +249,7 @@ new Class('CustomLoop', {
 	 * @param {function} func The function to unschedule all executions of
 	 * @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
 	 */
-	unScheduleByFunction: function (func) {
+	unscheduleByFunction: function (func) {
 		if (func === undefined) {throw new Error('Missing argument: func'); }
 
 		var unscheduledArray, i, exec;
@@ -287,7 +287,7 @@ new Class('CustomLoop', {
 	 * @param {object} caller The caller
 	 * @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
 	 */
-	unScheduleByCaller: function (caller) {
+	unscheduleByCaller: function (caller) {
 		if (caller === undefined) {throw new Error('Missing argument: caller'); }
 
 		var unscheduledArray, i, exec;
@@ -324,7 +324,7 @@ new Class('CustomLoop', {
 	 * 
 	 * @return {function[]} An array of all the unscheduled functions
 	 */
-	unScheduleAll: function () {
+	unscheduleAll: function () {
 		var removeArray;
 
 		removeArray = [].concat(this.executions, this.executionsQueue);
