@@ -217,7 +217,7 @@ new Class('Rectangle', [Animatable, Vector], {
         rect.width += ln * 2;
         rect.height += ln * 2;
 
-        return rect;
+        return rect.add(this.parent.getRoomPosition());
     },
 
 	/**
