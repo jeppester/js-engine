@@ -1,3 +1,7 @@
+/** For making the engine var unreachable **/
+/*(function () {
+var engine, loader, pointer, keyboard;/**/
+
 /**
  * Creates a new jsEngine class
  *
@@ -767,10 +771,11 @@ new Class('Engine', {
 			req.send();
 			codeString = req.responseText + "\n//@ sourceURL=/" + filePaths[i];
 			try {
-				eval.call(window, codeString);
+				eval(codeString);
 			}
 			catch (e) {
-				throw new Error('Failed loading "' + filePaths[i]);
+				console.log('Failed loading "' + filePaths[i]);
+				throw new Error(e);
 			}
 		}
 
@@ -969,3 +974,5 @@ new Class('Engine', {
 		return b + c;
 	}
 });
+/** For making the engine var unreachable **/
+/*}());/**/
