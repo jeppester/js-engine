@@ -17,12 +17,14 @@ new Class('View', [Vector], {
 	 */
 	View: function (child1, child2, child3) {
 		this.Vector();
-		this.children = Array.prototype.slice.call(arguments);
+		this.children = [];
         this.parent = undefined;
 		this.drawCacheCanvas = document.createElement('canvas');
 		this.drawCacheCtx = this.drawCacheCanvas.getContext('2d');
 		this.drawCacheEnabled = false;
 		this.drawCacheOffset = new Vector();
+
+		this.addChildren.apply(this, Array.prototype.slice.call(arguments));
 	},
     /** @scope View */
 
@@ -50,7 +52,7 @@ new Class('View', [Vector], {
 	 * @return {Child[]} An array containing the added children
 	 */
 	addChildren: function (child1, child2) {
-		if (arguments.length === 0) {throw new Error('This function needs at least one argument'); }
+		if (arguments.length === 0) {return; }
 		var i, child;
 
 		for (i = 0; i < arguments.length; i ++) {
