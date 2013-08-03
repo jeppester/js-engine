@@ -14,7 +14,18 @@ new Class('Loader', {
 		this.loaded = {
 			classes: []
 		};
-		this.themes = {};
+		this.themes = {
+            External: {
+                "name":"External",
+                "inherit":[],
+                "music":{},
+                "sfx":{},
+                "images":{},
+                "masks": {},
+                "resourcesCount": 0,
+                "resourcesLoaded": 0
+            }
+        };
 
 		// Make load overlay
 		this.loadOverlay = document.createElement('div');
@@ -327,12 +338,14 @@ new Class('Loader', {
 				this.loadThemes(theme.inherit);
 			}
 
+            // Always inherit "External" theme
+            theme.inherit.push('External');
+
 			// Create new theme
 			this.themes[name] = theme;
 			theme.resourcesCount = 0;
 			theme.resourcesLoaded = 0;
 			theme.masks = {};
-			theme.bBoxes = {};
 
 			// Load all images
 			this.loadResources(theme, theme.images, 'images');
@@ -389,7 +402,7 @@ new Class('Loader', {
 
 					images = object[path].match(/; *(\d+) *images?/);
 					if (images) {
-						res.imageLength = parseInt(images[1]);
+						res.imageLength = parseInt(images[1], 10);
 					}
 					else {
 						res.imageLength = 1;
@@ -402,10 +415,6 @@ new Class('Loader', {
 						res.spacing = 0;
 					}
 					theme.images[path] = res;
-					theme.bBoxes[path] = [];
-					for (i = 0; i < 100; i++) {
-						theme.bBoxes[path].push(false);
-					}
 
 					res.onload = onload;
 					theme.resourcesCount ++;
@@ -459,6 +468,88 @@ new Class('Loader', {
 			}
 		}
 	},
+
+    /**
+     * Loads an external resource to the built in External-theme
+     *
+     * @param {string} resourceString The proposed resource string of the resource when loaded
+     * @param {string} path The path to the resource's file
+     * @param {string} [typeString = "images"] A string defining the type of resource, can be: "images" (image file), sfx (sound effects) or "music" (background music)
+     * @param {function} [onLoaded = function () {}] A function to call when the resource has been loaded
+     * @param {string} [options = ""] A string defining the resource options (same as the string used for defining animations in a theme file)
+     */
+    loadExternalResource: function (resourceString, path, onLoaded, typeString, options) {
+        if (resourceString === undefined) {throw new Error('Missing argument: resourceString'); }
+        if (path === undefined) {throw new Error('Missing argument: path'); }
+        typeString = typeString || "images";
+        onLoaded = onLoaded || function () {};
+        options = options || "";
+
+        theme = this.themes.External;
+
+        switch (typeString) {
+            case 'images':
+                res = new Image();
+                res.src = path;
+
+                images = options.match(/; *(\d+) *images?/);
+                if (images) {
+                    res.imageLength = parseInt(images[1], 10);
+                }
+                else {
+                    res.imageLength = 1;
+                }
+
+                if (options.match(/; *bordered/)) {
+                    res.spacing = 1;
+                }
+                else {
+                    res.spacing = 0;
+                }
+                theme.images[resourceString] = res;
+
+                res.onload = onLoaded;
+                theme.resourcesCount ++;
+                break;
+
+            case 'sfx':
+                format = path.match(/[^\.]*$/)[0];
+
+                if (engine.host.supportedAudio.indexOf(format) === -1) {
+                    console.log('Sound format is not supported:', format);
+                    return;
+                }
+                res = new Audio(path);
+                theme.sfx[resourceString] = new Sound(res);
+
+                if (engine.preloadSounds) {
+                    res.setAttribute('preload', 'auto');
+                    res.addEventListener("canplaythrough", onLoaded, false);
+                    theme.resourcesCount ++;
+                }
+                break;
+
+            case 'music':
+                format = path.match(/[^\.]*$/)[0];
+
+                if (engine.host.supportedAudio.indexOf(format) === -1) {
+                    console.log('Sound format is not supported:', format);
+                    return;
+                }
+                res = new Audio(path);
+                theme.music[resourceString] = new Music(res);
+
+                if (engine.preloadSounds) {
+                    res.setAttribute('preload', 'auto');
+                    res.addEventListener("canplaythrough", onLoaded, false);
+                    theme.resourcesCount ++;
+                }
+                break;
+        }
+
+        res.setAttribute('data-theme', theme.name);
+        res.setAttribute('data-resourceString', resourceString);
+    },
 
 	/**
 	 * Generates a mask for an image specified by its resource string.
