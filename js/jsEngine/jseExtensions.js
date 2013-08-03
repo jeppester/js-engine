@@ -12,10 +12,21 @@
  * @return {Object|boolean} The first found object, or false if no object is found
  */
 Array.prototype.getElementByPropertyValue = function (property, value) {
+	return this[this.getKeyByPropertyValue(property, value)];
+};
+
+/**
+ * Returns the key of the first object - in the array - which has a specific property with a specific value.
+ * 
+ * @param {string} property The name of the property
+ * @param {*} value The value of the property (can be of any type)
+ * @return {Object|boolean} The key of the first found object, or false if no object is found
+ */
+Array.prototype.getKeyByPropertyValue = function (property, value) {
 	var i;
 	for (i = 0; i < this.length; i ++) {
 		if (this[i][property] === value) {
-			return this[i];
+			return i;
 		}
 	}
 	return false;
