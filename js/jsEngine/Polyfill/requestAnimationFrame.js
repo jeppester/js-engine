@@ -1,5 +1,3 @@
-polyfillsLoaded = true;
-
 /**
  * Provides requestAnimationFrame in a cross browser way.
  * 

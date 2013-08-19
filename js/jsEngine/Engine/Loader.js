@@ -1,10 +1,10 @@
-new Class('Loader', {
+new Class('Engine.Loader', {
 	/**
 	 * Constructor for the Loader class.
 	 * This function will also create a load overlay which will not disappear until the hideOverlay is called.
 	 * Therefore, remember to call hideOverlay, when your game is ready to be shown.
 	 *
-     * @name Loader
+     * @name Engine.Loader
      * @class Class for loading and storing resources.
      *        On engine startup a Loader object is instantiated to the global variable "loader".
      *        This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
@@ -34,7 +34,7 @@ new Class('Loader', {
 		this.loadOverlay.innerHTML = '<div id="loadOverlayText">' + engine.loadText + '</div>';
 		engine.arena.appendChild(this.loadOverlay);
 	},
-    /** @scope Loader */
+    /** @scope Engine.Loader */
 
 	/**
 	 * Fades out the load overlay (which is automatically created by Loader's constructor).
@@ -87,7 +87,7 @@ new Class('Loader', {
 	 * 
 	 * @param {string} resource The resource string of the sound that should be fetched
 	 * @param {string} themeName The name of the theme from which the sound should be fetched. If unset, the engine's default theme will be used
-	 * @return {Sound} A Sound object corresponding to the resource string and theme
+	 * @return {Sound.Effect} A Sound object corresponding to the resource string and theme
 	 */
 	getSound: function (resource, themeName) {
 		if (resource === undefined) {throw new Error('Missing argument: resource'); }
@@ -100,7 +100,7 @@ new Class('Loader', {
 	 * 
 	 * @param {string} resource The resource string of the track that should be fetched
 	 * @param {string} themeName The name of the theme from which the track should be fetched. If unset, the engine's default theme will be used
-	 * @return {Music} A Music object corresponding to the resource string and theme
+	 * @return {Sound.Music} A Music object corresponding to the resource string and theme
 	 */
 	getMusic: function (resource, themeName) {
 		if (resource === undefined) {throw new Error('Missing argument: resource'); }
@@ -371,8 +371,8 @@ new Class('Loader', {
 	 * Loads resources to a theme. This function is used by loadThemes for caching the theme resources.
 	 * 
 	 * @private
-	 * @param {object} theme A theme object to load the resources to
-	 * @param {object} object An object containing references to theme resources (like the subcategories of theme files)
+	 * @param {Object} theme A theme object to load the resources to
+	 * @param {Object} object An object containing references to theme resources (like the subcategories of theme files)
 	 * @param {string} typeString A string defining the resource type. Supported types are: "images", "sfx" and "music"
 	 */
 	loadResources: function (theme, object, typeString) {
@@ -624,7 +624,7 @@ new Class('Loader', {
 		}
 		ctx.putImageData(bitmap, 0, 0);
 
-		canvas.bBox = new Rectangle(left - bitmap.width / 2, top - bitmap.height / 2, right - left, bottom - top).getPolygon();
+		canvas.bBox = new Math.Rectangle(left, top, right - left, bottom - top).getPolygon();
 
 		return canvas;
 	},

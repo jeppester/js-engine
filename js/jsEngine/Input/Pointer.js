@@ -1,8 +1,8 @@
-new Class('Pointer', {
+new Class('Input.Pointer', {
 	/**
 	 * Constructor for the Pointer class
 	 *
-     * @name Pointer
+     * @name Input.Pointer
      * @class A class that eases the use of mouse and touch, by providing functions for checking the current state of both.
 	 */
 	Pointer: function () {
@@ -40,11 +40,11 @@ new Class('Pointer', {
 		}
 
 		// Setup mouse device
-		this.mouse = new Vector();
-		this.mouse.window = new Vector();
+		this.mouse = new Math.Vector();
+		this.mouse.window = new Math.Vector();
 		this.mouse.buttons = new Array(11);
 		for (button = 0; button < this.mouse.buttons.length; button++) {
-			this.mouse.buttons[button] = new Vector();
+			this.mouse.buttons[button] = new Math.Vector();
 			this.mouse.buttons[button].events = new Array(2);
 		}
 		this.mouse.lastMoved = 0;
@@ -52,13 +52,13 @@ new Class('Pointer', {
 		// Setup touches
 		this.touches = new Array(10);
 		for (button = 0; button < this.touches.length; button++) {
-			this.touches[button] = new Vector();
+			this.touches[button] = new Math.Vector();
 			this.touches[button].x = undefined;
 			this.touches[button].y = undefined;
 			this.touches[button].events = new Array(2);
 		}
 	},
-    /** @scope Pointer */
+    /** @scope Input.Pointer */
 
 	/**
 	 * Registers every onmousedown event to the Mouse object.
@@ -315,7 +315,7 @@ new Class('Pointer', {
      * The shape can be any geometric object that has a contains function (Rectangle, Polygon).
      *
      * @param {button} button A pointer constant representing the pointers to check
-     * @param {Rectangle|Polygon|Circle} shape A geometric shape defining the area to check
+     * @param {Math.Rectangle|Math.Polygon|Math.Circle} shape A geometric shape defining the area to check
      * @param {boolean} outside [Whether or not to check the outside of the specified area]
      * @return {Object[]|boolean} An array containing the pointers that have pressed the shape, or false if no presses inside the shape were detected
      */
@@ -353,7 +353,7 @@ new Class('Pointer', {
 	 * The shape can be any geometric object that has a contains function (Rectangle, Polygon).
 	 *
      * @param {button} button A pointer constant representing the pointers to check
-     * @param {Rectangle|Polygon|Circle} shape A geometric shape defining the area to check
+     * @param {Math.Rectangle|Math.Polygon|Math.Circle} shape A geometric shape defining the area to check
      * @param {boolean} outside [Whether or not to check the outside of the specified area]
      * @return {Object[]|boolean} An array containing the pointers that have released the shape, or false if no releases inside the shape were detected
 	 */
@@ -391,7 +391,7 @@ new Class('Pointer', {
 	 * The shape can be any geometric object that has a contains function (Rectangle, Polygon).
 	 *
      * @param {button} button A pointer constant representing the pointers to check
-     * @param {Rectangle|Polygon|Circle} shape A geometric shape defining the area to check
+     * @param {Math.Rectangle|Math.Polygon|Math.Circle} shape A geometric shape defining the area to check
      * @param {boolean} outside [Whether or not to check the outside of the specified area]
      * @return {Object[]|boolean} An array containing the pointers that are currently pressing the shape, or false if no pointers inside the shape were detected
 	 */
@@ -488,8 +488,8 @@ new Class('Pointer', {
 	 * Converts a coordinate which is relative to the main canvas to a position in the room (based on the room's cameras)
 	 * 
 	 * @private
-	 * @param {Vector} vector A vector representing a position which is relative to the main canvas
-	 * @return {Vector} vector A vector representing the calculated position relative to the room
+	 * @param {Math.Vector} vector A vector representing a position which is relative to the main canvas
+	 * @return {Math.Vector} vector A vector representing the calculated position relative to the room
 	 */
 	calculateRoomPosition: function (vector) {
 		var ret, len, camera;
@@ -543,7 +543,7 @@ new Class('Pointer', {
 	 * Checks if an area defined by a geometric shape, or its outside, is hovered by the mouse pointer.
 	 * The shape can be any geometric object that has a contains function (Rectangle, Polygon).
 	 * 
-	 * @param {Rectangle|Polygon|Circle} shape A geometric shape defining the area to check
+	 * @param {Math.Rectangle|Math.Polygon|Math.Circle} shape A geometric shape defining the area to check
      * @param {boolean} outside [Whether or not to check the outside of the specified area]
 	 * @return {boolean} True if the shape if hovered, false if not
 	 */
@@ -596,6 +596,6 @@ new Class('Pointer', {
 	 * @return {boolean} True if the pointer is outside, false if not
 	 */
 	outside: function () {
-		return new Rectangle(engine.arena.offsetLeft, engine.arena.offsetTop, engine.arena.offsetWidth, engine.arena.offsetHeight).contains(this.mouse.window) === false;
+		return new Math.Rectangle(engine.arena.offsetLeft, engine.arena.offsetTop, engine.arena.offsetWidth, engine.arena.offsetHeight).contains(this.mouse.window) === false;
 	}
 });

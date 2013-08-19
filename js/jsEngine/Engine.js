@@ -10,10 +10,20 @@ var engine, loader, pointer, keyboard;/**/
  * @param {Object} functions A map of functions to add to the new class, functions can also be added by using [Class name].prototype.[Function name] = function () {}
  */
 function Class(className, inherits, functions) {
-	var i, inheritClass, newClass, propName;
+	var name, constructor, str, i, ii, inheritClass, newClass, propName;
 
-	// Check that the class name only consists of letters
-	if (!/^\w*$/.test(className)) {throw new Error("Invalid class name: " + className); }
+    // Check if the class is inside a name space
+    name = className.split('.');
+    constructor = name[name.length - 1];
+
+    // Create name space if missing
+    for (i = 0; i < name.length - 1; i++) {
+        // Create eval string
+        str = name.slice(0, i - 1).join('.');
+        if (eval('window.' + str) === undefined) {
+            eval(str + ' = {}');
+        }
+    }
 
 	// Check if inherits can be used as argument, otherwise inherits will be used as the properties argument
 	if (inherits !== undefined && !Array.prototype.isPrototypeOf(inherits) && inherits.prototype === undefined) {
@@ -21,12 +31,14 @@ function Class(className, inherits, functions) {
 		inherits = undefined;
 	}
 
-    window[className] = function () {
-        this[this.className].apply(this, arguments);
-    }
-	newClass = window[className];
+    eval('\
+    ' + className + ' = function () {\
+        this.'+ name[name.length - 1] +'.apply(this, arguments);\
+    }');
 
-    newClass.prototype[className] = function () {};
+	newClass = eval('window.' + className);
+
+    newClass.prototype[constructor] = function () {};
     newClass.prototype.className = className;
     newClass.prototype.inheritedClasses = [];
 
@@ -124,6 +136,10 @@ new Class('Engine', {
 	 *                 }</code>
 	 */
 	Engine: function (options) {
+        // Set global engine variable
+        /** @global */
+        engine = this;
+
 		this.options = options ? options: {};
 		this.load();
 	},
@@ -137,10 +153,6 @@ new Class('Engine', {
 	load: function () {
 		// Define all used vars
 		var copyOpt, audioFormats, i, opt, gc;
-
-		// Set global engine variable
-        /** @global */
-		engine = this;
 
 		// Detect host information
 		this.host = {
@@ -204,6 +216,7 @@ new Class('Engine', {
 		this.cameras = [];
 		this.defaultCollisionResolution = 6;
         this.debug = false;
+        this.redrawObjects = [];
 
 		this.soundsMuted = false;
 		this.musicMuted = false;
@@ -230,6 +243,7 @@ new Class('Engine', {
 		this.mainCanvas.style.display = "block";
 		this.mainCanvas.width = this.canvasResX;
 		this.mainCanvas.height = this.canvasResY;
+		this.mainCtx = this.mainCanvas.getContext('2d');
 		this.arena.appendChild(this.mainCanvas);
 
 		// If autoresize is set to true, set up autoresize
@@ -254,49 +268,56 @@ new Class('Engine', {
 
 		// If Javascript Extensions has not been loaded, load them
 		if (typeof Array.prototype.getElementByPropertyValue === "undefined") {
-			this.loadFiles(this.enginePath + '/jseExtensions.js');
+			this.loadFiles(this.enginePath + '/Extension/Array.js');
 		}
+        if (typeof Object.prototype.importProperties === "undefined") {
+            this.loadFiles(this.enginePath + '/Extension/Object.js');
+        }
 
 		// Load polyfills
-		if (window.polyfillsLoaded === undefined) {
-			this.loadFiles(this.enginePath + '/jsePolyfills.js');
+		if (window.requestAnimationFrame === undefined) {
+			this.loadFiles(this.enginePath + '/Polyfill/requestAnimationFrame.js');
 		}
 
 		// Load global vars
 		if (typeof KEY_UP === "undefined") {
-			this.loadFiles(this.enginePath + '/jseGlobals.js');
+			this.loadFiles(this.enginePath + '/Globals.js');
 		}
 
 		// If the loader class does not exist, load it
 		if (typeof Loader === "undefined") {
-			this.loadFiles(this.enginePath + '/classes/Loader.js');
+			this.loadFiles(this.enginePath + '/Engine/Loader.js');
 		}
 
 		// Create loader object
         /** @global */
-		loader = new Loader();
+		loader = new Engine.Loader();
 
 		// Load engine classes
 		loader.loadClasses([
-			this.enginePath + '/classes/Animatable.js',
-            this.enginePath + '/classes/Child.js',
-			this.enginePath + '/classes/Vector.js',
-			this.enginePath + '/classes/View.js',	
-			this.enginePath + '/classes/Room.js',
-			this.enginePath + '/classes/Line.js',
-			this.enginePath + '/classes/Polygon.js',
-			this.enginePath + '/classes/Rectangle.js',
-			this.enginePath + '/classes/Circle.js',
-			this.enginePath + '/classes/Camera.js',
-			this.enginePath + '/classes/CustomLoop.js',
-			this.enginePath + '/classes/Sprite.js',
-			this.enginePath + '/classes/Collidable.js',
-			this.enginePath + '/classes/TextBlock.js',
-			this.enginePath + '/classes/GameObject.js',
-			this.enginePath + '/classes/Keyboard.js',
-			this.enginePath + '/classes/Pointer.js',
-			this.enginePath + '/classes/Sound.js',
-			this.enginePath + '/classes/Music.js'
+			this.enginePath + '/Lib/Animatable.js',
+			this.enginePath + '/Math/Vector.js',
+            this.enginePath + '/Math/Line.js',
+            this.enginePath + '/Math/Circle.js',
+            this.enginePath + '/Math/Rectangle.js',
+            this.enginePath + '/Math/Polygon.js',
+            this.enginePath + '/View/Child.js',
+            this.enginePath + '/View/Line.js',
+            this.enginePath + '/View/Circle.js',
+            this.enginePath + '/View/Rectangle.js',
+            this.enginePath + '/View/Polygon.js',
+            this.enginePath + '/View/Container.js',
+            this.enginePath + '/View/Sprite.js',
+            this.enginePath + '/View/Collidable.js',
+            this.enginePath + '/View/TextBlock.js',
+            this.enginePath + '/View/GameObject.js',
+            this.enginePath + '/Engine/Room.js',
+            this.enginePath + '/Engine/Camera.js',
+            this.enginePath + '/Engine/CustomLoop.js',
+            this.enginePath + '/Input/Keyboard.js',
+			this.enginePath + '/Input/Pointer.js',
+			this.enginePath + '/Sound/Effect.js',
+			this.enginePath + '/Sound/Music.js'
 		]);
 
 		gc = this.gameClassPath;
@@ -339,10 +360,10 @@ new Class('Engine', {
 		this.roomList = [];
 
 		// Create master room
-		this.masterRoom = new Room('master');
+		this.masterRoom = new Engine.Room('master');
 
 		// Make main room
-		this.currentRoom = new Room('main');
+		this.currentRoom = new Engine.Room('main');
 
 		// Set default custom loops
 		this.defaultAnimationLoop = this.masterRoom.loops.eachFrame;
@@ -350,9 +371,9 @@ new Class('Engine', {
 
 		// Make main camera
 		this.cameras.push(
-			new Camera(
-				new Rectangle(0, 0, this.canvasResX, this.canvasResY), 
-				new Rectangle(0, 0, this.canvasResX, this.canvasResY)
+			new Engine.Camera(
+				new Math.Rectangle(0, 0, this.canvasResX, this.canvasResY),
+				new Math.Rectangle(0, 0, this.canvasResX, this.canvasResY)
 			)
 		);
 
@@ -365,9 +386,9 @@ new Class('Engine', {
 
 		// Create objects required by the engine
         /** @global */
-		keyboard = new Keyboard();
+		keyboard = new Input.Keyboard();
         /** @global */
-		pointer = new Pointer();
+		pointer = new Input.Pointer();
 
 		// Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
 		if (this.pauseOnBlur) {
@@ -474,8 +495,8 @@ new Class('Engine', {
 	 */
 	convertSpeed: function (speed, from, to) {
 		if (speed === undefined) {throw new Error('Missing argument: speed'); }
-		if (speed.implements(Vector)) {
-			return new Vector(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
+		if (speed.implements(Math.Vector)) {
+			return new Math.Vector(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
 		}
 
 		from = from !== undefined ? from : SPEED_PIXELS_PER_SECOND;
@@ -882,14 +903,20 @@ new Class('Engine', {
 	redraw: function () {
 		var i, c;
 
-		c = this.mainCanvas.getContext('2d');
+		c = this.mainCtx
 
-		for (i = 0; i < this.cameras.length; i++) {
-			//this.mainCanvas.getContext('2d').clearRect(0, 0, this.canvasResX, this.canvasResY);
+
+        for (i = 0; i < this.cameras.length; i++) {
+            //this.mainCanvas.getContext('2d').clearRect(0, 0, this.canvasResX, this.canvasResY);
 			this.cameras[i].capture();
-			this.cameras[i].draw(c);
-		}
-	},
+            this.cameras[i].draw(c);
+        }
+
+        if (this.debug) {
+        	this.lastRedrawObjects = this.redrawObjects;
+        }
+        this.redrawObjects = [];
+    },
 
 	/**
 	 * Downloads a screen dump of the main canvas. Very usable for creating game screenshots directly from browser consoles.

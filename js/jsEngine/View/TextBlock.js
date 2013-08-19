@@ -1,4 +1,4 @@
-new Class('TextBlock', [Animatable, View], {
+new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	/**
 	 * The constructor for the TextBlock class.
 	 *
@@ -13,7 +13,7 @@ new Class('TextBlock', [Animatable, View], {
      * @property {string} alignment The text alignment of the text block, possible values are: "left", "center", "right"
      * @property {string} color A css string representing the text's color
      * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
-     * @property {number} dir The direction of the sprite (in radians)
+     * @property {number} direction The direction of the sprite (in radians)
      * @property {number} size A size modifier which modifies both the width and the height of the sprite
      * @property {number} widthModifier A size modifier which modifies the width of the sprite
      * @property {number} heightModifier A size modifier which modifies the height of the object
@@ -32,14 +32,14 @@ new Class('TextBlock', [Animatable, View], {
 	 * 	                size: 1,
 	 * 	                opacity: 1,
 	 * 	                composite: 'source-over',
-	 * 	                offset: new Vector(0, 0)
+	 * 	                offset: new Math.Vector(0, 0)
 	 *                 }</code>
 	 */
 	TextBlock: function (string, x, y, width, additionalProperties) {
 		if (string === undefined) {throw new Error('Missing argument: string'); }
 
 		// Call Vector's and view's constructors
-		this.View();
+		this.Container();
 		this.x = x !== undefined ? x : 0;
 		this.y = y !== undefined ? y : 0;
 
@@ -49,13 +49,13 @@ new Class('TextBlock', [Animatable, View], {
 		// Load default options
 		this.font = 'normal 14px Verdana';
 		this.alignment = 'left';
-		this.offset = new Vector();
+		this.offset = new Math.Vector();
 		this.color = "#000000";
 		this.opacity = 1;
 		this.size = 1;
 		this.widthModifier = 1;
 		this.heightModifier = 1;
-		this.dir = 0;
+		this.direction = 0;
 		this.composite = 'source-over';
 
 		// Load additional properties
@@ -98,6 +98,7 @@ new Class('TextBlock', [Animatable, View], {
 
 		this.stringToLines();
 		this.cacheRendering();
+		this.onAfterChange();
 	},
 
 	/**
@@ -224,50 +225,38 @@ new Class('TextBlock', [Animatable, View], {
 	},
 
 	/**
+     * Checks if the objects is visible. This function runs before each draw to ensure that it is necessary
+     * @return {boolean} Whether or not the object is visible (based on its size and opacity vars) 
+     */
+    isVisible: function () {
+        // If sprites size has been modified to zero, do nothing
+        return !(this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0 || /^\s*$/.test(this.string));
+    },
+
+	/**
 	 * Draws the cached rendering of the TextBlock object to the canvas.
 	 * 
 	 * @private
 	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the TextBlock
 	 * @param {Vector} cameraOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
 	 */
-	drawCanvas: function (c, cameraOffset) {
+	drawCanvas: function (c) {
 		// Draw Sprite on canvas
 		var x, y;
 
-		if (/^\s*$/.test(this.string)) {return; }
-
+		// Round offset if necessary
+		var offX, offY;
 		if (engine.avoidSubPixelRendering) {
-			x = Math.round(this.x - cameraOffset.x);
-			y = Math.round(this.y - cameraOffset.y);
+            offX = Math.round(this.offset.x);
+            offY = Math.round(this.offset.y);
+        }
+        else {
+            offX = this.offset.x;
+            offY = this.offset.y;
 		}
-		else {
-			x = this.x - cameraOffset.x;
-			y = this.y - cameraOffset.y;
-		}
-
-        // Save context (it has proven to be faster to use save-restore compared to resetting the below options manually)
-        c.save();
-
-        // Apply drawing options if they are needed (this saves a lot of resources)
-        c.globalAlpha = this.opacity;
-        if (this.composite !== 'source-over') {
-            c.globalCompositeOperation = this.composite;
-        }
-        if (x !== 0 || y !== 0) {
-            c.translate(x, y);
-        }
-        if (this.dir !== 0) {
-            c.rotate(this.dir);
-        }
-        if (this.size !== 1 || this.widthModifier !== 1 || this.heightModifier !== 1) {
-            c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
-        }
 
         // Draw bm
-        c.drawImage(this.bm, - this.offset.x, - this.offset.y, this.width, this.height);
-
-        // Restore the context
-        c.restore()
+        c.drawImage(this.bm, 0, 0, this.width, this.height, - offX, - offY, this.width, this.height);
 	},
 
 	/**
@@ -279,10 +268,10 @@ new Class('TextBlock', [Animatable, View], {
 	getRedrawRegion: function () {
 		var ret;
 
-		ret = new Rectangle(-this.offset.x, -this.offset.y, this.bm.width, this.bm.height);
+		ret = new Math.Rectangle(-this.offset.x, -this.offset.y, this.bm.width, this.bm.height);
 		ret = ret.getPolygon();
 		ret = ret.scale(this.size * this.widthModifier, this.size * this.heightModifier);
-		ret = ret.rotate(this.dir);
+		ret = ret.rotate(this.direction);
 		ret = ret.getBoundingRectangle().add(this.getRoomPosition());
 		ret.x = Math.floor(ret.x - 1);
 		ret.y = Math.floor(ret.y - 1);

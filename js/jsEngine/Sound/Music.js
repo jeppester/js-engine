@@ -1,8 +1,8 @@
-new Class('Music', {
+new Class('Sound.Music', {
 	/**
 	 * Constructor for the Music class
 	 *
-     * @name Music
+     * @name Sound.Music
      * @class A wrapper-class for audio-elements which are to be used as music.
      *
      * @property {boolean} paused Whether or not the music object is currently paused

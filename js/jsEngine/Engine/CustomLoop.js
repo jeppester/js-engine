@@ -1,13 +1,6 @@
-/**
- * CustomLoop:
- *
- */
-
-new Class('CustomLoop', {
+new Class('Engine.CustomLoop', {
 	/**
-	 * Constructor for CustomLoop class
-     *
-     * @name CustomLoop
+     * @name Engine.CustomLoop
 	 * @class A loop class.
      *        Contains a list of functions to run each time the loop executes.
      *        For the loop to be executed, it will have to be added to the current room via the Engine.currentRoom.addLoop.
@@ -42,7 +35,7 @@ new Class('CustomLoop', {
 		this.time = 0;
 		this.execTime = 0;
 	},
-    /** @scope CustomLoop */
+    /** @scope Engine.CustomLoop */
 
 	/**
 	 * Attaches a function to the loop.
@@ -368,7 +361,7 @@ new Class('CustomLoop', {
 	/**
 	 * Stop all animations of a specific object from the loop
 	 * 
-	 * @param {Animatable} object The object to stop all animations of
+	 * @param {Lib.Animatable} object The object to stop all animations of
 	 */
 	removeAnimationsOfObject: function (object) {
         var i;
@@ -399,7 +392,7 @@ new Class('CustomLoop', {
 
 			t = this.time - a.start;
 
-			if (t > a.dur) {
+			if (t > a.duration) {
 				// Delete animation
 				this.animations.splice(animId, 1);
 
@@ -418,7 +411,7 @@ new Class('CustomLoop', {
 				// If the animation is still running: Ease the animation of each property
 				for (propId in a.prop) {
 					if (a.prop.hasOwnProperty(propId)) {
-						a.obj[propId] = engine.ease(a.easing, t, a.prop[propId].begin, a.prop[propId].end - a.prop[propId].begin, a.dur);
+						a.obj[propId] = engine.ease(a.easing, t, a.prop[propId].begin, a.prop[propId].end - a.prop[propId].begin, a.duration);
 					}
 				}
 			}

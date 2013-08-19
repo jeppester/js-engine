@@ -1,55 +1,39 @@
-new Class('View', [Vector], {
+new Class('View.Container', [View.Child], {
 	/**
 	 * Constructor for the View class.
-     *
-     * @name View
-     * @class A class for objects that are to be drawn on the canvas (or to contain drawn objects)
-     *        All objects which are drawn on the game's canvas extends the View-class.
-     * @augments Vector
-     *
-     * @property {Child[]} children The view's children
-     * @property {View} parent The parent of the view or undefined if the view is an orphan
-     * @property {boolean} drawCacheEnabled Whether or not draw caching is enabled
-     *
-     * @param {Child} child1 A child to add to the view upon creation
-     * @param {Child} child2 An other child to add to the view upon creation
-     * @param {Child} child3 A third ...
+	 *
+	 * @name View.Container
+	 * @class A class for objects that are to be drawn on the canvas (or to contain drawn objects)
+	 *        All objects which are drawn on the game's canvas extends the View-class.
+	 * @augments View.Child
+	 *
+	 * @property {View.Child[]} children The view's children
+	 * @property {View.Container} parent The parent of the view or undefined if the view is an orphan
+	 * @property {boolean} drawCacheEnabled Whether or not draw caching is enabled
+	 *
+	 * @param {View.Child} child1 A child to add to the view upon creation
+	 * @param {View.Child} child2 An other child to add to the view upon creation
+	 * @param {View.Child} child3 A third ...
 	 */
-	View: function (child1, child2, child3) {
-		this.Vector();
+	Container: function (child1, child2, child3) {
+		this.Child();
 		this.children = [];
-        this.parent = undefined;
+		this.parent = undefined;
 		this.drawCacheCanvas = document.createElement('canvas');
 		this.drawCacheCtx = this.drawCacheCanvas.getContext('2d');
 		this.drawCacheEnabled = false;
-		this.drawCacheOffset = new Vector();
+		this.drawCacheOffset = new Math.Vector();
 
 		this.addChildren.apply(this, Array.prototype.slice.call(arguments));
 	},
-    /** @scope View */
-
-	/**
-	 * Fetches the position of the view inside the room
-	 */
-	getRoomPosition: function () {
-		var pos, parent;
-
-		pos = this.copy();
-		
-		parent = this;
-		while ((parent = parent.parent) !== undefined) {
-			pos.move(parent.x, parent.y);
-		}
-
-		return pos;
-	},
+	/** @scope View.Container */
 
 	/**
 	 * Adds children to a View object. If the object that the children are added to, is a descendant of the current room, the children will be drawn on the stage when added. The added children will be drawn above the current children.
 	 * 
-	 * @param {Child} child1 A child to add to the View object
-	 * @param {Child} child2 Another child to add...
-	 * @return {Child[]} An array containing the added children
+	 * @param {View.Child} child1 A child to add to the View object
+	 * @param {View.Child} child2 Another child to add...
+	 * @return {View.Child[]} An array containing the added children
 	 */
 	addChildren: function (child1, child2) {
 		if (arguments.length === 0) {return; }
@@ -58,7 +42,7 @@ new Class('View', [Vector], {
 		for (i = 0; i < arguments.length; i ++) {
 			child = arguments[i];
 
-			if (!child.implements(Child)) {throw new Error('Argument child has to be of type: Child'); }
+			if (!child.implements(View.Child)) {throw new Error('Argument child has to be of type: View.Child'); }
 
 			// If the child already has a parent, remove the child from that parent
 			if (child.parent) {
@@ -68,6 +52,7 @@ new Class('View', [Vector], {
 			// Add the child
 			this.children.push(child);
 			child.parent = this;
+			child.onAfterChange();
 
 			// Refresh the child's sprite (it might have changed)
 			if (child.refreshSource) {
@@ -80,9 +65,9 @@ new Class('View', [Vector], {
 	/**
 	 * Adds a child to a View object, below an already added child. This means that the inserted child (or children) will be drawn below the child which they are inserted below.
 	 * 
-	 * @param {Child|Child[]} insertChildren Object or array of objects to insert before an existing child
-	 * @param {Child} child Current child to insert other children before
-	 * @return {Child[]} Array of the inserted children
+	 * @param {View.Child|View.Child[]} insertChildren Object or array of objects to insert before an existing child
+	 * @param {View.Child} child Current child to insert other children before
+	 * @return {View.Child[]} Array of the inserted children
 	 */
 	insertBelow: function (insertChildren, child) {
 		if (insertChildren === undefined) {throw new Error('Missing argument: insertChildren'); }
@@ -102,9 +87,11 @@ new Class('View', [Vector], {
 		for (i = 0; i < insertChildren.length; i ++) {
 			child = insertChildren[i];
 
-            if (!child.implements(Child)) {throw new Error('Argument child has to be of type: Child'); }
+			if (!child.implements(Child)) {throw new Error('Argument child has to be of type: Child'); }
 
 			child.parent = this;
+			child.onAfterChange();
+			
 			if (child.refreshSource) {
 				child.refreshSource();
 			}
@@ -117,7 +104,7 @@ new Class('View', [Vector], {
 	 * Fetches an array of all the View's children.
 	 * This will not return a pointer, so changing the returned array will not change the View's children.
 	 * 
-	 * @return {Child[]} Array containing all of the View's children
+	 * @return {View.Child[]} Array containing all of the View's children
 	 */
 	getChildren: function () {
 		var ret, i;
@@ -179,7 +166,12 @@ new Class('View', [Vector], {
 
 		func.call(this);
 		for (i = 0;i < this.children.length;i ++) {
-			this.children[i].applyToThisAndChildren(func);
+			if (this.children[i].applyToThisAndChildren) {
+				this.children[i].applyToThisAndChildren(func);
+			}
+			else {
+				func.call(this.children[i]);
+			}
 		}
 	},
 
@@ -209,10 +201,10 @@ new Class('View', [Vector], {
 		drawRegion = this.getCombinedRedrawRegion();
 		drawRegion.move(-this.x, -this.y);
 
-        //console.log(drawRegion);
+		//console.log(drawRegion);
 
 		if (drawRegion) {
-			this.drawCacheOffset = new Vector(drawRegion.x, drawRegion.y);
+			this.drawCacheOffset = new Math.Vector(drawRegion.x, drawRegion.y);
 			this.drawCacheCanvas.width = drawRegion.width;
 			this.drawCacheCanvas.height = drawRegion.height;
 
@@ -224,7 +216,7 @@ new Class('View', [Vector], {
 	/**
 	 * Gets the complete region that will used for drawing on next redraw
 	 * 
-	 * @return {Rectangle} A rectangle representing the region
+	 * @return {Math.Rectangle} A rectangle representing the region
 	 */
 	getCombinedRedrawRegion: function () {
 		var box, addBox, i, child;
@@ -234,18 +226,20 @@ new Class('View', [Vector], {
 		}
 
 		for (i = 0; i < this.children.length; i ++) {
-            child = this.children[i];
+			child = this.children[i];
 
-            if (child.getCombinedRedrawRegion) {
-                addBox = child.getCombinedRedrawRegion();
-            }
-            else {
-                addBox = child.getRedrawRegion();
-            }
+			if (child.getCombinedRedrawRegion) {
+				addBox = child.getCombinedRedrawRegion();
+			}
+			else {
+				addBox = child.getRedrawRegion();
+			}
+
+			child.currentRedrawRegion = addBox;
 
 			if (addBox) {
 				if (box) {
-					box = box.combine(addBox);
+					box = box.getBoundingRectangle(addBox);
 				}
 				else {
 					box = addBox;
@@ -259,9 +253,9 @@ new Class('View', [Vector], {
 	/**
 	 * Removes one or more children from the View.
 	 * 
-	 * @param {Child} child1 A child to add to the View object
-	 * @param {Child} child2 Another child to remove...
-	 * @return {Child[]} An array of the children which was removed. If an object, which was supplied as argument, was not a child of the View, it will not appear in the returned array
+	 * @param {View.Child} child1 A child to add to the View object
+	 * @param {View.Child} child2 Another child to remove...
+	 * @return {View.Child[]} An array of the children which was removed. If an object, which was supplied as argument, was not a child of the View, it will not appear in the returned array
 	 */
 	removeChildren: function (child1, child2) {
 		if (arguments.length === 0) {throw new Error('This function needs at least one argument'); }
@@ -305,69 +299,62 @@ new Class('View', [Vector], {
 	 * Draws all children and grandchildren of an object that inherits the View class. It is usually not necessary to call this function since it is automatically called by the engine's redraw loop.
 	 * 
 	 * @param {CanvasRenderingContext2D} c A canvas' 2d context to draw the children on
-	 * @param {Vector} drawOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
-     * @param {Rectangle} area A rectangle specifying the area to draw
+	 * @param {Math.Rectangle} area A rectangle specifying the area to draw
 	 * @param {boolean} forceRedraw Whether or not to force a redraw even though draw caching is enabled (this option is actually used when caching the view)
 	 */
-	draw: function (c, drawOffset, area, forceRedraw) {
-		var i, len, child, newOffset, redrawRegion;
+	draw: function (c, area) {
+		var i, len, child;
 
-		if (this.drawCacheEnabled && !forceRedraw) {
-            var clipWidth, clipHeight, x, y, clipX, clipY, captureRegion;
-
-            x = this.x + this.drawCacheOffset.x - drawOffset.x;
-            y = this.y + this.drawCacheOffset.y - drawOffset.y;
-
-            clipX = (x < 0 ? 0 - x : 0);
-            clipY = (y < 0 ? 0 - y : 0);
-
-            clipWidth = Math.min(this.drawCacheCanvas.width, area.width - x) - clipX;
-            clipHeight = Math.min(this.drawCacheCanvas.height, area.height - y) - clipY;
-            //engine.frames % 180 || console.log(clipX, clipY, clipWidth, clipHeight);
-
-			c.drawImage(this.drawCacheCanvas, clipX, clipY, clipWidth, clipHeight, x + clipX, y + clipY, clipWidth, clipHeight);
-            //engine.stopMainLoop();
+		if (!this.isVisible()) {
+			return;
 		}
-		else {
-            // If this object has a redraw region, check if the region is inside the camera, and only draw it if that is the case
-            if (this.drawCanvas) {
-                if (engine.debug) {
-                    engine.drawCalls ++;
-                }
-                this.drawCanvas(c, drawOffset);
 
-                if (engine.drawBoundingBoxes && this.drawBoundingBox) {
-                    this.drawBoundingBox(c, drawOffset);
-                }
-                if (engine.drawMasks && this.drawMask) {
-                    this.drawMask(c, drawOffset);
-                }
-            }
+		this.transformCanvasContext(c);
 
-			// Draw children
-			len = this.children.length;
-
-            drawOffset.move(-this.x, -this.y);
-
-			for (i = 0; i < len; i ++) {
-				child = this.children[i];
-				if (child.draw) {
-					child.draw(c, drawOffset, area);
+		if (this.drawCanvas) {
+			if (!this.currentRedrawRegion) {
+				this.currentRedrawRegion = this.getCombinedRedrawRegion();
+			}
+			if (this.currentRedrawRegion.getOverlap(area)) {
+				if (engine.debug) {
+					engine.drawCalls ++;
 				}
-				else if (child.drawCanvas) {
-                    if (engine.debug) {
-                        engine.drawCalls ++;
-                    }
-					child.drawCanvas(c, drawOffset);
+
+				this.drawCanvas(c);
+
+				if (engine.drawBoundingBoxes && this.drawBoundingBox) {
+					this.drawBoundingBox(c);
+				}
+				if (engine.drawMasks && this.drawMask) {
+					this.drawMask(c);
 				}
 			}
-            drawOffset.move(this.x, this.y);
 		}
+
+		// Draw children
+		len = this.children.length;
+
+		for (i = 0; i < len; i ++) {
+			child = this.children[i];
+			if (child.draw) {
+				child.draw(c, area);
+			}
+			else if (child.isVisible() && child.currentRedrawRegion.getOverlap(area)) {
+				if (engine.debug) {
+					engine.drawCalls ++;
+				}
+				child.transformCanvasContext(c);
+				child.drawCanvas(c);
+				child.restoreCanvasContext(c);
+			}
+		}
+		
+		this.restoreCanvasContext(c);
 	},
 
 	/**
 	 * Remove drawCanvas function which was inherited from View
 	 */
 	drawCanvas: undefined,
-    getRedrawRegion: undefined
+	getRedrawRegion: undefined
 });

@@ -1,4 +1,4 @@
-new Class('Sprite', [View, Animatable], {
+new Class('View.Sprite', [View.Container, Lib.Animatable], {
 	/**
 	 * The constructor for Sprite objects.
 	 *
@@ -9,7 +9,7 @@ new Class('Sprite', [View, Animatable], {
      * @augments Animatable
      *
      * @property {string} source A resource string representing the bitmap source of the sprite, use setSource() to set the source (do not set it directly)
-     * @property {number} dir The direction of the sprite (in radians)
+     * @property {number} direction The direction of the sprite (in radians)
      * @property {int} imageNumber The current image in the animation (0 the source is not an animation)
      * @property {int} imageLength The number of images in the source (1 the source is not an animation)
      * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
@@ -23,27 +23,27 @@ new Class('Sprite', [View, Animatable], {
 	 * @param {string} source A string representing the source of the object's bitmap
 	 * @param {number} [x=0] The x-position of the object in the game arena, in pixels
 	 * @param {number} [y=0] The y-position of the object in the game arena, in pixels
-	 * @param {number} [dir=0] The rotation (in radians) of the object when drawn in the game arena
+	 * @param {number} [direction=0] The rotation (in radians) of the object when drawn in the game arena
 	 * @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
 	 *                 The default is:<code>
      *                 {
 	 *                  size: 1,
 	 * 	                opacity: 1,
 	 * 	                composite: 'source-over',
-	 * 	                offset: new Vector('center', 'center')
+	 * 	                offset: new Math.Vector('center', 'center')
 	 *                 }</code>
 	 */
-	Sprite: function (source, x, y, dir, additionalProperties) {
+	Sprite: function (source, x, y, direction, additionalProperties) {
 		if (source === undefined) {throw new Error('Missing argument: source'); }
 
 		// Call Vector's and view's constructors
-		this.View();
+		this.Container();
 		this.x = x !== undefined ? x : 0;
 		this.y = y !== undefined ? y : 0;
 
 		// Load default options
 		this.source = source;
-		this.dir = dir !== undefined ? dir : 0;
+		this.direction = direction !== undefined ? direction : 0;
 
 		engine.registerObject(this);
 
@@ -69,7 +69,7 @@ new Class('Sprite', [View, Animatable], {
 			throw new Error('Sprite source was not successfully loaded: ' + source);
 		}
 
-		this.offset = this.offset !== undefined ? this.offset : new Vector(this.width / 2, this.height / 2);
+		this.offset = this.offset !== undefined ? this.offset : new Math.Vector(this.width / 2, this.height / 2);
 		if (this.offset.x === 'center') {this.offset.x = this.width / 2; }
 		if (this.offset.y === 'center') {this.offset.y = this.height / 2; }
 
@@ -166,26 +166,16 @@ new Class('Sprite', [View, Animatable], {
 	 * @param {Vector} cameraOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
 	 */
 	drawCanvas: function (c, cameraOffset) {
-		// Draw Sprite on canvas
-		var x, y, offX, offY;
-
-		// If sprites size has been modified to zero, do nothing
-		if (this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0 || this.opacity === 0) {
-			return;
-		}
-
+		// Round offset if necessary
+		var offX, offY;
 		if (engine.avoidSubPixelRendering) {
-			x = Math.round(this.x - cameraOffset.x);
-			y = Math.round(this.y - cameraOffset.y);
             offX = Math.round(this.offset.x);
             offY = Math.round(this.offset.y);
-		}
-		else {
-			x = this.x - cameraOffset.x;
-			y = this.y - cameraOffset.y;
+        }
+        else {
             offX = this.offset.x;
             offY = this.offset.y;
-		}
+        }
 
 		// Set the right sub image
 		if (this.imageLength !== 1 && this.animationSpeed !== 0) {
@@ -203,29 +193,8 @@ new Class('Sprite', [View, Animatable], {
 			}
 		}
 
-        // Save context (it has proven to be faster to use save-restore compared to resetting the below options manually)
-        c.save();
-
-        // Apply drawing options if they are needed (this saves a lot of resources)
-        c.globalAlpha = this.opacity;
-        if (this.composite !== 'source-over') {
-            c.globalCompositeOperation = this.composite;
-        }
-        if (x !== 0 || y !== 0) {
-            c.translate(x, y);
-        }
-        if (this.dir !== 0) {
-            c.rotate(this.dir);
-        }
-        if (this.size !== 1 || this.widthModifier !== 1 || this.heightModifier !== 1) {
-            c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
-        }
-
         // Draw bm
         c.drawImage(this.bm, (this.width + this.bm.spacing) * this.imageNumber, 0, this.width, this.height, - offX, - offY, this.width, this.height);
-
-        // Restore the context
-        c.restore()
 	},
 
 	/**
@@ -235,18 +204,26 @@ new Class('Sprite', [View, Animatable], {
 	 * @return {Rectangle} The bounding rectangle of the sprite's redraw
 	 */
 	getRedrawRegion: function () {
-		var ret;
+		var box, parents, parent, i;
 
-		ret = new Rectangle(-this.offset.x, -this.offset.y, Math.floor(this.bm.width / this.imageLength), this.bm.height);
-		ret = ret.getPolygon();
-		ret = ret.scale(this.size * this.widthModifier, this.size * this.heightModifier);
-		ret = ret.rotate(this.dir);
-		ret = ret.getBoundingRectangle().add(this.getRoomPosition());
-		ret.x = Math.floor(ret.x - 1);
-		ret.y = Math.floor(ret.y - 1);
-		ret.width = Math.ceil(ret.width + 2);
-		ret.height = Math.ceil(ret.height + 2);
+		box = new Math.Rectangle(-this.offset.x, -this.offset.y, this.width, this.height).getPolygon();	
 
-		return ret;
+		parents = this.getParents();
+		parents.unshift(this);
+		
+		for (i = 0; i < parents.length; i ++) {
+			parent = parents[i];
+			box.scale(parent.size * parent.widthModifier, parent.size * parent.heightModifier);
+			box.rotate(parent.direction);
+			box.move(parent.x, parent.y);
+		}
+
+		box = box.getBoundingRectangle();
+		box.x = Math.floor(box.x);
+		box.y = Math.floor(box.y);
+		box.width = Math.ceil(box.width + 1);
+		box.height = Math.ceil(box.height + 1);
+
+		return box;/**/
 	}
 });

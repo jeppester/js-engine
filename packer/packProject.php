@@ -104,14 +104,14 @@ else {
 	array_push($files, 
 		$e . 'jseExtensions.js',
 		$e . 'jseGlobals.js',
-		$e . 'jsePolyfills.js',
+		$e . 'requestAnimationFrame.js',
 
 		$e . 'Engine.js',
 
 		$e . "classes/Animatable.js",
 		$e . "classes/Child.js",
 		$e . "classes/Vector.js",
-		$e . "classes/View.js",
+		$e . "classes/Container.js",
 		$e . "classes/Room.js",
 		$e . "classes/Line.js",
 		$e . "classes/Rectangle.js",

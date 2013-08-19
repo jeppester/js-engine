@@ -1,6 +1,6 @@
-new Class('Animatable', {
+new Class('Lib.Animatable', {
     /**
-     * @name Animatable
+     * @name Lib.Animatable
      * @class
      */
     /** @scope Animatable */
@@ -24,7 +24,7 @@ new Class('Animatable', {
 	 *                            </code>
 	 * @param {object} options An object containing key-value pairs for the animation's option:<code>
 	 *                         {
-	 *                         	"dur": "[animation duration (in ms)]",
+	 *                         	"duraton": "[animation duration (in ms)]",
 	 *                          "callback": "[callback function]",
 	 *                          "easing": "[easing function to use]"
 	 *                         }
@@ -45,7 +45,7 @@ new Class('Animatable', {
 
 		anim.callback = opt.callback !== undefined  ?  opt.callback : function () {};
 		anim.easing = opt.easing !== undefined ?  opt.easing : "quadInOut";
-		anim.dur = opt.dur !== undefined ?  opt.dur : 1000;
+		anim.duration = opt.duration !== undefined ?  opt.duration : 1000;
 
 		anim.prop = {};
 		for (i in map) {
@@ -61,7 +61,7 @@ new Class('Animatable', {
 		c = 0;
 		for (i in anim.prop) {
             if (anim.prop.hasOwnProperty(i)) {
-                if (anim.prop[i].begin === anim.prop[i].end) {
+                if (anim.prop[i].begin === anim.prop[i].end && !this.propertyIsAnimated(i)) {
                     delete anim.prop[i];
                 } else {
                     c ++;
@@ -77,6 +77,7 @@ new Class('Animatable', {
 
 		loop.addAnimation(anim);
 	},
+	/** @scope Lib.Animatable */
 
 	/**
 	 * Checks if the object is currently being animated.
@@ -96,6 +97,33 @@ new Class('Animatable', {
 					for (animId = loop.animations.length - 1; animId > -1; animId --) {
 						animation = loop.animations[animId];
 						if (animation.obj === this) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	},
+
+	/**
+	 * Checks if a specific property is current being animated
+	 * 
+	 * @return {boolean} Whether or not the property is being animated
+	 */
+	propertyIsAnimated: function (property) {
+		var roomId, room, name, loop, animId, animation;
+
+		// Look through all room on the room list, to see if one of the rooms' loops contains an animation of the object
+		for (roomId = 0; roomId < engine.roomList.length; roomId ++) {
+			room = engine.roomList[roomId];
+
+			for (name in room.loops) {
+				if (room.loops.hasOwnProperty(name)) {
+					loop = room.loops[name];
+					for (animId = loop.animations.length - 1; animId > -1; animId --) {
+						animation = loop.animations[animId];
+						if (animation.obj === this && animation.prop[property] !== undefined) {
 							return true;
 						}
 					}

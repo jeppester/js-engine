@@ -1,8 +1,8 @@
-new Class('Keyboard', {
+new Class('Input.Keyboard', {
 	/**
 	 * Constructor for the Keyboard class
 	 *
-     * @name Keyboard
+     * @name Input.Keyboard
      * @class A class that eases checking of the current state of all keys.
 	 */
 	Keyboard: function () {
@@ -27,7 +27,7 @@ new Class('Keyboard', {
 			};
 		}
 	},
-    /** @scope Keyboard */
+    /** @scope Input.Keyboard */
 
 	/**
 	 * Registers every onkeydown event to the Keyboard object.
