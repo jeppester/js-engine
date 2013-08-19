@@ -98,7 +98,6 @@ new Class('Engine.Camera', {
 
 		if (regions.length > 20) {
 			regions = [this.captureRegion.copy()];
-			console.log('Drawing whole region');
 		}
 
 		if (engine.debug) {

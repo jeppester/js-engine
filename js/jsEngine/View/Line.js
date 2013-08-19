@@ -21,45 +21,74 @@ new Class('View.Line',[Math.Line, View.Child], {
 	 */
 	Line: function (startVector, endVector, strokeStyle, lineWidth, lineCap) {
 		this.Child();
-        
-		startVector = startVector !== undefined ? startVector : new Math.Vector(0, 0);
-		endVector = endVector !== undefined ? endVector : new Math.Vector(0, 0);
-        this.strokeStyle = strokeStyle || "#000";
-        this.lineWidth = lineWidth || 1;
-        this.opacity = 1;
-        this.lineCap = lineCap || 'butt';
 
         // Create getters and setters for line ends
-        var aHidden, bHidden, parentObject;
-        parentObject = this;
-        Object.defineProperty(this, 'a', {
-            get: function() {return aHidden},
+        var hidden;
+
+        hidden = {
+            strokeStyle: strokeStyle || "#000",
+            lineWidth: lineWidth || 1,
+            lineCap: lineCap || 'butt',
+            a: undefined,
+            b: undefined,
+            parentObject: this
+        };
+
+        Object.defineProperty(this, 'strokeStyle', {
+            get: function() {return hidden.strokeStyle; },
             set: function(value) {
-                if (aHidden !== value) {
-                    aHidden = value;
+                if (hidden.strokeStyle !== value) {
+                    hidden.strokeStyle = value;
+                    this.onAfterChange();
+                }
+            }
+        });
+        Object.defineProperty(this, 'lineCap', {
+            get: function() {return hidden.lineCap; },
+            set: function(value) {
+                if (hidden.lineCap !== value) {
+                    hidden.lineCap = value;
+                    this.onAfterChange();
+                }
+            }
+        });
+        Object.defineProperty(this, 'lineWidth', {
+            get: function() {return hidden.lineWidth; },
+            set: function(value) {
+                if (hidden.lineWidth !== value) {
+                    hidden.lineWidth = value;
+                    this.onAfterChange();
+                }
+            }
+        });
+        Object.defineProperty(this, 'a', {
+            get: function() {return hidden.a; },
+            set: function(value) {
+                if (hidden.a !== value) {
+                    hidden.a = value;
 
                     var xHidden, yHidden;
 
-                    xHidden = aHidden.x;
-                    yHidden = aHidden.y;
+                    xHidden = hidden.a.x;
+                    yHidden = hidden.a.y;
 
                     // Put getters and setters on points values
-                    Object.defineProperty(aHidden, 'x', {
-                        get: function() {return xHidden},
+                    Object.defineProperty(hidden.a, 'x', {
+                        get: function() {return xHidden; },
                         set: function(value) {
                             if (xHidden !== value) {
                                 xHidden = value;
-                                parentObject.onAfterChange();
+                                hidden.parentObject.onAfterChange();
                             }
                         }
                     });
                     // Put getters and setters on points values
-                    Object.defineProperty(aHidden, 'y', {
-                        get: function() {return yHidden},
+                    Object.defineProperty(hidden.a, 'y', {
+                        get: function() {return yHidden; },
                         set: function(value) {
                             if (yHidden !== value) {
                                 yHidden = value;
-                                parentObject.onAfterChange();
+                                hidden.parentObject.onAfterChange();
                             }
                         }
                     });
@@ -69,33 +98,33 @@ new Class('View.Line',[Math.Line, View.Child], {
             }
         });
         Object.defineProperty(this, 'b', {
-            get: function() {return bHidden},
+            get: function() {return hidden.b; },
             set: function(value) {
-                if (bHidden !== value) {
-                    bHidden = value;
+                if (hidden.b !== value) {
+                    hidden.b = value;
 
                     var xHidden, yHidden;
 
-                    xHidden = bHidden.x;
-                    yHidden = bHidden.y;
+                    xHidden = hidden.b.x;
+                    yHidden = hidden.b.y;
 
                     // Put getters and setters on points values
-                    Object.defineProperty(bHidden, 'x', {
-                        get: function() {return xHidden},
+                    Object.defineProperty(hidden.b, 'x', {
+                        get: function() {return xHidden; },
                         set: function(value) {
                             if (xHidden !== value) {
                                 xHidden = value;
-                                parentObject.onAfterChange();
+                                hidden.parentObject.onAfterChange();
                             }
                         }
                     });
                     // Put getters and setters on points values
-                    Object.defineProperty(bHidden, 'y', {
-                        get: function() {return yHidden},
+                    Object.defineProperty(hidden.b, 'y', {
+                        get: function() {return yHidden; },
                         set: function(value) {
                             if (yHidden !== value) {
                                 yHidden = value;
-                                parentObject.onAfterChange();
+                                hidden.parentObject.onAfterChange();
                             }
                         }
                     });
@@ -105,7 +134,7 @@ new Class('View.Line',[Math.Line, View.Child], {
             }
         });
 
-		this.setFromVectors(startVector, endVector);
+		this.setFromVectors(startVector || new Math.Vector(), endVector || new Math.Vector());
 	},
     
     /**

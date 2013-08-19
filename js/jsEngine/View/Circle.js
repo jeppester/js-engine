@@ -23,12 +23,53 @@ new Class('View.Circle', [Math.Circle, View.Child], {
 	 */
 	Circle: function (x, y, radius, fillStyle, strokeStyle, lineWidth) {
 		this.Child();
-		this.set(x, y, radius);
 
-        this.fillStyle = fillStyle || "#000";
-        this.strokeStyle = strokeStyle || "#000";
-        this.lineWidth = lineWidth || 1;
-        this.opacity = 1;
+        var hidden;
+
+        hidden = {
+            radius: radius,
+            fillStyle: fillStyle || "#000",
+            strokeStyle: strokeStyle || "#000",
+            lineWidth: lineWidth || 1
+        };
+
+        // Put getters and setters on points values
+        Object.defineProperty(this, 'radius', {
+            get: function() {return hidden.radius; },
+            set: function(value) {
+                if (hidden.radius !== value) {
+                    hidden.radius = value;
+                    this.onAfterChange();
+                }
+            }
+        });
+        Object.defineProperty(this, 'fillStyle', {
+            get: function() {return hidden.fillStyle; },
+            set: function(value) {
+                if (hidden.fillStyle !== value) {
+                    hidden.fillStyle = value;
+                    this.onAfterChange();
+                }
+            }
+        });
+        Object.defineProperty(this, 'strokeStyle', {
+            get: function() {return hidden.strokeStyle; },
+            set: function(value) {
+                if (hidden.strokeStyle !== value) {
+                    hidden.strokeStyle = value;
+                    this.onAfterChange();
+                }
+            }
+        });
+        Object.defineProperty(this, 'lineWidth', {
+            get: function() {return hidden.lineWidth; },
+            set: function(value) {
+                if (hidden.lineWidth !== value) {
+                    hidden.lineWidth = value;
+                    this.onAfterChange();
+                }
+            }
+        });
 	},
     /** @scope View.Circle */
 
