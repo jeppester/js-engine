@@ -70,6 +70,8 @@ new Class('View.Circle', [Math.Circle, View.Child], {
                 }
             }
         });
+
+        this.set(x, y, radius);
 	},
     /** @scope View.Circle */
 

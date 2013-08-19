@@ -3,9 +3,9 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
 	 * The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
 	 *
      * @name View.Rectangle
-     * @class A math class which is used for handling non-rotated rectangles
-     * @augments Animatable
-     * @augments Vector
+     * @class A class which is used for drawable non-rotated rectangles
+     * @augments Math.Rectangle
+     * @augments View.Child
      *
      * @property {number} x The top left corner's x-coordinate
      * @property {number} y The top left corner's y-coordinate
@@ -17,8 +17,8 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
      *
 	 * @param {number} x The x-coordinate for the rectangle's top left corner
 	 * @param {number} y The y-coordinate for the rectangle's top left corner
-	 * @param {number} width The width of the rectangle
-	 * @param {number} height The height of the rectangle
+	 * @param {number} [width = 0] The width of the rectangle
+	 * @param {number} [height = 0] The height of the rectangle
      * @param {string} [fillStyle = "#000"] The rectangle's fill color if added to a view (css color string)
      * @param {string} [strokeStyle = "#000"] The rectangle's color if added to a view (css color string)
      * @param {number} [lineWidth = 1] The rectangle's width if added to a view (in px)
@@ -26,13 +26,66 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
 	Rectangle: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
 		this.Child();
 
-		this.set(x, y, width, height);
+        var hidden;
 
-        this.fillStyle = fillStyle || "#000";
-        this.strokeStyle = strokeStyle || "#000";
-        this.lineWidth = lineWidth || 1;
-        this.opacity = 1;
-	},
+        hidden = {
+            width: width || 0,
+            height: height || 0,
+            fillStyle: fillStyle || "#000",
+            strokeStyle: strokeStyle || "#000",
+            lineWidth: lineWidth || 1
+        };
+
+        // Put getters and setters on points values
+        Object.defineProperty(this, 'width', {
+            get: function() {return hidden.width; },
+            set: function(value) {
+                if (hidden.width !== value) {
+                    hidden.width = value;
+                    this.onAfterChange();
+                }
+            }
+        });
+        // Put getters and setters on points values
+        Object.defineProperty(this, 'height', {
+            get: function() {return hidden.height; },
+            set: function(value) {
+                if (hidden.height !== value) {
+                    hidden.height = value;
+                    this.onAfterChange();
+                }
+            }
+        });
+        Object.defineProperty(this, 'fillStyle', {
+            get: function() {return hidden.fillStyle; },
+            set: function(value) {
+                if (hidden.fillStyle !== value) {
+                    hidden.fillStyle = value;
+                    this.onAfterChange();
+                }
+            }
+        });
+        Object.defineProperty(this, 'strokeStyle', {
+            get: function() {return hidden.strokeStyle; },
+            set: function(value) {
+                if (hidden.strokeStyle !== value) {
+                    hidden.strokeStyle = value;
+                    this.onAfterChange();
+                }
+            }
+        });
+        Object.defineProperty(this, 'lineWidth', {
+            get: function() {return hidden.lineWidth; },
+            set: function(value) {
+                if (hidden.lineWidth !== value) {
+                    hidden.lineWidth = value;
+                    this.onAfterChange();
+                }
+            }
+        });
+
+		this.set(x, y, width, height);
+    },
     /** @scope View.Rectangle */
 
     /**
@@ -74,11 +127,11 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
 
 		c.beginPath();
 
-		c.moveTo(this.x, this.y);
-		c.lineTo(this.x + this.width, this.y);
-		c.lineTo(this.x + this.width, this.y + this.height);
-		c.lineTo(this.x, this.y + this.height);
-		c.lineTo(this.x, this.y);
+		c.moveTo(0, 0);
+		c.lineTo(this.width, 0);
+		c.lineTo(this.width, this.height);
+		c.lineTo(0, this.height);
+		c.lineTo(0, 0);
 
         c.lineWidth = this.lineWidth;
         c.stroke();

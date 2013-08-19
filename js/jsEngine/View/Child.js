@@ -7,110 +7,113 @@ new Class('View.Child', [Lib.Animatable], {
         this.hasChanged = false;
 
         // Define hidden vars
-        var xHidden, yHidden, opacityHidden, directionHidden, sizeHidden, widthModifierHidden, heightModifierHidden, offsetHidden, parentObject;
+        var hidden;
 
-        xHidden = 0;
-        yHidden = 0;
-        opacityHidden = 1;
-        directionHidden = 0;
-        sizeHidden = 1;
-        widthModifierHidden = 1;
-        heightModifierHidden = 1;
+        hidden = {
+            x: 0,
+            y: 0,
+            opacity: 1,
+            direction: 0,
+            size: 1,
+            widthModifier: 1,
+            heightModifier: 1,
+            offset: undefined,
+            parentObject: this
+        };
 
         // Define getter/setters for hidden vars
         Object.defineProperty(this, 'x', {
-            get: function() {return xHidden},
+            get: function() {return hidden.x; },
             set: function(value) {
-                if (xHidden !== value) {
-                    xHidden = value;
+                if (hidden.x !== value) {
+                    hidden.x = value;
                     this.onAfterChange();
                 }
             }
         });
         Object.defineProperty(this, 'y', {
-            get: function() {return yHidden},
+            get: function() {return hidden.y; },
             set: function(value) {
-                if (yHidden !== value) {
-                    yHidden = value;
+                if (hidden.y !== value) {
+                    hidden.y = value;
                     this.onAfterChange();
                 }
             }
         });
         Object.defineProperty(this, 'opacity', {
-            get: function() {return opacityHidden},
+            get: function() {return hidden.opacity; },
             set: function(value) {
-                if (opacityHidden !== value) {
-                    opacityHidden = value;
+                if (hidden.opacity !== value) {
+                    hidden.opacity = value;
                     this.onAfterChange();
                 }
             }
         });
         Object.defineProperty(this, 'direction', {
-            get: function() {return directionHidden},
+            get: function() {return hidden.direction; },
             set: function(value) {
-                if (directionHidden !== value) {
-                    directionHidden = value;
+                if (hidden.direction !== value) {
+                    hidden.direction = value;
                     this.onAfterChange();
                 }
             }
         });
         Object.defineProperty(this, 'size', {
-            get: function() {return sizeHidden},
+            get: function() {return hidden.size; },
             set: function(value) {
-                if (sizeHidden !== value) {
-                    sizeHidden = value;
+                if (hidden.size !== value) {
+                    hidden.size = value;
                     this.onAfterChange();
                 }
             }
         });
         Object.defineProperty(this, 'widthModifier', {
-            get: function() {return widthModifierHidden},
+            get: function() {return hidden.widthModifier; },
             set: function(value) {
-                if (widthModifierHidden !== value) {
-                    widthModifierHidden = value;
+                if (hidden.widthModifier !== value) {
+                    hidden.widthModifier = value;
                     this.onAfterChange();
                 }
             }
         });
         Object.defineProperty(this, 'heightModifier', {
-            get: function() {return heightModifierHidden},
+            get: function() {return hidden.heightModifier; },
             set: function(value) {
-                if (heightModifierHidden !== value) {
-                    heightModifierHidden = value;
+                if (hidden.heightModifier !== value) {
+                    hidden.heightModifier = value;
                     this.onAfterChange();
                 }
             }
         });
 
-        parentObject = this;
         Object.defineProperty(this, 'offset', {
-            get: function() {return offsetHidden},
+            get: function() {return hidden.offset; },
             set: function(value) {
-                if (offsetHidden !== value) {
-                    offsetHidden = value;
+                if (hidden.offset !== value) {
+                    hidden.offset = value;
 
-                    var xHidden, yHidden;
-
-                    xHidden = offsetHidden.x;
-                    yHidden = offsetHidden.y;
+                    var off = {
+                        x: value.x,
+                        y: value.y,
+                    };
 
                     // Put getters and setters on points values
-                    Object.defineProperty(offsetHidden, 'x', {
-                        get: function() {return xHidden},
+                    Object.defineProperty(hidden.offset, 'x', {
+                        get: function() {return off.x; },
                         set: function(value) {
-                            if (xHidden !== value) {
-                                xHidden = value;
-                                parentObject.onAfterChange();
+                            if (off.x !== value) {
+                                off.x = value;
+                                hidden.parentObject.onAfterChange();
                             }
                         }
                     });
                     // Put getters and setters on points values
-                    Object.defineProperty(offsetHidden, 'y', {
-                        get: function() {return yHidden},
+                    Object.defineProperty(hidden.offset, 'y', {
+                        get: function() {return off.y; },
                         set: function(value) {
-                            if (yHidden !== value) {
-                                yHidden = value;
-                                parentObject.onAfterChange();
+                            if (off.y !== value) {
+                                off.y = value;
+                                hidden.parentObject.onAfterChange();
                             }
                         }
                     });

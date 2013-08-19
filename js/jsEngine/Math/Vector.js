@@ -8,15 +8,12 @@ new Class('Math.Vector', [Lib.Animatable], {
      *
      * @property {number} x The x-value of the vector
      * @property {number} y The y-value of the vector
-     * @property {string} fillStyle The vector's color if added to a view (css color string)
      *
 	 * @param {number} [x=0] The x-value to set for the vector
 	 * @param {number} [y=0] The y-value to set for the vector
-     * @param {string} [fillStyle="#000"] The vector's color if added to a view (css color string)
 	 */
-	Vector: function (x, y, fillStyle) {
+	Vector: function (x, y) {
         this.set(x, y);
-        this.fillStyle = fillStyle || "#000";
         this.opacity = 1;
 	},
     /** @scope Math.Vector */

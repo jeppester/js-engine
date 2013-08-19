@@ -56,13 +56,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		this.animationLoops = true;
 		offset = OFFSET_MIDDLE_CENTER;
 
-		// Size modifiers
-		this.size = 1;
-		this.widthModifier = 1;
-		this.heightModifier = 1;
-
 		// Draw options
-		this.opacity = 1;
 		this.composite = 'source-over';	
 
 		// If an offset static var is used, remove it for now, and convert it later
