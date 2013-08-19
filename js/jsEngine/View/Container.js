@@ -16,8 +16,8 @@ new Class('View.Container', [View.Child], {
 	 * @param {View.Child} child3 A third ...
 	 */
 	Container: function (child1, child2, child3) {
-		this.Child();
 		this.children = [];
+		this.Child();
 		this.parent = undefined;
 		this.drawCacheCanvas = document.createElement('canvas');
 		this.drawCacheCtx = this.drawCacheCanvas.getContext('2d');

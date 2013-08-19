@@ -36,6 +36,8 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 	Sprite: function (source, x, y, direction, additionalProperties) {
 		if (source === undefined) {throw new Error('Missing argument: source'); }
 
+		var offset;
+
 		// Call Vector's and view's constructors
 		this.Container();
 		this.x = x !== undefined ? x : 0;
@@ -52,6 +54,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		this.animationSpeed = 30;
 		this.animationLastSwitch = engine.gameTime;
 		this.animationLoops = true;
+		offset = OFFSET_MIDDLE_CENTER;
 
 		// Size modifiers
 		this.size = 1;
@@ -60,7 +63,18 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 
 		// Draw options
 		this.opacity = 1;
-		this.composite = 'source-over';
+		this.composite = 'source-over';	
+
+		// If an offset static var is used, remove it for now, and convert it later
+		if (additionalProperties && additionalProperties.offset) {
+			if (typeof additionalProperties.offset === 'string') {
+				offset = additionalProperties.offset;
+				delete additionalProperties.offset;
+			}
+			else {
+				offset = undefined;
+			}
+		}
 
 		// Load additional properties
 		this.importProperties(additionalProperties);
@@ -69,9 +83,30 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 			throw new Error('Sprite source was not successfully loaded: ' + source);
 		}
 
-		this.offset = this.offset !== undefined ? this.offset : new Math.Vector(this.width / 2, this.height / 2);
-		if (this.offset.x === 'center') {this.offset.x = this.width / 2; }
-		if (this.offset.y === 'center') {this.offset.y = this.height / 2; }
+		// Convert static offset var (if such a var has been used)
+		if (offset) {
+			// calculate horizontal offset
+			if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
+				this.offset.x = 0;
+			}
+			else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
+				this.offset.x = this.width / 2;
+			}
+			else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+				this.offset.x = this.width;
+			}
+
+			// calculate vertical offset
+			if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
+				this.offset.y = 0;
+			}
+			else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
+				this.offset.y = this.height / 2;
+			}
+			else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+				this.offset.y = this.height;
+			}
+		}
 
 		if (engine.avoidSubPixelRendering) {
 			this.offset.x = Math.round(this.offset.x);

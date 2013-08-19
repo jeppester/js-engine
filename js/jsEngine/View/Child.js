@@ -7,7 +7,7 @@ new Class('View.Child', [Lib.Animatable], {
         this.hasChanged = false;
 
         // Define hidden vars
-        var xHidden, yHidden, opacityHidden, directionHidden, sizeHidden, widthModifierHidden, heightModifierHidden;
+        var xHidden, yHidden, opacityHidden, directionHidden, sizeHidden, widthModifierHidden, heightModifierHidden, offsetHidden, parentObject;
 
         xHidden = 0;
         yHidden = 0;
@@ -81,6 +81,46 @@ new Class('View.Child', [Lib.Animatable], {
                 }
             }
         });
+
+        parentObject = this;
+        Object.defineProperty(this, 'offset', {
+            get: function() {return offsetHidden},
+            set: function(value) {
+                if (offsetHidden !== value) {
+                    offsetHidden = value;
+
+                    var xHidden, yHidden;
+
+                    xHidden = offsetHidden.x;
+                    yHidden = offsetHidden.y;
+
+                    // Put getters and setters on points values
+                    Object.defineProperty(offsetHidden, 'x', {
+                        get: function() {return xHidden},
+                        set: function(value) {
+                            if (xHidden !== value) {
+                                xHidden = value;
+                                parentObject.onAfterChange();
+                            }
+                        }
+                    });
+                    // Put getters and setters on points values
+                    Object.defineProperty(offsetHidden, 'y', {
+                        get: function() {return yHidden},
+                        set: function(value) {
+                            if (yHidden !== value) {
+                                yHidden = value;
+                                parentObject.onAfterChange();
+                            }
+                        }
+                    });
+
+                    this.onAfterChange();
+                }
+            }
+        });
+
+        this.offset = new Math.Vector();
     },
     /** @scope View.Child */
 

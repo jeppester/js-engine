@@ -38,6 +38,8 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	TextBlock: function (string, x, y, width, additionalProperties) {
 		if (string === undefined) {throw new Error('Missing argument: string'); }
 
+		var offset;
+
 		// Call Vector's and view's constructors
 		this.Container();
 		this.x = x !== undefined ? x : 0;
@@ -47,6 +49,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		this.width = width !== undefined ? width : 200;
 
 		// Load default options
+		//var fontHidden, alignmentHidden, offsetH
 		this.font = 'normal 14px Verdana';
 		this.alignment = 'left';
 		this.offset = new Math.Vector();
@@ -57,6 +60,18 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		this.heightModifier = 1;
 		this.direction = 0;
 		this.composite = 'source-over';
+		offset = OFFSET_TOP_LEFT;
+
+		// If an offset static var is used, remove it for now, and convert it later
+		if (additionalProperties && additionalProperties.offset) {
+			if (typeof additionalProperties.offset === 'string') {
+				offset = additionalProperties.offset;
+				delete additionalProperties.offset;
+			}
+			else {
+				offset = undefined;
+			}
+		}
 
 		// Load additional properties
 		this.importProperties(additionalProperties);
@@ -68,10 +83,36 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		this.bmCtx = this.bm.getContext('2d');
 		this.bm.width = this.width;
 		this.bm.height = 1000;
+
 		engine.registerObject(this);
 
 		this.setString(string);
 		this.cacheRendering();
+
+		// Convert static offset var (if such a var has been used)
+		if (offset) {
+			// calculate horizontal offset
+			if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
+				this.offset.x = 0;
+			}
+			else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
+				this.offset.x = this.width / 2;
+			}
+			else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+				this.offset.x = this.width;
+			}
+
+			// calculate vertical offset
+			if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
+				this.offset.y = 0;
+			}
+			else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
+				this.offset.y = this.height / 2;
+			}
+			else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+				this.offset.y = this.height;
+			}
+		}
 
 		if (engine.avoidSubPixelRendering) {
 			this.offset.x = Math.round(this.offset.x);
