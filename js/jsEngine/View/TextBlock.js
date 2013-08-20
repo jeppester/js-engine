@@ -46,7 +46,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		this.y = y !== undefined ? y : 0;
 
 		// Load default options
-		this.width = width !== undefined ? width : 200;
+		this.clipWidth = width || 200;
 
 		// Load default options
 		//var fontHidden, alignmentHidden, offsetH
@@ -73,6 +73,26 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 			}
 		}
 
+		// Define pseudo properties
+		Object.defineProperty(this, 'width', {
+			get: function () {
+				return this.clipWidth * this.size * this.widthModifier;
+			},
+			set: function (value) {
+				this.widthModifier = value / (this.clipWidth * this.size);
+				return value;
+			}
+		});
+		Object.defineProperty(this, 'height', {
+			get: function () {
+				return this.clipHeight * this.size * this.heightModifier;
+			},
+			set: function (value) {
+				this.heightModifier = value / (this.clipHeight * this.size);
+				return value
+			}
+		});
+
 		// Load additional properties
 		this.importProperties(additionalProperties);
 		this.lineHeight = this.lineHeight ? this.lineHeight: this.font.match(/[0.0-9]+/) * 1.25;
@@ -81,7 +101,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		this.lineWidth = [];
 		this.bm = document.createElement('canvas');
 		this.bmCtx = this.bm.getContext('2d');
-		this.bm.width = this.width;
+		this.bm.width = this.clipWidth;
 		this.bm.height = 1000;
 
 		engine.registerObject(this);
@@ -96,10 +116,10 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 				this.offset.x = 0;
 			}
 			else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
-				this.offset.x = this.width / 2;
+				this.offset.x = this.clipWidth / 2;
 			}
 			else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.x = this.width;
+				this.offset.x = this.clipWidth;
 			}
 
 			// calculate vertical offset
@@ -107,10 +127,10 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 				this.offset.y = 0;
 			}
 			else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.height / 2;
+				this.offset.y = this.clipHeight / 2;
 			}
 			else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.height;
+				this.offset.y = this.clipHeight;
 			}
 		}
 
@@ -184,10 +204,10 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 				xOffset = 0;
 				break;
 			case 'right':
-				xOffset = this.width - this.lineWidth[i];
+				xOffset = this.clipWidth - this.lineWidth[i];
 				break;
 			case 'center':
-				xOffset = (this.width - this.lineWidth[i]) / 2;
+				xOffset = (this.clipWidth - this.lineWidth[i]) / 2;
 				break;
 			}
 
@@ -224,7 +244,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 				word = words[wid];
 
 				lt.innerHTML += word + " ";
-				if (lt.offsetWidth > this.width) {
+				if (lt.offsetWidth > this.clipWidth) {
 					line ++;
 					this.lines[line] = '';
 					lt.innerHTML = '';
@@ -243,26 +263,8 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		}
 		lt.parentNode.removeChild(lt);
 
-        this.height = this.lines.length * this.lineHeight;
-		this.bm.height = this.height;
-	},
-
-	/**
-	 * Calculates and sets the width modifier to fit a targeted width.
-	 * 
-	 * @param {number} width The targeted width in pixels
-	 */
-	setWidth: function (width) {
-		this.widthModifier = width / (this.bm.width * this.size);
-	},
-
-	/**
-	 * Calculates and sets the height modifier to fit a targeted height.
-	 * 
-	 * @param {number} height The targeted height in pixels
-	 */
-	setHeight: function (height) {
-		this.heightModifier = height / (this.bm.height * this.size);
+        this.bm.height = this.lines.length * this.lineHeight;
+		this.clipHeight = this.bm.height;
 	},
 
 	/**
@@ -297,7 +299,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		}
 
         // Draw bm
-        c.drawImage(this.bm, 0, 0, this.width, this.height, - offX, - offY, this.width, this.height);
+        c.drawImage(this.bm, 0, 0, this.clipWidth, this.clipHeight, - offX, - offY, this.clipWidth, this.clipHeight);
 	},
 
 	/**
@@ -309,7 +311,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	getRedrawRegion: function () {
 		var ret;
 
-		ret = new Math.Rectangle(-this.offset.x, -this.offset.y, this.bm.width, this.bm.height);
+		ret = new Math.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight);
 		ret = ret.getPolygon();
 		ret = ret.scale(this.size * this.widthModifier, this.size * this.heightModifier);
 		ret = ret.rotate(this.direction);

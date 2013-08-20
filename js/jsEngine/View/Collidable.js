@@ -123,8 +123,8 @@ new Class('View.Collidable', [View.Sprite], {
 
 		// Create a new canvas for checking for a collision
 		canvas = document.createElement('canvas');
-		canvas.width = Math.ceil(this.width);
-		canvas.height = Math.ceil(this.height);
+		canvas.width = Math.ceil(this.clipWidth);
+		canvas.height = Math.ceil(this.clipHeight);
 
 		// Add canvas for debugging
 		/*if (document.getElementById('colCanvas')) {
@@ -168,16 +168,16 @@ new Class('View.Collidable', [View.Sprite], {
 				obj.mask,
 
 				// Define image cutout
-				(obj.width + obj.bm.spacing) * obj.imageNumber,
+				(obj.clipWidth + obj.bm.spacing) * obj.imageNumber,
 				0,
-				obj.width,
-				obj.height,
+				obj.clipWidth,
+				obj.clipHeight,
 
 				// Define position and width on canvas
 				- obj.offset.x,
 				- obj.offset.y,
-				obj.width,
-				obj.height
+				obj.clipWidth,
+				obj.clipHeight
 			);
 
 			parents.reverse();
@@ -196,16 +196,16 @@ new Class('View.Collidable', [View.Sprite], {
 			mask,
 
 			// Define image cutout
-			(this.width + this.bm.spacing) * this.imageNumber,
+			(this.clipWidth + this.bm.spacing) * this.imageNumber,
 			0,
-			this.width,
-			this.height,
+			this.clipWidth,
+			this.clipHeight,
 
 			// Define position and width on canvas
-			-this.width / 2,
-			-this.height / 2,
-			this.width,
-			this.height
+			-this.clipWidth / 2,
+			-this.clipHeight / 2,
+			this.clipWidth,
+			this.clipHeight
 		);
 		
 		bitmap = c.getImageData(0, 0, canvas.width, canvas.height);
@@ -416,15 +416,15 @@ new Class('View.Collidable', [View.Sprite], {
 			c.drawImage(
 				this.mask,
 
-				(this.width + this.bm.spacing) * this.imageNumber,
+				(this.clipWidth + this.bm.spacing) * this.imageNumber,
 				0,
-				this.width,
-				this.height,
+				this.clipWidth,
+				this.clipHeight,
 
 				- this.offset.x,
 				- this.offset.y,
-				this.width,
-				this.height);
+				this.clipWidth,
+				this.clipHeight);
 		} catch (e) {
 			console.log(this.source);
 			console.log(this.bm);

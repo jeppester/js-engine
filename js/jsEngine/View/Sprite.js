@@ -49,15 +49,16 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 
 		engine.registerObject(this);
 
+		// Animation options
 		this.imageNumber = 0;
 		this.imageLength = 1;
 		this.animationSpeed = 30;
 		this.animationLastSwitch = engine.gameTime;
 		this.animationLoops = true;
-		offset = OFFSET_MIDDLE_CENTER;
+		this.clipWidth;
+		this.clipHeight;
 
-		// Draw options
-		this.composite = 'source-over';	
+		offset = OFFSET_MIDDLE_CENTER;
 
 		// If an offset static var is used, remove it for now, and convert it later
 		if (additionalProperties && additionalProperties.offset) {
@@ -69,6 +70,26 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 				offset = undefined;
 			}
 		}
+
+		// Define pseudo properties
+		Object.defineProperty(this, 'width', {
+			get: function () {
+				return this.clipWidth * this.size * this.widthModifier;
+			},
+			set: function (value) {
+				this.widthModifier = value / (this.clipWidth * this.size);
+				return value;
+			}
+		});
+		Object.defineProperty(this, 'height', {
+			get: function () {
+				return this.clipHeight * this.size * this.heightModifier;
+			},
+			set: function (value) {
+				this.heightModifier = value / (this.clipHeight * this.size);
+				return value
+			}
+		});
 
 		// Load additional properties
 		this.importProperties(additionalProperties);
@@ -84,10 +105,10 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 				this.offset.x = 0;
 			}
 			else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
-				this.offset.x = this.width / 2;
+				this.offset.x = this.bm.width / this.imageLength / 2;
 			}
 			else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.x = this.width;
+				this.offset.x = this.bm.width / this.imageLength;
 			}
 
 			// calculate vertical offset
@@ -95,10 +116,10 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 				this.offset.y = 0;
 			}
 			else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.height / 2;
+				this.offset.y = this.bm.height / 2;
 			}
 			else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.height;
+				this.offset.y = this.bm.height;
 			}
 		}
 
@@ -150,8 +171,8 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		this.bm = loader.getImage(this.source, theme);
 		this.imageLength = this.bm.imageLength;
 		this.imageNumber = Math.min(this.imageLength - 1, this.imageNumber);
-		this.width = Math.floor(this.bm.width / this.imageLength);
-		this.height = this.bm.height;
+		this.clipWidth = Math.floor(this.bm.width / this.imageLength);
+		this.clipHeight = this.bm.height;
 
 		return this.bm;
 	},
@@ -170,24 +191,6 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 	},
 
 	/**
-	 * Calculates and sets the width modifier to fit a targeted width.
-	 * 
-	 * @param {number} width The targeted width in pixels
-	 */
-	setWidth: function (width) {
-		this.widthModifier = width / (this.width * this.size);
-	},
-
-	/**
-	 * Calculates and sets the height modifier to fit a targeted height.
-	 * 
-	 * @param {number} height The targeted height in pixels
-	 */
-	setHeight: function (height) {
-		this.heightModifier = height / (this.height * this.size);
-	},
-
-	/**
 	 * Draws the object to the canvas.
 	 * 
 	 * @private
@@ -197,6 +200,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 	drawCanvas: function (c, cameraOffset) {
 		// Round offset if necessary
 		var offX, offY;
+
 		if (engine.avoidSubPixelRendering) {
             offX = Math.round(this.offset.x);
             offY = Math.round(this.offset.y);
@@ -223,7 +227,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		}
 
         // Draw bm
-        c.drawImage(this.bm, (this.width + this.bm.spacing) * this.imageNumber, 0, this.width, this.height, - offX, - offY, this.width, this.height);
+        c.drawImage(this.bm, (this.clipWidth + this.bm.spacing) * this.imageNumber, 0, this.clipWidth, this.clipHeight, - offX, - offY, this.clipWidth, this.clipHeight);
 	},
 
 	/**
@@ -235,7 +239,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 	getRedrawRegion: function () {
 		var box, parents, parent, i;
 
-		box = new Math.Rectangle(-this.offset.x, -this.offset.y, this.width, this.height).getPolygon();	
+		box = new Math.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight).getPolygon();	
 
 		parents = this.getParents();
 		parents.unshift(this);

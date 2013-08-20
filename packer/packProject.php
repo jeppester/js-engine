@@ -72,7 +72,7 @@ else {
 }
 
 /* SEARCH GAME FILE FOR ENGINE DIR, ENGINE FILE AND GAME CLASS FILE */
-preg_match('/["|\']([^"|\']*)(Engine(\.packed)?\.js)["|\']/', $gameFile, $m);
+preg_match('/["\']([^"\']*)((autoload|jsEngine\.min)\.js)["\']/', $gameFile, $m);
 $options['engineDir'] = $m[1];
 $options['engineFile'] = $m[2];
 
@@ -104,18 +104,22 @@ else {
 	array_push($files, 
 		$e . 'Extension/Array.js',
 		$e . 'Extension/Object.js',
-		$e . 'Globals.js',
+		
 		$e . 'Polyfill/requestAnimationFrame.js',
+
+        $e . 'Engine/Class.js',
+		$e . 'Engine/Globals.js',
+		$e . 'Engine/Engine.js',
         $e . 'Engine/Loader.js',
 
-		$e . 'Engine.js',
-
         $e . 'Lib/Animatable.js',
+
         $e . 'Math/Vector.js',
         $e . 'Math/Line.js',
         $e . 'Math/Circle.js',
         $e . 'Math/Rectangle.js',
         $e . 'Math/Polygon.js',
+
         $e . 'View/Child.js',
         $e . 'View/Line.js',
         $e . 'View/Circle.js',
@@ -126,11 +130,14 @@ else {
         $e . 'View/Collidable.js',
         $e . 'View/TextBlock.js',
         $e . 'View/GameObject.js',
+
         $e . 'Engine/Room.js',
         $e . 'Engine/Camera.js',
         $e . 'Engine/CustomLoop.js',
+
         $e . 'Input/Keyboard.js',
         $e . 'Input/Pointer.js',
+
         $e . 'Sound/Effect.js',
         $e . 'Sound/Music.js'
 	);
