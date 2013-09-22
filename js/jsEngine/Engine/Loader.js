@@ -77,7 +77,7 @@ new Class('Engine.Loader', {
 	 * @return {HTMLImageElement} The image element corresponding to the resource string and theme
 	 */
 	getImage: function (resource, themeName) {
-		if (resource === undefined) {throw new Error('Missing argument: resource'); }
+		if (resource === undefined) {throw new Error('Missing argument: resource'); } //dev
 		themeName = themeName !== undefined ? themeName : engine.defaultTheme;
 		return this.getResource(resource, 'images', themeName);
 	},
@@ -90,7 +90,7 @@ new Class('Engine.Loader', {
 	 * @return {Sound.Effect} A Sound object corresponding to the resource string and theme
 	 */
 	getSound: function (resource, themeName) {
-		if (resource === undefined) {throw new Error('Missing argument: resource'); }
+		if (resource === undefined) {throw new Error('Missing argument: resource'); } //dev
 		themeName = themeName !== undefined ? themeName : engine.defaultTheme;
 		return this.getResource(resource, 'sfx', themeName);
 	},
@@ -103,7 +103,7 @@ new Class('Engine.Loader', {
 	 * @return {Sound.Music} A Music object corresponding to the resource string and theme
 	 */
 	getMusic: function (resource, themeName) {
-		if (resource === undefined) {throw new Error('Missing argument: resource'); }
+		if (resource === undefined) {throw new Error('Missing argument: resource'); } //dev
 		themeName = themeName !== undefined ? themeName : engine.defaultTheme;
 		return this.getResource(resource, 'music', themeName);
 	},
@@ -117,7 +117,7 @@ new Class('Engine.Loader', {
 	 * @return {HTMLCanvasElement} A generated mask (canvas element) for the image element corresponding to the resource string and theme
 	 */
 	getMask: function (resource, themeName) {
-		if (resource === undefined) {throw new Error('Missing argument: resource'); }
+		if (resource === undefined) {throw new Error('Missing argument: resource'); } //dev
 		themeName = themeName !== undefined ? themeName : engine.defaultTheme;
 
 		var mask;
@@ -146,9 +146,9 @@ new Class('Engine.Loader', {
 	 * @return {HTMLImageElement|Sound|Music} The resource corresponding to the provided resource string, resource type and theme name
 	 */
 	getResource: function (resource, typeString, themeName) {
-		if (resource === undefined) {throw new Error('Missing argument: resource'); }
-		if (typeString === undefined) {throw new Error('Missing argument: typeString'); }
-		if (themeName === undefined) {throw new Error('Missing argument: themeName'); }
+		if (resource === undefined) {throw new Error('Missing argument: resource'); } //dev
+		if (typeString === undefined) {throw new Error('Missing argument: typeString'); } //dev
+		if (themeName === undefined) {throw new Error('Missing argument: themeName'); } //dev
 		var res, inh, i;
 
 		if (resource.indexOf('/') !== -1) {
@@ -273,7 +273,7 @@ new Class('Engine.Loader', {
 	 * @return {boolean} True, when the classes has been loaded without any errors
 	 */
 	loadClasses: function (paths) {
-		if (paths === undefined) {throw new Error('Missing argument: paths'); }
+		if (paths === undefined) {throw new Error('Missing argument: paths'); } //dev
 		var objectName, i;
 
 		for (i in paths) {
@@ -310,7 +310,7 @@ new Class('Engine.Loader', {
 	 * @param {function} callback A callback function to run when all the themes has been loaded
 	 */
 	loadThemes: function (themeNames, callback) {
-		if (themeNames === undefined) {throw new Error('Missing argument: themeNames'); }
+		if (themeNames === undefined) {throw new Error('Missing argument: themeNames'); } //dev
 		if (callback !== undefined) {this.onthemesloaded = callback; }
 
 		var name, req, i, total, theme, codeString;
@@ -376,9 +376,9 @@ new Class('Engine.Loader', {
 	 * @param {string} typeString A string defining the resource type. Supported types are: "images", "sfx" and "music"
 	 */
 	loadResources: function (theme, object, typeString) {
-		if (theme === undefined) {throw new Error('Missing argument: theme'); }
-		if (object === undefined) {throw new Error('Missing argument: object'); }
-		if (typeString === undefined) {throw new Error('Missing argument: typeString'); }
+		if (theme === undefined) {throw new Error('Missing argument: theme'); } //dev
+		if (object === undefined) {throw new Error('Missing argument: object'); } //dev
+		if (typeString === undefined) {throw new Error('Missing argument: typeString'); } //dev
 
 		var onload, res, path, i, format, images;
 
@@ -449,7 +449,7 @@ new Class('Engine.Loader', {
 						}
 					}
 					if (!format) {
-						console.log('Sound was not available in a supported format: ' + theme.name + "/sfx/" + path.replace(/\./g, '/'));
+						throw new Error('Sound was not available in a supported format: ' + theme.name + "/sfx/" + path.replace(/\./g, '/')); //dev
 						continue;
 					}
 					res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, '/') + '.' + format);
@@ -479,8 +479,8 @@ new Class('Engine.Loader', {
      * @param {string} [options = ""] A string defining the resource options (same as the string used for defining animations in a theme file)
      */
     loadExternalResource: function (resourceString, path, onLoaded, typeString, options) {
-        if (resourceString === undefined) {throw new Error('Missing argument: resourceString'); }
-        if (path === undefined) {throw new Error('Missing argument: path'); }
+        if (resourceString === undefined) {throw new Error('Missing argument: resourceString'); } //dev
+        if (path === undefined) {throw new Error('Missing argument: path'); } //dev
         typeString = typeString || "images";
         onLoaded = onLoaded || function () {};
         options = options || "";
@@ -516,7 +516,7 @@ new Class('Engine.Loader', {
                 format = path.match(/[^\.]*$/)[0];
 
                 if (engine.host.supportedAudio.indexOf(format) === -1) {
-                    console.log('Sound format is not supported:', format);
+                    throw new Error('Sound format is not supported:', format); //dev
                     return;
                 }
                 res = new Audio(path);
@@ -533,7 +533,7 @@ new Class('Engine.Loader', {
                 format = path.match(/[^\.]*$/)[0];
 
                 if (engine.host.supportedAudio.indexOf(format) === -1) {
-                    console.log('Sound format is not supported:', format);
+                    throw new Error('Sound format is not supported:', format); //dev
                     return;
                 }
                 res = new Audio(path);
@@ -560,7 +560,7 @@ new Class('Engine.Loader', {
 	 * @return {HTMLCanvasElement} A canvas element with the generated mask
 	 */
 	generateMask: function (resourceString, alphaLimit) {
-		if (resourceString === undefined) {throw new Error('Missing argument: resourceString'); }
+		if (resourceString === undefined) {throw new Error('Missing argument: resourceString'); } //dev
 		alphaLimit = alphaLimit !== undefined ? alphaLimit : 255;
 
 		var image, canvas, ctx, bitmap, data, length, pixel, top, bottom, left, right, x, y;
@@ -573,9 +573,9 @@ new Class('Engine.Loader', {
 		canvas.imageLength = image.imageLength;
 		ctx = canvas.getContext('2d');
 
-		if (image === false) {
-			throw new Error('Trying to create mask for non-existing resource: ' + resourceString);
-		}
+		if (image === false) { //dev
+			throw new Error('Trying to create mask for non-existing resource: ' + resourceString); //dev
+		} //dev
 		ctx.drawImage(
 			image,
 			0,

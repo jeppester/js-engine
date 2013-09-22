@@ -28,8 +28,8 @@ new Class('Math.Line',[Lib.Animatable], {
 	 * @return {Math.Line} The resulting Line object (itself)
 	 */
 	setFromVectors: function (startVector, endVector) {
-		if (!startVector.implements(Math.Vector)) {throw new Error('Argument startVector should be of type: Vector'); }
-		if (!endVector.implements(Math.Vector)) {throw new Error('Argument endVector should be of type: Vector'); }
+		if (!startVector.implements(Math.Vector)) {throw new Error('Argument startVector should be of type: Vector'); } //dev
+		if (!endVector.implements(Math.Vector)) {throw new Error('Argument endVector should be of type: Vector'); } //dev
 
 		this.a = startVector;
 		this.b = endVector;
@@ -88,7 +88,7 @@ new Class('Math.Line',[Lib.Animatable], {
 	 * @return {Math.Line} The resulting Line object (itself)
 	 */
 	rotate: function (direction) {
-		if (typeof direction !== 'number') {throw new Error('Argument direction should be of type: Number'); }
+		if (typeof direction !== 'number') {throw new Error('Argument direction should be of type: Number'); } //dev
 
 		this.a.rotate(direction);
 		this.b.rotate(direction);
@@ -192,9 +192,9 @@ new Class('Math.Line',[Lib.Animatable], {
 		else if (object.implements(Math.Polygon)) {
 			return object.intersects(this);
 		}
-		else {
-			throw new Error('Argument object should be of type: Line, Rectangle, Circle or Polygon');
-		}
+		else { //dev
+			throw new Error('Argument object should be of type: Line, Rectangle, Circle or Polygon'); //dev
+		} //dev
 	},
 
 	/**
@@ -250,9 +250,9 @@ new Class('Math.Line',[Lib.Animatable], {
 		else if (object.implements(Circle)) {
 			return object.getDistance(this);
 		}
-		else {
-			throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
-		}
+		else { //dev
+			throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon'); //dev
+		} //dev
 	},
 
     /**

@@ -42,7 +42,7 @@ new Class('View.Container', [View.Child], {
 		for (i = 0; i < arguments.length; i ++) {
 			child = arguments[i];
 
-			if (!child.implements(View.Child)) {throw new Error('Argument child has to be of type: View.Child'); }
+			if (!child.implements(View.Child)) {throw new Error('Argument child has to be of type: View.Child'); } //dev
 
 			// If the child already has a parent, remove the child from that parent
 			if (child.parent) {
@@ -52,7 +52,7 @@ new Class('View.Container', [View.Child], {
 			// Add the child
 			this.children.push(child);
 			child.parent = this;
-			child.onAfterChange();
+			engine.enableRedrawRegions && child.onAfterChange();
 
 			// Refresh the child's sprite (it might have changed)
 			if (child.refreshSource) {
@@ -65,13 +65,13 @@ new Class('View.Container', [View.Child], {
 	/**
 	 * Adds a child to a View object, below an already added child. This means that the inserted child (or children) will be drawn below the child which they are inserted below.
 	 * 
-	 * @param {View.Child|View.Child[]} insertChildren Object or array of objects to insert before an existing child
+	 * @param {View.Child|View.Child[]} insertChildren Child or array of children to insert before an existing child
 	 * @param {View.Child} child Current child to insert other children before
 	 * @return {View.Child[]} Array of the inserted children
 	 */
 	insertBelow: function (insertChildren, child) {
-		if (insertChildren === undefined) {throw new Error('Missing argument: insertChildren'); }
-		if (child === undefined) {throw new Error('Missing argument: child'); }
+		if (insertChildren === undefined) {throw new Error('Missing argument: insertChildren'); } //dev
+		if (child === undefined) {throw new Error('Missing argument: child'); } //dev
 		var arr, i;
 
 		if (!Array.prototype.isPrototypeOf(insertChildren)) {
@@ -87,10 +87,10 @@ new Class('View.Container', [View.Child], {
 		for (i = 0; i < insertChildren.length; i ++) {
 			child = insertChildren[i];
 
-			if (!child.implements(Child)) {throw new Error('Argument child has to be of type: Child'); }
+			if (!child.implements(View.Child)) {throw new Error('Argument child has to be of type: Child'); } //dev
 
 			child.parent = this;
-			child.onAfterChange();
+			engine.enableRedrawRegions && child.onAfterChange();
 			
 			if (child.refreshSource) {
 				child.refreshSource();
@@ -126,7 +126,7 @@ new Class('View.Container', [View.Child], {
 	 */
 	setTheme: function (themeName, recursive) {
 		if (themeName) {
-			if (loader.themes[themeName] === undefined) {throw new Error('Trying to set nonexistent theme: ' + themeName); }
+			if (loader.themes[themeName] === undefined) {throw new Error('Trying to set nonexistent theme: ' + themeName); } //dev
 		}
 		else {
 			themeName = undefined;
@@ -161,7 +161,7 @@ new Class('View.Container', [View.Child], {
 	 * @param {function} func Function to execute
 	 */
 	applyToThisAndChildren: function (func) {
-		if (func === undefined) {throw new Error('Missing argument: function'); }
+		if (func === undefined) {throw new Error('Missing argument: function'); } //dev
 		var i;
 
 		func.call(this);
@@ -258,7 +258,7 @@ new Class('View.Container', [View.Child], {
 	 * @return {View.Child[]} An array of the children which was removed. If an object, which was supplied as argument, was not a child of the View, it will not appear in the returned array
 	 */
 	removeChildren: function (child1, child2) {
-		if (arguments.length === 0) {throw new Error('This function needs at least one argument'); }
+		if (arguments.length === 0) {throw new Error('This function needs at least one argument'); } //dev
 		var i, childId, removed;
 
 		removed = [];
@@ -290,7 +290,7 @@ new Class('View.Container', [View.Child], {
 		rmChild.forEach(function () {
 			this.parent = undefined;
 			if (purge) {
-				this.remove(purge);
+				engine.purge(this);
 			}
 		});
 	},
@@ -303,6 +303,15 @@ new Class('View.Container', [View.Child], {
 	 * @param {boolean} forceRedraw Whether or not to force a redraw even though draw caching is enabled (this option is actually used when caching the view)
 	 */
 	draw: function (c, area) {
+		if (engine.enableRedrawRegions) {
+			this.drawRedrawRegions(c, area);
+		}
+		else {
+			this.drawWholeCanvas(c);
+		}
+	},
+
+	drawRedrawRegions: function (c, area) {
 		var i, len, child;
 
 		if (!this.isVisible()) {
@@ -316,18 +325,16 @@ new Class('View.Container', [View.Child], {
 				this.currentRedrawRegion = this.getCombinedRedrawRegion();
 			}
 			if (this.currentRedrawRegion.getOverlap(area)) {
-				if (engine.debug) {
-					engine.drawCalls ++;
-				}
+				engine.drawCalls ++; //dev
 
 				this.drawCanvas(c);
 
-				if (engine.drawBoundingBoxes && this.drawBoundingBox) {
-					this.drawBoundingBox(c);
-				}
-				if (engine.drawMasks && this.drawMask) {
-					this.drawMask(c);
-				}
+				if (engine.drawBoundingBoxes && this.drawBoundingBox) { //dev
+					this.drawBoundingBox(c); //dev
+				} //dev
+				if (engine.drawMasks && this.drawMask) { //dev
+					this.drawMask(c); //dev
+				} //dev
 			}
 		}
 
@@ -340,9 +347,50 @@ new Class('View.Container', [View.Child], {
 				child.draw(c, area);
 			}
 			else if (child.isVisible() && child.currentRedrawRegion.getOverlap(area)) {
-				if (engine.debug) {
-					engine.drawCalls ++;
-				}
+				engine.drawCalls ++; //dev
+				
+				child.transformCanvasContext(c);
+				child.drawCanvas(c);
+				child.restoreCanvasContext(c);
+			}
+		}
+		
+		this.restoreCanvasContext(c);
+	},
+
+	drawWholeCanvas: function (c) {
+		var i, len, child;
+
+		if (!this.isVisible()) {
+			return;
+		}
+
+		this.transformCanvasContext(c);
+
+		if (this.drawCanvas) {
+			engine.drawCalls ++; //dev
+
+			this.drawCanvas(c);
+
+			if (engine.drawBoundingBoxes && this.drawBoundingBox) { //dev
+				this.drawBoundingBox(c); //dev
+			} //dev
+			if (engine.drawMasks && this.drawMask) { //dev
+				this.drawMask(c); //dev
+			} //dev
+		}
+
+		// Draw children
+		len = this.children.length;
+
+		for (i = 0; i < len; i ++) {
+			child = this.children[i];
+			if (child.draw) {
+				child.draw(c);
+			}
+			else if (child.isVisible()) {
+				engine.drawCalls ++; //dev
+				
 				child.transformCanvasContext(c);
 				child.drawCanvas(c);
 				child.restoreCanvasContext(c);

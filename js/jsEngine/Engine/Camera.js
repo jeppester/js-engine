@@ -15,8 +15,8 @@ new Class('Engine.Camera', {
      * @param {Math.Rectangle} projectionRegion A rectangle which defines the region on the main canvas where the captured region should be drawn
      */
     Camera: function (captureRegion, projectionRegion) {
-        if (!captureRegion.implements(Math.Rectangle)) {throw new Error('Argument captureRegion should be of type: Rectangle'); }
-		if (!projectionRegion.implements(Math.Rectangle)) {throw new Error('Argument projectionRegion should be of type: Rectangle'); }
+        if (!captureRegion.implements(Math.Rectangle)) {throw new Error('Argument captureRegion should be of type: Rectangle'); } //dev
+		if (!projectionRegion.implements(Math.Rectangle)) {throw new Error('Argument projectionRegion should be of type: Rectangle'); } //dev
 
 		this.captureRegion = captureRegion;
 		this.projectionRegion = projectionRegion;
@@ -58,6 +58,33 @@ new Class('Engine.Camera', {
 	 * @private
 	 */
 	capture: function () {
+		if (engine.enableRedrawRegions) {
+			this.captureRedrawRegions();
+		}
+		else {
+			this.captureWholeCanvas();
+		}
+	},
+
+	captureWholeCanvas: function () {
+		var region; 
+
+		this.captureRegion.x = Math.round(this.captureRegion.x);
+		this.captureRegion.y = Math.round(this.captureRegion.y);
+		
+		region = this.captureRegion;
+
+		this.ctx.save();
+		this.ctx.translate(-region.x, -region.y);
+
+		engine.masterRoom.draw(this.ctx, region);
+		this.room.draw(this.ctx, region);
+
+		//this.ctx.translate(region.x, region.y);
+		this.ctx.restore();
+	},
+
+	captureRedrawRegions: function () {
 		var x, y, i, captureRegion, regions, object, region, ctx, overlap;
 
 		this.captureRegion.x = Math.round(this.captureRegion.x);
@@ -100,14 +127,12 @@ new Class('Engine.Camera', {
 			regions = [this.captureRegion.copy()];
 		}
 
-		if (engine.debug) {
-            engine.redrawRegions = regions;
-            engine.redrawnPixels = 0;
-
-            for (i = 0; i < regions.length; i ++) {
-            	engine.redrawnPixels += regions[i].getArea();
-            }
-        }
+		// Do debug calculations
+        engine.redrawRegions = regions; //dev
+        engine.redrawnPixels = 0; //dev
+        for (i = 0; i < regions.length; i ++) { //dev
+        	engine.redrawnPixels += regions[i].getArea(); //dev
+        } //dev
 
 		// Draw each redraw region on separate canvases and draw the canvases on the camera's canvas
 		for (i = 0; i < regions.length; i++) {
@@ -120,7 +145,6 @@ new Class('Engine.Camera', {
 			ctx.translate(-region.x, -region.y);
 			engine.masterRoom.draw(ctx, region);
 			this.room.draw(ctx, region);
-
 
 			this.ctx.drawImage(region.canvas, region.x - this.captureRegion.x, region.y - this.captureRegion.y);
 		}
@@ -137,9 +161,7 @@ new Class('Engine.Camera', {
 		// Camera on canvas
 		c.save();
 
-		if (engine.debug) {
-			engine.drawCalls ++;
-		}
+		engine.drawCalls ++; //dev
 
 		c.drawImage(this.canvas, this.projectionRegion.x, this.projectionRegion.y, this.projectionRegion.width, this.projectionRegion.height);
 		c.restore();

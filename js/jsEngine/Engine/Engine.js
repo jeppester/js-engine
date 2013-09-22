@@ -1,6 +1,6 @@
 /** For making the engine var unreachable **/
-/*(function () {
-var engine, loader, pointer, keyboard;/**/
+(function () {
+/*var main;/**/
 
 new Class('Engine', {
 	/**
@@ -33,7 +33,6 @@ new Class('Engine', {
      * @property {int} defaultCollisionResolution The collision resolution set for all created collidable objects
      * @property {boolean} soundsMuted Whether or not all sound effects are currently muted
      * @property {boolean} musicMuted Whether or not all music is currently muted
-     * @property {boolean} debug Whether or not debug information is collected (fps, draw times)
      *
 	 * @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
 	 *                 The default options are:
@@ -59,7 +58,7 @@ new Class('Engine', {
 	 * 	                "pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
 	 * 	                "soundsMuted": false, // If all sound effects should be initially muted
 	 * 	                "themesPath": "themes", // The path to the themes-directory
-	 * 	                "debug": false, // Whether or not debug information should be collected (fps, draw times)
+	 * 	                "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 	 *                 }</code>
 	 */
 	Engine: function (options) {
@@ -142,14 +141,14 @@ new Class('Engine', {
 		this.disableTouchScroll = true;
 		this.cameras = [];
 		this.defaultCollisionResolution = 6;
-        this.debug = false;
         this.redrawObjects = [];
+        this.enableRedrawRegions = false;
 
 		this.soundsMuted = false;
 		this.musicMuted = false;
 
 		// Copy options to engine (except those which are only used for engine initialization)
-		copyOpt = ['backgroundColor', 'debug', 'disableTouchScroll', 'defaultCollisionResolution', 'focusOnLoad', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'pauseOnBlur', 'drawBoundingBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+		copyOpt = ['backgroundColor', 'enableRedrawRegions', 'disableTouchScroll', 'defaultCollisionResolution', 'focusOnLoad', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'pauseOnBlur', 'drawBoundingBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 		for (i = 0; i < copyOpt.length; i ++) {
 			opt = copyOpt[i];
 			if (this.options[opt] !== undefined) {
@@ -297,7 +296,7 @@ new Class('Engine', {
 			this.onload();
 		}
 
-		console.log('jsEngine started');
+		console.log('jsEngine started'); //dev
 	},
 
 	/**
@@ -371,7 +370,7 @@ new Class('Engine', {
 	 * @return {number} The resulting value of the conversion
 	 */
 	convertSpeed: function (speed, from, to) {
-		if (speed === undefined) {throw new Error('Missing argument: speed'); }
+		if (speed === undefined) {throw new Error('Missing argument: speed'); } //dev
 		if (speed.implements(Math.Vector)) {
 			return new Math.Vector(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
 		}
@@ -406,17 +405,17 @@ new Class('Engine', {
 	 * @param {Room|string} room A pointer to the desired room, or a string representing the name of the room
 	 */
 	goToRoom: function (room) {
-		if (room === undefined) {throw new Error ('Missing argument: room'); }
+		if (room === undefined) {throw new Error ('Missing argument: room'); } //dev
 
 		// If a string has been specified, find the room by name
 		if (typeof room === "string") {
 			room = this.roomList.getElementByPropertyValue('name', room);
-			if (!room) {throw new Error('Could not find a room with the specified name'); }
+			if (!room) {throw new Error('Could not find a room with the specified name'); } //dev
 		}
 		// Else, check if the room exists on the room list, and if not, throw an error
 		else {
 			if (this.roomList.indexOf(room) === -1) {
-				throw new Error('Room is not on room list, has it been removed?');
+				throw new Error('Room is not on room list, has it been removed?'); //dev
 			}
 		}
 
@@ -432,10 +431,10 @@ new Class('Engine', {
 	 * @param {Room} room The room which should be added
 	 */
 	addRoom: function (room) {
-		if (room === undefined) {throw new Error ('Missing argument: room'); }
-		if (this.roomList.indexOf(room) !== -1) {
-			throw new Error('Room is already on room list, rooms are automatically added upon instantiation');
-		}
+		if (room === undefined) {throw new Error ('Missing argument: room'); } //dev
+		if (this.roomList.indexOf(room) !== -1) { //dev
+			throw new Error('Room is already on room list, rooms are automatically added upon instantiation'); //dev
+		} //dev
 
 		this.roomList.push(room);
 	},
@@ -446,27 +445,27 @@ new Class('Engine', {
 	 * @param {Room|string} room A pointer to the room, or a string representing the name of the room, which should be removed
 	 */
 	removeRoom: function(room) {
-		if (room === undefined) {throw new Error ('Missing argument: room'); }
+		if (room === undefined) {throw new Error ('Missing argument: room'); } //dev
 		var index;
 
 		// If a string has been specified, find the room by name
 		if (typeof room === "string") {
 			room = this.roomList.getElementByPropertyValue('name', room);
-			if (!room) {throw new Error('Could not find a room with the specified name'); }
+			if (!room) {throw new Error('Could not find a room with the specified name'); } //dev
 		}
 		// Else, check if the room exists on the room list, and if not, throw an error
 		index = this.roomList.indexOf(room);
 
 		if (index === -1) {
-			throw new Error('Room is not on room list, has it been removed?');
+			throw new Error('Room is not on room list, has it been removed?'); //dev
 		}
 
 		// Make sure we are not removing the current room, or the master room
 		if (room === this.masterRoom) {
-			throw new Error('Cannot remove master room');
+			throw new Error('Cannot remove master room'); //dev
 		}
 		else if (room === this.currentRoom) {
-			throw new Error('Cannot remove current room, remember to leave the room first, by entering another room (use engine.goToRoom)');
+			throw new Error('Cannot remove current room, remember to leave the room first, by entering another room (use engine.goToRoom)'); //dev
 		}
 
 		this.roomList.splice(i, 1);
@@ -515,8 +514,8 @@ new Class('Engine', {
 	 * @param {boolean} enforce Whether or not the enforce the theme on objects for which another theme has already been set
 	 */
 	setDefaultTheme: function (themeName, enforce) {
-		if (themeName === undefined) {throw new Error('Missing argument: themeName'); }
-		if (loader.themes[themeName] === undefined) {throw new Error('Trying to set nonexistent theme: ' + themeName); }
+		if (themeName === undefined) {throw new Error('Missing argument: themeName'); } //dev
+		if (loader.themes[themeName] === undefined) {throw new Error('Trying to set nonexistent theme: ' + themeName); } //dev
 
 		enforce = enforce !== undefined ? enforce : false;
 
@@ -571,29 +570,24 @@ new Class('Engine', {
 		this.currentRoom.update();
 
 		// Draw game objects
-        if (!this.debug) {
-            this.redraw();
-        }
-        else {
-            this.drawCalls = 0;
-            drawTime = new Date().getTime();
-            this.redraw();
-            drawTime = new Date().getTime() - drawTime;
+        this.drawCalls = 0; //dev
+        drawTime = new Date().getTime(); //dev
+        this.redraw();
+        drawTime = new Date().getTime() - drawTime; //dev
 
-            // Count frames per second and calculate mean redraw time
-            if (this.fpsMsCounter < 1000) {
-                this.fpsCounter ++;
-                this.drawTimeCounter += drawTime;
-                this.fpsMsCounter += this.timeIncrease;
-            }
-            else {
-                this.fps = this.fpsCounter;
-                this.drawTime = this.drawTimeCounter / this.fpsCounter;
-                this.fpsCounter = 0;
-                this.drawTimeCounter = 0;
-                this.fpsMsCounter = 0;
-            }
-        }
+        // Count frames per second and calculate mean redraw time
+        if (this.fpsMsCounter < 1000) { //dev
+            this.fpsCounter ++; //dev
+            this.drawTimeCounter += drawTime; //dev
+            this.fpsMsCounter += this.timeIncrease; //dev
+        } //dev
+        else { //dev
+            this.fps = this.fpsCounter; //dev
+            this.drawTime = this.drawTimeCounter / this.fpsCounter; //dev
+            this.fpsCounter = 0; //dev
+            this.drawTimeCounter = 0; //dev
+            this.fpsMsCounter = 0; //dev
+        } //dev
 
 		// Schedule the loop to run again
 		requestAnimationFrame(function (time) {
@@ -637,14 +631,16 @@ new Class('Engine', {
 	 * @return {string} The registered id
 	 */
 	registerObject: function (obj, id) {
-		if (obj === undefined) {throw new Error('Missing argument: obj'); }
+		if (obj === undefined) {throw new Error('Missing argument: obj'); } //dev
 
 		if (id === undefined) {
 			this.currentId ++;
 			id = "obj" + (this.currentId - 1);
-		} else if (this.objectIndex[id] !== undefined) {
-			throw new Error('Object id already taken: ' + id);
 		}
+		else if (this.objectIndex[id] !== undefined) { //dev
+			throw new Error('Object id already taken: ' + id); //dev
+		} //dev
+
 		this.objectIndex[id] = obj;
 		obj.id = id;
 		return id;
@@ -668,13 +664,13 @@ new Class('Engine', {
 			req.open('GET', filePaths[i], false);
 			req.send();
 			codeString = req.responseText + "\n//@ sourceURL=/" + filePaths[i];
-			try {
+			try { //dev
 				eval(codeString);
-			}
-			catch (e) {
-				console.log('Failed loading "' + filePaths[i]);
-				throw new Error(e);
-			}
+			} //dev
+			catch (e) { //dev
+				console.log('Failed loading "' + filePaths[i]); //dev
+				throw new Error(e); //dev
+			} //dev
 		}
 
 		if (window.loadedFiles === undefined) {window.loadedFiles = []; }
@@ -691,8 +687,8 @@ new Class('Engine', {
 	 * @param {object} caller An object to call the callback function as.
 	 */
 	ajaxRequest: function (url, params, async, callback, caller) {
-		if (url === undefined) {throw new Error('Missing argument: url'); }
-		if (callback === undefined) {throw new Error('Missing argument: callback'); }
+		if (url === undefined) {throw new Error('Missing argument: url'); } //dev
+		if (callback === undefined) {throw new Error('Missing argument: callback'); } //dev
 
 		params = params !== undefined ? params : '';
 		async = async !== undefined ? async : true;
@@ -721,12 +717,12 @@ new Class('Engine', {
 		req.send(params);
 
 		if (!async) {
-			if (req.readyState === 4 && req.status === 200) {
+			if (req.readyState === 4 && req.status === 200) { //dev
 				callback.call(caller, req.responseText);
-			}
-			else {
-				throw new Error('XMLHttpRequest failed: ' + url);
-			}
+			} //dev
+			else { //dev
+				throw new Error('XMLHttpRequest failed: ' + url); //dev
+			} //dev
 		}
 	},
 
@@ -738,7 +734,7 @@ new Class('Engine', {
 	purge: function (obj) {
 		var len, name, loop, roomId, room;
 
-		if (obj === undefined) {throw new Error(obj); }
+		if (obj === undefined) {throw new Error('Cannot purge object: ' + obj); } //dev
 		if (typeof obj === "string") {
 			obj = this.objectIndex[obj];
 		}
@@ -789,9 +785,7 @@ new Class('Engine', {
             this.cameras[i].draw(c);
         }
 
-        if (this.debug) {
-        	this.lastRedrawObjects = this.redrawObjects;
-        }
+        this.lastRedrawObjects = this.redrawObjects; //dev
         this.redrawObjects = [];
     },
 
@@ -879,4 +873,4 @@ new Class('Engine', {
 	}
 });
 /** For making the engine var unreachable **/
-/*}());/**/
+}());/**/

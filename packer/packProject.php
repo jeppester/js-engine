@@ -4,6 +4,7 @@
 $options = array(
 	"nominify" => false,
 	"keepLogs" => false,
+	"keepDev" => false,
 	"engineOnly" => false,
 	"engineDir" => 'js/jsEngine/',
 	"engineFile" => 'Engine.js',
@@ -19,15 +20,16 @@ packProject.php [option 1] [option 2] [...]
 Minifies and packs a jsEngine project's code to one single file.
 
 Options:
- --nominify: Append all files to each other, but do not minify them
- --engine-only: Only pack the engine
- --keeplogs: Do not remove console.log()-calls
+ --no-minify:         Append all files to each other, but do not minify them
+ --engine-only:      Only pack the engine
+ --keep-logs:        Do not remove console.log()-calls
+ --keep-dev:         Do not remove lines ending with a \"//dev\"-comment
  --game-file [path]: Specify the game file (.html) to fetch js-file locations from
 ";
 	exit;
 };
 
-if (in_array("--nominify",$argv)) {
+if (in_array("--no-minify",$argv)) {
 	$options["nominify"] = true;
 };
 
@@ -35,8 +37,12 @@ if (in_array("--engine-only",$argv)) {
 	$options["engineOnly"] = true;
 };
 
-if (!in_array("--keeplogs",$argv)) {
+if (in_array("--keep-logs",$argv)) {
 	$options["keepLogs"] = true;
+};
+
+if (in_array("--keep-dev",$argv)) {
+	$options["keepDev"] = true;
 };
 
 // Output dir option
@@ -195,12 +201,24 @@ foreach ($files as $file) {
 	$filesContent .= file_get_contents($options['gameDir'] . $file) . "\n";
 }
 
-if (!$options['keepLogs']) {
-	echo "Keep logs specified, keeping logs\n";
+// Remove line with a "//dev"-comment after (unless other is specified)
+if ($options['keepDev'] === false) {
+	$filesContent = preg_replace('/[^\n]*\/\/dev\r?\n/', '', $filesContent);
+}
+else {
+	echo "Keep dev specified, Removing dev lines\n";
+}
 
+//echo $filesContent;
+//exit;
+
+if (!$options['keepLogs']) {
 	// remove all occurrences of "console.log([something])"
-	$filesContent=preg_replace ('/console\.log[^\n|;]*(\n|;)?/', '', $filesContent);
-};
+	$filesContent=preg_replace ('/console\.log[^\n|;]*(\n|;)?/', '$1', $filesContent);
+}
+else {
+	echo "Keep logs specified, keeping logs\n";
+}
 
 if ($options['nominify']) {
 	echo "Nominify option used, saving concatenated files\n";

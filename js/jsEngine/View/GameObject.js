@@ -31,9 +31,9 @@ new Class('View.GameObject', [View.Collidable], {
 	 *                                      </code>
 	 */
 	GameObject: function (source, x, y, direction, additionalProperties) {
-		if (source === undefined) {throw new Error('Missing argument: source'); }
-		if (x === undefined) {throw new Error('Missing argument: x'); }
-		if (y === undefined) {throw new Error('Missing argument: y'); }
+		if (source === undefined) {throw new Error('Missing argument: source'); } //dev
+		if (x === undefined) {throw new Error('Missing argument: x'); } //dev
+		if (y === undefined) {throw new Error('Missing argument: y'); } //dev
 
 		this.Collidable(source, x, y, direction, additionalProperties);
 		
@@ -54,7 +54,8 @@ new Class('View.GameObject', [View.Collidable], {
 	updatePosition: function () {
 		// If the object is "alive", add its speed vector to its position
 		if (this.alive) {
-			this.add(engine.convertSpeed(this.speed));
+			this.x += engine.convertSpeed(this.speed.x);
+			this.y += engine.convertSpeed(this.speed.y);
 		}
 	}
 });

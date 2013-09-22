@@ -44,9 +44,9 @@ new Class('Engine.CustomLoop', {
 	 * @param {function} func The function to run on each execution of the custom loop
 	 */
 	attachFunction: function (caller, func) {
-		if (caller === undefined) {throw new Error('Missing argument: caller'); }
-		if (func === undefined) {throw new Error('Missing argument: func'); }
-		if (typeof func !== "function") {throw new Error('Argument func must be of type function'); }
+		if (caller === undefined) {throw new Error('Missing argument: caller'); } //dev
+		if (func === undefined) {throw new Error('Missing argument: func'); } //dev
+		if (typeof func !== "function") {throw new Error('Argument func must be of type function'); } //dev
 
 		this.functionsQueue.push({
 			object: caller,
@@ -72,8 +72,8 @@ new Class('Engine.CustomLoop', {
 	 * @return {boolean} Whether or not the function was found and detached
 	 */
 	detachFunction: function (caller, func) {
-		if (caller === undefined) {throw new Error('Missing argument: caller'); }
-		if (func === undefined) {throw new Error('Missing argument: func'); }
+		if (caller === undefined) {throw new Error('Missing argument: caller'); } //dev
+		if (func === undefined) {throw new Error('Missing argument: func'); } //dev
 
 		var i, a;
 
@@ -106,7 +106,7 @@ new Class('Engine.CustomLoop', {
 	 * @return {function[]} An array of detached functions
 	 */
 	detachFunctionsByFunction: function (func) {
-		if (func === undefined) {throw new Error('Missing argument: func'); }
+		if (func === undefined) {throw new Error('Missing argument: func'); } //dev
 
 		var removeArray, i;
 
@@ -141,7 +141,7 @@ new Class('Engine.CustomLoop', {
 	 * @return {function[]} An array of detached functions
 	 */
 	detachFunctionsByCaller: function (caller) {
-		if (caller === undefined) {throw new Error('Missing argument: caller'); }
+		if (caller === undefined) {throw new Error('Missing argument: caller'); } //dev
 		
 		var removeArray, i;
 
@@ -179,9 +179,9 @@ new Class('Engine.CustomLoop', {
 	 * @param {number} delay The delay in ms
 	 */
 	schedule: function (caller, func, delay) {
-		if (caller === undefined) {throw new Error('Missing argument: caller'); }
-		if (func === undefined) {throw new Error('Missing argument: function'); }
-		if (delay === undefined) {throw new Error('Missing argument: delay'); }
+		if (caller === undefined) {throw new Error('Missing argument: caller'); } //dev
+		if (func === undefined) {throw new Error('Missing argument: function'); } //dev
+		if (delay === undefined) {throw new Error('Missing argument: delay'); } //dev
 
 		this.executionsQueue.push({
 			func: func,
@@ -208,8 +208,8 @@ new Class('Engine.CustomLoop', {
 	 * @return {boolean} Whether or not the function was found and unscheduled
 	 */
 	unschedule: function (caller, func) {
-		if (caller === undefined) {throw new Error('Missing argument: caller'); }
-		if (func === undefined) {throw new Error('Missing argument: function'); }
+		if (caller === undefined) {throw new Error('Missing argument: caller'); } //dev
+		if (func === undefined) {throw new Error('Missing argument: function'); } //dev
 
 		var i, exec;
 
@@ -243,7 +243,7 @@ new Class('Engine.CustomLoop', {
 	 * @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
 	 */
 	unscheduleByFunction: function (func) {
-		if (func === undefined) {throw new Error('Missing argument: func'); }
+		if (func === undefined) {throw new Error('Missing argument: func'); } //dev
 
 		var unscheduledArray, i, exec;
 
@@ -281,7 +281,7 @@ new Class('Engine.CustomLoop', {
 	 * @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
 	 */
 	unscheduleByCaller: function (caller) {
-		if (caller === undefined) {throw new Error('Missing argument: caller'); }
+		if (caller === undefined) {throw new Error('Missing argument: caller'); } //dev
 
 		var unscheduledArray, i, exec;
 
@@ -335,7 +335,7 @@ new Class('Engine.CustomLoop', {
 	 * @param {object} animation An animation object
 	 */
 	addAnimation: function (animation) {
-		if (animation === undefined) {throw new Error('Missing argument: animation'); }
+		if (animation === undefined) {throw new Error('Missing argument: animation'); } //dev
 		var anim, propList, currentAnimations, i, cur, propName;
 
 		anim = animation;
@@ -456,9 +456,9 @@ new Class('Engine.CustomLoop', {
 		for (i = 0; i < this.functions.length; i++) {
 			exec = this.functions[i];
 
-			if (!exec.activity) {
-				throw new Error('Trying to exec non-existent attached function');
-			}
+			if (!exec.activity) { //dev
+				throw new Error('Trying to exec non-existent attached function'); //dev
+			} //dev
 
 			exec.activity.call(exec.object);
 		}

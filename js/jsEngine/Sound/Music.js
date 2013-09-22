@@ -11,8 +11,8 @@ new Class('Sound.Music', {
 	 * @param {HTMLAudioElement} audioElement The Audio element to use as source for the music object
 	 */
 	Music: function (audioElement) {
-		if (audioElement === undefined) {throw new Error('Missing argument: audioElement'); }
-		if (audioElement.toString() !== "[object HTMLAudioElement]") {throw new Error('Argument audioElement has to be of type HTMLAudioElement'); }
+		if (audioElement === undefined) {throw new Error('Missing argument: audioElement'); } //dev
+		if (audioElement.toString() !== "[object HTMLAudioElement]") {throw new Error('Argument audioElement has to be of type HTMLAudioElement'); } //dev
 
 		this.source = audioElement;
 		this.paused = false;

@@ -40,8 +40,8 @@ new Class('Math.Vector', [Lib.Animatable], {
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
 	setFromDirection: function (direction, length) {
-		if (typeof direction !== 'number') {throw new Error('Argument direction should be of type: Number'); }
-		if (typeof length !== 'number') {throw new Error('Argument length should be of type: Number'); }
+		if (typeof direction !== 'number') {throw new Error('Argument direction should be of type: Number'); } //dev
+		if (typeof length !== 'number') {throw new Error('Argument length should be of type: Number'); } //dev
 
 		this.x = Math.cos(direction) * length;
 		this.y = Math.sin(direction) * length;
@@ -66,8 +66,8 @@ new Class('Math.Vector', [Lib.Animatable], {
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
 	move: function (x, y) {
-		if (typeof x !== 'number') {throw new Error('Argument x should be of type: Number'); }
-		if (typeof y !== 'number') {throw new Error('Argument y should be of type: Number'); }
+		if (typeof x !== 'number') {throw new Error('Argument x should be of type: Number'); } //dev
+		if (typeof y !== 'number') {throw new Error('Argument y should be of type: Number'); } //dev
 
 		this.x += x;
 		this.y += y;
@@ -82,7 +82,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
 	rotate: function (direction) {
-		if (typeof direction !== 'number') {throw new Error('Argument direction should be of type: Number'); }
+		if (typeof direction !== 'number') {throw new Error('Argument direction should be of type: Number'); } //dev
 
 		this.setFromDirection(this.getDirection() + direction, this.getLength());
 
@@ -97,7 +97,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
 	scale: function (scaleH, scaleV) {
-		if (typeof scaleH !== 'number') {throw new Error('Argument scaleH should be of type Number'); }
+		if (typeof scaleH !== 'number') {throw new Error('Argument scaleH should be of type Number'); } //dev
 		scaleV = scaleV !== undefined ? scaleV : scaleH;
 
 		this.x *= scaleH;
@@ -122,9 +122,9 @@ new Class('Math.Vector', [Lib.Animatable], {
 			this.x += vector;
 			this.y += vector;
 		}
-		else {
-			throw new Error('Argument vector should be of type Vector or Number');
-		}
+		else { //dev
+			throw new Error('Argument vector should be of type Vector or Number'); //dev
+		} //dev
 
 		return this;
 	},
@@ -144,9 +144,9 @@ new Class('Math.Vector', [Lib.Animatable], {
 			this.x -= vector;
 			this.y -= vector;
 		}
-		else {
-			throw new Error('Argument vector should be of type Vector or Number');
-		}
+		else { //dev
+			throw new Error('Argument vector should be of type Vector or Number'); //dev
+		} //dev
 
 		return this;
 	},
@@ -166,9 +166,9 @@ new Class('Math.Vector', [Lib.Animatable], {
 			this.x /= vector;
 			this.y /= vector;
 		}
-		else {
-			throw new Error('Argument vector should be of type Vector or Number');
-		}
+		else { //dev
+			throw new Error('Argument vector should be of type Vector or Number'); //dev
+		} //dev
 
 		return this;
 	},
@@ -180,7 +180,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
 	multiply: function (vector) {
-		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type Vector'); }
+		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type Vector'); } //dev
 
 		this.x *= vector.x;
 		this.y *= vector.y;
@@ -195,7 +195,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 	 * @return {number} The dot product
 	 */
 	getDot: function (vector) {
-		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type: Vector'); }
+		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type: Vector'); } //dev
 
 		return this.x * vector.x + this.y * vector.y;
 	},
@@ -207,7 +207,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 	 * @return {number} The cross product
 	 */
 	getCross: function (vector) {
-		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type: Vector'); }
+		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type: Vector'); } //dev
 
 		return this.x * vector.y - this.y * vector.x;
 	},
@@ -237,7 +237,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 	 * @return {number} The direction to the object
 	 */
 	getDirectionTo: function (point) {
-		if (!point.implements(Math.Vector)) {throw new Error('Only Vectors or objects inheriting Vector are supported'); }
+		if (!point.implements(Math.Vector)) {throw new Error('Only Vectors or objects inheriting Vector are supported'); } //dev
 
 		return point.copy().subtract(this).getDirection();
 	},
@@ -264,6 +264,6 @@ new Class('Math.Vector', [Lib.Animatable], {
 		if (object.implements(Math.Polygon)) {
 			return object.getDistance(this);
 		}
-		throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
+		throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon'); //dev
 	}
 });

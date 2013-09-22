@@ -26,6 +26,25 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
 	Rectangle: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
 		this.Child();
 
+        if (engine.enableRedrawRegions) {
+            this.RectangleInitWithRedrawRegions(x, y, width, height, fillStyle, strokeStyle, lineWidth);
+        }
+        else {
+            this.RectangleInitWithoutRedrawRegions(x, y, width, height, fillStyle, strokeStyle, lineWidth);
+        }
+    },
+    /** @scope View.Rectangle */
+
+    RectangleInitWithoutRedrawRegions: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
+        this.width = width || 0;
+        this.height = height || 0;
+        this.fillStyle = fillStyle || "#000";
+        this.strokeStyle = strokeStyle || "#000";
+        this.lineWidth = lineWidth || 1;
+        this.set(x, y, width, height);
+    },
+
+    RectangleInitWithRedrawRegions: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
         var hidden;
 
         hidden = {
@@ -84,9 +103,8 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
             }
         });
 
-		this.set(x, y, width, height);
+        this.set(x, y, width, height);
     },
-    /** @scope View.Rectangle */
 
     /**
      * Calculates the region which the object will fill out when redrawn.

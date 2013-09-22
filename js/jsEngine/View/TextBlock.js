@@ -10,7 +10,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
      * @property {string} font A css string representing the font of the text block
      * @property {number} width The width of the text block
      * @property {number} height The height of the text block
-     * @property {string} alignment The text alignment of the text block, possible values are: "left", "center", "right"
+     * @property {string} alignment The text alignment of the text block, possible values are: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT
      * @property {string} color A css string representing the text's color
      * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
      * @property {number} direction The direction of the sprite (in radians)
@@ -28,7 +28,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
      *                 {
 	 * 	                font: 'normal 14px Verdana',
 	 * 	                color: '#000',
-	 * 	                alignment: 'left',
+	 * 	                alignment: ALIGNMENT_LEFT,
 	 * 	                size: 1,
 	 * 	                opacity: 1,
 	 * 	                composite: 'source-over',
@@ -36,7 +36,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	 *                 }</code>
 	 */
 	TextBlock: function (string, x, y, width, additionalProperties) {
-		if (string === undefined) {throw new Error('Missing argument: string'); }
+		if (string === undefined) {throw new Error('Missing argument: string'); } //dev
 
 		var offset;
 
@@ -47,20 +47,74 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 
 		// Load default options
 		this.clipWidth = width || 200;
+		this.lines = [];
+		this.lineWidth = [];
+		this.bm = document.createElement('canvas');
+		this.bmCtx = this.bm.getContext('2d');
+		this.bm.width = this.clipWidth;
+		this.bm.height = 10;
 
-		// Load default options
-		//var fontHidden, alignmentHidden, offsetH
-		this.font = 'normal 14px Verdana';
-		this.alignment = 'left';
-		this.offset = new Math.Vector();
-		this.color = "#000000";
-		this.opacity = 1;
-		this.size = 1;
-		this.widthModifier = 1;
-		this.heightModifier = 1;
-		this.direction = 0;
-		this.composite = 'source-over';
-		offset = OFFSET_TOP_LEFT;
+		// Load default options and getters/setters
+		var hidden;
+		hidden = {
+			string: '',
+			font: 'normal 14px Verdana',
+			alignment: 'left',
+			color: "#000000",
+			lineHeight: 0,
+		};
+
+		Object.defineProperty(this, 'string', {
+			get: function () {return hidden.string; },
+			set: function (value) {
+				hidden.string = typeof value === 'string' ? value : value.toString();
+				this.stringToLines();
+				this.cacheRendering();
+				engine.enableRedrawRegions && this.onAfterChange();
+				return value;
+			}
+		});
+		Object.defineProperty(this, 'font', {
+			get: function () {return hidden.font; },
+			set: function (value) {
+				if (typeof value !== 'string') {throw new Error('font should be of type: string'); } //dev
+				hidden.font = value;
+				this.stringToLines();
+				this.cacheRendering();
+				engine.enableRedrawRegions && this.onAfterChange();
+				return value;
+			}
+		});
+		Object.defineProperty(this, 'alignment', {
+			get: function () {return hidden.alignment; },
+			set: function (value) {
+				if (['left', 'center', 'right'].indexOf(value) === -1) {throw new Error('alignment should be one of the following: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT'); } //dev
+				hidden.alignment = value;
+				this.cacheRendering();
+				engine.enableRedrawRegions && this.onAfterChange();
+				return value;
+			}
+		});
+		Object.defineProperty(this, 'color', {
+			get: function () {return hidden.color; },
+			set: function (value) {
+				if (!/#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})/.test(value)) {throw new Error('color should be a CSS color string'); } //dev
+				hidden.color = value;
+				this.cacheRendering();
+				engine.enableRedrawRegions && this.onAfterChange();
+				return value;
+			}
+		});
+		Object.defineProperty(this, 'lineHeight', {
+			get: function () {return hidden.lineHeight; },
+			set: function (value) {
+				hidden.lineHeight = typeof value !== "number" ? value : parseFloat(value);
+				this.calculateCanvasHeight();
+				this.cacheRendering();
+				engine.enableRedrawRegions && this.onAfterChange();
+				return value;
+			}
+		});
 
 		// If an offset static var is used, remove it for now, and convert it later
 		if (additionalProperties && additionalProperties.offset) {
@@ -75,39 +129,25 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 
 		// Define pseudo properties
 		Object.defineProperty(this, 'width', {
-			get: function () {
-				return this.clipWidth * this.size * this.widthModifier;
-			},
+			get: function () {return this.clipWidth * this.size * this.widthModifier; },
 			set: function (value) {
 				this.widthModifier = value / (this.clipWidth * this.size);
 				return value;
 			}
 		});
 		Object.defineProperty(this, 'height', {
-			get: function () {
-				return this.clipHeight * this.size * this.heightModifier;
-			},
+			get: function () {return this.clipHeight * this.size * this.heightModifier; },
 			set: function (value) {
 				this.heightModifier = value / (this.clipHeight * this.size);
 				return value
 			}
 		});
 
+		this.lineHeight = additionalProperties && additionalProperties.lineHeight ? additionalProperties.lineHeight: this.font.match(/[0.0-9]+/) * 1.25;
+		
 		// Load additional properties
 		this.importProperties(additionalProperties);
-		this.lineHeight = this.lineHeight ? this.lineHeight: this.font.match(/[0.0-9]+/) * 1.25;
-
-		this.lines = [];
-		this.lineWidth = [];
-		this.bm = document.createElement('canvas');
-		this.bmCtx = this.bm.getContext('2d');
-		this.bm.width = this.clipWidth;
-		this.bm.height = 1000;
-
-		engine.registerObject(this);
-
-		this.setString(string);
-		this.cacheRendering();
+		this.string = string;
 
 		// Convert static offset var (if such a var has been used)
 		if (offset) {
@@ -142,47 +182,62 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
     /** @scope TextBlock */
 
 	/**
-	 * Used for setting the text string of a TextBlock object.
+	 * Breaks the TextBlock's text string into lines.
 	 * 
-	 * @param {string} string A text string to set for the TextBlock object
+	 * @private
 	 */
-	setString: function (string) {
-		if (string === undefined) {throw new Error('Missing argument: string'); }
-		this.string = string;
+	stringToLines: function () {
+		var lt, line, paragraphs, pid, words, wid, word;
 
-		if (typeof this.string !== 'string') {
-			this.string = this.string.toString();
-		}
-		if (this.string === '') {
-			this.string = ' ';
+		lt = document.createElement('span');
+		lt.style.font = this.font;
+		lt.style.visibility = 'hidden';
+		lt.style.position = 'absolute';
+		document.body.appendChild(lt);
+
+		line = 0;
+		this.lines = [];
+		this.lines[line] = '';
+
+		paragraphs = this.string.split("\n");
+
+		for (pid = 0; pid < paragraphs.length; pid ++) {
+			words = paragraphs[pid].split(' ');
+			lt.innerHTML = '';
+			this.lines[line] = '';
+
+			for (wid = 0; wid < words.length; wid ++) {
+				word = words[wid];
+
+				lt.innerHTML += word + " ";
+				if (lt.offsetWidth > this.clipWidth) {
+					line ++;
+					this.lines[line] = '';
+					lt.innerHTML = '';
+					lt.innerHTML += word + " ";
+					this.lineWidth[line] = lt.offsetWidth;
+				}
+				else {
+					this.lineWidth[line] = lt.offsetWidth;
+				}
+
+				this.lines[line] += word + " ";
+			}
+
+			line ++;
 		}
 
-		this.stringToLines();
-		this.cacheRendering();
-		this.onAfterChange();
+		this.calculateCanvasHeight();
+		lt.parentNode.removeChild(lt);
 	},
 
 	/**
-	 * Used for setting the text alignment of a TextBlock object.
-	 * 
-	 * @param {string} alignment A string representing the new text alignment. Valid alignments are: "left", "right", "center".
+	 * Calculates and sets the height of the cache canvas based on the number of lines, the font height and the line height
+	 * @return {[type]} [description]
 	 */
-	setAlignment: function (alignment) {
-		if (alignment === undefined) {throw new Error('Missing argument: alignment'); }
-		if (/left|right|center/.test(alignment) === false) {throw new Error('Invalid alignment given. Valid alignments are: "left", "right", "center"'); }
-		this.alignment = alignment;
-		this.cacheRendering();
-	},
-
-	/**
-	 * Sets the text color of the TextBlock object.
-	 * 
-	 * @param {string} colorString A CSS colorstring. For instance "#000" or "#ABABAB" or "red"
-	 */
-	setColor: function (colorString) {
-		if (colorString === undefined) {throw new Error('Missing argument: colorString'); }
-		this.color = colorString;
-		this.cacheRendering();
+	calculateCanvasHeight: function () {
+		this.bm.height = (this.lines.length - 1) * this.lineHeight + this.font.match(/[0.0-9]+/) * 1.25;
+		this.clipHeight = this.bm.height;
 	},
 
 	/**
@@ -212,59 +267,9 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 			}
 
 			if (this.lines[i]) {
-				this.bmCtx.fillText(this.lines[i], xOffset, this.lineHeight * (1 + i));
+				this.bmCtx.fillText(this.lines[i], xOffset, this.lineHeight * i + this.font.match(/[0.0-9]+/) * 1);
 			}
 		}
-	},
-
-	/**
-	 * Breaks the TextBlock's text string into lines.
-	 * 
-	 * @private
-	 */
-	stringToLines: function () {
-		var lt, line, paragraphs, pid, words, wid, word;
-
-		lt = document.createElement('span');
-		lt.style.font = this.font;
-		lt.style.visibility = 'hidden';
-		lt.style.position = 'absolute';
-		document.body.appendChild(lt);
-
-		line = 0;
-		this.lines = [];
-		this.lines[line] = '';
-
-		paragraphs = this.string.split("\n");
-
-		for (pid = 0; pid < paragraphs.length; pid ++) {
-			words = paragraphs[pid].split(' ');
-
-			for (wid = 0; wid < words.length; wid ++) {
-				word = words[wid];
-
-				lt.innerHTML += word + " ";
-				if (lt.offsetWidth > this.clipWidth) {
-					line ++;
-					this.lines[line] = '';
-					lt.innerHTML = '';
-					lt.innerHTML += word + " ";
-				}
-				else {
-					this.lineWidth[line] = lt.offsetWidth;
-				}
-
-				this.lines[line] += word + " ";
-			}
-
-			line ++;
-			lt.innerHTML = '';
-			this.lines[line] = '';
-		}
-		lt.parentNode.removeChild(lt);
-
-        this.bm.height = this.lines.length * this.lineHeight;
-		this.clipHeight = this.bm.height;
 	},
 
 	/**

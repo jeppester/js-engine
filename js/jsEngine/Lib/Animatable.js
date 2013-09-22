@@ -31,8 +31,8 @@ new Class('Lib.Animatable', {
 	 *                         </code>
 	 */
 	animate: function (properties, options) {
-		if (properties === undefined) {throw new Error('Missing argument: properties'); }
-		if (options === undefined) {throw new Error('Missing argument: options'); }
+		if (properties === undefined) {throw new Error('Missing argument: properties'); } //dev
+		if (options === undefined) {throw new Error('Missing argument: options'); } //dev
 		var anim, i, c, loop, map, opt;
 
 		anim = {};
@@ -175,7 +175,20 @@ new Class('Lib.Animatable', {
 				}
 			}
 		}
-	}
+	},
+
+	schedule: function (func, delay, loopName) {
+		var room;
+
+		loopName = loopName || 'eachFrame';
+		room = this.getRoom();
+
+		if (!room) { //dev
+			throw new Error('Schedule requires that the object is added to a room'); //dev
+		} //dev
+		
+		room.loops[loopName].schedule(this, func, delay);
+	},
 });
 
 

@@ -52,9 +52,9 @@ new Class('Engine.Room', [View.Container], {
 	 * @param {Engine.CustomLoop} loop The loop to add
 	 */
 	addLoop: function (name, loop) {
-		if (loop === undefined) {throw new Error('Missing argument: loop'); }
-		if (name === undefined) {throw new Error('Missing argument: name'); }
-		if (this.loops[name] !== undefined) {throw new Error('Name is taken: ' + name); }
+		if (loop === undefined) {throw new Error('Missing argument: loop'); } //dev
+		if (name === undefined) {throw new Error('Missing argument: name'); } //dev
+		if (this.loops[name] !== undefined) {throw new Error('Name is taken: ' + name); } //dev
 
 		this.loops[name] = loop;
 	},
@@ -65,8 +65,8 @@ new Class('Engine.Room', [View.Container], {
 	 * @param {string} name The name that the custom loop has been added as
 	 */
 	removeLoop: function (name) {
-		if (name === undefined) {throw new Error('Missing argument: name'); }
-		if (name === 'eachFrame') {throw new Error('The "eachFrame" loop cannot be removed'); }
+		if (name === undefined) {throw new Error('Missing argument: name'); } //dev
+		if (name === 'eachFrame') {throw new Error('The "eachFrame" loop cannot be removed'); } //dev
 
 		delete this.loops[name];
 	},

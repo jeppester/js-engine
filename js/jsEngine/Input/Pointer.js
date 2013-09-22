@@ -67,7 +67,7 @@ new Class('Input.Pointer', {
 	 * @param {MouseEvent} event Event object passed by the onmousedown event
 	 */
 	onMouseDown: function (event) {
-		if (event === undefined) {throw new Error('Missing argument: event'); }
+		if (event === undefined) {throw new Error('Missing argument: event'); } //dev
 		var button;
 
 		this.onMouseMove(event);
@@ -86,7 +86,7 @@ new Class('Input.Pointer', {
 	 * @param {MouseEvent} event Event object passed by the onmouseup event
 	 */
 	onMouseUp: function (event) {
-		if (event === undefined) {throw new Error('Missing argument: event'); }
+		if (event === undefined) {throw new Error('Missing argument: event'); } //dev
 		var button;
 
 		this.onMouseMove(event);
@@ -105,7 +105,7 @@ new Class('Input.Pointer', {
 	 * @param {MouseEvent} event Event object passed by the onmousemove event
 	 */
 	onMouseMove: function (event) {
-		if (event === undefined) {throw new Error('Missing argument: event'); }
+		if (event === undefined) {throw new Error('Missing argument: event'); } //dev
 
 		var roomPos;
 
@@ -141,7 +141,7 @@ new Class('Input.Pointer', {
 	 * @param {TouchEvent} event Event object passed by the ontouchstart event
 	 */
 	onTouchStart: function (event) {
-		if (event === undefined) {throw new Error('Missing argument: event'); }
+		if (event === undefined) {throw new Error('Missing argument: event'); } //dev
 		var i, eventTouch, pointerTouch, touchNumber;
 
 		// Update pressed touches
@@ -175,7 +175,7 @@ new Class('Input.Pointer', {
 	 * @param {TouchEvent} event Event object passed by the ontouchend event
 	 */
 	onTouchEnd: function (event) {
-		if (event === undefined) {throw new Error('Missing argument: event'); }
+		if (event === undefined) {throw new Error('Missing argument: event'); } //dev
 		var i, eventTouch, pointerTouch;
 
 		// Update unpressed touches
@@ -204,7 +204,7 @@ new Class('Input.Pointer', {
 	 * @param {TouchEvent} event Event object passed by the ontouchmove event
 	 */
 	onTouchMove: function (event) {
-		if (event === undefined) {throw new Error('Missing argument: event'); }
+		if (event === undefined) {throw new Error('Missing argument: event'); } //dev
 		var i, eventTouch, pointerTouch, roomPos;
 
 		for (i = 0; i < event.touches.length; i++) {
@@ -245,7 +245,7 @@ new Class('Input.Pointer', {
 	 * @return {Object[]|boolean} Returns an array containing the pointers that are currently down, or false if no pointers are down
 	 */
 	isDown: function (button) {
-		if (button === undefined) {throw new Error('Missing argument: button'); }
+		if (button === undefined) {throw new Error('Missing argument: button'); } //dev
 		var pointers;
 
 		switch (this.getButtonType(button)) {
@@ -269,7 +269,7 @@ new Class('Input.Pointer', {
 	 * @return {Object[]|boolean} Returns an array containing the pointers that have just been pressed, or false if no pressed pointers where detected
 	 */
 	isPressed: function (button) {
-		if (button === undefined) {throw new Error('Missing argument: button'); }
+		if (button === undefined) {throw new Error('Missing argument: button'); } //dev
 		var pointers;
 
 		switch (this.getButtonType(button)) {
@@ -293,7 +293,7 @@ new Class('Input.Pointer', {
 	 * @return {Object[]|boolean} Returns an array containing the pointers that have just been released, or false if no released pointers where detected
 	 */
 	isReleased: function (button) {
-		if (button === undefined) {throw new Error('Missing argument: button'); }
+		if (button === undefined) {throw new Error('Missing argument: button'); } //dev
 		var pointers;
 
 		switch (this.getButtonType(button)) {
@@ -321,8 +321,8 @@ new Class('Input.Pointer', {
      */
     shapeIsPressed: function (button, shape, outside) {
 		button = button !== undefined ? button : MOUSE_TOUCH_ANY;
-		if (shape === undefined) {throw new Error('Missing argument: shape'); }
-		if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); }
+		if (shape === undefined) {throw new Error('Missing argument: shape'); } //dev
+		if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); } //dev
 		var i, pointers, pointer, ret;
 
 		// Narrow possible presses down to the pressed pointers within the selected buttons
@@ -359,8 +359,8 @@ new Class('Input.Pointer', {
 	 */
 	shapeIsReleased: function (button, shape, outside) {
 		button = button !== undefined ? button : MOUSE_TOUCH_ANY;
-		if (shape === undefined) {throw new Error('Missing argument: shape'); }
-		if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); }
+		if (shape === undefined) {throw new Error('Missing argument: shape'); } //dev
+		if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); } //dev
 		var i, pointers, pointer, ret;
 
 		// Narrow possible presses down to the pressed pointers within the selected buttons
@@ -397,8 +397,8 @@ new Class('Input.Pointer', {
 	 */
 	shapeIsDown: function (button, shape, outside) {
 		button = button !== undefined ? button : MOUSE_TOUCH_ANY;
-		if (shape === undefined) {throw new Error('Missing argument: shape'); }
-		if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); }
+		if (shape === undefined) {throw new Error('Missing argument: shape'); } //dev
+		if (typeof shape.contains !== 'function') {throw new Error('Argument shape has implement a "contains"-function'); } //dev
 		var i, pointers, pointer, ret;
 
 		// Narrow possible pointers down to the pointers which are down within the selected buttons
@@ -440,9 +440,9 @@ new Class('Input.Pointer', {
 		else if (button === MOUSE_TOUCH_ANY) {
 			return "any";
 		}
-		else {
-			throw new Error('Argument button has to be a pointer constant (see jseGlobals.js)');
-		}
+		else { //dev
+			throw new Error('Argument button has to be a pointer constant (see jseGlobals.js)'); //dev
+		} //dev
 	},
 
 	/**
@@ -454,9 +454,9 @@ new Class('Input.Pointer', {
 	 * @return {boolean} Whether or not the pointer or one of the pointers has the provided state
 	 */
 	checkPointer: function (pointers, state) {
-		if (pointers === "undefined") {throw new Error("Missing argument: pointers"); }
-		if (state === "undefined") {throw new Error("Missing argument: state"); }
-		if (['pressed', 'released', 'down'].indexOf(state) === -1) {throw new Error('Argument state must be one of the following values: "pressed", "released" or "down"'); }
+		if (pointers === "undefined") {throw new Error("Missing argument: pointers"); } //dev
+		if (state === "undefined") {throw new Error("Missing argument: state"); } //dev
+		if (['pressed', 'released', 'down'].indexOf(state) === -1) {throw new Error('Argument state must be one of the following values: "pressed", "released" or "down"'); } //dev
 		var i, pointer, ret;
 
 		if (!Array.prototype.isPrototypeOf(pointers)) {
@@ -566,7 +566,7 @@ new Class('Input.Pointer', {
 	 * @return {boolean} True if the button has now been released, false if the button was not already pressed
 	 */
 	release: function (button) {
-		if (button === undefined) {throw new Error('Missing argument: button'); }
+		if (button === undefined) {throw new Error('Missing argument: button'); } //dev
 		var i, pointers, events, unpressed;
 
 		// Find pressed pointers that are covered by the given button

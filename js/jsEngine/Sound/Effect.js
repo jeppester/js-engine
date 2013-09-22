@@ -10,8 +10,8 @@ new Class('Sound.Effect', {
 	 * @param {HTMLAudioElement} audioElement The Audio element to use as source for the sound object
      */
 	Effect: function (audioElement) {
-		if (audioElement === undefined) {throw new Error('Missing argument: audioElement'); }
-		if (audioElement.toString() !== "[object HTMLAudioElement]") {throw new Error('Argument audioElement has to be of type HTMLAudioElement'); }
+		if (audioElement === undefined) {throw new Error('Missing argument: audioElement'); } //dev
+		if (audioElement.toString() !== "[object HTMLAudioElement]") {throw new Error('Argument audioElement has to be of type HTMLAudioElement'); } //dev
 
 		var snd;
 
@@ -80,7 +80,7 @@ new Class('Sound.Effect', {
 	 * @param {number} playbackId The playback ID of the playback to stop. The ID is generated when a playback is started, and is returned by the play-function
 	 */
 	stop: function (playbackId) {
-		if (playbackId === undefined) {throw new Error('Missing argument: playbackId'); }
+		if (playbackId === undefined) {throw new Error('Missing argument: playbackId'); } //dev
 
 		var i, sound;
 
@@ -117,7 +117,7 @@ new Class('Sound.Effect', {
 	 * @param {number} playbackId The playback ID of the playback to stop from looping. The ID is generated when a playback is started, and is returned by the play-function
 	 */
 	stopLoop: function (playbackId) {
-		if (playbackId === undefined) {throw new Error('Missing argument: playbackId'); }
+		if (playbackId === undefined) {throw new Error('Missing argument: playbackId'); } //dev
 
 		var i, sound;
 

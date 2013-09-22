@@ -76,8 +76,8 @@ new Class('Math.Rectangle', [Math.Vector], {
 	 * @return {Math.Rectangle} The resulting Rectangle object (itself)
 	 */
 	move: function (x, y) {
-		if (typeof x !== 'number') {throw new Error('Argument x should be of type: Number'); }
-		if (typeof y !== 'number') {throw new Error('Argument y should be of type: Number'); }
+		if (typeof x !== 'number') {throw new Error('Argument x should be of type: Number'); } //dev
+		if (typeof y !== 'number') {throw new Error('Argument y should be of type: Number'); } //dev
 
 		this.x += x;
 		this.y += y;
@@ -93,8 +93,8 @@ new Class('Math.Rectangle', [Math.Vector], {
 	 * @return {Math.Rectangle} The resulting Rectangle object (itself)
 	 */
 	moveTo: function (x, y) {
-		if (typeof x !== 'number') {throw new Error('Argument x should be of type: Number'); }
-		if (typeof y !== 'number') {throw new Error('Argument y should be of type: Number'); }
+		if (typeof x !== 'number') {throw new Error('Argument x should be of type: Number'); } //dev
+		if (typeof y !== 'number') {throw new Error('Argument y should be of type: Number'); } //dev
 
 		this.x = x;
 		this.y = y;
@@ -137,7 +137,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 	 * @return {Math.Rectangle} The resulting Rectangle object (itself)
 	 */
 	scale: function (scaleH, scaleV) {
-		if (typeof scaleH !== 'number') {throw new Error('Argument scaleH should be of type Number'); }
+		if (typeof scaleH !== 'number') {throw new Error('Argument scaleH should be of type Number'); } //dev
 		scaleV = scaleV !== undefined ? scaleV : scaleH;
 
 		this.width *= scaleH;

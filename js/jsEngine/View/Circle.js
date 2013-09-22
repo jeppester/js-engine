@@ -24,6 +24,24 @@ new Class('View.Circle', [Math.Circle, View.Child], {
 	Circle: function (x, y, radius, fillStyle, strokeStyle, lineWidth) {
 		this.Child();
 
+        if (engine.enableRedrawRegions) {
+            this.CircleInitWithRedrawRegions(x, y, radius, fillStyle, strokeStyle, lineWidth);
+        }
+        else {
+            this.CircleInitWithoutRedrawRegions(x, y, radius, fillStyle, strokeStyle, lineWidth);
+        }
+	},
+    /** @scope View.Circle */
+
+    CircleInitWithoutRedrawRegions: function (x, y, radius, fillStyle, strokeStyle, lineWidth) {
+        this.radius = radius;
+        this.fillStyle = fillStyle || "#000";
+        this.strokeStyle = strokeStyle || "#000";
+        this.lineWidth = lineWidth || 1;
+        this.set(x, y, radius);
+    },
+
+    CircleInitWithRedrawRegions: function (x, y, radius, fillStyle, strokeStyle, lineWidth) {
         var hidden;
 
         hidden = {
@@ -72,8 +90,7 @@ new Class('View.Circle', [Math.Circle, View.Child], {
         });
 
         this.set(x, y, radius);
-	},
-    /** @scope View.Circle */
+    },
 
     /**
      * Calculates the region which the object will fill out when redrawn.

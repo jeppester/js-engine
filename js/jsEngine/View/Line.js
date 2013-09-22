@@ -20,7 +20,25 @@ new Class('View.Line',[Math.Line, View.Child], {
      * @param {string} [lineCap='butt'] The line's cap style if added to a view
 	 */
 	Line: function (startVector, endVector, strokeStyle, lineWidth, lineCap) {
-		this.Child();
+        this.Child();
+
+        if (engine.enableRedrawRegions) {
+            this.LineInitWithRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
+        }
+        else {
+            this.LineInitWithoutRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
+        }
+    },
+    /** @scope View.Line */
+
+    LineInitWithoutRedrawRegions: function (startVector, endVector, strokeStyle, lineWidth, lineCap) {
+        this.strokeStyle = strokeStyle || "#000";
+        this.lineWidth = lineWidth || 1;
+        this.lineCap = lineCap || 'butt';
+        this.setFromVectors(startVector || new Math.Vector(), endVector || new Math.Vector());
+    },
+
+    LineInitWithRedrawRegions: function (startVector, endVector, strokeStyle, lineWidth, lineCap) {
 
         // Create getters and setters for line ends
         var hidden;
@@ -134,8 +152,8 @@ new Class('View.Line',[Math.Line, View.Child], {
             }
         });
 
-		this.setFromVectors(startVector || new Math.Vector(), endVector || new Math.Vector());
-	},
+        this.setFromVectors(startVector || new Math.Vector(), endVector || new Math.Vector());
+    },
     
     /**
      * Calculates the region which the object will fill out when redrawn.

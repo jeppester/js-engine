@@ -61,8 +61,8 @@ new Class('Math.Circle', [Lib.Animatable], {
 	 * @return {Math.Circle} The resulting Circle object (itself)
 	 */
 	move: function (x, y) {
-		if (typeof x !== 'number') {throw new Error('Argument x should be of type: Number'); }
-		if (typeof y !== 'number') {throw new Error('Argument y should be of type: Number'); }
+		if (typeof x !== 'number') {throw new Error('Argument x should be of type: Number'); } //dev
+		if (typeof y !== 'number') {throw new Error('Argument y should be of type: Number'); } //dev
 
 		this.x += x;
 		this.y += y;
@@ -78,8 +78,8 @@ new Class('Math.Circle', [Lib.Animatable], {
 	 * @return {Math.Circle} The resulting Circle object (itself)
 	 */
 	moveTo: function (x, y) {
-		if (typeof x !== 'number') {throw new Error('Argument x should be of type: Number'); }
-		if (typeof y !== 'number') {throw new Error('Argument y should be of type: Number'); }
+		if (typeof x !== 'number') {throw new Error('Argument x should be of type: Number'); } //dev
+		if (typeof y !== 'number') {throw new Error('Argument y should be of type: Number'); } //dev
 
 		this.x = x;
 		this.y = y;
@@ -96,7 +96,7 @@ new Class('Math.Circle', [Lib.Animatable], {
 	 * @return {Math.Circle} The resulting Circle object (itself)
 	 */
 	scale: function (factor) {
-		if (typeof factor !== 'number') {throw new Error('Argument factor should be of type Number'); }
+		if (typeof factor !== 'number') {throw new Error('Argument factor should be of type Number'); } //dev
 
 		this.radius *= factor;
 
@@ -134,9 +134,9 @@ new Class('Math.Circle', [Lib.Animatable], {
 		else if (object.implements(Polygon)) {
 			return object.getDistance(this);
 		}
-		else {
-			throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
-		}
+		else { //dev
+			throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon'); //dev
+		} //dev
 	},
 
 	/**
@@ -174,9 +174,9 @@ new Class('Math.Circle', [Lib.Animatable], {
 			// if not, the circle must contain the polygon
 			return true;
 		}
-		else {
-			throw new Error('Argument object has to be of type: Vector, Line, Circle, Rectangle or Polygon');
-		}
+		else { //dev
+			throw new Error('Argument object has to be of type: Vector, Line, Circle, Rectangle or Polygon'); //dev
+		} //dev
 	},
 
 	/**
@@ -198,8 +198,8 @@ new Class('Math.Circle', [Lib.Animatable], {
 		else if (object.implements(Polygon)) {
 			return object.intersects(this);
 		}
-		else {
-			throw new Error('Argument object has to be of type: Line, Circle, Rectangle or Polygon');
-		}
+		else { //dev
+			throw new Error('Argument object has to be of type: Line, Circle, Rectangle or Polygon'); //dev
+		} //dev
 	}
 });

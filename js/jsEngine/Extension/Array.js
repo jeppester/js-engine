@@ -89,7 +89,7 @@ Array.prototype.sortByNumericProperty = function (property, desc) {
  * @param {function} func The function to execute
  */
 Array.prototype.forEach = function (func) {
-	if (typeof func !== 'function') {throw new Error('Argument func should be of type: function'); }
+	if (typeof func !== 'function') {throw new Error('Argument func should be of type: function'); } //dev
 
 	// Copy the array (to avoid errors if the original array is altered by the function)
 	var cp;

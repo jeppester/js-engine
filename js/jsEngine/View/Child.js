@@ -4,7 +4,29 @@ new Class('View.Child', [Lib.Animatable], {
      * @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
      */
     Child: function () {
-        this.hasChanged = false;
+        if (engine.enableRedrawRegions) {
+            this.ChildInitWithRedrawRegions();
+        }
+        else {
+            this.ChildInitWithoutRedrawRegions();
+        }
+        engine.registerObject(this);
+    },
+    /** @scope View.Child */
+
+    ChildInitWithoutRedrawRegions: function () {
+        this.x = 0;
+        this.y = 0;
+        this.opacity = 1;
+        this.direction = 0;
+        this.size = 1;
+        this.widthModifier = 1;
+        this.heightModifier = 1;
+        this.offset = new Math.Vector();
+    },
+
+    ChildInitWithRedrawRegions: function () {
+                this.hasChanged = false;
 
         // Define hidden vars
         var hidden;
@@ -125,7 +147,6 @@ new Class('View.Child', [Lib.Animatable], {
 
         this.offset = new Math.Vector();
     },
-    /** @scope View.Child */
 
     onAfterChange: function () {
         if (!this.hasChanged && this.isDrawn()) {
@@ -179,6 +200,24 @@ new Class('View.Child', [Lib.Animatable], {
         }
 
         return parents;
+    },
+
+    /**
+     * Finds the room to which the object is currently added
+     *
+     * @return {View.Room|boolean} The room to which the object is currently added, or false if the object is not added to a room
+     */
+    getRoom: function () {
+        var parents, ancestor;
+
+        parents = this.getParents();
+        if (parents.length === 0) {
+            return false;
+        }
+
+        ancestor = parents[parents.length -1];
+
+        return ancestor.implements(Engine.Room) ? ancestor : false;
     },
 
     /**

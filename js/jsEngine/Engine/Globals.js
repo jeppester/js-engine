@@ -75,3 +75,8 @@ OFFSET_MIDDLE_RIGHT			= 'mr';
 OFFSET_BOTTOM_LEFT			= 'bl';
 OFFSET_BOTTOM_CENTER		= 'bc';
 OFFSET_BOTTOM_RIGHT			= 'br';
+
+// Alignment options
+ALIGNMENT_LEFT				= 'left';
+ALIGNMENT_CENTER			= 'center';
+ALIGNMENT_RIGHT				= 'right';

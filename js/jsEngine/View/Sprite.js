@@ -34,7 +34,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 	 *                 }</code>
 	 */
 	Sprite: function (source, x, y, direction, additionalProperties) {
-		if (source === undefined) {throw new Error('Missing argument: source'); }
+		if (source === undefined) {throw new Error('Missing argument: source'); } //dev
 
 		var offset;
 
@@ -46,8 +46,6 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		// Load default options
 		this.source = source;
 		this.direction = direction !== undefined ? direction : 0;
-
-		engine.registerObject(this);
 
 		// Animation options
 		this.imageNumber = 0;
@@ -95,7 +93,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		this.importProperties(additionalProperties);
 
 		if (!this.refreshSource()) {
-			throw new Error('Sprite source was not successfully loaded: ' + source);
+			throw new Error('Sprite source was not successfully loaded: ' + source); //dev
 		}
 
 		// Convert static offset var (if such a var has been used)
@@ -183,7 +181,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 	 * @param {string} source The resource string of the bitmap-source to use for the object
 	 */
 	setSource: function (source) {
-		if (source === undefined) {throw new Error('Missing argument: source'); }
+		if (source === undefined) {throw new Error('Missing argument: source'); } //dev
 		if (this.source === source) {return; }
 
 		this.source = source;

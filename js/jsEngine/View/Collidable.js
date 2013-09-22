@@ -32,7 +32,7 @@ new Class('View.Collidable', [View.Sprite], {
 	 * @return {Object[]|boolean} If getCollidingObjects is set to true, an array of colliding object, else a boolean representing whether or not a collission was detected.
 	 */
 	boundingBoxCollidesWith: function (objects, getCollidingObjects) {
-		if (objects === undefined) {throw new Error('Missing argument: objects'); }
+		if (objects === undefined) {throw new Error('Missing argument: objects'); } //dev
 		if (!Array.prototype.isPrototypeOf(objects)) {
 			objects = [objects];
 		}
@@ -110,7 +110,7 @@ new Class('View.Collidable', [View.Sprite], {
 	 * 	}</code>
 	 */
 	maskCollidesWith: function (objects, getCollisionPosition) {
-		if (objects === undefined) {throw new Error('Missing argument: objects'); }
+		if (objects === undefined) {throw new Error('Missing argument: objects'); } //dev
 		var canvas, mask, ctx, roomPos, parents, obj, bitmap, i, ii, data, length, pixel, pxArr, x, y, avX, avY, retVector;
 
 		if (!Array.prototype.isPrototypeOf(objects)) {
@@ -292,7 +292,7 @@ new Class('View.Collidable', [View.Sprite], {
 	 *                          If both getCollisionPosition and getCollidingObjects are true, the objects-array will contain all colliding objects, and the positions-array will contain each colliding object's collision position
 	 */
 	collidesWith: function (objects, getCollisionPosition, getCollidingObjects) {
-		if (objects === undefined) {throw new Error('Missing argument: objects'); }
+		if (objects === undefined) {throw new Error('Missing argument: objects'); } //dev
 		var ret, i, position;
 
 		if (!Array.prototype.isPrototypeOf(objects)) {

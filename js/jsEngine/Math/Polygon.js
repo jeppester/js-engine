@@ -47,7 +47,7 @@ new Class('Math.Polygon', {
 			x = arguments[i * 2];
 			y = arguments[i * 2 + 1];
 
-			if (typeof x !== 'number' || typeof y !== 'number') {throw new Error('All arguments should be of type: Number'); }
+			if (typeof x !== 'number' || typeof y !== 'number') {throw new Error('All arguments should be of type: Number'); } //dev
 
 			this.points.push(new Math.Vector(x, y));
 		}
@@ -63,8 +63,8 @@ new Class('Math.Polygon', {
 	 * @return {Math.Polygon} The resulting Polygon object (itself)
 	 */
 	move: function (x, y) {
-		if (typeof x !== 'number') {throw new Error('Argument x should be of type Number'); }
-		if (typeof y !== 'number') {throw new Error('Argument y should be of type Number'); }
+		if (typeof x !== 'number') {throw new Error('Argument x should be of type Number'); } //dev
+		if (typeof y !== 'number') {throw new Error('Argument y should be of type Number'); } //dev
 
 		return this.add(new Math.Vector(x, y));
 	},
@@ -76,7 +76,7 @@ new Class('Math.Polygon', {
 	 * @return {Math.Polygon} The resulting Polygon object (itself)
 	 */
 	add: function (vector) {
-		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type Vector'); }
+		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type Vector'); } //dev
 
 		var i;
 
@@ -94,7 +94,7 @@ new Class('Math.Polygon', {
 	 * @return {Math.Polygon} The resulting Polygon object (itself)
 	 */
 	rotate: function (direction) {
-		if (typeof direction !== 'number') {throw new Error('Argument direction should be of type Number'); }
+		if (typeof direction !== 'number') {throw new Error('Argument direction should be of type Number'); } //dev
 
 		var i;
 
@@ -174,7 +174,7 @@ new Class('Math.Polygon', {
 	 * @return {Math.Rectangle} The bounding rectangle
 	 */
 	getBoundingRectangle: function () {
-		if (this.points.length === 0) {throw new Error('Cannot create bounding rectangle for pointless polygon'); }
+		if (this.points.length === 0) {throw new Error('Cannot create bounding rectangle for pointless polygon'); } //dev
 
 		var startVector, endVector, i;
 
@@ -245,9 +245,9 @@ new Class('Math.Polygon', {
 
 			return dist;
 		}
-		else {
-			throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon');
-		}
+		else { //dev
+			throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon'); //dev
+		} //dev
 	},
 
 	/**
@@ -279,9 +279,9 @@ new Class('Math.Polygon', {
 		else if (object.implements(Math.Polygon)) {
 			return object.points.length > 0 && !this.intersects(object) && this.contains(object.points[0]);
 		}
-		else {
-			throw new Error('Argument object has to be of type: Vector, Line, Rectangle or Polygon');
-		}
+		else { //dev
+			throw new Error('Argument object has to be of type: Vector, Line, Rectangle or Polygon'); //dev
+		} //dev
 	},
 
 	/**
@@ -354,9 +354,9 @@ new Class('Math.Polygon', {
 				}
 			}
 		}
-		else {
-			throw new Error('Argument object has to be of type: Line, Circle, Rectangle or Polygon');
-		}
+		else { //dev
+			throw new Error('Argument object has to be of type: Line, Circle, Rectangle or Polygon'); //dev
+		} //dev
 
 		if (countIntersections) {
 			return intersectionCount;

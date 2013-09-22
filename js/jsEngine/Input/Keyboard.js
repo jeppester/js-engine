@@ -38,7 +38,7 @@ new Class('Input.Keyboard', {
 	onKeyDown: function (event) {
 		var key;
 
-		if (event === undefined) {throw new Error('Missing argument: event'); }
+		if (event === undefined) {throw new Error('Missing argument: event'); } //dev
 
 		if (!this.isDown(event.keyCode)) {
 			key = this.keys[event.keyCode];
@@ -56,7 +56,7 @@ new Class('Input.Keyboard', {
 	onKeyUp: function (event) {
 		var key;
 
-		if (event === undefined) {throw new Error('Missing argument: event'); }
+		if (event === undefined) {throw new Error('Missing argument: event'); } //dev
 
 		if (this.isDown(event.keyCode)) {
 			key = this.keys[event.keyCode];
@@ -72,7 +72,7 @@ new Class('Input.Keyboard', {
 	 * @return {boolean} True if the key is down, false if not
 	 */
 	isDown: function (key) {
-		if (key === undefined) {throw new Error('Missing argument: key'); }
+		if (key === undefined) {throw new Error('Missing argument: key'); } //dev
 
 		if (typeof key === 'string') {
 			key = key.toUpperCase().charCodeAt(0);
@@ -88,7 +88,7 @@ new Class('Input.Keyboard', {
 	 * @return {boolean} True if the key has been pressed, false if not
 	 */
 	isPressed: function (key) {
-		if (key === undefined) {throw new Error('Missing argument: key'); }
+		if (key === undefined) {throw new Error('Missing argument: key'); } //dev
 
 		if (typeof key === 'string') {
 			key = key.toUpperCase().charCodeAt(0);
@@ -104,7 +104,7 @@ new Class('Input.Keyboard', {
 	 * @return {boolean} True if the key has been pressed, false if not
 	 */
 	isReleased: function (key) {
-		if (key === undefined) {throw new Error('Missing argument: key'); }
+		if (key === undefined) {throw new Error('Missing argument: key'); } //dev
 
 		if (typeof key === 'string') {
 			key = key.toUpperCase().charCodeAt(0);

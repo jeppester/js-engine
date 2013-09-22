@@ -55,7 +55,7 @@ function Class(className, inherits, functions) {
 	// Inherit functions
 
     if (inherits) {
-        if (!Array.prototype.isPrototypeOf(inherits)) {throw new Error("Arguments inherits is not an array"); }
+        if (!Array.prototype.isPrototypeOf(inherits)) {throw new Error("Arguments inherits is not an array"); } //dev
 
         for (i = 0; i < inherits.length; i ++) {
             inheritClass = inherits[i];
