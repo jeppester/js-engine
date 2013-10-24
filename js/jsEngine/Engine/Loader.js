@@ -432,7 +432,7 @@ new Class('Engine.Loader', {
 						continue;
 					}
 					res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, '/') + '.' + format);
-					theme.sfx[path] = new Sound(res);
+					theme.sfx[path] = new Sound.Effect(res);
 
 					if (engine.preloadSounds) {
 						res.setAttribute('preload', 'auto');
@@ -453,7 +453,7 @@ new Class('Engine.Loader', {
 						continue;
 					}
 					res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, '/') + '.' + format);
-					theme.music[path] = new Music(res);
+					theme.music[path] = new Sound.Music(res);
 
 					if (engine.preloadSounds) {
 						res.setAttribute('preload', 'auto');
@@ -520,7 +520,7 @@ new Class('Engine.Loader', {
                     return;
                 }
                 res = new Audio(path);
-                theme.sfx[resourceString] = new Sound(res);
+                theme.sfx[resourceString] = new Sound.Effect(res);
 
                 if (engine.preloadSounds) {
                     res.setAttribute('preload', 'auto');
