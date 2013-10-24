@@ -729,15 +729,27 @@ new Class('Engine', {
 	/**
 	 * Removes an object from all engine loops, views, and from the object index
 	 *
-	 * param {Object} obj The object to remove
+	 * param {Object} obj An object to remove
+	 * param {Object} obj2 A second object to remove
 	 */
-	purge: function (obj) {
+	purge: function (obj, obj2) {
+		var i;
+
+		if (arguments.length > 1) {
+			for (i = 0; i < arguments.length; i ++) {
+				this.purge(arguments[i]);
+			}
+			return;
+		}
+
 		var len, name, loop, roomId, room;
 
 		if (obj === undefined) {throw new Error('Cannot purge object: ' + obj); } //dev
 		if (typeof obj === "string") {
 			obj = this.objectIndex[obj];
 		}
+
+		obj.onBeforePurge && obj.onBeforePurge();
 
 		// Purge ALL children
 		if (obj.children) {
