@@ -237,7 +237,16 @@ new Class('View.Child', [Lib.Animatable], {
      * @return {number} The distance in pixels
      */
     getDistanceTo: function (child) {
-        return new Math.Vector(this.x, this.y).subtract(new Math.Vector(child.x, child.y)).getLength();
+        return this.getRoomPosition().subtract(child.getRoomPosition()).getLength();
+    },
+
+    /**
+     * Calculates the direction to another child
+     * @param  {View.Child} child The object to calculate the direction to
+     * @return {number} The direction in radians
+     */
+    getDirectionTo: function (child) {
+        return child.getRoomPosition().subtract(this.getRoomPosition()).getDirection();
     },
 
     /**
