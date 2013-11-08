@@ -214,7 +214,7 @@ else {
 
 if (!$options['keepLogs']) {
 	// remove all occurrences of "console.log([something])"
-	$filesContent=preg_replace ('/console\.log[^\n|;]*(\n|;)?/', '$1', $filesContent);
+	$filesContent = preg_replace ('/console\.log[^\n|;]*(\n|;)?/', '$1', $filesContent);
 }
 else {
 	echo "Keep logs specified, keeping logs\n";
