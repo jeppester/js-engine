@@ -1,6 +1,7 @@
 new Class('View.Child', [Lib.Animatable], {
     /**
      * @name View.Child
+     * @augments Lib.Animatable
      * @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
      */
     Child: function () {

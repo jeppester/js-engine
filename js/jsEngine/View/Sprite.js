@@ -2,11 +2,11 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 	/**
 	 * The constructor for Sprite objects.
 	 *
-     * @name Sprite
+     * @name View.Sprite
      * @class Class for drawing bitmaps with rotation and size.
      *        Usually all graphical objects in a game are sprites or extends this class.
-     * @augments View
-     * @augments Animatable
+     * @augments View.Container
+     * @augments Lib.Animatable
      *
      * @property {string} source A resource string representing the bitmap source of the sprite, use setSource() to set the source (do not set it directly)
      * @property {number} direction The direction of the sprite (in radians)
@@ -126,7 +126,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 			this.offset.y = Math.round(this.offset.y);
 		}
 	},
-    /** @scope Sprite */
+    /** @scope View.Sprite */
 
 	/**
 	 * Fetches the name of the theme which currently applies to the object.

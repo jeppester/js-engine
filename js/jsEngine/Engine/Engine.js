@@ -63,7 +63,10 @@ new Class('Engine', {
 	 */
 	Engine: function (options) {
         // Set global engine variable
-        /** @global */
+        /**
+         * Global reference to the engine (automatically create upon initialization of the engine)
+         * @global
+         */
         engine = this;
 
 		this.options = options ? options: {};

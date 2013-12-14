@@ -22,7 +22,7 @@ new Class('View.Collidable', [View.Sprite], {
 		this.mask = this.mask ? this.mask : loader.getMask(source, this.getTheme());
 		this.collisionResolution = this.collisionResolution ? this.collisionResolution : engine.defaultCollisionResolution;
 	},
-    /** @scope Collidable */
+    /** @scope View.Collidable */
 
 	/**
 	 * Checks for a collision with other objects' rotated BBoxes. The word polygon is used because the check is actually done by using the Polygon object.

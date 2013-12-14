@@ -3,7 +3,7 @@ new Class('Lib.Animatable', {
      * @name Lib.Animatable
      * @class
      */
-    /** @scope Animatable */
+    /** @scope Lib.Animatable */
 
 	/**
 	 * Used for animating numeric properties of the owner of the function.
