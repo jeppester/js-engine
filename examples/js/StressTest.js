@@ -7,15 +7,15 @@ new Class('StressTest', {
             game.onLoaded();
         });
 
-        this.objectView = new View();
-        this.hudView = new View();
+        this.objectView = new View.Container();
+        this.hudView = new View.Container();
         engine.currentRoom.addChildren(this.objectView, this.hudView);
 
-        fpsCounter = new TextBlock('FPS: 0', 10, 10, 100, {color: '#FFF'});
-        objectCounter = new TextBlock('Objects: 0', 10, 30, 100, {color: '#FFF'});
+        fpsCounter = new View.TextBlock('FPS: 0', 10, 10, 100, {color: '#FFF'});
+        objectCounter = new View.TextBlock('Objects: 0', 10, 30, 100, {color: '#FFF'});
         this.hudView.addChildren(fpsCounter, objectCounter);
 
-        engine.currentRoom.addLoop('each20Frames', new CustomLoop(20));
+        engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
         engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
         engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
     },
@@ -25,8 +25,8 @@ new Class('StressTest', {
     },
 
     updateFPS: function () {
-        fpsCounter.setString('FPS: ' + engine.fps);
-        objectCounter.setString('Objects: ' + (Object.keys(engine.objectIndex).length - 2));
+        fpsCounter.string = 'FPS: ' + engine.fps;
+        objectCounter.string = 'Objects: ' + (Object.keys(engine.objectIndex).length - 2);
     },
 
     addObjects: function (count) {
@@ -34,7 +34,7 @@ new Class('StressTest', {
         var i;
 
         for (i = 0; i < count; i++) {
-            sprite = new GameObject(
+            sprite = new View.GameObject(
                 'Rock',
                 Math.random() * 600,
                 Math.random() * 400,

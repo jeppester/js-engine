@@ -394,8 +394,8 @@ new Class('View.Collidable', [View.Sprite], {
 		c.lineTo(pol.points[3].x, pol.points[3].y);
 		c.closePath();
 
-		c.strokeStyle = "#FFF";
-		c.lineWidth = 4;
+		c.strokeStyle = "#0F0";
+		c.lineWidth = 1;
 
 		c.stroke();
 	},

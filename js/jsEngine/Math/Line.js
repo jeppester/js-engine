@@ -215,7 +215,7 @@ new Class('Math.Line',[Lib.Animatable], {
 	getDistance: function (object) {
 		var ba, ab, bc, ac;
 
-		if (object.implements(Vector)) {
+		if (object.implements(Math.Vector)) {
 			// Get all possibly used vectors
 			ba = this.a.copy().subtract(this.b);
 			ab = this.b.copy().subtract(this.a);
@@ -234,7 +234,7 @@ new Class('Math.Line',[Lib.Animatable], {
 				return Math.abs(ab.getCross(ac) / ab.getLength());
 			}
 		}
-		else if (object.implements(Line)) {
+		else if (object.implements(Math.Line)) {
 			// If the lines intersect, return 0
 			if (this.intersects(object)) {
 				return 0;
@@ -244,10 +244,10 @@ new Class('Math.Line',[Lib.Animatable], {
 				return Math.min(this.getDistance(object.a), this.getDistance(object.b), object.getDistance(this.a), object.getDistance(this.b));
 			}
 		}
-		else if (object.implements(Rectangle)) {
+		else if (object.implements(Math.Rectangle)) {
 			return object.getDistance(this);
 		}
-		else if (object.implements(Circle)) {
+		else if (object.implements(Math.Circle)) {
 			return object.getDistance(this);
 		}
 		else { //dev

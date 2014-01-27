@@ -29,13 +29,13 @@ new Class('Examples', {
         var text, sprite, movable;
     
         // Create two views and add them to the room
-        this.bgView = new View();
-        this.fgView = new View();
+        this.bgView = new View.Container();
+        this.fgView = new View.Container();
         engine.currentRoom.addChildren(this.bgView, this.fgView);
     
         // TEXT EXAMPLE
         // Make a hello world text
-        text = new TextBlock(
+        text = new View.TextBlock(
             'Hello world!', // TextBlock
             50, // x-position
             50, // y-position
@@ -54,7 +54,7 @@ new Class('Examples', {
     
         // SPRITE EXAMPLE
         // Make a sprite object
-        sprite = new Sprite(
+        sprite = new View.Sprite(
             'Rock', // Image ID (See "/themes/Example/theme.json" for an explanation of themes)
             70, // x-position
             200, // y-position

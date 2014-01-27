@@ -7,7 +7,7 @@ Requires:
 */
 
 // Create a new JsEngine class which extends the Sprite class
-new Class('MovableCharacter', [Sprite], {
+new Class('MovableCharacter', [View.Sprite], {
     // Create constructor (the constructors name is always the class name with lowercase first letter)
     MovableCharacter: function(x, y) {
         // Call the sprite constructor to fully extend the sprite and set all sprite properties
@@ -47,10 +47,10 @@ new Class('MovableCharacter', [Sprite], {
             // Turn the character around
             this.animate(
                 {
-                    dir: this.dir + Math.PI * 2
+                    direction: this.direction + Math.PI * 2
                 },
                 {
-                    dur: 2000
+                    duration: 2000
                 }
             );
         }

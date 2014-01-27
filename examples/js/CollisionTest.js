@@ -9,7 +9,7 @@ new Class('CollisionTest', {
         ]);
 
         // Add collision checking loop
-        engine.currentRoom.addLoop('collisionChecking', new CustomLoop(5));
+        engine.currentRoom.addLoop('collisionChecking', new Engine.CustomLoop(5));
 
         // Make two collision objects
         window.balls = [];

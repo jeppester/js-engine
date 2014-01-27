@@ -7,17 +7,17 @@ new Class('CollisionStressTest', {
             game.onLoaded();
         });
     
-        this.objectView = new View();
-        this.hudView = new View();
+        this.objectView = new View.Container();
+        this.hudView = new View.Container();
         engine.currentRoom.addChildren(this.objectView, this.hudView);
     
-        this.fpsCounter = new TextBlock('FPS: 0', 10, 10, 100, {color: '#FFF'});
-        this.objectCounter = new TextBlock('Objects: 0', 10, 30, 100, {color: '#FFF'});
-        this.collisionDisplay = new TextBlock('Collides: No', 10, 50, 100, {color: '#FFF'});
-        this.collider = new Collidable('Character', 300, 200);
+        this.fpsCounter = new View.TextBlock('FPS: 0', 10, 10, 100, {color: '#FFF'});
+        this.objectCounter = new View.TextBlock('Objects: 0', 10, 30, 100, {color: '#FFF'});
+        this.collisionDisplay = new View.TextBlock('Collides: No', 10, 50, 100, {color: '#FFF'});
+        this.collider = new View.Collidable('Character', 300, 200);
         this.hudView.addChildren(this.collider, this.fpsCounter, this.objectCounter, this.collisionDisplay);
     
-        engine.currentRoom.addLoop('each20Frames', new CustomLoop(20));
+        engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
         engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
         engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
         engine.currentRoom.loops.eachFrame.attachFunction(this, this.checkCollision);
@@ -29,16 +29,16 @@ new Class('CollisionStressTest', {
     
     checkCollision: function () {
         if (this.collider.collidesWith(this.objectView.getChildren(), 1)) {
-            this.collisionDisplay.setString('Collides: Yes');
+            this.collisionDisplay.string = 'Collides: Yes';
         }
         else {
-            this.collisionDisplay.setString('Collides: No');
+            this.collisionDisplay.string = 'Collides: No';
         }
     },
     
     updateFPS: function () {
-        this.fpsCounter.setString('FPS: ' + engine.fps);
-        this.objectCounter.setString('Objects: ' + (Object.keys(engine.objectIndex).length - 2));
+        this.fpsCounter.string = 'FPS: ' + engine.fps;
+        this.objectCounter.string = 'Objects: ' + (Object.keys(engine.objectIndex).length - 2);
     },
     
     addObjects: function (count) {
@@ -46,7 +46,7 @@ new Class('CollisionStressTest', {
         var i;
     
         for (i = 0; i < count; i++) {
-            sprite = new GameObject(
+            sprite = new View.GameObject(
                 'Rock',
                 Math.random() * 600,
                 Math.random() * 400

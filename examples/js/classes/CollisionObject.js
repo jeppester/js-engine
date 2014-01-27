@@ -7,7 +7,7 @@ Requires:
 */
 
 // Create a new JsEngine class which extends the Sprite class
-new Class('CollisionObject', [GameObject], {
+new Class('CollisionObject', [View.GameObject], {
     // Create constructor (the constructors name is always the class name with lowercase first letter)
     CollisionObject: function (source, x, y, additionalProperties) {
         // Call the sprite constructor to fully extend the sprite and set all sprite properties
@@ -60,17 +60,17 @@ new Class('CollisionObject', [GameObject], {
     
                 // Move to contact position
                 do {
-                    this.x += Math.cos(colPos.direction - Math.PI);
-                    this.y += Math.sin(colPos.direction - Math.PI);
+                    this.x += Math.cos(colPos.getDirection() - Math.PI);
+                    this.y += Math.sin(colPos.getDirection() - Math.PI);
     
-                    ball.x += Math.cos(colPos.direction);
-                    ball.y += Math.sin(colPos.direction);
+                    ball.x += Math.cos(colPos.getDirection());
+                    ball.y += Math.sin(colPos.getDirection());
                 }
                 while (this.collidesWith(ball, true));
     
                 speed = ball.speed.getLength();
-                ball.speed.setFromDirection(colPos.direction, speed);
-                this.speed.setFromDirection(colPos.direction - Math.PI, speed);
+                ball.speed.setFromDirection(colPos.getDirection(), speed);
+                this.speed.setFromDirection(colPos.getDirection() - Math.PI, speed);
             }
         }
     

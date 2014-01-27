@@ -10,7 +10,7 @@ new Class('MasksAndBBoxes', {
         // Hide loader overlay
         loader.hideOverlay();
 
-        object = new GameObject(
+        object = new View.GameObject(
             'Character', // Image ID (See "/themes/Example/theme.json" for an explanation of themes)
             50, // x-position
             50, // y-position
@@ -19,15 +19,15 @@ new Class('MasksAndBBoxes', {
 
         object.animation = function () {
             this.animate({
-                dir: this.dir + Math.PI * 2
+                direction: this.direction + Math.PI * 2
             }, {
-                dur: 10000,
+                duration: 10000,
                 callback: this.animation
             })
         };
         object.animation();
 
-        object2 = new GameObject(
+        object2 = new View.GameObject(
             'Rock', // Image ID (See "/themes/Example/theme.json" for an explanation of themes)
             16, // x-position
             50, // y-position
@@ -35,14 +35,14 @@ new Class('MasksAndBBoxes', {
         );
         object2.checkCollision = function () {
             if (this.collidesWith(object)) {
-                text.setString('Collides');
+                text.string = 'Collides';
             }
             else {
-                text.setString('');
+                text.string = '';
             }
         };
 
-        text = new TextBlock('', 6, 4, 80);
+        text = new View.TextBlock('', 6, 4, 80);
 
         engine.currentRoom.loops.eachFrame.attachFunction(object2, object2.checkCollision);
 

@@ -75,6 +75,12 @@ new Class('Engine.Camera', {
 		region = this.captureRegion;
 
 		this.ctx.save();
+
+		if (engine.backgroundColor) {
+			this.ctx.fillStyle = engine.backgroundColor;
+			this.ctx.fillRect(0, 0, engine.canvasResX, engine.canvasResY);
+		}
+
 		this.ctx.translate(-region.x, -region.y);
 
 		engine.masterRoom.draw(this.ctx, region);
