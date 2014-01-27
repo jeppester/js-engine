@@ -67,7 +67,10 @@ new Class('Engine', {
 	 */
 	Engine: function (options) {
         // Set global engine variable
-        /** @global */
+        /**
+         * Global engine var set upon engine initialization
+         * @global
+         */
         engine = this;
 
 		this.options = options ? options: {};
@@ -199,7 +202,10 @@ new Class('Engine', {
 		}
 
 		// Create loader object
-        /** @global */
+        /**
+         * Global Engine.Loader instance which is created upon engine initialization
+         * @global
+         */
 		loader = new Engine.Loader();
 
 		loader.loadClasses([this.gameClassPath]);
@@ -266,9 +272,15 @@ new Class('Engine', {
 		}
 
 		// Create objects required by the engine
-        /** @global */
+        /**
+         * Global instance of Input.Keyboard which is created upon engine initialization
+         * @global
+         */
 		keyboard = new Input.Keyboard();
-        /** @global */
+        /**
+         * Global instance of Input.Pointer which is created upon engine initialization
+         * @global
+         */
 		pointer = new Input.Pointer();
 
 		// Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)

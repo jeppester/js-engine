@@ -10,6 +10,7 @@ $options = array(
 	"engineFile" => 'Engine.js',
 	"gameFile" => dirname(__FILE__) . '/../index.html',
 	"gameClassFile" => 'js/Game.js',
+	"ignoreHTML" => false,
 );
 
 echo "\n";
@@ -25,6 +26,7 @@ Options:
  --keep-logs:        Do not remove console.log()-calls
  --keep-dev:         Do not remove lines ending with a \"//dev\"-comment
  --game-file [path]: Specify the game file (.html) to fetch js-file locations from
+ --include [path]:   Specify a file containing a list of files to include (one path per line)
 ";
 	exit;
 };
@@ -43,6 +45,10 @@ if (in_array("--keep-logs",$argv)) {
 
 if (in_array("--keep-dev",$argv)) {
 	$options["keepDev"] = true;
+};
+
+if (in_array("--ignore-html",$argv)) {
+	$options["ignoreHTML"] = true;
 };
 
 // Output dir option
@@ -165,11 +171,9 @@ function scanLoad($file) {
 
 		$fCon = file_get_contents($fPath);
 
-		// Search the files for loaded objects
-		preg_match_all('/loader\.loadClasses\(\[[^\]]*\]\)/', $fCon, $m1);
-
+		// Search the files for loaded files and classes
+		preg_match_all('/(?:loader|engine)\.load(?:Classes|Files)\(\[[^\]]*\]\)/', $fCon, $m1);
 		$m = $m1[0];
-
 		foreach($m as $val) {
 			preg_match_all('/[\'|"]([^\.]+\.js)[\'|"]/', $val, $jsFiles);
 
@@ -186,6 +190,13 @@ function scanLoad($file) {
 
 if (!$options['engineOnly']) {
 	scanLoad($options['gameClassFile']);
+
+	// Include option
+	if ($id = array_search('--include', $argv)) {
+		if (isset($argv[$id + 1])) {
+			$files = array_unique(array_merge($files, file($argv[$id + 1])));
+		}
+	}
 }
 else {
 	echo "Skipping game, packing engine only\n";
@@ -198,6 +209,9 @@ else {
 // Append all these files to each other
 $filesContent="";
 foreach ($files as $file) {
+	// Remove trailing newline (introduced by include files)
+	$file = preg_replace('/\n\r?$/', '', $file);
+
 	$filesContent .= file_get_contents($options['gameDir'] . $file) . "\n";
 }
 
@@ -240,8 +254,13 @@ if ($options['engineOnly']) {
 else {
 	echo "Saving game to game.packed.js\n";
 	file_put_contents($options['outputDir'] . '/'. 'game.min.js', $packedJS);
-
-	echo "Saving HTML-file with fixed references to " . $options['outputDir'] . '/' . $outputFileName . "\n\n";
-	file_put_contents($options['outputDir'] . '/' . $outputFileName, str_replace($options['engineDir'] . $options['engineFile'], 'game.min.js', $gameFile));
+	
+	if (!$options['ignoreHTML']) {
+		echo "Saving HTML-file with fixed references to " . $options['outputDir'] . '/' . $outputFileName . "\n\n";
+		file_put_contents($options['outputDir'] . '/' . $outputFileName, str_replace($options['engineDir'] . $options['engineFile'], 'game.min.js', $gameFile));
+	}
+	else {
+		echo "Ignoring HTML file\n";
+	}
 }
 ?>
