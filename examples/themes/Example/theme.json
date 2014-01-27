@@ -7,7 +7,7 @@
 
 {
 	"name":"Example",
-	"inherit":"",
+	"inherit":[],
 	"music":{},
 	"sfx":{
 		"Donk":"wav",
