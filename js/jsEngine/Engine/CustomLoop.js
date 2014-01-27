@@ -414,9 +414,6 @@ new Class('Engine.CustomLoop', {
 						a.obj[propId] = engine.ease(a.easing, t, a.prop[propId].begin, a.prop[propId].end - a.prop[propId].begin, a.duration);
 					}
 				}
-
-				// Execute the animation's onStep-function
-				a.onStep();
 			}
 		}
 	},

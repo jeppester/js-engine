@@ -2,11 +2,11 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 	/**
 	 * The constructor for Sprite objects.
 	 *
-     * @name View.Sprite
+     * @name Sprite
      * @class Class for drawing bitmaps with rotation and size.
      *        Usually all graphical objects in a game are sprites or extends this class.
-     * @augments View.Container
-     * @augments Lib.Animatable
+     * @augments View
+     * @augments Animatable
      *
      * @property {string} source A resource string representing the bitmap source of the sprite, use setSource() to set the source (do not set it directly)
      * @property {number} direction The direction of the sprite (in radians)
@@ -72,19 +72,21 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		// Define pseudo properties
 		Object.defineProperty(this, 'width', {
 			get: function () {
-				return this.clipWidth * this.size * this.widthModifier;
+				return Math.abs(this.clipWidth * this.size * this.widthModifier);
 			},
 			set: function (value) {
-				this.widthModifier = value / (this.clipWidth * this.size);
+				var sign = this.widthModifier > 0 ? 1 : -1;
+				this.widthModifier = sign * Math.abs(value / (this.clipWidth * this.size));
 				return value;
 			}
 		});
 		Object.defineProperty(this, 'height', {
 			get: function () {
-				return this.clipHeight * this.size * this.heightModifier;
+				return Math.abs(this.clipHeight * this.size * this.heightModifier);
 			},
 			set: function (value) {
-				this.heightModifier = value / (this.clipHeight * this.size);
+				var sign = this.heightModifier > 0 ? 1 : -1;
+				this.heightModifier = sign * Math.abs(value / (this.clipHeight * this.size));
 				return value
 			}
 		});
@@ -126,7 +128,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 			this.offset.y = Math.round(this.offset.y);
 		}
 	},
-    /** @scope View.Sprite */
+    /** @scope Sprite */
 
 	/**
 	 * Fetches the name of the theme which currently applies to the object.

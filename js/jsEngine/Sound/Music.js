@@ -17,7 +17,7 @@ new Class('Sound.Music', {
 		this.source = audioElement;
 		this.paused = false;
 	},
-    /** @scope Sound.Music */
+    /** @scope Music */
 
 	/**
 	 * Starts playback of the object

@@ -3,7 +3,7 @@ new Class('Lib.Animatable', {
      * @name Lib.Animatable
      * @class
      */
-    /** @scope Lib.Animatable */
+    /** @scope Animatable */
 
 	/**
 	 * Used for animating numeric properties of the owner of the function.
@@ -44,7 +44,6 @@ new Class('Lib.Animatable', {
 		loop = opt.loop !== undefined  ?  opt.loop : (this.loop !== undefined ? this.loop : engine.defaultAnimationLoop);
 
 		anim.callback = opt.callback !== undefined  ?  opt.callback : function () {};
-		anim.onStep = opt.onStep !== undefined  ?  opt.onStep : function () {};
 		anim.easing = opt.easing !== undefined ?  opt.easing : "quadInOut";
 		anim.duration = opt.duration !== undefined ?  opt.duration : 1000;
 

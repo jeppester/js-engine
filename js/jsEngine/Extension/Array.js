@@ -10,6 +10,19 @@ Array.prototype.getElementByPropertyValue = function (property, value) {
 };
 
 /**
+ * Returns all objects - in the array - which have a specific property with a specific value.
+ * 
+ * @param {string} property The name of the property
+ * @param {*} value The value of the property (can be of any type)
+ * @return {*[]} An array containing the the found objects (an empty array if no objects are found)
+ */
+Array.prototype.getArrayByPropertyValue = function (property, value) {
+	return this.filter(function (arr) {
+		return arr[property] === value;
+	});
+};
+
+/**
  * Returns the key of the first object - in the array - which has a specific property with a specific value.
  * 
  * @param {string} property The name of the property
@@ -24,6 +37,25 @@ Array.prototype.getKeyByPropertyValue = function (property, value) {
 		}
 	}
 	return false;
+};
+
+/**
+ * Returns the keys of all objects - in the array - which have a specific property with a specific value.
+ * 
+ * @param {string} property The name of the property
+ * @param {*} value The value of the property (can be of any type)
+ * @return {*[]} An array containing the keys of the found objects (an empty array if no objects are found)
+ */
+Array.prototype.getKeysByPropertyValue = function (property, value) {
+	var i, keys;
+
+	keys = [];
+	for (i = 0; i < this.length; i ++) {
+		if (this[i][property] === value) {
+			keys.push(i);
+		}
+	}
+	return keys;
 };
 
 /**

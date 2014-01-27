@@ -7,7 +7,7 @@ new Class('Engine.Room', [View.Container], {
      *        A room holds a list of objects to draw, and a list of custom loops.
      *        If a room is set as the engine's current room (engine.currentRoom); its objects will be drawn, and its custom loops will be executed each time the engine's main loop executes.
      *        The engine also has a master room (engine.masterRoom), which is persistent throughout a game (this is the room where you would add persistent objects and custom loops)
-     * @augments View.Container
+     * @augments View
      *
      * @property {string} name The name of the room
      * @property {function} onEntered A function which will be executed when the room is entered

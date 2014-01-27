@@ -149,13 +149,12 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
 		c.lineTo(this.width, 0);
 		c.lineTo(this.width, this.height);
 		c.lineTo(0, this.height);
-		c.lineTo(0, 0);
+		c.closePath();
 
         c.lineWidth = this.lineWidth;
-        c.stroke();
         c.fill();
+        c.stroke();
 
-		c.closePath();
 
 		c.restore();
 	}

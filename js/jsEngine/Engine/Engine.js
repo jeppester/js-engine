@@ -20,6 +20,7 @@ new Class('Engine', {
      * @property {boolean} drawMasks Whether or not the masks of all collidable objects are drawn
      * @property {boolean} pauseOnBlur Whether or the engine will pause itself when the window is blurred
      * @property {boolean} disableRightClick Whether or not right click context menu is disabled inside the main canvas
+     * @property {boolean} preventDefaultKeyboard Whether or not preventDefault is called for keyboard events
      * @property {HTMLElement} arena The HTML element to use as parent to the main canvas
      * @property {boolean} autoResize Whether or not the arena will autoresize itself to fit the window
      * @property {boolean} autoResizeLimitToResolution Whether or not the arena should not autoresize itself to be bigger than the main canvas' resolution
@@ -28,6 +29,7 @@ new Class('Engine', {
      * @property {string} loadText The text shown while loading the engine
      * @property {string} backgroundColor A CSS color string which is used as the background color of the main canvas
      * @property {number} timeFactor The factor to multiply the time increase with. A factor of 2 will make everything happen with double speed
+     * @property {boolean} resetCursorOnEachFrame Whether or not the mouse cursor will be reset on each frame
      * @property {boolean} disableTouchScroll Whether or not touch scroll has been disabled
      * @property {Camera[]} cameras An array containing the engine's cameras
      * @property {int} defaultCollisionResolution The collision resolution set for all created collidable objects
@@ -47,6 +49,7 @@ new Class('Engine', {
 	 * 	                "canvasResY": 600, // The vertical resolution to set for the game's main canvas
 	 * 	                "defaultCollisionResolution": 6, // Res. of collision checking, by default every 6th px is checked
 	 * 	                "disableRightClick": true, // If right clicks inside the arena should be disabled
+	 *                  "preventDefaultKeyboard": true, // Whether or not preventDefault should be called for keyboard events
 	 * 	                "disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
 	 * 	                "drawBoundingBoxes": false, // If Collidable object's bounding boxes should be drawn
 	 * 	                "drawMasks": false, // If Collidable object's masks should be drawn
@@ -56,6 +59,7 @@ new Class('Engine', {
 	 * 	                "loadText": 'jsEngine loading...'
 	 * 	                "musicMuted": false, // If all music playback should be initially muted
 	 * 	                "pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
+	 *					"resetCursorOnEachFrame": true // Whether or not the mouse cursor should be reset on each frame
 	 * 	                "soundsMuted": false, // If all sound effects should be initially muted
 	 * 	                "themesPath": "themes", // The path to the themes-directory
 	 * 	                "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
@@ -63,10 +67,7 @@ new Class('Engine', {
 	 */
 	Engine: function (options) {
         // Set global engine variable
-        /**
-         * Global reference to the engine (automatically create upon initialization of the engine)
-         * @global
-         */
+        /** @global */
         engine = this;
 
 		this.options = options ? options: {};
@@ -81,7 +82,7 @@ new Class('Engine', {
 	 */
 	load: function () {
 		// Define all used vars
-		var copyOpt, audioFormats, i, opt, gc;
+		var copyOpt, audioFormats, i, opt;
 
 		// Detect host information
 		this.host = {
@@ -133,6 +134,7 @@ new Class('Engine', {
 		this.drawMasks = false;
 		this.pauseOnBlur = true;
 		this.disableRightClick = true;
+		this.preventDefaultKeyboard = true;
 		this.arena = document.getElementById('arena');
 		this.autoResize = true;
 		this.autoResizeLimitToResolution = true;
@@ -142,6 +144,7 @@ new Class('Engine', {
 		this.backgroundColor = "#FFF";
 		this.timeFactor = 1;
 		this.disableTouchScroll = true;
+		this.resetCursorOnEachFrame = true;
 		this.cameras = [];
 		this.defaultCollisionResolution = 6;
         this.redrawObjects = [];
@@ -151,7 +154,7 @@ new Class('Engine', {
 		this.musicMuted = false;
 
 		// Copy options to engine (except those which are only used for engine initialization)
-		copyOpt = ['backgroundColor', 'enableRedrawRegions', 'disableTouchScroll', 'defaultCollisionResolution', 'focusOnLoad', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'pauseOnBlur', 'drawBoundingBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+		copyOpt = ['backgroundColor', 'preventDefaultKeyboard', 'enableRedrawRegions', 'resetCursorOnEachFrame', 'disableTouchScroll', 'defaultCollisionResolution', 'focusOnLoad', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'pauseOnBlur', 'drawBoundingBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
 		for (i = 0; i < copyOpt.length; i ++) {
 			opt = copyOpt[i];
 			if (this.options[opt] !== undefined) {
@@ -199,9 +202,8 @@ new Class('Engine', {
         /** @global */
 		loader = new Engine.Loader();
 
-		gc = this.gameClassPath;
-		loader.loadClasses([gc]);
-		this.gameClassName = gc.match(/(\w*)\.\w+$/)[1];
+		loader.loadClasses([this.gameClassPath]);
+		this.gameClassName = this.gameClassPath.match(/(\w*)\.\w+$/)[1];
 
 		// Load themes
 		this.defaultTheme = this.options.themes[0];
@@ -568,6 +570,11 @@ new Class('Engine', {
 		this.gameTime += this.gameTimeIncrease;
 		this.frames ++;
 
+		// Reset mouse cursor (if told to)
+		if (this.resetCursorOnEachFrame) {
+			pointer.resetCursor();
+		}
+
 		// Execute loops
 		this.masterRoom.update();
 		this.currentRoom.update();
@@ -732,27 +739,15 @@ new Class('Engine', {
 	/**
 	 * Removes an object from all engine loops, views, and from the object index
 	 *
-	 * param {Object} obj An object to remove
-	 * param {Object} obj2 A second object to remove
+	 * param {Object} obj The object to remove
 	 */
-	purge: function (obj, obj2) {
-		var i;
-
-		if (arguments.length > 1) {
-			for (i = 0; i < arguments.length; i ++) {
-				this.purge(arguments[i]);
-			}
-			return;
-		}
-
+	purge: function (obj) {
 		var len, name, loop, roomId, room;
 
 		if (obj === undefined) {throw new Error('Cannot purge object: ' + obj); } //dev
 		if (typeof obj === "string") {
 			obj = this.objectIndex[obj];
 		}
-
-		obj.onBeforePurge && obj.onBeforePurge();
 
 		// Purge ALL children
 		if (obj.children) {

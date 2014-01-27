@@ -2,30 +2,30 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	/**
 	 * The constructor for the TextBlock class.
 	 *
-     * @name View.TextBlock
-     * @class A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
-     * @augments Lib.Animatable
-     * @augments View.Container
-     *
-     * @property {string} font A css string representing the font of the text block
-     * @property {number} width The width of the text block
-     * @property {number} height The height of the text block
-     * @property {string} alignment The text alignment of the text block, possible values are: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT
-     * @property {string} color A css string representing the text's color
-     * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
-     * @property {number} direction The direction of the sprite (in radians)
-     * @property {number} size A size modifier which modifies both the width and the height of the sprite
-     * @property {number} widthModifier A size modifier which modifies the width of the sprite
-     * @property {number} heightModifier A size modifier which modifies the height of the object
-     * @property {number} opacity The opacity of the sprite
-     *
+	 * @name TextBlock
+	 * @class A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
+	 * @augments Animatable
+	 * @augments View
+	 *
+	 * @property {string} font A css string representing the font of the text block
+	 * @property {number} width The width of the text block
+	 * @property {number} height The height of the text block
+	 * @property {string} alignment The text alignment of the text block, possible values are: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT
+	 * @property {string} color A css string representing the text's color
+	 * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
+	 * @property {number} direction The direction of the sprite (in radians)
+	 * @property {number} size A size modifier which modifies both the width and the height of the sprite
+	 * @property {number} widthModifier A size modifier which modifies the width of the sprite
+	 * @property {number} heightModifier A size modifier which modifies the height of the object
+	 * @property {number} opacity The opacity of the sprite
+	 *
 	 * @param {string} string The string to display inside the TextBlock
 	 * @param {number} [x=0] The x-position of the object in the game arena, in pixels
 	 * @param {number} [y=0] The y-position of the object in the game arena, in pixels
 	 * @param {number} [width=200] The width of the text block, in pixels. When the text reaches the width, it will break into a new line
 	 * @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
 	 *                 The default is:<code>
-     *                 {
+	 *                 {
 	 * 	                font: 'normal 14px Verdana',
 	 * 	                color: '#000',
 	 * 	                alignment: ALIGNMENT_LEFT,
@@ -46,7 +46,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		this.y = y !== undefined ? y : 0;
 
 		// Load default options
-		this.clipWidth = width || 200;
+		this.clipWidth = parseInt(width, 10) || 200;
 		this.lines = [];
 		this.lineWidth = [];
 		this.bm = document.createElement('canvas');
@@ -78,6 +78,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 			get: function () {return hidden.font; },
 			set: function (value) {
 				if (typeof value !== 'string') {throw new Error('font should be of type: string'); } //dev
+				if (value === hidden.font) {return value; }
 				hidden.font = value;
 				this.stringToLines();
 				this.cacheRendering();
@@ -89,6 +90,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 			get: function () {return hidden.alignment; },
 			set: function (value) {
 				if (['left', 'center', 'right'].indexOf(value) === -1) {throw new Error('alignment should be one of the following: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT'); } //dev
+				if (value === hidden.alignment) {return value; }
 				hidden.alignment = value;
 				this.cacheRendering();
 				engine.enableRedrawRegions && this.onAfterChange();
@@ -99,6 +101,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 			get: function () {return hidden.color; },
 			set: function (value) {
 				if (!/#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})/.test(value)) {throw new Error('color should be a CSS color string'); } //dev
+				if (value === hidden.color) {return value; }
 				hidden.color = value;
 				this.cacheRendering();
 				engine.enableRedrawRegions && this.onAfterChange();
@@ -129,16 +132,22 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 
 		// Define pseudo properties
 		Object.defineProperty(this, 'width', {
-			get: function () {return this.clipWidth * this.size * this.widthModifier; },
+			get: function () {
+				return Math.abs(this.clipWidth * this.size * this.widthModifier);
+			},
 			set: function (value) {
-				this.widthModifier = value / (this.clipWidth * this.size);
+				var sign = this.widthModifier > 0 ? 1 : -1;
+				this.widthModifier = sign * Math.abs(value / (this.clipWidth * this.size));
 				return value;
 			}
 		});
 		Object.defineProperty(this, 'height', {
-			get: function () {return this.clipHeight * this.size * this.heightModifier; },
+			get: function () {
+				return Math.abs(this.clipHeight * this.size * this.heightModifier);
+			},
 			set: function (value) {
-				this.heightModifier = value / (this.clipHeight * this.size);
+				var sign = this.heightModifier > 0 ? 1 : -1;
+				this.heightModifier = sign * Math.abs(value / (this.clipHeight * this.size));
 				return value
 			}
 		});
@@ -179,7 +188,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 			this.offset.y = Math.round(this.offset.y);
 		}
 	},
-    /** @scope View.TextBlock */
+	/** @scope TextBlock */
 
 	/**
 	 * Breaks the TextBlock's text string into lines.
@@ -273,13 +282,13 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	},
 
 	/**
-     * Checks if the objects is visible. This function runs before each draw to ensure that it is necessary
-     * @return {boolean} Whether or not the object is visible (based on its size and opacity vars) 
-     */
-    isVisible: function () {
-        // If sprites size has been modified to zero, do nothing
-        return !(this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0 || /^\s*$/.test(this.string));
-    },
+	 * Checks if the objects is visible. This function runs before each draw to ensure that it is necessary
+	 * @return {boolean} Whether or not the object is visible (based on its size and opacity vars) 
+	 */
+	isVisible: function () {
+		// If sprites size has been modified to zero, do nothing
+		return !(this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0 || /^\s*$/.test(this.string));
+	},
 
 	/**
 	 * Draws the cached rendering of the TextBlock object to the canvas.
@@ -295,16 +304,16 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		// Round offset if necessary
 		var offX, offY;
 		if (engine.avoidSubPixelRendering) {
-            offX = Math.round(this.offset.x);
-            offY = Math.round(this.offset.y);
-        }
-        else {
-            offX = this.offset.x;
-            offY = this.offset.y;
+			offX = Math.round(this.offset.x);
+			offY = Math.round(this.offset.y);
+		}
+		else {
+			offX = this.offset.x;
+			offY = this.offset.y;
 		}
 
-        // Draw bm
-        c.drawImage(this.bm, 0, 0, this.clipWidth, this.clipHeight, - offX, - offY, this.clipWidth, this.clipHeight);
+		// Draw bm
+		c.drawImage(this.bm, 0, 0, this.clipWidth, this.clipHeight, - offX, - offY, this.clipWidth, this.clipHeight);
 	},
 
 	/**

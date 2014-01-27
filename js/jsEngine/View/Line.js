@@ -5,7 +5,7 @@ new Class('View.Line',[Math.Line, View.Child], {
      * @name View.Line
      * @class A class which is used for handling lines
      * @augments View.Child
-     * @augments Math.Line
+     * @augments Math.Animatable
      *
      * @property {View.Vector} a The line's starting point
      * @property {View.Vector} b The line's ending point

@@ -323,14 +323,14 @@ new Class('Engine.Loader', {
 
 			// Fetch theme details
 			req = new XMLHttpRequest();
-			req.open('GET', engine.themesPath + '/' + name + '/theme.json', false);
+			req.open('GET', engine.themesPath + '/' + name + '/theme.js', false);
 			req.send();
 
 			// Check that the theme is actually there
 			if (req.status === 404) {console.log('Theme not found: ' + name); continue; }
 
 			// Get theme details
-			codeString = req.responseText + "\n//@ sourceURL=/" + engine.themesPath + '/' + name + '/theme.json';
+			codeString = req.responseText + "\n//@ sourceURL=/" + engine.themesPath + '/' + name + '/theme.js';
             eval('theme = ' + codeString);
 
 			// Load inherited themes

@@ -10,13 +10,17 @@ new Class('Input.Keyboard', {
 
 		document.addEventListener('keydown', function (event) {
 			keyboard.onKeyDown(event);
-			event.preventDefault();
-			return false;
+
+			if (engine.preventDefaultKeyboard) {
+				event.preventDefault();
+			}
 		}, false);
 		document.addEventListener('keyup', function (event) {
 			keyboard.onKeyUp(event);
-			event.preventDefault();
-			return false;
+
+			if (engine.preventDefaultKeyboard) {
+				event.preventDefault();
+			}
 		}, false);
 
 		// Create key array

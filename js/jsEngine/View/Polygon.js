@@ -2,7 +2,7 @@ new Class('View.Polygon',[Math.Polygon, View.Child], {
 	/**
 	 * The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
 	 *
-     * @name View.Polygon
+     * @name Polygon
      * @class A class which is used for handling polygons
      * @augments Math.Polygon
      * @augments View.Child
@@ -26,8 +26,10 @@ new Class('View.Polygon',[Math.Polygon, View.Child], {
         this.strokeStyle = strokeStyle || "#000";
         this.lineWidth = lineWidth || 1;
         this.opacity = 1;
+        this.closed = 1;
+        this.lineDash = [];
 	},
-    /** @scope View.Polygon */
+    /** @scope Polygon */
 
     /**
      * Calculates the region which the object will fill out when redrawn.
@@ -66,17 +68,30 @@ new Class('View.Polygon',[Math.Polygon, View.Child], {
         c.strokeStyle = this.strokeStyle;
         c.fillStyle = this.fillStyle;
 
+        if (this.lineDash !== [] && c.setLineDash) {
+            c.setLineDash(this.lineDash);
+        }
+
 		c.beginPath();
 
         len = this.points.length;
-        c.moveTo(this.points[len - 1].x, this.points[len - 1].y);
+
         for (i = 0; i < len; i ++) {
             c.lineTo(this.points[i].x, this.points[i].y);
         }
 
         c.lineWidth = this.lineWidth;
         c.globalAlpha = this.opacity;
-        c.stroke();
-        c.fill();
+
+        if (this.closed) {
+            c.closePath();
+            c.fill();
+            c.stroke();
+        }
+        else {
+            c.fill();
+            c.stroke();
+            c.closePath();
+        }
 	}
 });

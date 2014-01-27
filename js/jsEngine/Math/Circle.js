@@ -16,11 +16,6 @@ new Class('Math.Circle', [Lib.Animatable], {
 	 */
 	Circle: function (x, y, radius) {
 		this.set(x, y, radius);
-
-        this.fillStyle = fillStyle || "#000";
-        this.strokeStyle = strokeStyle || "#000";
-        this.lineWidth = lineWidth || 1;
-        this.opacity = 1;
 	},
     /** @scope Math.Circle */
 
@@ -119,19 +114,19 @@ new Class('Math.Circle', [Lib.Animatable], {
 	 * @return {number} The distance
 	 */
 	getDistance: function (object) {
-		if (object.implements(Vector)) {
+		if (object.implements(Math.Vector)) {
 			return Math.max(0, object.getDistance(new Math.Vector(this.x, this.y)) - this.radius);
 		}
-		else if (object.implements(Line)) {
+		else if (object.implements(Math.Line)) {
 			return Math.max(0, object.getDistance(new Math.Vector(this.x, this.y)) - this.radius);
 		}
-		else if (object.implements(Circle)) {
+		else if (object.implements(Math.Circle)) {
 			return Math.max(0, new Math.Vector(this.x, this.y).getDistance(new Math.Vector(object.x, object.y)) - (this.radius + object.radius));
 		}
-		else if (object.implements(Rectangle)) {
+		else if (object.implements(Math.Rectangle)) {
 			return object.getDistance(this);
 		}
-		else if (object.implements(Polygon)) {
+		else if (object.implements(Math.Polygon)) {
 			return object.getDistance(this);
 		}
 		else { //dev
@@ -148,23 +143,23 @@ new Class('Math.Circle', [Lib.Animatable], {
 	contains: function (object) {
 		var i, cDist;
 
-		if (object.implements(Vector)) {
+		if (object.implements(Math.Vector)) {
 			return object.copy().move(-this.x, -this.y).getLength() < this.radius;
 		}
-		else if (object.implements(Line)) {
+		else if (object.implements(Math.Line)) {
 			return this.contains(object.a) && this.contains(object.b);
 		}
-		else if (object.implements(Circle)) {
+		else if (object.implements(Math.Circle)) {
 			// Find the distance between the circles' centres
 			cDist = new Math.Vector(object.x, object.y).move(-this.x, -this.y).getLength();
 
 			// If the sum of the distance and the checked circle's radius is smaller than this circles radius, this circle must contain the other circle
 			return cDist + object.radius < this.radius;
 		}
-		else if (object.implements(Rectangle)) {
+		else if (object.implements(Math.Rectangle)) {
 			return this.contains(object.getPolygon());
 		}
-		else if (object.implements(Polygon)) {
+		else if (object.implements(Math.Polygon)) {
 			// Check if any of the polygon's points are outside the circle
 			for (i = 0; i < object.points.length; i++) {
 				if (!this.contains(object.points[i])) {
@@ -186,16 +181,16 @@ new Class('Math.Circle', [Lib.Animatable], {
 	 * @return {boolean} True if the Circle intersects with the checked object, false if not
 	 */
 	intersects: function (object) {
-		if (object.implements(Line)) {
+		if (object.implements(Math.Line)) {
 			return this.contains(object) === false && object.getDistance(this) <= 0;
 		}
-		else if (object.implements(Circle)) {
+		else if (object.implements(Math.Circle)) {
 			return !this.contains(object) && !object.contains(this) && new Math.Vector(this.x, this.y).getDistance(new Math.Vector(object.x, object.y)) <= this.radius + object.radius;
 		}
-		else if (object.implements(Rectangle)) {
+		else if (object.implements(Math.Rectangle)) {
 			return object.getPolygon().intersects(this);
 		}
-		else if (object.implements(Polygon)) {
+		else if (object.implements(Math.Polygon)) {
 			return object.intersects(this);
 		}
 		else { //dev

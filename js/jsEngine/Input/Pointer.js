@@ -32,11 +32,6 @@ new Class('Input.Pointer', {
 				engine.host.hasMouse = true;
 				pointer.onMouseMove(event);
 			}, false);
-
-			// Set mouse cursor
-			if (engine.options.cursor) {
-				engine.arena.style.cursor = "url('" + loader.getImage(engine.options.cursor).src + "') 0 0, auto";
-			}
 		}
 
 		// Setup mouse device
@@ -597,5 +592,43 @@ new Class('Input.Pointer', {
 	 */
 	outside: function () {
 		return new Math.Rectangle(engine.arena.offsetLeft, engine.arena.offsetTop, engine.arena.offsetWidth, engine.arena.offsetHeight).contains(this.mouse.window) === false;
+	},
+
+	/**
+	 * Resets the mouse cursor, automatically called by the engine before each frame i executed, unless engine.resetCursorOnEachFrame is set to false
+	 * 
+	 * @private
+	 */
+	resetCursor: function () {
+		engine.arena.style.cursor = 'default';
+	},
+
+	/**
+	 * Sets the mouse cursor for the arena.
+	 * By default the mouse cursor will be reset on each frame (this can be changed with the "resetCursorOnEachFrame" engine option)
+	 * Please be aware that not all images can be used as cursor. Not all sizes and formats are supported by all browsers.
+	 *
+	 * @param {string} A resource string, image path string or css cursor of the cursor
+	 */
+	setCursor: function (cursor) {
+		if (cursor === undefined) {throw new Error('Missing argument: cursor'); } //dev
+		if (typeof cursor !== 'string') {throw new Error('Argument cursor should be of type: string'); } //dev
+
+		var resource;
+
+		// Check if "cursor" is a resource string
+		resource = loader.getImage(cursor);
+
+		// If the cursor string corresponded to a resource, use the resource's src as cursor
+		if (resource) {
+			cursor = "url('" + resource.src + "') 0 0, auto";
+		}
+		// Else, if the cursor is not a single word (a css cursor), use the cursor var as direct image path
+		else if (!/^\w*$/.test(cursor)) {
+			cursor = "url('" + cursor + "') 0 0, auto";
+		}
+
+		// Finally: set the cursor
+		engine.arena.style.cursor = cursor;
 	}
 });

@@ -1,11 +1,11 @@
 /**
  * Creates a new jsEngine class
- * @global
+ *
  * @param {string} className The name of the new class
  * @param {Class|Class[]|Object} [inherits] A class or an array of classes to inherit functions from (to actually extend an inherited class, run the class' constructor from inside the extending class)
  * @param {Object} functions A map of functions to add to the new class, functions can also be added by using [Class name].prototype.[Function name] = function () {}
  */
-Class = function(className, inherits, functions) {
+function Class(className, inherits, functions) {
 	var name, constructor, str, i, ii, inheritClass, newClass, propName;
 
     // Check if the class is inside a name space
