@@ -8,7 +8,7 @@
 
 {
 	"name":"Empty",
-	"inherit":"",
+	"inherit":[],
 	"music":{},
 	"sfx":{},
 	"images":{}
