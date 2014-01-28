@@ -24,10 +24,25 @@ new Class('Engine.Room', [View.Container], {
 		this.onEntered = onEntered !== undefined ? onEntered : function () {};
 		this.onLeft = onLeft !== undefined ? onLeft : function () {};
 		this.loops = {};
+		this.paused = false;
 		this.addLoop('eachFrame', new Engine.CustomLoop());
 		engine.addRoom(this);
 	},
     /** @scope Engine.Room */
+
+    /**
+     * Prevents all the room's loops from being executed, this function is used by the engine before making room transitions
+     */
+    pause: function () {
+    	this.paused = true;
+    },
+
+    /**
+     * Enables the room's loops after again after the room has been paused.
+     */
+    play: function () {
+    	this.paused = false;
+    },
 
 	/**
 	 * Updates all the room's loops.
@@ -35,6 +50,10 @@ new Class('Engine.Room', [View.Container], {
 	 * @private
 	 */
 	update: function () {
+		if (this.paused) {
+			return;
+		}
+
 		var i;
 
 		for (i in this.loops) {
