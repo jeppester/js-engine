@@ -398,8 +398,17 @@ new Class('Engine.Loader', {
 				switch (typeString) {
 				case 'images':
 					res = new Image();
-					res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, '/') + '.png';
 
+					// Get image format
+					format = object[path].match(/(png|jpg|jpeg|svg)/);
+					if (format) {
+						format = format[0];
+					}
+
+					// Start loading iage
+					res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, '/') + '.' + format;
+
+					// Find out if the image is a sprite
 					images = object[path].match(/; *(\d+) *images?/);
 					if (images) {
 						res.imageLength = parseInt(images[1], 10);
@@ -416,6 +425,7 @@ new Class('Engine.Loader', {
 					}
 					theme.images[path] = res;
 
+					// Set load callback
 					res.onload = onload;
 					theme.resourcesCount ++;
 					break;
