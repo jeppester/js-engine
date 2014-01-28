@@ -160,29 +160,55 @@ new Class('View.Child', [Lib.Animatable], {
         }
     },
 
-    isDrawn: function () {
+    /**
+     * Checks if the child object is inside a room that is currently visible
+     * 
+     * @return {Boolean} Whether or not the child object is currently in a visible room
+     */
+    isInVisibleRoom: function () {
         var p;
 
         p = this.getParents().pop();
 
-        return this.isVisible() && (p === engine.currentRoom || p === engine.masterRoom);
+        return (p === engine.currentRoom || p === engine.masterRoom);
+    },
+
+    /**
+     * Checks if the child object is in a state where it will get drawn.
+     * For this function to return true, the child object has to be both visible and placed in a visible room.
+     * 
+     * @return {Boolean} Whether or not the child object is in a state where it will get drawn
+     */
+    isDrawn: function () {
+        return this.isVisible() && this.isInVisibleRoom();
     },
 
     /**
      * Fetches the position of the child inside the room
+     *
+     * @return {Math.Vector|Boolean} The objects position in its room, or false if the object is not placed in any room.
      */
     getRoomPosition: function () {
-        var pos, parents, i;
-
-        pos = new Math.Vector(this.x, this.y);
+        var pos, parents, parent, i;
         
         parents = this.getParents();
 
-        for (i = 0; i < parents.length; i ++) {
-            pos.move(parents[i].x, parents[i].y);
-        }
+        if (parents.length && parents[parents.length -1].implements(Engine.Room)) {
+            pos = new Math.Vector(this.x, this.y);
+            
+            for (i = 0; i < parents.length; i ++) {
+                parent = parents[i];
 
-        return pos;
+                pos.scale(parent.widthModifier * parent.size, parent.heightModifier * parent.size);
+                pos.rotate(parent.direction);
+                pos.move(parent.x, parent.y);
+            }
+
+            return pos;
+        }
+        else {
+            return false;
+        }
     },
 
     /**
@@ -205,7 +231,7 @@ new Class('View.Child', [Lib.Animatable], {
     /**
      * Finds the room to which the object is currently added
      *
-     * @return {View.Room|boolean} The room to which the object is currently added, or false if the object is not added to a room
+     * @return {View.Room|Boolean} The room to which the object is currently added, or false if the object is not added to a room
      */
     getRoom: function () {
         var parents, ancestor;
