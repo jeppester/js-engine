@@ -502,7 +502,7 @@ new Class('Engine.Loader', {
                 res = new Image();
                 res.src = path;
 
-                images = options.match(/; *(\d+) *images?/);
+                images = options.match(/ *(\d+) *images?/);
                 if (images) {
                     res.imageLength = parseInt(images[1], 10);
                 }
