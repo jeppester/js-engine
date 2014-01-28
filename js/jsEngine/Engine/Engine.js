@@ -253,8 +253,8 @@ new Class('Engine', {
 		this.currentRoom = new Engine.Room('main');
 
 		// Set default custom loops
-		this.defaultAnimationLoop = this.masterRoom.loops.eachFrame;
-		this.defaultActivityLoop = this.masterRoom.loops.eachFrame;
+		this.defaultAnimationLoop = this.currentRoom.loops.eachFrame;
+		this.defaultActivityLoop = this.currentRoom.loops.eachFrame;
 
 		// Make main camera
 		this.cameras.push(
