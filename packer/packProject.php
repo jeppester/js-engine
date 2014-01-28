@@ -76,7 +76,7 @@ if (!file_exists($options["gameFile"])) {
 }
 else {
 	$gameFile = file_get_contents($options['gameFile']);
-	$options['gameDir'] = preg_replace('/\/[^\/]*$/', '/', $options['gameFile']);
+	$options['gameDir'] = dirname($options['gameFile']) . '/';
 
 	if (!isset($options['outputDir'])) {
 		$options['outputDir'] = $options['gameDir'];
@@ -194,7 +194,11 @@ if (!$options['engineOnly']) {
 	// Include option
 	if ($id = array_search('--include', $argv)) {
 		if (isset($argv[$id + 1])) {
-			$files = array_unique(array_merge($files, file($argv[$id + 1])));
+			$includeFiles = file($argv[$id + 1]);
+
+			foreach ($includeFiles as $file) {
+				scanLoad(str_replace("\n", '', $file));
+			}
 		}
 	}
 }
@@ -245,7 +249,7 @@ else {
 	$packedJS = JSMin::minify($filesContent);
 }
 
-$outputFileName = preg_replace('/^.*\/(.*)\.(\w*)$/', '$1.min.$2', $options['gameFile']);
+$outputFileName = basename($options['gameFile'], ".html") . '.min.' . pathinfo($options['gameFile'], PATHINFO_EXTENSION);
 
 if ($options['engineOnly']) {
 	echo "Saving to " . $options['outputDir'] . '/' . "jsEngine.min.js' (only engine was packed)\n";
