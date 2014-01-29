@@ -420,8 +420,15 @@ new Class('Engine', {
 	 * Leaves the current room and opens another room
 	 * 
 	 * @param {Room|string} room A pointer to the desired room, or a string representing the name of the room
+	 * @param {number} transition A room transition constant or function
 	 */
-	goToRoom: function (room) {
+	goToRoom: function (room, transition, transitionOptions) {
+		var oldRoom;
+
+		if (this.changingRoom) {
+			return false;
+		}
+
 		if (room === undefined) {throw new Error ('Missing argument: room'); } //dev
 
 		// If a string has been specified, find the room by name
@@ -436,9 +443,15 @@ new Class('Engine', {
 			}
 		}
 
-		this.currentRoom.onLeave();
-		this.currentRoom = room;
-		this.currentRoom.onEnter();
+		transition = transition ? transition : ROOM_TRANSITION_NONE;
+
+		oldRoom = this.currentRoom;
+		engine.changingRoom = true;
+		transition(oldRoom, room, transitionOptions, function () {
+			engine.changingRoom = false;
+			engine.currentRoom = room;
+		});
+		return oldRoom;
 	},
 
 	/**

@@ -13,8 +13,9 @@ new Class('Engine.Camera', {
      *
      * @param {Math.Rectangle} captureRegion A rectangle which defines the region of the current room to capture
      * @param {Math.Rectangle} projectionRegion A rectangle which defines the region on the main canvas where the captured region should be drawn
+     * @param {Engine.Room} room The room to capture from
      */
-    Camera: function (captureRegion, projectionRegion) {
+    Camera: function (captureRegion, projectionRegion, room) {
         if (!captureRegion.implements(Math.Rectangle)) {throw new Error('Argument captureRegion should be of type: Rectangle'); } //dev
 		if (!projectionRegion.implements(Math.Rectangle)) {throw new Error('Argument projectionRegion should be of type: Rectangle'); } //dev
 
@@ -23,7 +24,7 @@ new Class('Engine.Camera', {
 		this.canvas = document.createElement('canvas');
 		this.canvas.width = this.captureRegion.width;
 		this.canvas.height = this.captureRegion.height;
-		this.room = engine.currentRoom;
+		this.room = room || engine.currentRoom;
 		this.ctx = this.canvas.getContext('2d');
 	},
     /** @scope Engine.Camera */

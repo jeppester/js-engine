@@ -41,7 +41,7 @@ new Class('Lib.Animatable', {
 
 		anim.obj = this;
 
-		loop = opt.loop !== undefined  ?  opt.loop : (this.loop !== undefined ? this.loop : engine.defaultAnimationLoop);
+		loop = options.loop !== undefined  ?  options.loop : (this.loop !== undefined ? this.loop : engine.defaultAnimationLoop);
 
 		anim.callback = opt.callback !== undefined  ?  opt.callback : function () {};
 		anim.easing = opt.easing !== undefined ?  opt.easing : "quadInOut";

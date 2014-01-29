@@ -15,8 +15,8 @@
 	},
 	"images":{
         // Images in image root folder
-		"Character":"",
-        "Rock":"",
+		"Character":"png",
+        "Rock":"png",
         "Dot":"png",
 
         // Images inside a folder

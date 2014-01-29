@@ -289,3 +289,301 @@ ALIGNMENT_CENTER			= 'center';
  * Right text alignment
  */
 ALIGNMENT_RIGHT				= 'right';
+
+// ROOM TRANSITIONS
+// These are wrapped in a function to keep helper functions from the global scope
+(function () {
+	function slideOut (camera, from, animOptions) {
+		switch (from) {
+			case 'left':
+				camera.projectionRegion.animate({x: camera.projectionRegion.x + engine.canvasResX}, animOptions);
+				break;
+			case 'right':
+				camera.projectionRegion.animate({x: camera.projectionRegion.x - engine.canvasResX}, animOptions);
+				break;
+			case 'top':
+				camera.projectionRegion.animate({y: camera.projectionRegion.y + engine.canvasResY}, animOptions);
+				break;
+			case 'bottom':
+				camera.projectionRegion.animate({y: camera.projectionRegion.y - engine.canvasResY}, animOptions);
+				break;
+		}
+	}
+	function slideIn (camera, from, animOptions) {
+		switch (from) {
+			case 'left':
+				camera.projectionRegion.x -= engine.canvasResX;
+				camera.projectionRegion.animate({x: camera.projectionRegion.x + engine.canvasResX}, animOptions);
+				break;
+			case 'right':
+				camera.projectionRegion.x += engine.canvasResX;
+				camera.projectionRegion.animate({x: camera.projectionRegion.x - engine.canvasResX}, animOptions);
+				break;
+			case 'top':
+				camera.projectionRegion.y -= engine.canvasResY;
+				camera.projectionRegion.animate({y: camera.projectionRegion.y + engine.canvasResY}, animOptions);
+				break;
+			case 'bottom':
+				camera.projectionRegion.y += engine.canvasResY;
+				camera.projectionRegion.animate({y: camera.projectionRegion.y - engine.canvasResY}, animOptions);
+				break;
+		}
+	}
+	function squeezeOut (camera, from, animOptions) {
+		switch (from) {
+			case 'left':
+				camera.projectionRegion.animate({width: 0, x: camera.projectionRegion.x + engine.canvasResX}, animOptions);
+				break;
+			case 'right':
+				camera.projectionRegion.animate({width: 0}, animOptions);
+				break;
+			case 'top':
+				camera.projectionRegion.animate({height: 0, y: camera.projectionRegion.y + engine.canvasResY}, animOptions);
+				break;
+			case 'bottom':
+				camera.projectionRegion.animate({height: 0}, animOptions);
+				break;
+		}
+	}
+	function squeezeIn (camera, from, animOptions) {
+		var oldWidth, oldHeight;
+
+		switch (from) {
+			case 'left':
+				oldWidth = camera.projectionRegion.width;
+				camera.projectionRegion.width = 0;
+				camera.projectionRegion.animate({width: oldWidth}, animOptions);
+				break;
+			case 'right':
+				oldWidth = camera.projectionRegion.width;
+				camera.projectionRegion.width = 0;
+				camera.projectionRegion.x += engine.canvasResX;
+				camera.projectionRegion.animate({x: camera.projectionRegion.x - engine.canvasResX, width: oldWidth}, animOptions);
+				break;
+			case 'top':
+				oldHeight = camera.projectionRegion.height;
+				camera.projectionRegion.height = 0;
+				camera.projectionRegion.animate({height: oldHeight}, animOptions);
+				break;
+			case 'bottom':
+				oldHeight = camera.projectionRegion.height;
+				camera.projectionRegion.height = 0;
+				camera.projectionRegion.y += engine.canvasResY;
+				camera.projectionRegion.animate({y: camera.projectionRegion.y - engine.canvasResY, height: oldHeight}, animOptions);
+				break;
+		}
+	}
+
+	/**
+	 * Room transition global for entering a new room with no transition (this is default)
+	 * 
+	 * @global
+	 * @param {Engine.Room} oldRoom The room that is left
+	 * @param {Engine.Room} newRoom The room that is entered
+	 */
+	ROOM_TRANSITION_NONE		= function (oldRoom, newRoom, options, callback) {
+		var i, camera;
+
+		for (i = 0; i < engine.cameras.length; i ++) {
+			camera = engine.cameras[i];
+
+			if (camera.room === oldRoom) {
+				camera.room = newRoom;
+			}
+		}
+
+		callback();
+	}
+
+	/**
+	 * Room transition global for entering a new room by sliding the current room to the left
+	 *
+	 * @global
+	 * @param {Engine.Room} oldRoom The room that is left
+	 * @param {Engine.Room} newRoom The room that is entered
+	 */
+	ROOM_TRANSITION_SLIDE_SLIDE	= function (oldRoom, newRoom, options, callback) {
+		var i, camera, newCams, newCam, animOptions;
+
+		newCams = [];
+		oldRoom.pause();
+
+		options = options || {};
+		options.from = options.from || 'right';
+		animOptions = {
+			easing: options.easing || 'quadInOut',
+			duration: options.duration || 2000,
+			loop: engine.masterRoom.loops.eachFrame,
+		}
+
+		for (i = 0; i < engine.cameras.length; i ++) {
+			camera = engine.cameras[i];
+			if (camera.room === oldRoom) {
+				slideOut(camera, options.from, animOptions);
+
+				newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
+				newCams.push(newCam);
+			}
+		}
+		
+		engine.cameras.push.apply(engine.cameras, newCams);
+		newCams.forEach(function () {
+			slideIn(this, options.from, animOptions);
+		});
+
+		engine.masterRoom.loops.eachFrame.schedule(oldRoom, function () {
+			this.play();
+			engine.cameras = engine.cameras.filter(function (camera) {
+				return newCams.indexOf(camera) !== -1;
+			})
+
+			callback();
+		}, animOptions.duration);
+	}
+	/**
+	 * Room transition global for entering a new room by squeezing the old room out and sliding the new room in
+	 *
+	 * @global
+	 * @param {Engine.Room} oldRoom The room that is left
+	 * @param {Engine.Room} newRoom The room that is entered
+	 */
+	ROOM_TRANSITION_SQUEEZE_SLIDE	= function (oldRoom, newRoom, options, callback) {
+		var i, camera, newCams, newCam, animOptions;
+
+		newCams = [];
+		oldRoom.pause();
+
+		options = options || {};
+		options.from = options.from || 'right';
+		animOptions = {
+			easing: options.easing || 'quadInOut',
+			duration: options.duration || 2000,
+			loop: engine.masterRoom.loops.eachFrame,
+		}
+
+		for (i = 0; i < engine.cameras.length; i ++) {
+			camera = engine.cameras[i];
+
+			if (camera.room === oldRoom) {
+				squeezeOut(camera, options.from, animOptions);
+
+				newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
+				newCams.push(newCam);
+			}
+		}
+		
+		engine.cameras.push.apply(engine.cameras, newCams);
+
+		newCams.forEach(function () {
+			slideIn(this, options.from, animOptions);
+		});
+
+		engine.masterRoom.loops.eachFrame.schedule(oldRoom, function () {
+			this.play();
+			engine.cameras = engine.cameras.filter(function (camera) {
+				return newCams.indexOf(camera) !== -1;
+			})
+
+			callback();
+		}, animOptions.duration);
+	}
+	/**
+	 * Room transition global for squeezing the old room out and squeezing the new room in
+	 *
+	 * @global
+	 * @param {Engine.Room} oldRoom The room that is left
+	 * @param {Engine.Room} newRoom The room that is entered
+	 */
+	ROOM_TRANSITION_SQUEEZE_SQUEEZE	= function (oldRoom, newRoom, options, callback) {
+		var i, camera, newCams, newCam, animOptions;
+
+		newCams = [];
+		oldRoom.pause();
+
+		options = options || {};
+		options.from = options.from || 'right';
+		animOptions = {
+			easing: options.easing || 'quadInOut',
+			duration: options.duration || 2000,
+			loop: engine.masterRoom.loops.eachFrame,
+		}
+
+		console.log(options.from);
+
+		for (i = 0; i < engine.cameras.length; i ++) {
+			camera = engine.cameras[i];
+
+			if (camera.room === oldRoom) {
+				squeezeOut(camera, options.from, animOptions);
+
+				newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
+				newCams.push(newCam);
+			}
+		}
+		
+		engine.cameras.push.apply(engine.cameras, newCams);
+
+		newCams.forEach(function () {
+			squeezeIn(this, options.from, animOptions);
+		});
+
+		engine.masterRoom.loops.eachFrame.schedule(oldRoom, function () {
+			this.play();
+			engine.cameras = engine.cameras.filter(function (camera) {
+				return newCams.indexOf(camera) !== -1;
+			})
+
+			callback();
+		}, animOptions.duration);
+	}
+
+	/**
+	 * Room transition global for sliding the old room out and squeezing the new room in
+	 *
+	 * @global
+	 * @param {Engine.Room} oldRoom The room that is left
+	 * @param {Engine.Room} newRoom The room that is entered
+	 */
+	ROOM_TRANSITION_SLIDE_SQUEEZE	= function (oldRoom, newRoom, options, callback) {
+		var i, camera, newCams, newCam, animOptions;
+
+		newCams = [];
+		oldRoom.pause();
+
+		options = options || {};
+		options.from = options.from || 'right';
+		animOptions = {
+			easing: options.easing || 'quadInOut',
+			duration: options.duration || 2000,
+			loop: engine.masterRoom.loops.eachFrame,
+		}
+
+		console.log(options.from);
+
+		for (i = 0; i < engine.cameras.length; i ++) {
+			camera = engine.cameras[i];
+
+			if (camera.room === oldRoom) {
+				slideOut(camera, options.from, animOptions);
+
+				newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
+				newCams.push(newCam);
+			}
+		}
+		
+		engine.cameras.push.apply(engine.cameras, newCams);
+
+		newCams.forEach(function () {
+			squeezeIn(this, options.from, animOptions);
+		});
+
+		engine.masterRoom.loops.eachFrame.schedule(oldRoom, function () {
+			this.play();
+			engine.cameras = engine.cameras.filter(function (camera) {
+				return newCams.indexOf(camera) !== -1;
+			})
+
+			callback();
+		}, animOptions.duration);
+	}
+})();
