@@ -89,6 +89,11 @@ new Class('View.Container', [View.Child], {
 
 			if (!child.implements(View.Child)) {throw new Error('Argument child has to be of type: Child'); } //dev
 
+			// If the child already has a parent, remove the child from that parent
+			if (child.parent) {
+				child.parent.removeChildren(child);
+			}
+
 			child.parent = this;
 			engine.enableRedrawRegions && child.onAfterChange();
 			
