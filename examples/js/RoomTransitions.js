@@ -26,6 +26,13 @@ new Class('RoomTransitions', {
             room.addChildren(new View.Sprite('Folder.Star2', 100 + Math.random() * 400, 100 + Math.random() * 200));
         }
 
+        // Create fourth room
+        room = new Engine.Room('room4');
+        room.addChildren(new View.Rectangle(0, 0, 600, 400, '#FFF'));
+        for (i = 0; i < 20; i ++) {
+            room.addChildren(new View.Sprite('Dot', 100 + Math.random() * 400, 100 + Math.random() * 200));
+        }
+
         // Hide loader overlay
         loader.hideOverlay(function () {
             // Start keyboard listener (The listener is placed in the persistent master room)
@@ -41,8 +48,11 @@ new Class('RoomTransitions', {
             else if (engine.currentRoom.name === 'room2') {
                 engine.goToRoom('room3', ROOM_TRANSITION_SQUEEZE_SQUEEZE, {duration: 1000, from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]});
             }
-            else {
-                engine.goToRoom('room1', ROOM_TRANSITION_SLIDE_SQUEEZE, {duration: 1000, from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]});
+            else if (engine.currentRoom.name === 'room3') {
+                engine.goToRoom('room4', ROOM_TRANSITION_SLIDE_SQUEEZE, {duration: 1000, from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]});
+            }
+            else{
+                engine.goToRoom('room1', ROOM_TRANSITION_SQUEEZE_SLIDE, {duration: 1000, from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]});
             }
         }
     },
