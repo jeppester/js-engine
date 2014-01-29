@@ -21,22 +21,20 @@
 </div>
 
 <!-- Load jsEngine -->
-<script type="text/javascript" src="jsEngine.min.js"></script>
+<!--<script type="text/javascript" src="jsEngine.min.js"></script>-->
+<script type="text/javascript" src="../js/jsEngine/autoload.js"></script>
 
 <!-- Start engine -->
 <script type="text/javascript">
 	new Engine({
-		// Set game-class path (Look at this file to start programming your game)
-		gameClassPath:'js/CollisionStressTest.js',
+		// Set main class to load
+		gameClassPath:'js/RoomTransitions.js',
 
 		// Set themes to load
 		themes:['Example'],
-		
+
 		// Set arena background-color
 		backgroundColor: "#000",
-
-		// Disable pause on blur (so that JavaScript profiling can be done easier)
-		pauseOnBlur: false,
 
 		// Set resolution of the game
 		canvasResX:600,
