@@ -38,8 +38,29 @@ new Class('StressTest', {
                 'Rock',
                 Math.random() * 600,
                 Math.random() * 400,
-                Math.random() * Math.PI * 2
+                Math.random() * Math.PI * 2,
+                {speed: new Math.Vector(-5 + Math.random() * 10, -5 + Math.random() * 10)}
             );
+            sprite.checkBounce = function () {
+                if (this.x < 0) {
+                    this.x = 0;
+                    this.speed.x = -this.speed.x;
+                }
+                else if (this.x > 600) {
+                    this.x = 600;
+                    this.speed.x = -this.speed.x;
+                }
+
+                if (this.y < 0) {
+                    this.y = 0;
+                    this.speed.y = -this.speed.y;
+                }
+                else if (this.y > 400) {
+                    this.y = 400;
+                    this.speed.y = -this.speed.y;
+                }
+            }
+            engine.currentRoom.loops.eachFrame.attachFunction(sprite, sprite.checkBounce);
 
             this.objectView.addChildren(sprite);
         }
