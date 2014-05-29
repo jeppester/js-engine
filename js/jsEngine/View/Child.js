@@ -22,7 +22,27 @@ new Class('View.Child', [Lib.Animatable], {
         this.size = 1;
         this.widthModifier = 1;
         this.heightModifier = 1;
-        this.offset = new Math.Vector();
+
+        var hidden = {
+            offset: new Math.Vector(),
+        }
+
+        Object.defineProperty(this, 'offset', {
+            get: function () {
+                return hidden.offset;
+            },
+            set: function (value) {
+                if (typeof value === 'string') {
+                    this.offsetGlobal = value;
+                    hidden.offset = this.parseOffsetGlobal(value);
+                }
+                else {
+                    this.offsetGlobal = false;
+                    hidden.offset = value;
+                }
+                return value;
+            }
+        });
     },
 
     ChildInitWithRedrawRegions: function () {
@@ -158,6 +178,17 @@ new Class('View.Child', [Lib.Animatable], {
                 this.hasChanged = true;
             }
         }
+    },
+
+    /**
+     * Parses an offset global into an actual Math.Vector offset
+     * (this function is only here for convenience and should be replaced by any class that inherits the child class)
+     * 
+     * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
+     * @return {Math.Vector} A parsed version of the offset global
+     */
+    parseOffsetGlobal: function (offset) {
+        return new Math.Vector();
     },
 
     /**

@@ -38,7 +38,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	TextBlock: function (string, x, y, width, additionalProperties) {
 		if (string === undefined) {throw new Error('Missing argument: string'); } //dev
 
-		var offset;
+		var hidden, offset;
 
 		// Call Vector's and view's constructors
 		this.Container();
@@ -54,8 +54,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		this.bm.width = this.clipWidth;
 		this.bm.height = 10;
 
-		// Load default options and getters/setters
-		var hidden;
+		// Create getters/setters
 		hidden = {
 			string: '',
 			font: 'normal 14px Verdana',
@@ -119,17 +118,6 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 			}
 		});
 
-		// If an offset static var is used, remove it for now, and convert it later
-		if (additionalProperties && additionalProperties.offset) {
-			if (typeof additionalProperties.offset === 'string') {
-				offset = additionalProperties.offset;
-				delete additionalProperties.offset;
-			}
-			else {
-				offset = undefined;
-			}
-		}
-
 		// Define pseudo properties
 		Object.defineProperty(this, 'width', {
 			get: function () {
@@ -154,34 +142,18 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 
 		this.lineHeight = additionalProperties && additionalProperties.lineHeight ? additionalProperties.lineHeight: this.font.match(/[0.0-9]+/) * 1.25;
 		
+		offset = OFFSET_TOP_LEFT;
+		if (additionalProperties && additionalProperties.offset) {
+			offset = additionalProperties.offset;
+			delete additionalProperties.offset;
+		}
+
 		// Load additional properties
 		this.importProperties(additionalProperties);
 		this.string = string;
 
-		// Convert static offset var (if such a var has been used)
-		if (offset) {
-			// calculate horizontal offset
-			if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
-				this.offset.x = 0;
-			}
-			else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
-				this.offset.x = this.clipWidth / 2;
-			}
-			else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.x = this.clipWidth;
-			}
-
-			// calculate vertical offset
-			if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = 0;
-			}
-			else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.clipHeight / 2;
-			}
-			else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.clipHeight;
-			}
-		}
+		// Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
+		this.offset = offset;
 
 		if (engine.avoidSubPixelRendering) {
 			this.offset.x = Math.round(this.offset.x);
@@ -189,6 +161,40 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		}
 	},
 	/** @scope TextBlock */
+
+	/**
+	 * Parses an offset global into an actual Math.Vector offset that fits the instance
+	 * 
+	 * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
+	 * @return {Math.Vector} The offset vector the offset global corresponds to for the instance
+	 */
+	parseOffsetGlobal: function (offset) {
+		ret = new Math.Vector();
+
+		// calculate horizontal offset
+		if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
+			ret.x = 0;
+		}
+		else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
+			ret.x = this.clipWidth / 2;
+		}
+		else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+			ret.x = this.clipWidth;
+		}
+
+		// calculate vertical offset
+		if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
+			ret.y = 0;
+		}
+		else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
+			ret.y = this.clipHeight / 2;
+		}
+		else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+			ret.y = this.clipHeight;
+		}
+
+		return ret;
+	},
 
 	/**
 	 * Breaks the TextBlock's text string into lines.

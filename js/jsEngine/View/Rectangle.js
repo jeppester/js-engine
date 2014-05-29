@@ -36,11 +36,29 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
     /** @scope View.Rectangle */
 
     RectangleInitWithoutRedrawRegions: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
+        var hidden;
+
         this.width = width || 0;
         this.height = height || 0;
         this.fillStyle = fillStyle || "#000";
         this.strokeStyle = strokeStyle || "#000";
-        this.lineWidth = lineWidth || 1;
+
+        hidden = {
+            lineWidth: lineWidth || 0,
+        };
+
+        Object.defineProperty(this, 'lineWidth', {
+            get: function() {return hidden.lineWidth; },
+            set: function(value) {
+                if (hidden.lineWidth !== value) {
+                    hidden.lineWidth = value;
+                    if (this.offsetGlobal) {
+                        this.offset = this.offsetGlobal;
+                    }
+                }
+            }
+        });
+
         this.set(x, y, width, height);
     },
 
@@ -52,7 +70,7 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
             height: height || 0,
             fillStyle: fillStyle || "#000",
             strokeStyle: strokeStyle || "#000",
-            lineWidth: lineWidth || 1
+            lineWidth: lineWidth || 0,
         };
 
         // Put getters and setters on points values
@@ -104,6 +122,40 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
         });
 
         this.set(x, y, width, height);
+    },
+
+    /**
+     * Parses an offset global into an actual Math.Vector offset that fits the instance
+     * 
+     * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
+     * @return {Math.Vector} The offset vector the offset global corresponds to for the instance
+     */
+    parseOffsetGlobal: function (offset) {
+        ret = new Math.Vector();
+
+        // calculate horizontal offset
+        if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
+            ret.x = -this.lineWidth / 2;
+        }
+        else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
+            ret.x = this.width / 2;
+        }
+        else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+            ret.x = this.width + this.lineWidth / 2;
+        }
+
+        // calculate vertical offset
+        if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
+            ret.y = -this.lineWidth / 2;
+        }
+        else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
+            ret.y = this.height / 2;
+        }
+        else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+            ret.y = this.height + this.lineWidth / 2;
+        }
+
+        return ret;
     },
 
     /**

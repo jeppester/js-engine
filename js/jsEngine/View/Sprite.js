@@ -56,19 +56,6 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		this.clipWidth;
 		this.clipHeight;
 
-		offset = OFFSET_MIDDLE_CENTER;
-
-		// If an offset static var is used, remove it for now, and convert it later
-		if (additionalProperties && additionalProperties.offset) {
-			if (typeof additionalProperties.offset === 'string') {
-				offset = additionalProperties.offset;
-				delete additionalProperties.offset;
-			}
-			else {
-				offset = undefined;
-			}
-		}
-
 		// Define pseudo properties
 		Object.defineProperty(this, 'width', {
 			get: function () {
@@ -87,9 +74,16 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 			set: function (value) {
 				var sign = this.heightModifier > 0 ? 1 : -1;
 				this.heightModifier = sign * Math.abs(value / (this.clipHeight * this.size));
-				return value
+				return value;
 			}
 		});
+
+		// If an offset static var is used, remove it for now, and convert it later
+		offset = OFFSET_MIDDLE_CENTER;
+		if (additionalProperties && additionalProperties.offset) {
+			offset = additionalProperties.offset;
+			delete additionalProperties.offset;
+		}
 
 		// Load additional properties
 		this.importProperties(additionalProperties);
@@ -98,36 +92,49 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 			throw new Error('Sprite source was not successfully loaded: ' + source); //dev
 		}
 
-		// Convert static offset var (if such a var has been used)
-		if (offset) {
-			// calculate horizontal offset
-			if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
-				this.offset.x = 0;
-			}
-			else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
-				this.offset.x = this.bm.width / this.imageLength / 2;
-			}
-			else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.x = this.bm.width / this.imageLength;
-			}
-
-			// calculate vertical offset
-			if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = 0;
-			}
-			else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.bm.height / 2;
-			}
-			else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.bm.height;
-			}
-		}
+		// Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
+		this.offset = offset;
 
 		if (engine.avoidSubPixelRendering) {
 			this.offset.x = Math.round(this.offset.x);
 			this.offset.y = Math.round(this.offset.y);
 		}
 	},
+
+	/**
+	 * Parses an offset global into an actual Math.Vector offset that fits the instance
+	 * 
+	 * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
+	 * @return {Math.Vector} The offset vector the offset global corresponds to for the instance
+	 */
+	parseOffsetGlobal: function (offset) {
+		ret = new Math.Vector();
+
+		// calculate horizontal offset
+		if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
+			ret.x = 0;
+		}
+		else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
+			ret.x = this.bm.width / this.imageLength / 2;
+		}
+		else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+			ret.x = this.bm.width / this.imageLength;
+		}
+
+		// calculate vertical offset
+		if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
+			ret.y = 0;
+		}
+		else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
+			ret.y = this.bm.height / 2;
+		}
+		else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+			ret.y = this.bm.height;
+		}
+
+		return ret;
+	},
+
     /** @scope Sprite */
 
 	/**
@@ -173,6 +180,9 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		this.imageNumber = Math.min(this.imageLength - 1, this.imageNumber);
 		this.clipWidth = Math.floor(this.bm.width / this.imageLength);
 		this.clipHeight = this.bm.height;
+		if (this.offsetGlobal) {
+			this.offset = this.offsetGlobal;
+		}
 
 		return this.bm;
 	},
