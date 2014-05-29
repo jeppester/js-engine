@@ -49,7 +49,7 @@ new Class('Engine', {
 	 * 	                "canvasResY": 600, // The vertical resolution to set for the game's main canvas
 	 * 	                "defaultCollisionResolution": 6, // Res. of collision checking, by default every 6th px is checked
 	 * 	                "disableRightClick": true, // If right clicks inside the arena should be disabled
-	 *                  "preventDefaultKeyboard": true, // Whether or not preventDefault should be called for keyboard events
+	 *                  "preventDefaultKeyboard": false, // Whether or not preventDefault should be called for keyboard events
 	 * 	                "disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
 	 * 	                "drawBoundingBoxes": false, // If Collidable object's bounding boxes should be drawn
 	 * 	                "drawMasks": false, // If Collidable object's masks should be drawn
@@ -137,7 +137,7 @@ new Class('Engine', {
 		this.drawMasks = false;
 		this.pauseOnBlur = true;
 		this.disableRightClick = true;
-		this.preventDefaultKeyboard = true;
+		this.preventDefaultKeyboard = false;
 		this.arena = document.getElementById('arena');
 		this.autoResize = true;
 		this.autoResizeLimitToResolution = true;
