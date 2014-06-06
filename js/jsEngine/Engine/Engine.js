@@ -1,4 +1,4 @@
-* For making the engine var unreachable **/
+/* For making the engine var unreachable **/
 (function () {
 /*var main;/**/
 
@@ -855,11 +855,11 @@ new Class('Engine', {
 	redraw: function () {
 		var i, gl, wm;
 
-		gl = this.gl
+		gl = this.gl;
 		wm = Helpers.makeIdentity();
 
 		engine.masterRoom.drawContainerGl(gl, wm);
-		this.room.drawContainerGl(gl, wm);
+		this.currentRoom.drawContainerGl(gl, wm);
 
 		// Ignore cameras for now
 
@@ -956,4 +956,4 @@ new Class('Engine', {
 	}
 });
 /** For making the engine var unreachable **/
-}());/*
+}());

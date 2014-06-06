@@ -244,7 +244,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
 		// Set a rectangle the same size as the image.
-		setPlane(gl, 0, 0, this.bm.width, this.bm.height);
+		Helpers.setPlane(gl, 0, 0, this.bm.width, this.bm.height);
 
 		// Draw the rectangle.
 		gl.drawArrays(gl.TRIANGLES, 0, 6);
