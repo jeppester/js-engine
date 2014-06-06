@@ -50,7 +50,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		this.lines = [];
 		this.lineWidth = [];
 		this.bm = document.createElement('canvas');
-		this.bmCtx = this.bm.getContext('2d');
+		this.bmCtx = Helpers.getCanvasContext(this.bm);
 		this.bm.width = this.clipWidth;
 		this.bm.height = 10;
 

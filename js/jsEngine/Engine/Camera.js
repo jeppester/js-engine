@@ -25,7 +25,7 @@ new Class('Engine.Camera', {
 		this.canvas.width = this.captureRegion.width;
 		this.canvas.height = this.captureRegion.height;
 		this.room = room || engine.currentRoom;
-		this.ctx = this.canvas.getContext('2d');
+		this.ctx = Helpers.getCanvasContext(this.canvas);
 	},
     /** @scope Engine.Camera */
 
@@ -148,7 +148,7 @@ new Class('Engine.Camera', {
 			region.canvas.width = region.width;
 			region.canvas.height = region.height;
 
-			ctx = region.canvas.getContext('2d');
+			ctx = Helpers.getCanvasContext(region.canvas);
 			ctx.translate(-region.x, -region.y);
 			engine.masterRoom.draw(ctx, region);
 			this.room.draw(ctx, region);

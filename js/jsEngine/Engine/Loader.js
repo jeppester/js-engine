@@ -581,7 +581,7 @@ new Class('Engine.Loader', {
 		canvas.width = image.width;
 		canvas.height = image.height;
 		canvas.imageLength = image.imageLength;
-		ctx = canvas.getContext('2d');
+		ctx = Helpers.getCanvasContext(canvas);
 
 		if (image === false) { //dev
 			throw new Error('Trying to create mask for non-existing resource: ' + resourceString); //dev

@@ -40,6 +40,8 @@
 		enginePath + '/Extension/Array.js',
 		enginePath + '/Extension/Object.js',
 
+		enginePath + '/Engine/Helpers.js',
+
 		enginePath + '/Engine/Class.js',
 		enginePath + '/Engine/Globals.js',
 		enginePath + '/Engine/Engine.js',

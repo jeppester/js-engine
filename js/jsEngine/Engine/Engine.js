@@ -173,13 +173,7 @@ new Class('Engine', {
 		this.arena.style.webkitUserSelect = "none";
 		this.arena.style.MozUserSelect = "none";
 
-		// Make main canvas
-		this.mainCanvas = document.createElement("canvas");
-		this.mainCanvas.style.display = "block";
-		this.mainCanvas.width = this.canvasResX;
-		this.mainCanvas.height = this.canvasResY;
-		this.mainCtx = this.mainCanvas.getContext('2d');
-		this.arena.appendChild(this.mainCanvas);
+		this.createCanvas();
 
 		// If autoresize is set to true, set up autoresize
 		if (this.autoResize) {
@@ -314,6 +308,50 @@ new Class('Engine', {
 		}
 
 		console.log('jsEngine started'); //dev
+	},
+
+	/**
+	 * Creates and prepares the game canvas for being used
+	 */
+	createCanvas: function () {
+		var c;
+
+		// Make main canvas
+		this.mainCanvas = document.createElement("canvas");
+		this.mainCanvas.style.display = "block";
+		this.mainCanvas.width = this.canvasResX;
+		this.mainCanvas.height = this.canvasResY;
+		this.mainCtx = Helpers.getCanvasContext(this.mainCanvas);
+		this.arena.appendChild(this.mainCanvas);
+
+		c = this.mainCtx
+
+		// Create shaders
+		this.initShaders();
+		this.program = this.mainCtx.createProgram();
+
+		c.attachShader(this.program, this.vertexShader);
+		c.attachShader(this.program, this.fragmentShader);
+		c.linkProgram(this.program);
+		c.useProgram(this.program);
+	},
+
+	initShaders: function () {
+		var c, vertex, fragment;
+
+		c = this.mainCtx;
+
+		// Vertex shader
+		vertex   = this.loadFileContent('/shaders/Vertex.vert.js');
+		this.vertexShader = c.createShader(c.VERTEX_SHADER);
+		c.shaderSource(this.vertexShader, vertex);
+		c.compileShader(this.vertexShader);
+
+		// Fragment shader
+		fragment = this.loadFileContent('/shaders/Fragment.frag.js');
+		this.fragmentShader = c.createShader(c.FRAGMENT_SHADER);
+		c.shaderSource(this.fragmentShader, fragment);
+		c.compileShader(this.fragmentShader);
 	},
 
 	/**
@@ -681,6 +719,13 @@ new Class('Engine', {
 		return id;
 	},
 
+	loadFileContent: function (filePath) {
+		req = new XMLHttpRequest();
+		req.open('GET', filePath, false);
+		req.send();
+		return req.responseText;
+	},
+
 	/**
 	 * Loads and executes one or multiple JavaScript file synchronously
 	 * 
@@ -695,10 +740,7 @@ new Class('Engine', {
 
 		for (i = 0; i < filePaths.length; i ++) {
 			// console.log('Loading: ' + filePaths[i])
-			req = new XMLHttpRequest();
-			req.open('GET', filePaths[i], false);
-			req.send();
-			codeString = req.responseText + "\n//@ sourceURL=/" + filePaths[i];
+			codeString = this.loadFileContent(filePaths[i]) + "\n//@ sourceURL=/" + filePaths[i];
 			try { //dev
 				eval(codeString);
 			} //dev
@@ -815,7 +857,6 @@ new Class('Engine', {
 
 
         for (i = 0; i < this.cameras.length; i++) {
-            //this.mainCanvas.getContext('2d').clearRect(0, 0, this.canvasResX, this.canvasResY);
 			this.cameras[i].capture();
             this.cameras[i].draw(c);
         }

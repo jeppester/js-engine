@@ -20,7 +20,7 @@ new Class('View.Container', [View.Child], {
 		this.Child();
 		this.parent = undefined;
 		this.drawCacheCanvas = document.createElement('canvas');
-		this.drawCacheCtx = this.drawCacheCanvas.getContext('2d');
+		this.drawCacheCtx = Helpers.getCanvasContext(this.drawCacheCanvas);
 		this.drawCacheEnabled = false;
 		this.drawCacheOffset = new Math.Vector();
 
