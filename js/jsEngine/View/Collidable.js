@@ -81,8 +81,8 @@ new Class('View.Collidable', [View.Sprite], {
 		for (i = 0; i < parents.length; i ++) {
 			parent = parents[i];
 
-			if (parent.size !== 1 || parent.widthModifier !== 1 || parent.heightModifier !== 1) {
-				box.scale(parent.size * parent.widthModifier, parent.size * parent.heightModifier);
+			if (parent.size !== 1 || parent.widthScale !== 1 || parent.heightScale !== 1) {
+				box.scale(parent.size * parent.widthScale, parent.size * parent.heightScale);
 			}
 
 			if (parent.direction !== 0) {
@@ -257,8 +257,8 @@ new Class('View.Collidable', [View.Sprite], {
 			avY -= this.offset.y;
 
 			// Scale the position according to the object's size modifiers
-			avX /= this.size * this.widthModifier;
-			avY /= this.size * this.heightModifier;
+			avX /= this.size * this.widthScale;
+			avY /= this.size * this.heightScale;
 
 			// Rotate the position according to the object's direction
 			retVector = new Math.Vector(avX, avY);
@@ -301,7 +301,7 @@ new Class('View.Collidable', [View.Sprite], {
 
 		getCollidingObjects = getCollidingObjects !== undefined ? getCollidingObjects : false;
 
-		if (this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0) {
+		if (this.size === 0 || this.widthScale === 0 || this.heightScale === 0) {
 			return false;
 		}
 

@@ -315,6 +315,40 @@ new Class('View.Container', [View.Child], {
 		}
 	},
 
+	drawContainerGl: function (gl, wm) {
+		wm = Helpers.matrixMultiply([this.localMatrix(), wm]);
+
+		if (this.drawGl) {
+			engine.drawCalls ++; //dev
+
+			this.drawGl(gl, wm);
+
+			// if (engine.drawBoundingBoxes && this.drawBoundingBox) { //dev
+			// 	this.drawBoundingBox(c); //dev
+			// } //dev
+			// if (engine.drawMasks && this.drawMask) { //dev
+			// 	this.drawMask(c); //dev
+			// } //dev
+		}
+
+		// Draw children
+		len = this.children.length;
+
+		for (i = 0; i < len; i ++) {
+			child = this.children[i];
+			if (child.drawContainerGl) {
+				child.drawContainerGl(gl, wm);
+			}
+			else if (child.isVisible()) {
+				engine.drawCalls ++; //dev
+				
+				// child.transformCanvasContext(c);
+				child.drawGl(gl, Helpers.matrixMultiply(wm, child.localMatrix));
+				// child.restoreCanvasContext(c);
+			}
+		}
+	},
+
 	drawRedrawRegions: function (c, area) {
 		var i, len, child;
 

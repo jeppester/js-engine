@@ -171,7 +171,7 @@ new Class('View.Line',[Math.Line, View.Child], {
         
         for (i = 0; i < parents.length; i ++) {
             parent = parents[i];
-            box.scale(parent.size * parent.widthModifier, parent.size * parent.heightModifier);
+            box.scale(parent.size * parent.widthScale, parent.size * parent.heightScale);
             box.rotate(parent.direction);
             box.move(parent.x, parent.y);
         }

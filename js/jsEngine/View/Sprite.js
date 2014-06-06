@@ -16,8 +16,8 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
      * @property {number} animationSpeed The number of images / second in the animation (only relevant if the source is an animation)
      * @property {boolean} animationLoops Whether or not the animation should loop (only relevant if the source is an animation)
      * @property {number} size A size modifier which modifies both the width and the height of the sprite
-     * @property {number} widthModifier A size modifier which modifies the width of the sprite
-     * @property {number} heightModifier A size modifier which modifies the height of the object
+     * @property {number} widthScale A size modifier which modifies the width of the sprite
+     * @property {number} heightScale A size modifier which modifies the height of the object
      * @property {number} opacity The opacity of the sprite
      *
 	 * @param {string} source A string representing the source of the object's bitmap
@@ -59,21 +59,21 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		// Define pseudo properties
 		Object.defineProperty(this, 'width', {
 			get: function () {
-				return Math.abs(this.clipWidth * this.size * this.widthModifier);
+				return Math.abs(this.clipWidth * this.size * this.widthScale);
 			},
 			set: function (value) {
-				var sign = this.widthModifier > 0 ? 1 : -1;
-				this.widthModifier = sign * Math.abs(value / (this.clipWidth * this.size));
+				var sign = this.widthScale > 0 ? 1 : -1;
+				this.widthScale = sign * Math.abs(value / (this.clipWidth * this.size));
 				return value;
 			}
 		});
 		Object.defineProperty(this, 'height', {
 			get: function () {
-				return Math.abs(this.clipHeight * this.size * this.heightModifier);
+				return Math.abs(this.clipHeight * this.size * this.heightScale);
 			},
 			set: function (value) {
-				var sign = this.heightModifier > 0 ? 1 : -1;
-				this.heightModifier = sign * Math.abs(value / (this.clipHeight * this.size));
+				var sign = this.heightScale > 0 ? 1 : -1;
+				this.heightScale = sign * Math.abs(value / (this.clipHeight * this.size));
 				return value;
 			}
 		});
@@ -200,6 +200,56 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		this.refreshSource();
 	},
 
+	drawGl: function (gl, wm) {
+		// look up where the vertex data needs to go.
+		var positionLocation = gl.getAttribLocation(engine.program, "a_position");
+		var texCoordLocation = gl.getAttribLocation(engine.program, "a_texCoord");
+
+		// provide texture coordinates for the rectangle.
+		var texCoordBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+		    0.0,  0.0,
+		    1.0,  0.0,
+		    0.0,  1.0,
+		    0.0,  1.0,
+		    1.0,  0.0,
+		    1.0,  1.0]), gl.STATIC_DRAW);
+		gl.enableVertexAttribArray(texCoordLocation);
+		gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
+
+		// Create a texture.
+		var texture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+
+		// Set the parameters so we can render any size image.
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+		// Upload the image into the texture.
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.bm);
+
+		// lookup uniforms
+		var resolutionLocation = gl.getUniformLocation(engine.program, "u_resolution");
+
+		// set the resolution
+		gl.uniform2f(resolutionLocation, engine.mainCanvas.width, engine.mainCanvas.height);
+
+		// Create a buffer for the position of the rectance corners.
+		var buffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+		gl.enableVertexAttribArray(positionLocation);
+		gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+		// Set a rectangle the same size as the image.
+		setPlane(gl, 0, 0, this.bm.width, this.bm.height);
+
+		// Draw the rectangle.
+		gl.drawArrays(gl.TRIANGLES, 0, 6);
+	},
+
 	/**
 	 * Draws the object to the canvas.
 	 * 
@@ -256,7 +306,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		
 		for (i = 0; i < parents.length; i ++) {
 			parent = parents[i];
-			box.scale(parent.size * parent.widthModifier, parent.size * parent.heightModifier);
+			box.scale(parent.size * parent.widthScale, parent.size * parent.heightScale);
 			box.rotate(parent.direction);
 			box.move(parent.x, parent.y);
 		}

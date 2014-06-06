@@ -1,41 +1,41 @@
-/** For making the engine var unreachable **/
+* For making the engine var unreachable **/
 (function () {
 /*var main;/**/
 
 new Class('Engine', {
 	/**
 	 * The constructor for the Engine class.
-     *
-     * @name Engine
-     * @class The main game engine class.
-     *        Responsible for the main loop, the main canvas, etc.
-     *
-     * @property {boolean} running Whether or not the engine is currently running
-     * @property {int} canvasResX The main canvas horizontal resolution
-     * @property {int} canvasResY The main canvas vertical resolution
-     * @property {string} enginePath The url to jsEngine's source folder
-     * @property {boolean} focusOnLoad If the engine should focus itself when loaded
-     * @property {string} themesPath The url to jsEngine's theme folder
-     * @property {boolean} drawBoundingBoxes Whether or not the bounding boxes of all collidable objects are drawn
-     * @property {boolean} drawMasks Whether or not the masks of all collidable objects are drawn
-     * @property {boolean} pauseOnBlur Whether or the engine will pause itself when the window is blurred
-     * @property {boolean} disableRightClick Whether or not right click context menu is disabled inside the main canvas
-     * @property {boolean} preventDefaultKeyboard Whether or not preventDefault is called for keyboard events
-     * @property {HTMLElement} arena The HTML element to use as parent to the main canvas
-     * @property {boolean} autoResize Whether or not the arena will autoresize itself to fit the window
-     * @property {boolean} autoResizeLimitToResolution Whether or not the arena should not autoresize itself to be bigger than the main canvas' resolution
-     * @property {int} cachedSoundCopies The number of copies each sound object caches of it's source to enable multiple playbacks
-     * @property {string} gameClassPath The URL of the game's main class
-     * @property {string} loadText The text shown while loading the engine
-     * @property {string} backgroundColor A CSS color string which is used as the background color of the main canvas
-     * @property {number} timeFactor The factor to multiply the time increase with. A factor of 2 will make everything happen with double speed
-     * @property {boolean} resetCursorOnEachFrame Whether or not the mouse cursor will be reset on each frame
-     * @property {boolean} disableTouchScroll Whether or not touch scroll has been disabled
-     * @property {Camera[]} cameras An array containing the engine's cameras
-     * @property {int} defaultCollisionResolution The collision resolution set for all created collidable objects
-     * @property {boolean} soundsMuted Whether or not all sound effects are currently muted
-     * @property {boolean} musicMuted Whether or not all music is currently muted
-     *
+	 *
+	 * @name Engine
+	 * @class The main game engine class.
+	 *        Responsible for the main loop, the main canvas, etc.
+	 *
+	 * @property {boolean} running Whether or not the engine is currently running
+	 * @property {int} canvasResX The main canvas horizontal resolution
+	 * @property {int} canvasResY The main canvas vertical resolution
+	 * @property {string} enginePath The url to jsEngine's source folder
+	 * @property {boolean} focusOnLoad If the engine should focus itself when loaded
+	 * @property {string} themesPath The url to jsEngine's theme folder
+	 * @property {boolean} drawBoundingBoxes Whether or not the bounding boxes of all collidable objects are drawn
+	 * @property {boolean} drawMasks Whether or not the masks of all collidable objects are drawn
+	 * @property {boolean} pauseOnBlur Whether or the engine will pause itself when the window is blurred
+	 * @property {boolean} disableRightClick Whether or not right click context menu is disabled inside the main canvas
+	 * @property {boolean} preventDefaultKeyboard Whether or not preventDefault is called for keyboard events
+	 * @property {HTMLElement} arena The HTML element to use as parent to the main canvas
+	 * @property {boolean} autoResize Whether or not the arena will autoresize itself to fit the window
+	 * @property {boolean} autoResizeLimitToResolution Whether or not the arena should not autoresize itself to be bigger than the main canvas' resolution
+	 * @property {int} cachedSoundCopies The number of copies each sound object caches of it's source to enable multiple playbacks
+	 * @property {string} gameClassPath The URL of the game's main class
+	 * @property {string} loadText The text shown while loading the engine
+	 * @property {string} backgroundColor A CSS color string which is used as the background color of the main canvas
+	 * @property {number} timeFactor The factor to multiply the time increase with. A factor of 2 will make everything happen with double speed
+	 * @property {boolean} resetCursorOnEachFrame Whether or not the mouse cursor will be reset on each frame
+	 * @property {boolean} disableTouchScroll Whether or not touch scroll has been disabled
+	 * @property {Camera[]} cameras An array containing the engine's cameras
+	 * @property {int} defaultCollisionResolution The collision resolution set for all created collidable objects
+	 * @property {boolean} soundsMuted Whether or not all sound effects are currently muted
+	 * @property {boolean} musicMuted Whether or not all music is currently muted
+	 *
 	 * @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
 	 *                 The default options are:
 	 *                 <code>{
@@ -66,17 +66,17 @@ new Class('Engine', {
 	 *                 }</code>
 	 */
 	Engine: function (options) {
-        // Set global engine variable
-        /**
-         * Global engine var set upon engine initialization
-         * @global
-         */
-        engine = this;
+		// Set global engine variable
+		/**
+		 * Global engine var set upon engine initialization
+		 * @global
+		 */
+		engine = this;
 
 		this.options = options ? options: {};
 		this.load();
 	},
-    /** @scope Engine */
+	/** @scope Engine */
 
 	/**
 	 * Load all files and functions, that are needed before the engine can start.
@@ -150,8 +150,8 @@ new Class('Engine', {
 		this.resetCursorOnEachFrame = true;
 		this.cameras = [];
 		this.defaultCollisionResolution = 6;
-        this.redrawObjects = [];
-        this.enableRedrawRegions = false;
+		this.redrawObjects = [];
+		this.enableRedrawRegions = false;
 
 		this.soundsMuted = false;
 		this.musicMuted = false;
@@ -168,7 +168,7 @@ new Class('Engine', {
 
 		// Set style for arena
 		this.arena.style.position = "absolute";
-		this.arena.style.background = "#fff";
+		this.arena.style.background = this.backgroundColor;
 		this.arena.style.userSelect = "none";
 		this.arena.style.webkitUserSelect = "none";
 		this.arena.style.MozUserSelect = "none";
@@ -196,10 +196,10 @@ new Class('Engine', {
 		}
 
 		// Create loader object
-        /**
-         * Global Engine.Loader instance which is created upon engine initialization
-         * @global
-         */
+		/**
+		 * Global Engine.Loader instance which is created upon engine initialization
+		 * @global
+		 */
 		loader = new Engine.Loader();
 
 		loader.loadClasses([this.gameClassPath]);
@@ -233,9 +233,9 @@ new Class('Engine', {
 
 		this.fps = 0;
 		this.fpsCounter = 0;
-        this.drawTime = 0;
-        this.drawTimeCounter = 0;
-        this.drawCalls = 0;
+		this.drawTime = 0;
+		this.drawTimeCounter = 0;
+		this.drawCalls = 0;
 
 		// Create a room list (All rooms will add themselves to this list)
 		this.roomList = [];
@@ -266,15 +266,15 @@ new Class('Engine', {
 		}
 
 		// Create objects required by the engine
-        /**
-         * Global instance of Input.Keyboard which is created upon engine initialization
-         * @global
-         */
+		/**
+		 * Global instance of Input.Keyboard which is created upon engine initialization
+		 * @global
+		 */
 		keyboard = new Input.Keyboard();
-        /**
-         * Global instance of Input.Pointer which is created upon engine initialization
-         * @global
-         */
+		/**
+		 * Global instance of Input.Pointer which is created upon engine initialization
+		 * @global
+		 */
 		pointer = new Input.Pointer();
 
 		// Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
@@ -314,44 +314,47 @@ new Class('Engine', {
 	 * Creates and prepares the game canvas for being used
 	 */
 	createCanvas: function () {
-		var c;
+		var gl;
 
 		// Make main canvas
 		this.mainCanvas = document.createElement("canvas");
 		this.mainCanvas.style.display = "block";
 		this.mainCanvas.width = this.canvasResX;
 		this.mainCanvas.height = this.canvasResY;
-		this.mainCtx = Helpers.getCanvasContext(this.mainCanvas);
+		this.gl = Helpers.getCanvasContext(this.mainCanvas);
 		this.arena.appendChild(this.mainCanvas);
 
-		c = this.mainCtx
+		gl = this.gl
+
+		// Optimize options
+		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
 
 		// Create shaders
 		this.initShaders();
-		this.program = this.mainCtx.createProgram();
+		this.program = this.gl.createProgram();
 
-		c.attachShader(this.program, this.vertexShader);
-		c.attachShader(this.program, this.fragmentShader);
-		c.linkProgram(this.program);
-		c.useProgram(this.program);
+		gl.attachShader(this.program, this.vertexShader);
+		gl.attachShader(this.program, this.fragmentShader);
+		gl.linkProgram(this.program);
+		gl.useProgram(this.program);
 	},
 
 	initShaders: function () {
-		var c, vertex, fragment;
+		var gl, vertex, fragment;
 
-		c = this.mainCtx;
+		gl = this.gl;
 
 		// Vertex shader
 		vertex   = this.loadFileContent('/shaders/Vertex.vert.js');
-		this.vertexShader = c.createShader(c.VERTEX_SHADER);
-		c.shaderSource(this.vertexShader, vertex);
-		c.compileShader(this.vertexShader);
+		this.vertexShader = gl.createShader(gl.VERTEX_SHADER);
+		gl.shaderSource(this.vertexShader, vertex);
+		gl.compileShader(this.vertexShader);
 
 		// Fragment shader
 		fragment = this.loadFileContent('/shaders/Fragment.frag.js');
-		this.fragmentShader = c.createShader(c.FRAGMENT_SHADER);
-		c.shaderSource(this.fragmentShader, fragment);
-		c.compileShader(this.fragmentShader);
+		this.fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+		gl.shaderSource(this.fragmentShader, fragment);
+		gl.compileShader(this.fragmentShader);
 	},
 
 	/**
@@ -621,7 +624,7 @@ new Class('Engine', {
 	mainLoop: function () {
 		if (!this.running) {return; }
 
-        var drawTime;
+		var drawTime;
 
 		// Get the current time (for calculating movement based on the precise time change)
 		this.last = this.now;
@@ -643,24 +646,24 @@ new Class('Engine', {
 		this.currentRoom.update();
 
 		// Draw game objects
-        this.drawCalls = 0; //dev
-        drawTime = new Date().getTime(); //dev
-        this.redraw();
-        drawTime = new Date().getTime() - drawTime; //dev
+		this.drawCalls = 0; //dev
+		drawTime = new Date().getTime(); //dev
+		this.redraw();
+		drawTime = new Date().getTime() - drawTime; //dev
 
-        // Count frames per second and calculate mean redraw time
-        if (this.fpsMsCounter < 1000) { //dev
-            this.fpsCounter ++; //dev
-            this.drawTimeCounter += drawTime; //dev
-            this.fpsMsCounter += this.timeIncrease; //dev
-        } //dev
-        else { //dev
-            this.fps = this.fpsCounter; //dev
-            this.drawTime = this.drawTimeCounter / this.fpsCounter; //dev
-            this.fpsCounter = 0; //dev
-            this.drawTimeCounter = 0; //dev
-            this.fpsMsCounter = 0; //dev
-        } //dev
+		// Count frames per second and calculate mean redraw time
+		if (this.fpsMsCounter < 1000) { //dev
+			this.fpsCounter ++; //dev
+			this.drawTimeCounter += drawTime; //dev
+			this.fpsMsCounter += this.timeIncrease; //dev
+		} //dev
+		else { //dev
+			this.fps = this.fpsCounter; //dev
+			this.drawTime = this.drawTimeCounter / this.fpsCounter; //dev
+			this.fpsCounter = 0; //dev
+			this.drawTimeCounter = 0; //dev
+			this.fpsMsCounter = 0; //dev
+		} //dev
 
 		// Schedule the loop to run again
 		requestAnimationFrame(function (time) {
@@ -776,7 +779,6 @@ new Class('Engine', {
 			params = 'data=' + JSON.stringify(params);
 		}
 
-
 		var req;
 
 		req = new XMLHttpRequest();
@@ -851,19 +853,24 @@ new Class('Engine', {
 	 * Redraws the canvas by redrawing all cameras
 	 */
 	redraw: function () {
-		var i, c;
+		var i, gl, wm;
 
-		c = this.mainCtx
+		gl = this.gl
+		wm = Helpers.makeIdentity();
 
+		engine.masterRoom.drawContainerGl(gl, wm);
+		this.room.drawContainerGl(gl, wm);
 
-        for (i = 0; i < this.cameras.length; i++) {
-			this.cameras[i].capture();
-            this.cameras[i].draw(c);
-        }
+		// Ignore cameras for now
 
-        this.lastRedrawObjects = this.redrawObjects; //dev
-        this.redrawObjects = [];
-    },
+		// for (i = 0; i < this.cameras.length; i++) {
+		// 	this.cameras[i].capture();
+		// 	this.cameras[i].draw(gl);
+		// }
+
+		// this.lastRedrawObjects = this.redrawObjects; //dev
+		// this.redrawObjects = [];
+	},
 
 	/**
 	 * Downloads a screen dump of the main canvas. Very usable for creating game screenshots directly from browser consoles.
@@ -949,4 +956,4 @@ new Class('Engine', {
 	}
 });
 /** For making the engine var unreachable **/
-}());/**/
+}());/*

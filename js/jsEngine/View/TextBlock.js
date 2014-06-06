@@ -15,8 +15,8 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	 * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
 	 * @property {number} direction The direction of the sprite (in radians)
 	 * @property {number} size A size modifier which modifies both the width and the height of the sprite
-	 * @property {number} widthModifier A size modifier which modifies the width of the sprite
-	 * @property {number} heightModifier A size modifier which modifies the height of the object
+	 * @property {number} widthScale A size modifier which modifies the width of the sprite
+	 * @property {number} heightScale A size modifier which modifies the height of the object
 	 * @property {number} opacity The opacity of the sprite
 	 *
 	 * @param {string} string The string to display inside the TextBlock
@@ -121,21 +121,21 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		// Define pseudo properties
 		Object.defineProperty(this, 'width', {
 			get: function () {
-				return Math.abs(this.clipWidth * this.size * this.widthModifier);
+				return Math.abs(this.clipWidth * this.size * this.widthScale);
 			},
 			set: function (value) {
-				var sign = this.widthModifier > 0 ? 1 : -1;
-				this.widthModifier = sign * Math.abs(value / (this.clipWidth * this.size));
+				var sign = this.widthScale > 0 ? 1 : -1;
+				this.widthScale = sign * Math.abs(value / (this.clipWidth * this.size));
 				return value;
 			}
 		});
 		Object.defineProperty(this, 'height', {
 			get: function () {
-				return Math.abs(this.clipHeight * this.size * this.heightModifier);
+				return Math.abs(this.clipHeight * this.size * this.heightScale);
 			},
 			set: function (value) {
-				var sign = this.heightModifier > 0 ? 1 : -1;
-				this.heightModifier = sign * Math.abs(value / (this.clipHeight * this.size));
+				var sign = this.heightScale > 0 ? 1 : -1;
+				this.heightScale = sign * Math.abs(value / (this.clipHeight * this.size));
 				return value
 			}
 		});
@@ -293,7 +293,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	 */
 	isVisible: function () {
 		// If sprites size has been modified to zero, do nothing
-		return !(this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0 || /^\s*$/.test(this.string));
+		return !(this.size === 0 || this.widthScale === 0 || this.heightScale === 0 || /^\s*$/.test(this.string));
 	},
 
 	/**
@@ -333,7 +333,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 
 		ret = new Math.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight);
 		ret = ret.getPolygon();
-		ret = ret.scale(this.size * this.widthModifier, this.size * this.heightModifier);
+		ret = ret.scale(this.size * this.widthScale, this.size * this.heightScale);
 		ret = ret.rotate(this.direction);
 		ret = ret.getBoundingRectangle().add(this.getRoomPosition());
 		ret.x = Math.floor(ret.x - 1);

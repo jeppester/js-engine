@@ -20,8 +20,8 @@ new Class('View.Child', [Lib.Animatable], {
         this.opacity = 1;
         this.direction = 0;
         this.size = 1;
-        this.widthModifier = 1;
-        this.heightModifier = 1;
+        this.widthScale = 1;
+        this.heightScale = 1;
 
         var hidden = {
             offset: new Math.Vector(),
@@ -57,8 +57,8 @@ new Class('View.Child', [Lib.Animatable], {
             opacity: 1,
             direction: 0,
             size: 1,
-            widthModifier: 1,
-            heightModifier: 1,
+            widthScale: 1,
+            heightScale: 1,
             offset: undefined,
             parentObject: this
         };
@@ -109,20 +109,20 @@ new Class('View.Child', [Lib.Animatable], {
                 }
             }
         });
-        Object.defineProperty(this, 'widthModifier', {
-            get: function() {return hidden.widthModifier; },
+        Object.defineProperty(this, 'widthScale', {
+            get: function() {return hidden.widthScale; },
             set: function(value) {
-                if (hidden.widthModifier !== value) {
-                    hidden.widthModifier = value;
+                if (hidden.widthScale !== value) {
+                    hidden.widthScale = value;
                     this.onAfterChange();
                 }
             }
         });
-        Object.defineProperty(this, 'heightModifier', {
-            get: function() {return hidden.heightModifier; },
+        Object.defineProperty(this, 'heightScale', {
+            get: function() {return hidden.heightScale; },
             set: function(value) {
-                if (hidden.heightModifier !== value) {
-                    hidden.heightModifier = value;
+                if (hidden.heightScale !== value) {
+                    hidden.heightScale = value;
                     this.onAfterChange();
                 }
             }
@@ -230,7 +230,7 @@ new Class('View.Child', [Lib.Animatable], {
             for (i = 0; i < parents.length; i ++) {
                 parent = parents[i];
 
-                pos.scale(parent.widthModifier * parent.size, parent.heightModifier * parent.size);
+                pos.scale(parent.widthScale * parent.size, parent.heightScale * parent.size);
                 pos.rotate(parent.direction);
                 pos.move(parent.x, parent.y);
             }
@@ -305,6 +305,18 @@ new Class('View.Child', [Lib.Animatable], {
     getDirectionTo: function (child) {
         return child.getRoomPosition().subtract(this.getRoomPosition()).getDirection();
     },
+    
+
+    localMatrix: function () {
+        var origin, scale, rotation, position; 
+
+        origin   = Helpers.makeTranslation(this.offset.x, this.offset.y);
+        scale    = Helpers.makeScale(this.widthScale, this.heightScale);
+        rotation = Helpers.makeRotation(Math.cos(this.direction), Math.sin(this.direction));
+        position = Helpers.makeTranslation(this.x, this.y);
+
+        return Helpers.matrixMultiply([origin, scale, rotation, position]);
+    },
 
     /**
      * Prepares the canvas context for drawing the object (applies all transformations)
@@ -335,8 +347,8 @@ new Class('View.Child', [Lib.Animatable], {
         if (this.direction !== 0) {
             c.rotate(this.direction);
         }
-        if (this.size !== 1 || this.widthModifier !== 1 || this.heightModifier !== 1) {
-            c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
+        if (this.size !== 1 || this.widthScale !== 1 || this.heightScale !== 1) {
+            c.scale(this.widthScale * this.size, this.heightScale * this.size);
         }
     },
 
@@ -359,8 +371,8 @@ new Class('View.Child', [Lib.Animatable], {
         }
 
         // Apply drawing options if they are needed (this saves a lot of resources)
-        if (this.size !== 1 || this.widthModifier !== 1 || this.heightModifier !== 1) {
-            c.scale(1 / (this.widthModifier * this.size), 1 / (this.heightModifier * this.size));
+        if (this.size !== 1 || this.widthScale !== 1 || this.heightScale !== 1) {
+            c.scale(1 / (this.widthScale * this.size), 1 / (this.heightScale * this.size));
         }
         if (this.direction !== 0) {
             c.rotate(-this.direction);
@@ -380,6 +392,6 @@ new Class('View.Child', [Lib.Animatable], {
      */
     isVisible: function () {
         // If sprites size has been modified to zero, do nothing
-        return !(this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0);
+        return !(this.size === 0 || this.widthScale === 0 || this.heightScale === 0);
     }
 });
