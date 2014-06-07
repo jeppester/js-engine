@@ -40,12 +40,13 @@
 		enginePath + '/Extension/Array.js',
 		enginePath + '/Extension/Object.js',
 
-		enginePath + '/Engine/Helpers.js',
 
 		enginePath + '/Engine/Class.js',
 		enginePath + '/Engine/Globals.js',
 		enginePath + '/Engine/Engine.js',
 		enginePath + '/Engine/Loader.js',
+
+		enginePath + '/Renderer/WebGL.js',
 
 		enginePath + '/Lib/Animatable.js',
 

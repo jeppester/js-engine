@@ -25,7 +25,7 @@ new Class('Engine.Camera', {
 		this.canvas.width = this.captureRegion.width;
 		this.canvas.height = this.captureRegion.height;
 		this.room = room || engine.currentRoom;
-		this.ctx = Helpers.getCanvasContext(this.canvas);
+		//this.ctx = Helpers.getCanvasContext(this.canvas);
 	},
     /** @scope Engine.Camera */
 

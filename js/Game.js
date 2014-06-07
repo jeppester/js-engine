@@ -31,7 +31,7 @@ new Class('Game', {
 
         /* DO GAME STUFF */
         engine.currentRoom.addChildren(
-            new View.Sprite('Rock', 100, 100)
+            object = new View.Sprite('Rock', 100, 100)
         );
     }
 });

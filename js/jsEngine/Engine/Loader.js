@@ -22,6 +22,7 @@ new Class('Engine.Loader', {
                 "sfx":{},
                 "images":{},
                 "masks": {},
+                "textures": {},
                 "resourcesCount": 0,
                 "resourcesLoaded": 0
             }
@@ -346,6 +347,7 @@ new Class('Engine.Loader', {
 			theme.resourcesCount = 0;
 			theme.resourcesLoaded = 0;
 			theme.masks = {};
+			theme.textures = {};
 
 			// Load all images
 			this.loadResources(theme, theme.images, 'images');
@@ -581,7 +583,7 @@ new Class('Engine.Loader', {
 		canvas.width = image.width;
 		canvas.height = image.height;
 		canvas.imageLength = image.imageLength;
-		ctx = Helpers.getCanvasContext(canvas);
+		ctx = canvas.getContext('2d');
 
 		if (image === false) { //dev
 			throw new Error('Trying to create mask for non-existing resource: ' + resourceString); //dev

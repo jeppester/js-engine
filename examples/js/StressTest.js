@@ -11,22 +11,22 @@ new Class('StressTest', {
         this.hudView = new View.Container();
         engine.currentRoom.addChildren(this.objectView, this.hudView);
 
-        fpsCounter = new View.TextBlock('FPS: 0', 10, 10, 100, {color: '#FFF'});
-        objectCounter = new View.TextBlock('Objects: 0', 10, 30, 100, {color: '#FFF'});
-        this.hudView.addChildren(fpsCounter, objectCounter);
+        //fpsCounter = new View.TextBlock('FPS: 0', 10, 10, 100, {color: '#FFF'});
+        //objectCounter = new View.TextBlock('Objects: 0', 10, 30, 100, {color: '#FFF'});
+        //this.hudView.addChildren(fpsCounter, objectCounter);
 
-        engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
-        engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
+        //engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
+        //engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
         engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
     },
 
     onLoaded: function() {
-        this.addObjects(1000);
+        this.addObjects(100);
     },
 
     updateFPS: function () {
-        fpsCounter.string = 'FPS: ' + engine.fps;
-        objectCounter.string = 'Objects: ' + (Object.keys(engine.objectIndex).length - 2);
+        //fpsCounter.string = 'FPS: ' + engine.fps;
+        //objectCounter.string = 'Objects: ' + (Object.keys(engine.objectIndex).length - 2);
     },
 
     addObjects: function (count) {

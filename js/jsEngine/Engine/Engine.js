@@ -174,6 +174,7 @@ new Class('Engine', {
 		this.arena.style.MozUserSelect = "none";
 
 		this.createCanvas();
+		this.initRenderer();
 
 		// If autoresize is set to true, set up autoresize
 		if (this.autoResize) {
@@ -317,44 +318,20 @@ new Class('Engine', {
 		var gl;
 
 		// Make main canvas
-		this.mainCanvas = document.createElement("canvas");
-		this.mainCanvas.style.display = "block";
-		this.mainCanvas.width = this.canvasResX;
-		this.mainCanvas.height = this.canvasResY;
-		this.gl = Helpers.getCanvasContext(this.mainCanvas);
-		this.arena.appendChild(this.mainCanvas);
-
-		gl = this.gl
-
-		// Optimize options
-		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-
-		// Create shaders
-		this.initShaders();
-		this.program = this.gl.createProgram();
-
-		gl.attachShader(this.program, this.vertexShader);
-		gl.attachShader(this.program, this.fragmentShader);
-		gl.linkProgram(this.program);
-		gl.useProgram(this.program);
+		this.canvas = document.createElement("canvas");
+		this.canvas.style.display = "block";
+		this.canvas.width = this.canvasResX;
+		this.canvas.height = this.canvasResY;
+		this.arena.appendChild(this.canvas);
 	},
 
-	initShaders: function () {
-		var gl, vertex, fragment;
-
-		gl = this.gl;
-
-		// Vertex shader
-		vertex   = this.loadFileContent('/shaders/Vertex.vert.js');
-		this.vertexShader = gl.createShader(gl.VERTEX_SHADER);
-		gl.shaderSource(this.vertexShader, vertex);
-		gl.compileShader(this.vertexShader);
-
-		// Fragment shader
-		fragment = this.loadFileContent('/shaders/Fragment.frag.js');
-		this.fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-		gl.shaderSource(this.fragmentShader, fragment);
-		gl.compileShader(this.fragmentShader);
+	initRenderer: function () {
+		if (this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl')) {
+			this.renderer = new Renderer.WebGL(this.canvas);
+		}
+		else {
+			this.renderer = new Renderer.Canvas(this.canvas);
+		}
 	},
 
 	/**
@@ -379,8 +356,8 @@ new Class('Engine', {
 			this.arena.style.left = "50%";
 			this.arena.style.marginLeft = -this.canvasResX / 2 + "px";
 			this.arena.style.marginTop = -this.canvasResY / 2 + "px";
-			this.mainCanvas.style.width = this.canvasResX + "px";
-			this.mainCanvas.style.height = this.canvasResY + "px";
+			this.canvas.style.width = this.canvasResX + "px";
+			this.canvas.style.height = this.canvasResY + "px";
 		}
 	},
 
@@ -415,8 +392,8 @@ new Class('Engine', {
 		this.arena.style.left = "50%";
 		this.arena.style.marginTop = -h / 2 + "px";
 		this.arena.style.marginLeft = -w / 2 + "px";
-		this.mainCanvas.style.height = h + "px";
-		this.mainCanvas.style.width = w + "px";
+		this.canvas.style.height = h + "px";
+		this.canvas.style.width = w + "px";
 	},
 
 	/**
@@ -677,7 +654,7 @@ new Class('Engine', {
 	 * @param {number} res The new horizontal resolution
 	 */
 	setCanvasResX: function (res) {
-		this.mainCanvas.width = res;
+		this.canvas.width = res;
 		this.canvasResX = res;
 
 		if (this.autoResize) {
@@ -691,7 +668,7 @@ new Class('Engine', {
 	 * @param {number} res The new vertical resolution
 	 */
 	setCanvasResY: function (res) {
-		this.mainCanvas.height = res;
+		this.canvas.height = res;
 		this.canvasResY = res;
 		if (this.autoResize) {
 			this.autoResizeCanvas();
@@ -853,15 +830,11 @@ new Class('Engine', {
 	 * Redraws the canvas by redrawing all cameras
 	 */
 	redraw: function () {
-		var i, gl, wm;
-
-		gl = this.gl;
-		wm = Helpers.makeIdentity();
-
-		engine.masterRoom.drawContainerGl(gl, wm);
-		this.currentRoom.drawContainerGl(gl, wm);
+		this.renderer.render(engine.masterRoom);
+		this.renderer.render(engine.currentRoom);
 
 		// Ignore cameras for now
+		// var i;
 
 		// for (i = 0; i < this.cameras.length; i++) {
 		// 	this.cameras[i].capture();
@@ -878,7 +851,7 @@ new Class('Engine', {
 	dumpScreen: function () {
 		var dataString, a;
 
-		dataString = this.mainCanvas.toDataURL().replace(/image\/png/, 'image/octet-stream');
+		dataString = this.canvas.toDataURL().replace(/image\/png/, 'image/octet-stream');
 
 		a = document.createElement('a');
 		a.href = dataString;

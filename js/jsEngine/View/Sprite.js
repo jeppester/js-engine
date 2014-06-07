@@ -40,6 +40,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 
 		// Call Vector's and view's constructors
 		this.Container();
+		this.renderType = "sprite";
 		this.x = x !== undefined ? x : 0;
 		this.y = y !== undefined ? y : 0;
 
@@ -198,56 +199,6 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 
 		this.source = source;
 		this.refreshSource();
-	},
-
-	drawGl: function (gl, wm) {
-		// look up where the vertex data needs to go.
-		var positionLocation = gl.getAttribLocation(engine.program, "a_position");
-		var texCoordLocation = gl.getAttribLocation(engine.program, "a_texCoord");
-
-		// provide texture coordinates for the rectangle.
-		var texCoordBuffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-		    0.0,  0.0,
-		    1.0,  0.0,
-		    0.0,  1.0,
-		    0.0,  1.0,
-		    1.0,  0.0,
-		    1.0,  1.0]), gl.STATIC_DRAW);
-		gl.enableVertexAttribArray(texCoordLocation);
-		gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
-
-		// Create a texture.
-		var texture = gl.createTexture();
-		gl.bindTexture(gl.TEXTURE_2D, texture);
-
-		// Set the parameters so we can render any size image.
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-
-		// Upload the image into the texture.
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.bm);
-
-		// lookup uniforms
-		var resolutionLocation = gl.getUniformLocation(engine.program, "u_resolution");
-
-		// set the resolution
-		gl.uniform2f(resolutionLocation, engine.mainCanvas.width, engine.mainCanvas.height);
-
-		// Create a buffer for the position of the rectance corners.
-		var buffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		gl.enableVertexAttribArray(positionLocation);
-		gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-		// Set a rectangle the same size as the image.
-		Helpers.setPlane(gl, 0, 0, this.bm.width, this.bm.height);
-
-		// Draw the rectangle.
-		gl.drawArrays(gl.TRIANGLES, 0, 6);
 	},
 
 	/**

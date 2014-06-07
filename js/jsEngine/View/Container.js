@@ -19,10 +19,10 @@ new Class('View.Container', [View.Child], {
 		this.children = [];
 		this.Child();
 		this.parent = undefined;
-		this.drawCacheCanvas = document.createElement('canvas');
+		/*this.drawCacheCanvas = document.createElement('canvas');
 		this.drawCacheCtx = Helpers.getCanvasContext(this.drawCacheCanvas);
 		this.drawCacheEnabled = false;
-		this.drawCacheOffset = new Math.Vector();
+		this.drawCacheOffset = new Math.Vector();*/
 
 		this.addChildren.apply(this, Array.prototype.slice.call(arguments));
 	},
@@ -313,87 +313,6 @@ new Class('View.Container', [View.Child], {
 		else {
 			this.drawWholeCanvas(c, noCache);
 		}
-	},
-
-	drawContainerGl: function (gl, wm) {
-		wm = Helpers.matrixMultiply([this.localMatrix(), wm]);
-
-		if (this.drawGl) {
-			engine.drawCalls ++; //dev
-
-			this.drawGl(gl, wm);
-
-			// if (engine.drawBoundingBoxes && this.drawBoundingBox) { //dev
-			// 	this.drawBoundingBox(c); //dev
-			// } //dev
-			// if (engine.drawMasks && this.drawMask) { //dev
-			// 	this.drawMask(c); //dev
-			// } //dev
-		}
-
-		// Draw children
-		len = this.children.length;
-
-		for (i = 0; i < len; i ++) {
-			child = this.children[i];
-			if (child.drawContainerGl) {
-				child.drawContainerGl(gl, wm);
-			}
-			else if (child.isVisible()) {
-				engine.drawCalls ++; //dev
-				
-				// child.transformCanvasContext(c);
-				child.drawGl(gl, Helpers.matrixMultiply(wm, child.localMatrix));
-				// child.restoreCanvasContext(c);
-			}
-		}
-	},
-
-	drawRedrawRegions: function (c, area) {
-		var i, len, child;
-
-		if (!this.isVisible()) {
-			return;
-		}
-
-		this.transformCanvasContext(c);
-
-		if (this.drawCanvas) {
-			if (!this.currentRedrawRegion) {
-				this.currentRedrawRegion = this.getCombinedRedrawRegion();
-			}
-			if (this.currentRedrawRegion.getOverlap(area)) {
-				engine.drawCalls ++; //dev
-
-				this.drawCanvas(c);
-
-				if (engine.drawBoundingBoxes && this.drawBoundingBox) { //dev
-					this.drawBoundingBox(c); //dev
-				} //dev
-				if (engine.drawMasks && this.drawMask) { //dev
-					this.drawMask(c); //dev
-				} //dev
-			}
-		}
-
-		// Draw children
-		len = this.children.length;
-
-		for (i = 0; i < len; i ++) {
-			child = this.children[i];
-			if (child.draw) {
-				child.draw(c, area);
-			}
-			else if (child.isVisible() && child.currentRedrawRegion.getOverlap(area)) {
-				engine.drawCalls ++; //dev
-				
-				child.transformCanvasContext(c);
-				child.drawCanvas(c);
-				child.restoreCanvasContext(c);
-			}
-		}
-		
-		this.restoreCanvasContext(c);
 	},
 
 	drawWholeCanvas: function (c, noCache) {

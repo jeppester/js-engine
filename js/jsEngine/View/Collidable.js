@@ -134,7 +134,7 @@ new Class('View.Collidable', [View.Sprite], {
 
 		canvas.id = 'colCanvas';
 
-		c = Helpers.getCanvasContext(canvas);
+		c = canvas.getContext('2d');
 
 		c.fillStyle = "#FFF";
 

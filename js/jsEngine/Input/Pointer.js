@@ -105,7 +105,7 @@ new Class('Input.Pointer', {
 		var roomPos;
 
 		this.mouse.window.set(event.pageX, event.pageY);
-		this.mouse.set(this.mouse.window.x - engine.arena.offsetLeft - engine.mainCanvas.offsetLeft + document.body.scrollLeft, this.mouse.window.y - engine.arena.offsetTop - engine.mainCanvas.offsetTop + document.body.scrollTop);
+		this.mouse.set(this.mouse.window.x - engine.arena.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, this.mouse.window.y - engine.arena.offsetTop - engine.canvas.offsetTop + document.body.scrollTop);
 
 		// Find the mouse position relative to the arena
 		this.mouse.x = this.mouse.x / engine.arena.offsetWidth * engine.canvasResX;
@@ -213,7 +213,7 @@ new Class('Input.Pointer', {
 			}
 
 
-			pointerTouch.set(eventTouch.pageX - engine.arena.offsetLeft - engine.mainCanvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - engine.arena.offsetTop - engine.mainCanvas.offsetTop + document.body.scrollTop);
+			pointerTouch.set(eventTouch.pageX - engine.arena.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - engine.arena.offsetTop - engine.canvas.offsetTop + document.body.scrollTop);
 			pointerTouch.x = pointerTouch.x / engine.arena.offsetWidth * engine.canvasResX;
 			pointerTouch.y = pointerTouch.y / engine.arena.offsetHeight * engine.canvasResY;
 

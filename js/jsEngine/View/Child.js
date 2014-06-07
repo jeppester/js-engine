@@ -4,6 +4,7 @@ new Class('View.Child', [Lib.Animatable], {
      * @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
      */
     Child: function () {
+        this.renderType = '';
         if (engine.enableRedrawRegions) {
             this.ChildInitWithRedrawRegions();
         }
@@ -304,18 +305,6 @@ new Class('View.Child', [Lib.Animatable], {
      */
     getDirectionTo: function (child) {
         return child.getRoomPosition().subtract(this.getRoomPosition()).getDirection();
-    },
-    
-
-    localMatrix: function () {
-        var origin, scale, rotation, position; 
-
-        origin   = Helpers.makeTranslation(this.offset.x, this.offset.y);
-        scale    = Helpers.makeScale(this.widthScale, this.heightScale);
-        rotation = Helpers.makeRotation(Math.cos(this.direction), Math.sin(this.direction));
-        position = Helpers.makeTranslation(this.x, this.y);
-
-        return Helpers.matrixMultiply([origin, scale, rotation, position]);
     },
 
     /**
