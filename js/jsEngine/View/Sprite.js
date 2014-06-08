@@ -202,46 +202,6 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 	},
 
 	/**
-	 * Draws the object to the canvas.
-	 * 
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Sprite
-	 * @param {Vector} cameraOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
-	 */
-	drawCanvas: function (c, cameraOffset) {
-		// Round offset if necessary
-		var offX, offY;
-
-		if (engine.avoidSubPixelRendering) {
-            offX = Math.round(this.offset.x);
-            offY = Math.round(this.offset.y);
-        }
-        else {
-            offX = this.offset.x;
-            offY = this.offset.y;
-        }
-
-		// Set the right sub image
-		if (this.imageLength !== 1 && this.animationSpeed !== 0) {
-			if (engine.gameTime - this.animationLastSwitch > 1000 / this.animationSpeed) {
-				this.imageNumber = this.imageNumber + (this.animationSpeed > 0 ? 1 : -1);
-
-				this.animationLastSwitch = engine.gameTime;
-
-				if (this.imageNumber === this.imageLength) {
-					this.imageNumber = this.animationLoops ? 0 : this.imageLength - 1;
-				}
-				else if (this.imageNumber === -1) {
-					this.imageNumber = this.animationLoops ? this.imageLength - 1 : 0;
-				}
-			}
-		}
-
-        // Draw bm
-        c.drawImage(this.bm, (this.clipWidth + this.bm.spacing) * this.imageNumber, 0, this.clipWidth, this.clipHeight, - offX, - offY, this.clipWidth, this.clipHeight);
-	},
-
-	/**
 	 * Calculates the region which the sprite will fill out when redrawn.
 	 * 
 	 * @private

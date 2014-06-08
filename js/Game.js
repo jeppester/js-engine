@@ -30,8 +30,5 @@ new Class('Game', {
         loader.hideOverlay();
 
         /* DO GAME STUFF */
-        engine.currentRoom.addChildren(
-            object = new View.Sprite('Rock', 100, 100)
-        );
     }
 });

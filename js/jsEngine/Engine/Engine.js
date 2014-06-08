@@ -326,12 +326,13 @@ new Class('Engine', {
 	},
 
 	initRenderer: function () {
-		if (this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl')) {
-			this.renderer = new Renderer.WebGL(this.canvas);
-		}
-		else {
-			this.renderer = new Renderer.Canvas(this.canvas);
-		}
+		this.renderer = new Renderer.WebGL(this.canvas);
+		// if (this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl')) {
+		// 	this.renderer = new Renderer.WebGL(this.canvas);
+		// }
+		// else {
+		// 	this.renderer = new Renderer.Canvas(this.canvas);
+		// }
 	},
 
 	/**
@@ -720,7 +721,7 @@ new Class('Engine', {
 
 		for (i = 0; i < filePaths.length; i ++) {
 			// console.log('Loading: ' + filePaths[i])
-			codeString = this.loadFileContent(filePaths[i]) + "\n//@ sourceURL=/" + filePaths[i];
+			codeString = this.loadFileContent(filePaths[i]) + "\n//# sourceURL=/" + filePaths[i];
 			try { //dev
 				eval(codeString);
 			} //dev

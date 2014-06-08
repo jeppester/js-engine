@@ -4,9 +4,11 @@ new Class('Renderer.WebGL', {
 
 		// Cache variables
 		this.cache = {
-			textures: [],
+			currentTexture: undefined,
+			textures: {},
 		}
 
+		// Get gl context
 		options = {alpha: false};
 		this.gl = canvas.getContext('webgl', options) || canvas.getContext('experimental-webgl', options);
 		gl = this.gl;
@@ -14,8 +16,7 @@ new Class('Renderer.WebGL', {
 		// Optimize options
 		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
 
-		// Create shaders
-		this.initShaders();
+
 
 		// Set default blending
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -23,28 +24,72 @@ new Class('Renderer.WebGL', {
 
 		// Init program
 		this.program = gl.createProgram();
-		gl.attachShader(this.program, this.vertexShader);
-		gl.attachShader(this.program, this.fragmentShader);
-		gl.linkProgram(this.program);
+
+		// Create shaders
+		this.initShaders();
+
+		// Init buffers
+		this.initBuffers();
+
+		// Use program
 		gl.useProgram(this.program);
+
+		// Set resolution
+		gl.uniform2f(this.locations.u_resolution, engine.canvas.width, engine.canvas.height);
+
 	},
 
 	initShaders: function () {
 		var gl, vertex, fragment;
-
 		gl = this.gl;
+
 
 		// Vertex shader
 		vertex   = engine.loadFileContent(engine.enginePath + '/Renderer/WebGL/VertexShader.vert.js');
 		this.vertexShader = gl.createShader(gl.VERTEX_SHADER);
 		gl.shaderSource(this.vertexShader, vertex);
 		gl.compileShader(this.vertexShader);
+		gl.attachShader(this.program, this.vertexShader);
 
 		// Fragment shader
 		fragment = engine.loadFileContent(engine.enginePath + '/Renderer/WebGL/FragmentShader.frag.js');
 		this.fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 		gl.shaderSource(this.fragmentShader, fragment);
 		gl.compileShader(this.fragmentShader);
+		gl.attachShader(this.program, this.fragmentShader);
+
+		gl.linkProgram(this.program);
+
+		this.locations = {
+			a_texCoord: 	gl.getAttribLocation(this.program, "a_texCoord"),
+			a_position: 	gl.getAttribLocation(this.program, "a_position"),
+			u_resolution: 	gl.getUniformLocation(this.program, "u_resolution"),
+			u_matrix: 		gl.getUniformLocation(this.program, "u_matrix")
+		}
+	},
+
+	initBuffers: function () {
+		var gl;
+		gl = this.gl;
+
+		// Text coord buffer
+		this.textCoordBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.textCoordBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+		    0.0,  0.0,
+		    1.0,  0.0,
+		    0.0,  1.0,
+		    0.0,  1.0,
+		    1.0,  0.0,
+		    1.0,  1.0]), gl.STATIC_DRAW);
+		gl.enableVertexAttribArray(this.locations.a_texCoord);
+		gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
+
+		// Rectangle corner buffer
+		this.rectangleCornerBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.rectangleCornerBuffer);
+		gl.enableVertexAttribArray(this.locations.a_position);
+		gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
 	},
 
 	render: function (object) {
@@ -61,9 +106,12 @@ new Class('Renderer.WebGL', {
 		}
 
 		switch (object.renderType) {
+			case 'textblock':
+				if (this.cache.textures[object.bm.oldSrc]) {
+					delete this.cache.textures[object.bm.oldSrc];
+				}
 			case 'sprite':
 				this.renderSprite(object, localWm);
-				engine.drawCalls ++; //dev
 				break;
 		}
 
@@ -77,45 +125,22 @@ new Class('Renderer.WebGL', {
 	},
 
 	renderSprite: function(object, wm) {
-		var gl = this.gl;
+		var gl, t;
 
-		// look up where the vertex data needs to go.
-		var positionLocation = gl.getAttribLocation(this.program, "a_position");
-		var texCoordLocation = gl.getAttribLocation(this.program, "a_texCoord");
+		gl = this.gl;
 
-		// provide texture coordinates for the rectangle.
-		var texCoordBuffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-		    0.0,  0.0,
-		    1.0,  0.0,
-		    0.0,  1.0,
-		    0.0,  1.0,
-		    1.0,  0.0,
-		    1.0,  1.0]), gl.STATIC_DRAW);
-		gl.enableVertexAttribArray(texCoordLocation);
-		gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
+		// Bind the texture (if it is not already the binded)
+		t = this.getSpriteTexture(object);
+		if (this.cache.currentTexture !== t) {
+			this.cache.currentTexture = t;
 
-		// Bind the texture
-		gl.bindTexture(gl.TEXTURE_2D, this.getSpriteTexture(object));
-
-		// lookup uniforms
-		var resolutionLocation = gl.getUniformLocation(this.program, "u_resolution");
-
-		// set the resolution
-		gl.uniform2f(resolutionLocation, engine.canvas.width, engine.canvas.height);
-
-		// Create a buffer for the position of the rectangle corners.
-		var buffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		gl.enableVertexAttribArray(positionLocation);
-		gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-		// Set a rectangle the same size as the image.
-		this.setPlane(gl, 0, 0, object.bm.width, object.bm.height);
+			// Set a rectangle the same size as the image
+			gl.bindTexture(gl.TEXTURE_2D, t);
+			this.setPlane(gl, 0, 0, object.bm.width, object.bm.height);
+		}
 
 		// Set matrix
-		gl.uniformMatrix3fv(gl.getUniformLocation(this.program, "u_matrix"), false, wm);
+		gl.uniformMatrix3fv(this.locations.u_matrix, false, wm);
 
 		// Draw the rectangle.
 		gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -138,12 +163,12 @@ new Class('Renderer.WebGL', {
 
 		// Upload the image into the texture.
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-		// Set the parameters so we can render any size image.
+		
+		// Set texture wrapping
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
 		gl.bindTexture(gl.TEXTURE_2D, null);
 		this.cache.textures[image.src] = texture;
@@ -178,9 +203,9 @@ new Class('Renderer.WebGL', {
 		];
 	},
 
-	makeRotation: function(angleInRadians) {
-		var c = Math.cos(angleInRadians);
-		var s = Math.sin(angleInRadians);
+	makeRotation: function(direction) {
+		var c = Math.cos(direction);
+		var s = Math.sin(direction);
 		return [
 			c,-s, 0,
 			s, c, 0,
@@ -243,7 +268,7 @@ new Class('Renderer.WebGL', {
 
 			a20 * b00 + a21 * b10 + a22 * b20,
 			a20 * b01 + a21 * b11 + a22 * b21,
-			a20 * b02 + a21 * b12 + a22 * b22,
+			a20 * b02 + a21 * b12 + a22 * b22
 		];
 	},
 

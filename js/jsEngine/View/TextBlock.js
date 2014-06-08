@@ -42,17 +42,23 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 
 		// Call Vector's and view's constructors
 		this.Container();
+		this.renderType = "textblock";
 		this.x = x !== undefined ? x : 0;
 		this.y = y !== undefined ? y : 0;
+
+		// Animation options
+		this.imageLength = 1;
+		this.imageNumber = 0;
 
 		// Load default options
 		this.clipWidth = parseInt(width, 10) || 200;
 		this.lines = [];
 		this.lineWidth = [];
 		this.bm = document.createElement('canvas');
-		this.bmCtx = Helpers.getCanvasContext(this.bm);
+		this.bmCtx = this.bm.getContext('2d');
 		this.bm.width = this.clipWidth;
 		this.bm.height = 10;
+		this.bm.spacing = 0;
 
 		// Create getters/setters
 		hidden = {
@@ -285,6 +291,18 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 				this.bmCtx.fillText(this.lines[i], xOffset, this.lineHeight * i + this.font.match(/[0.0-9]+/) * 1);
 			}
 		}
+
+		this.createHash();		
+	},
+
+	createHash: function () {
+		var self;
+
+		self = this;
+		this.bm.oldSrc = this.bm.src;
+		this.bm.src = ['string', 'font', 'alignment', 'color', 'lineHeight', 'clipWidth'].map(function (property) {
+			return self[property];
+		}).join('-|-');
 	},
 
 	/**
@@ -294,32 +312,6 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	isVisible: function () {
 		// If sprites size has been modified to zero, do nothing
 		return !(this.size === 0 || this.widthScale === 0 || this.heightScale === 0 || /^\s*$/.test(this.string));
-	},
-
-	/**
-	 * Draws the cached rendering of the TextBlock object to the canvas.
-	 * 
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the TextBlock
-	 * @param {Vector} cameraOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
-	 */
-	drawCanvas: function (c) {
-		// Draw Sprite on canvas
-		var x, y;
-
-		// Round offset if necessary
-		var offX, offY;
-		if (engine.avoidSubPixelRendering) {
-			offX = Math.round(this.offset.x);
-			offY = Math.round(this.offset.y);
-		}
-		else {
-			offX = this.offset.x;
-			offY = this.offset.y;
-		}
-
-		// Draw bm
-		c.drawImage(this.bm, 0, 0, this.clipWidth, this.clipHeight, - offX, - offY, this.clipWidth, this.clipHeight);
 	},
 
 	/**

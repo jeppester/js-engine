@@ -14,7 +14,7 @@
 			req = new XMLHttpRequest();
 			req.open('GET', filePaths[i], false);
 			req.send();
-			codeString = req.responseText + "\n//@ sourceURL=/" + filePaths[i];
+			codeString = req.responseText + "\n//# sourceURL=/" + filePaths[i];
 			try {
 				eval(codeString);
 			}
@@ -47,6 +47,7 @@
 		enginePath + '/Engine/Loader.js',
 
 		enginePath + '/Renderer/WebGL.js',
+		enginePath + '/Renderer/Canvas.js',
 
 		enginePath + '/Lib/Animatable.js',
 
