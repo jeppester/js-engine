@@ -46,6 +46,7 @@ new Class('Lib.Animatable', {
 		anim.callback = opt.callback !== undefined  ?  opt.callback : function () {};
 		anim.easing = opt.easing !== undefined ?  opt.easing : "quadInOut";
 		anim.duration = opt.duration !== undefined ?  opt.duration : 1000;
+		anim.onStep = opt.onStep !== undefined ? opt.onStep : function () {};
 
 		anim.prop = {};
 		for (i in map) {
