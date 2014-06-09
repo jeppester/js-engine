@@ -392,6 +392,9 @@ new Class('Engine.CustomLoop', {
 
 			t = this.time - a.start;
 
+			// Execute onStep-callback if any
+			a.onStep && a.onStep();
+
 			if (t > a.duration) {
 				// Delete animation
 				this.animations.splice(animId, 1);
