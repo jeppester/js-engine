@@ -49,6 +49,7 @@ new Class('Engine', {
 	 * 	                "canvasResY": 600, // The vertical resolution to set for the game's main canvas
 	 * 	                "defaultCollisionResolution": 6, // Res. of collision checking, by default every 6th px is checked
 	 * 	                "disableRightClick": true, // If right clicks inside the arena should be disabled
+	 * 	                "disableWebGL": false, // If WebGL rendering should be disabled
 	 *                  "preventDefaultKeyboard": false, // Whether or not preventDefault should be called for keyboard events
 	 * 	                "disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
 	 * 	                "drawBoundingBoxes": false, // If Collidable object's bounding boxes should be drawn
@@ -152,12 +153,39 @@ new Class('Engine', {
 		this.defaultCollisionResolution = 6;
 		this.redrawObjects = [];
 		this.enableRedrawRegions = false;
+		this.disableWebGL = false;
 
 		this.soundsMuted = false;
 		this.musicMuted = false;
 
 		// Copy options to engine (except those which are only used for engine initialization)
-		copyOpt = ['backgroundColor', 'preventDefaultKeyboard', 'enableRedrawRegions', 'resetCursorOnEachFrame', 'disableTouchScroll', 'defaultCollisionResolution', 'focusOnLoad', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'pauseOnBlur', 'drawBoundingBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+		copyOpt = [
+			'arena',
+			'autoResize',
+			'autoResizeLimitToResolution',
+			'avoidSubPixelRendering',
+			'backgroundColor',
+			'cachedSoundCopies',
+			'canvasResX',
+			'canvasResY',
+			'defaultCollisionResolution',
+			'disableWebGL',
+			'disableRightClick',
+			'disableTouchScroll',
+			'drawBoundingBoxes',
+			'drawMasks',
+			'enableRedrawRegions',
+			'enginePath',
+			'focusOnLoad',
+			'gameClassPath',
+			'loadText',
+			'musicMuted',
+			'pauseOnBlur',
+			'preventDefaultKeyboard',
+			'resetCursorOnEachFrame',
+			'soundsMuted',
+			'themesPath',
+		];
 		for (i = 0; i < copyOpt.length; i ++) {
 			opt = copyOpt[i];
 			if (this.options[opt] !== undefined) {
@@ -326,13 +354,12 @@ new Class('Engine', {
 	},
 
 	initRenderer: function () {
-		this.renderer = new Renderer.WebGL(this.canvas);
-		// if (this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl')) {
-		// 	this.renderer = new Renderer.WebGL(this.canvas);
-		// }
-		// else {
-		// 	this.renderer = new Renderer.Canvas(this.canvas);
-		// }
+		if (!this.disableWebGL && (this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl'))) {
+			this.renderer = new Renderer.WebGL(this.canvas);
+		}
+		else {
+			this.renderer = new Renderer.Canvas(this.canvas);
+		}
 	},
 
 	/**

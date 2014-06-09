@@ -22,11 +22,12 @@ Minifies and packs a jsEngine project's code to one single file.
 
 Options:
  --no-minify:         Append all files to each other, but do not minify them
- --engine-only:      Only pack the engine
- --keep-logs:        Do not remove console.log()-calls
- --keep-dev:         Do not remove lines ending with a \"//dev\"-comment
- --game-file [path]: Specify the game file (.html) to fetch js-file locations from
- --include [path]:   Specify a file containing a list of files to include (one path per line)
+ --engine-only:       Only pack the engine
+ --keep-logs:         Do not remove console.log()-calls
+ --keep-dev:          Do not remove lines ending with a \"//dev\"-comment
+ --game-file [path]:  Specify the game file (.html) to fetch js-file locations from
+ --include [path]:    Specify a file containing a list of files to include (one path per line)
+ --output-dir [path]: Specify where to save the minified files
 ";
 	exit;
 };
@@ -120,11 +121,13 @@ else {
 		$e . 'Polyfill/requestAnimationFrame.js',
 		$e . 'Polyfill/Array.prototype.forEach.js',
 
-		$e . 'Engine/Helpers.js',
         $e . 'Engine/Class.js',
 		$e . 'Engine/Globals.js',
 		$e . 'Engine/Engine.js',
         $e . 'Engine/Loader.js',
+
+        $e . 'Renderer/WebGL.js',
+        $e . 'Renderer/Canvas.js',
 
         $e . 'Lib/Animatable.js',
 

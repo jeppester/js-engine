@@ -45,14 +45,40 @@ new Class('Renderer.WebGL', {
 
 
 		// Vertex shader
-		vertex   = engine.loadFileContent(engine.enginePath + '/Renderer/WebGL/VertexShader.vert.js');
+		vertex = '\
+			attribute vec2 a_position;\
+			attribute vec2 a_texCoord;\
+			\
+			uniform vec2 u_resolution;\
+			uniform mat3 u_matrix;\
+			\
+			varying vec2 v_texCoord;\
+			\
+			void main() {\
+				vec2 position = (u_matrix * vec3(a_position, 1)).xy;\
+				vec2 zeroToOne = position / u_resolution;\
+				vec2 zeroToTwo = zeroToOne * 2.0;\
+				vec2 clipSpace = zeroToTwo - 1.0;\
+				\
+				gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);\
+				\
+				v_texCoord = a_texCoord;\
+			}';
 		this.vertexShader = gl.createShader(gl.VERTEX_SHADER);
 		gl.shaderSource(this.vertexShader, vertex);
 		gl.compileShader(this.vertexShader);
 		gl.attachShader(this.program, this.vertexShader);
 
 		// Fragment shader
-		fragment = engine.loadFileContent(engine.enginePath + '/Renderer/WebGL/FragmentShader.frag.js');
+		fragment = '\
+			precision mediump float;\
+			\
+			uniform sampler2D u_image;\
+			varying vec2 v_texCoord;\
+			\
+			void main() {\
+			   gl_FragColor = texture2D(u_image, v_texCoord);\
+			}';
 		this.fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 		gl.shaderSource(this.fragmentShader, fragment);
 		gl.compileShader(this.fragmentShader);

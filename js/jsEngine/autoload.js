@@ -34,11 +34,11 @@
 
 	// Load all engine files
 	loadFiles([
-		enginePath + '/Polyfill/requestAnimationFrame.js',
-		enginePath + '/Polyfill/Array.prototype.forEach.js',
-
 		enginePath + '/Extension/Array.js',
 		enginePath + '/Extension/Object.js',
+
+		enginePath + '/Polyfill/requestAnimationFrame.js',
+		enginePath + '/Polyfill/Array.prototype.forEach.js',
 
 
 		enginePath + '/Engine/Class.js',
