@@ -21,7 +21,7 @@ new Class('StressTest', {
     },
 
     onLoaded: function() {
-        this.addObjects(1000);
+        this.addObjects(2000);
     },
 
     updateFPS: function () {
