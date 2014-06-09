@@ -858,19 +858,8 @@ new Class('Engine', {
 	 * Redraws the canvas by redrawing all cameras
 	 */
 	redraw: function () {
-		this.renderer.render(engine.masterRoom);
-		this.renderer.render(engine.currentRoom);
-
-		// Ignore cameras for now
-		// var i;
-
-		// for (i = 0; i < this.cameras.length; i++) {
-		// 	this.cameras[i].capture();
-		// 	this.cameras[i].draw(gl);
-		// }
-
-		// this.lastRedrawObjects = this.redrawObjects; //dev
-		// this.redrawObjects = [];
+		// Send cameras to the renderer
+		this.renderer.render(this.cameras);
 	},
 
 	/**

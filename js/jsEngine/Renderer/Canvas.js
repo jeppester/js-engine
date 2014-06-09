@@ -5,19 +5,56 @@ new Class('Renderer.Canvas', {
 		this.context = canvas.getContext('2d');
 	},
 
-	render: function (object) {
+	render: function (cameras) {
+		var camerasLength, roomsLength, i, ii, camera;
+
 		this.context.save();
 		this.context.clearRect(0, 0, engine.canvas.width, engine.canvas.height);
 
-		this.renderTree(object);
+		camerasLength = cameras.length;
 
-		this.context.restore();
+		for (i = 0; i < camerasLength; i ++) {
+			camera = cameras[i];
+
+			rooms = [engine.masterRoom, camera.room];
+			roomsLength = rooms.length;
+
+			// Setup/update camera
+			if (!camera.canvas) {
+				camera.canvas = document.createElement('canvas');
+				camera.context = camera.canvas.getContext('2d');
+			}
+			if (camera.captureRegion.width !== camera.canvas.width) {
+				camera.canvas.width = camera.captureRegion.width;
+				changed = true;
+			}
+			if (camera.captureRegion.height !== camera.canvas.height) {
+				camera.canvas.height = camera.captureRegion.height;
+				changes = true;
+			}
+
+			// Clear camera canvas
+			camera.context.clearRect(0, 0, camera.canvas.width, camera.canvas.height);
+
+			// Apply camera translation
+			camera.context.translate(-camera.captureRegion.x, -camera.captureRegion.y);
+
+			// Draw rooms
+			for (ii = 0; ii < roomsLength; ii ++) {
+				this.renderTree(rooms[ii], camera.context);
+			}
+
+			// Draw camera canvas to main canvas
+			this.context.drawImage(camera.canvas, camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height);
+
+			this.context.restore();
+		}
 	},
 
-	renderTree: function(object) {
+	renderTree: function(object, context) {
 		var i, len, child;
 
-		this.transformCanvasContext(object);
+		this.transformCanvasContext(object, context);
 
 		if (!object.isVisible()) {
 			return;
@@ -26,7 +63,11 @@ new Class('Renderer.Canvas', {
 		switch (object.renderType) {
 			case 'sprite':
 			case 'textblock':
-				this.renderSprite(object);
+				this.renderSprite(object, context);
+				engine.drawCalls ++; //dev
+				break;
+			case 'rectangle':
+				this.renderRectangle(object, context);
 				engine.drawCalls ++; //dev
 				break;
 		}
@@ -35,14 +76,14 @@ new Class('Renderer.Canvas', {
 
 			len = object.children.length;
 			for (i = 0; i < len; i ++) {
-				this.renderTree(object.children[i]);
+				this.renderTree(object.children[i], context);
 			}
 		}
 
-		this.restoreCanvasContext(object);
+		this.restoreCanvasContext(object, context);
 	},
 
-	renderSprite: function(object) {
+	renderSprite: function(object, context) {
 		// Round offset if necessary
 		var offX, offY;
 
@@ -66,7 +107,33 @@ new Class('Renderer.Canvas', {
 		}
 
 		// Draw bm
-		this.context.drawImage(object.bm, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, - offX, - offY, object.clipWidth, object.clipHeight);
+		context.drawImage(object.bm, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, - offX, - offY, object.clipWidth, object.clipHeight);
+	},
+
+	/**
+	 * Draws the Rectangle object on the canvas (if added as a child of a View)
+	 *
+	 * @private
+	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Rectangle
+     * @param {Vector} cameraOffset A vector defining the offset with which to draw the object
+     */
+	renderRectangle: function (object, context) {
+		context.translate(-object.offset.x, -object.offset.y);
+
+        context.strokeStyle = object.strokeStyle;
+        context.fillStyle = object.fillStyle;
+
+		context.beginPath();
+
+		context.moveTo(0, 0);
+		context.lineTo(object.width, 0);
+		context.lineTo(object.width, object.height);
+		context.lineTo(0, object.height);
+		context.closePath();
+
+        context.lineWidth = object.lineWidth;
+        context.fill();
+        context.stroke();
 	},
 
 	/**
@@ -74,11 +141,11 @@ new Class('Renderer.Canvas', {
 	 *
 	 * @private
 	 */
-	transformCanvasContext: function (object) {
+	transformCanvasContext: function (object, context) {
 	    // Draw Sprite on canvas
 	    var c, x, y;
 
-	    c = this.context;
+	    c = context;
 
 	    if (engine.avoidSubPixelRendering) {
 	        x = Math.round(object.x);
@@ -110,11 +177,11 @@ new Class('Renderer.Canvas', {
 	 *
 	 * @private
 	 */
-	restoreCanvasContext: function (object) {
+	restoreCanvasContext: function (object, context) {
 	    // Draw Sprite on canvas
 	    var c, x, y;
 
-	    c = this.context;
+	    c = context;
 
 	    if (engine.avoidSubPixelRendering) {
 	        x = Math.round(object.x);

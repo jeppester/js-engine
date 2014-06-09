@@ -2,10 +2,16 @@ new Class('Renderer.WebGL', {
 	WebGL: function (canvas) {
 		var gl, options;
 
+		this.canvas = canvas;
+
 		// Cache variables
 		this.cache = {
 			currentTexture: undefined,
 			textures: {},
+			currentResolution: {
+				width: 0,
+				height: 0,
+			}
 		}
 
 		// Get gl context
@@ -15,8 +21,6 @@ new Class('Renderer.WebGL', {
 
 		// Optimize options
 		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-
-
 
 		// Set default blending
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -33,10 +37,6 @@ new Class('Renderer.WebGL', {
 
 		// Use program
 		gl.useProgram(this.program);
-
-		// Set resolution
-		gl.uniform2f(this.locations.u_resolution, engine.canvas.width, engine.canvas.height);
-
 	},
 
 	initShaders: function () {
@@ -87,10 +87,10 @@ new Class('Renderer.WebGL', {
 		gl.linkProgram(this.program);
 
 		this.locations = {
-			a_texCoord: 	gl.getAttribLocation(this.program, "a_texCoord"),
-			a_position: 	gl.getAttribLocation(this.program, "a_position"),
-			u_resolution: 	gl.getUniformLocation(this.program, "u_resolution"),
-			u_matrix: 		gl.getUniformLocation(this.program, "u_matrix")
+			a_texCoord:		gl.getAttribLocation(this.program, "a_texCoord"),
+			a_position:		gl.getAttribLocation(this.program, "a_position"),
+			u_resolution:	gl.getUniformLocation(this.program, "u_resolution"),
+			u_matrix:		gl.getUniformLocation(this.program, "u_matrix")
 		}
 	},
 
@@ -118,8 +118,44 @@ new Class('Renderer.WebGL', {
 		gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
 	},
 
-	render: function (object) {
-		this.renderTree(object, this.makeIdentity());
+	render: function (cameras) {
+		var camerasLength, roomsLength, i, ii, wm, gl, w, h;
+
+		gl = this.gl
+		camerasLength = cameras.length;
+
+		for (i = 0; i < camerasLength; i ++) {
+			camera = cameras[i];
+
+			// Setup camera resolution
+			w = camera.captureRegion.width;
+			h = camera.captureRegion.height;
+			if (this.cache.currentResolution.width !== w || this.cache.currentResolution.height !== h) {
+				this.cache.currentResolution.width = w;
+				this.cache.currentResolution.height = w;
+
+				gl.uniform2f(this.locations.u_resolution, w, h);
+			}
+
+			// Set camera position
+			wm = this.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
+
+			// Set camera projection viewport
+			gl.viewport(
+				camera.projectionRegion.x,
+				camera.projectionRegion.y,
+				camera.projectionRegion.width,
+				camera.projectionRegion.height
+			);
+
+			rooms = [engine.masterRoom, camera.room];
+			roomsLength = rooms.length;
+
+			for (ii = 0; ii < roomsLength; ii ++) {
+				// Draw rooms
+				this.renderTree(rooms[ii], wm);
+			}
+		}
 	},
 
 	renderTree: function(object, wm) {

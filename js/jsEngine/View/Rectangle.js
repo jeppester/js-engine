@@ -25,6 +25,7 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
 	 */
 	Rectangle: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
 		this.Child();
+        this.renderType = 'rectangle';
 
         if (engine.enableRedrawRegions) {
             this.RectangleInitWithRedrawRegions(x, y, width, height, fillStyle, strokeStyle, lineWidth);
@@ -179,35 +180,4 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
 
         return rect.add(this.parent.getRoomPosition());
     },
-
-	/**
-	 * Draws the Rectangle object on the canvas (if added as a child of a View)
-	 *
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Rectangle
-     * @param {Vector} cameraOffset A vector defining the offset with which to draw the object
-     */
-	drawCanvas: function (c) {
-		c.save();
-
-		c.translate(-this.offset.x, -this.offset.y);
-
-        c.strokeStyle = this.strokeStyle;
-        c.fillStyle = this.fillStyle;
-
-		c.beginPath();
-
-		c.moveTo(0, 0);
-		c.lineTo(this.width, 0);
-		c.lineTo(this.width, this.height);
-		c.lineTo(0, this.height);
-		c.closePath();
-
-        c.lineWidth = this.lineWidth;
-        c.fill();
-        c.stroke();
-
-
-		c.restore();
-	}
 });
