@@ -7,6 +7,7 @@ new Class('Renderer.WebGL', {
 		// Cache variables
 		this.cache = {
 			currentTexture: undefined,
+			currentAlpha: undefined,
 			textures: {},
 			currentResolution: {
 				width: 0,
@@ -15,7 +16,10 @@ new Class('Renderer.WebGL', {
 		}
 
 		// Get gl context
-		options = {alpha: false};
+		options = {
+			premultipliedAlpha: false,
+			alpha: false,
+		};
 		this.gl = canvas.getContext('webgl', options) || canvas.getContext('experimental-webgl', options);
 		gl = this.gl;
 
@@ -75,9 +79,11 @@ new Class('Renderer.WebGL', {
 			\
 			uniform sampler2D u_image;\
 			varying vec2 v_texCoord;\
+			uniform float u_alpha;\
 			\
 			void main() {\
-			   gl_FragColor = texture2D(u_image, v_texCoord);\
+			   vec4 textureColor = texture2D(u_image, v_texCoord);\
+			   gl_FragColor = vec4(textureColor.rgb, textureColor.a * u_alpha);\
 			}';
 		this.fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 		gl.shaderSource(this.fragmentShader, fragment);
@@ -90,7 +96,8 @@ new Class('Renderer.WebGL', {
 			a_texCoord:		gl.getAttribLocation(this.program, "a_texCoord"),
 			a_position:		gl.getAttribLocation(this.program, "a_position"),
 			u_resolution:	gl.getUniformLocation(this.program, "u_resolution"),
-			u_matrix:		gl.getUniformLocation(this.program, "u_matrix")
+			u_matrix:		gl.getUniformLocation(this.program, "u_matrix"),
+			u_alpha:		gl.getUniformLocation(this.program, "u_alpha")
 		}
 	},
 
@@ -159,12 +166,19 @@ new Class('Renderer.WebGL', {
 	},
 
 	renderTree: function(object, wm) {
-		var i, len, child, localWm;
+		var i, len, child, localWm, gl;
 
+		gl = this.gl;
 		localWm = this.matrixMultiplyArray([this.calculateLocalMatrix(object), wm]);
 
 		if (!object.isVisible()) {
 			return;
+		}
+
+		// Set object alpha (because alpha is used by ALL rendered objects)
+		if (this.cache.currentAlpha !== object.opacity) {
+			this.cache.currentAlpha = object.opacity;
+			gl.uniform1f(this.locations.u_alpha, object.opacity);
 		}
 
 		switch (object.renderType) {
@@ -178,7 +192,6 @@ new Class('Renderer.WebGL', {
 		}
 
 		if (object.children) {
-
 			len = object.children.length;
 			for (i = 0; i < len; i ++) {
 				this.renderTree(object.children[i], localWm);
@@ -242,8 +255,8 @@ new Class('Renderer.WebGL', {
 	    var origin, scale, rotation, position;
 
 	    origin   = this.makeTranslation(-object.offset.x, -object.offset.y);
-	    scale    = this.makeScale(object.widthScale, object.heightScale);
-	    rotation = this.makeRotation(object.direction);
+	    scale    = this.makeScale(object.widthScale * object.size, object.heightScale * object.size);
+	    rotation = this.makeRotation(-object.direction);
 	    position = this.makeTranslation(object.x, object.y);
 
 	    return this.matrixMultiplyArray([origin, scale, rotation, position]);

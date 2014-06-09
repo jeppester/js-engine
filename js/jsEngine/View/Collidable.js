@@ -146,7 +146,7 @@ new Class('View.Collidable', [View.Sprite], {
 		parents = this.getParents();
 		parents.unshift(this);
 		for (i = 0; i < parents.length; i ++) {
-			parents[i].restoreCanvasContext(c);
+			Renderer.Canvas.prototype.restoreCanvasContext(parents[i], c);
 		}
 
 		// Draw other objects
@@ -161,7 +161,7 @@ new Class('View.Collidable', [View.Sprite], {
 			parents.reverse();
 			parents.push(obj);
 			parents.forEach(function () {
-				this.transformCanvasContext(c);
+				Renderer.Canvas.prototype.transformCanvasContext(this, c);
 			})
 
 			c.drawImage(
@@ -182,7 +182,7 @@ new Class('View.Collidable', [View.Sprite], {
 
 			parents.reverse();
 			parents.forEach(function () {
-				this.restoreCanvasContext(c);
+				Renderer.Canvas.prototype.restoreCanvasContext(this, c);
 			});
 		}
 

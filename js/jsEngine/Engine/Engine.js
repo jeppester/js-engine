@@ -43,7 +43,7 @@ new Class('Engine', {
 	 * 	                "avoidSubPixelRendering": true, // If subpixelrendering should be avoided
 	 * 	                "autoResize": true, // If the arena should autoresize to fit the window (or iframe)
 	 * 	                "autoResizeLimitToResolution": true, // If the autoresizing should be limited to the game's resolution
-	 * 	                "backgroundColor": "#FFF", // The color of the arena's background
+	 * 	                "backgroundColor": "#000", // The color of the arena's background
 	 * 	                "cachedSoundCopies": 5, // How many times sounds should be duplicated to allow multiple playbacks
 	 * 	                "canvasResX": 800, // The horizontal resolution to set for the game's main canvas
 	 * 	                "canvasResY": 600, // The vertical resolution to set for the game's main canvas
@@ -145,7 +145,7 @@ new Class('Engine', {
 		this.cachedSoundCopies = 5;
 		this.gameClassPath = "js/Game.js";
 		this.loadText = "jsEngine loading...";
-		this.backgroundColor = "#FFF";
+		this.backgroundColor = "#000";
 		this.timeFactor = 1;
 		this.disableTouchScroll = true;
 		this.resetCursorOnEachFrame = true;
@@ -196,7 +196,7 @@ new Class('Engine', {
 
 		// Set style for arena
 		this.arena.style.position = "absolute";
-		this.arena.style.background = this.backgroundColor;
+		this.arena.style.background = "#000";
 		this.arena.style.userSelect = "none";
 		this.arena.style.webkitUserSelect = "none";
 		this.arena.style.MozUserSelect = "none";
