@@ -166,10 +166,11 @@ new Class('Renderer.WebGL', {
 	},
 
 	renderTree: function(object, wm) {
-		var i, len, child, localWm, gl;
+		var i, len, child, localWm, offset, gl;
 
 		gl = this.gl;
 		localWm = this.matrixMultiplyArray([this.calculateLocalMatrix(object), wm]);
+		offset = this.makeTranslation(-object.offset.x, -object.offset.y);
 
 		if (!object.isVisible()) {
 			return;
@@ -187,7 +188,7 @@ new Class('Renderer.WebGL', {
 					delete this.cache.textures[object.bm.oldSrc];
 				}
 			case 'sprite':
-				this.renderSprite(object, localWm);
+				this.renderSprite(object, this.matrixMultiply(offset, localWm));
 				break;
 		}
 
@@ -254,12 +255,11 @@ new Class('Renderer.WebGL', {
 	calculateLocalMatrix: function (object) {
 	    var origin, scale, rotation, position;
 
-	    origin   = this.makeTranslation(-object.offset.x, -object.offset.y);
 	    scale    = this.makeScale(object.widthScale * object.size, object.heightScale * object.size);
 	    rotation = this.makeRotation(-object.direction);
 	    position = this.makeTranslation(object.x, object.y);
 
-	    return this.matrixMultiplyArray([origin, scale, rotation, position]);
+	    return this.matrixMultiplyArray([scale, rotation, position]);
 	},
 
 	makeIdentity: function() {
