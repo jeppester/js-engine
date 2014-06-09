@@ -126,10 +126,11 @@ else {
 		$e . 'Engine/Engine.js',
         $e . 'Engine/Loader.js',
 
+        $e . 'Lib/Animatable.js',
+        $e . 'Lib/MatrixCalculation.js',
+
         $e . 'Renderer/WebGL.js',
         $e . 'Renderer/Canvas.js',
-
-        $e . 'Lib/Animatable.js',
 
         $e . 'Math/Vector.js',
         $e . 'Math/Line.js',

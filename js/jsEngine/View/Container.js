@@ -181,43 +181,6 @@ new Class('View.Container', [View.Child], {
 	},
 
 	/**
-	 * Sets whether or not the view should be cached (and only redrawn when called directly).
-	 * If a view is set to static, the view's canvas will be used for caching a drawing of the view's children.
-	 * 
-	 * @param {boolean} enabled Whether or not draw caching should be enabled or disabled
-	 */
-	setDrawCache: function (enabled) {
-		enabled = enabled === true;
-		if (enabled === this.drawCacheEnabled) {return; }
-
-
-		if (enabled) {
-			this.cacheDrawing();
-			document.body.appendChild(this.drawCacheCanvas);
-		}
-		this.drawCacheEnabled = enabled;
-	},
-
-	/**
-	 * Caches a drawing of the View's children (and itself)
-	 */
-	cacheDrawing: function () {
-		// Calculate the size of the canvas and its offset
-		var drawRegion;
-		drawRegion = this.getCombinedRedrawRegion();
-		
-		if (drawRegion) {
-			drawRegion.move(-this.x, -this.y);
-			this.drawCacheOffset = new Math.Vector(drawRegion.x, drawRegion.y);
-			this.drawCacheCanvas.width = drawRegion.width;
-			this.drawCacheCanvas.height = drawRegion.height;
-
-			// Draw all children to the cache canvas
-			this.draw(this.drawCacheCtx, this.drawCacheOffset.copy().move(this.x, this.y), drawRegion, true);
-		}
-	},
-
-	/**
 	 * Gets the complete region that will used for drawing on next redraw
 	 * 
 	 * @return {Math.Rectangle} A rectangle representing the region

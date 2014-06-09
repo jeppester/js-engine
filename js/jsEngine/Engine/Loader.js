@@ -331,7 +331,7 @@ new Class('Engine.Loader', {
 			if (req.status === 404) {console.log('Theme not found: ' + name); continue; }
 
 			// Get theme details
-			codeString = req.responseText + "\n//@ sourceURL=/" + engine.themesPath + '/' + name + '/theme.js';
+			codeString = req.responseText + "\n//# sourceURL=/" + engine.themesPath + '/' + name + '/theme.js';
             eval('theme = ' + codeString);
 
 			// Load inherited themes

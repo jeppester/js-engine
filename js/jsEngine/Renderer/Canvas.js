@@ -1,95 +1,80 @@
-new Class('Renderer.Canvas', {
+new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 	Canvas: function (canvas) {
 		var gl, options;
 
+		this.canvas = canvas;
 		this.context = canvas.getContext('2d');
 	},
 
 	render: function (cameras) {
-		var camerasLength, roomsLength, i, ii, camera;
-
-		this.context.save();
-		this.context.clearRect(0, 0, engine.canvas.width, engine.canvas.height);
+		var camerasLength, roomsLength, i, ii, wm, c, w, h;
 
 		camerasLength = cameras.length;
+		c = this.context;
+		c.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		c.save();
 
 		for (i = 0; i < camerasLength; i ++) {
 			camera = cameras[i];
 
+			// Setup camera resolution
+			//w = camera.captureRegion.width;
+			//h = camera.captureRegion.height;
+
+			// Set camera position
+			wm = this.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
+
+			// Set camera projection viewport
+			c.beginPath();
+			c.moveTo(camera.projectionRegion.x, camera.projectionRegion.y);
+			c.lineTo(camera.projectionRegion.x + camera.projectionRegion.width, 0);
+			c.lineTo(camera.projectionRegion.x + camera.projectionRegion.width, camera.projectionRegion.y + camera.projectionRegion.height);
+			c.lineTo(0, camera.projectionRegion.y + camera.projectionRegion.height);
+			c.closePath();
+			c.clip()
+
 			rooms = [engine.masterRoom, camera.room];
 			roomsLength = rooms.length;
 
-			// Setup/update camera
-			if (!camera.canvas) {
-				camera.canvas = document.createElement('canvas');
-				camera.context = camera.canvas.getContext('2d');
-			}
-			if (camera.captureRegion.width !== camera.canvas.width) {
-				camera.canvas.width = camera.captureRegion.width;
-				changed = true;
-			}
-			if (camera.captureRegion.height !== camera.canvas.height) {
-				camera.canvas.height = camera.captureRegion.height;
-				changes = true;
-			}
-
-			// Clear camera canvas
-			camera.context.clearRect(0, 0, camera.canvas.width, camera.canvas.height);
-
-			// Apply camera translation
-			camera.context.translate(-camera.captureRegion.x, -camera.captureRegion.y);
-
-			// Draw rooms
 			for (ii = 0; ii < roomsLength; ii ++) {
-				this.renderTree(rooms[ii], camera.context);
+				// Draw rooms
+				this.renderTree(rooms[ii], wm);
 			}
 
-			// Draw camera canvas to main canvas
-			this.context.drawImage(camera.canvas, camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height);
-
-			this.context.restore();
+			c.restore();
 		}
 	},
 
-	renderTree: function(object, context) {
-		var i, len, child;
+	renderTree: function(object, wm) {
+		var i, len, child, localWm, offset;
 
-		this.transformCanvasContext(object, context);
+		localWm = this.matrixMultiplyArray([this.calculateLocalMatrix(object), wm]);
+		offset = this.makeTranslation(-object.offset.x, -object.offset.y);
 
 		if (!object.isVisible()) {
 			return;
 		}
 
 		switch (object.renderType) {
-			case 'sprite':
 			case 'textblock':
-				this.renderSprite(object, context);
-				engine.drawCalls ++; //dev
-				break;
-			case 'rectangle':
-				this.renderRectangle(object, context);
-				engine.drawCalls ++; //dev
+			case 'sprite':
+				offset = this.matrixMultiply(offset, localWm);
+
+				this.context.setTransform(offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]);
+				this.context.globalAlpha = object.opacity;
+				this.renderSprite(object);
 				break;
 		}
 
 		if (object.children) {
-
 			len = object.children.length;
 			for (i = 0; i < len; i ++) {
-				this.renderTree(object.children[i], context);
+				this.renderTree(object.children[i], localWm);
 			}
 		}
-
-		this.restoreCanvasContext(object, context);
 	},
 
-	renderSprite: function(object, context) {
-		// Round offset if necessary
-		var offX, offY;
-
-		offX = object.offset.x;
-		offY = object.offset.y;
-
+	renderSprite: function(object) {
 		// Set the right sub image
 		if (object.imageLength !== 1 && object.animationSpeed !== 0) {
 			if (engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed) {
@@ -107,7 +92,7 @@ new Class('Renderer.Canvas', {
 		}
 
 		// Draw bm
-		context.drawImage(object.bm, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, - offX, - offY, object.clipWidth, object.clipHeight);
+		this.context.drawImage(object.bm, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight);
 	},
 
 	/**
@@ -117,24 +102,28 @@ new Class('Renderer.Canvas', {
 	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Rectangle
      * @param {Vector} cameraOffset A vector defining the offset with which to draw the object
      */
-	renderRectangle: function (object, context) {
-		context.translate(-object.offset.x, -object.offset.y);
+	renderRectangle: function (object) {
+		var c;
 
-        context.strokeStyle = object.strokeStyle;
-        context.fillStyle = object.fillStyle;
+		c = this.context;
 
-		context.beginPath();
+        c.strokeStyle = object.strokeStyle;
+        c.fillStyle = object.fillStyle;
 
-		context.moveTo(0, 0);
-		context.lineTo(object.width, 0);
-		context.lineTo(object.width, object.height);
-		context.lineTo(0, object.height);
-		context.closePath();
+		c.beginPath();
 
-        context.lineWidth = object.lineWidth;
-        context.fill();
-        context.stroke();
+		c.moveTo(0, 0);
+		c.lineTo(object.width, 0);
+		c.lineTo(object.width, object.height);
+		c.lineTo(0, object.height);
+		c.closePath();
+
+        c.lineWidth = object.lineWidth;
+        c.fill();
+        c.stroke();
 	},
+
+	// Legacy, used for collisions (should be replaced by matrix math)
 
 	/**
 	 * Prepares the canvas context for drawing the object (applies all transformations)

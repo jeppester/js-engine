@@ -196,7 +196,7 @@ new Class('Engine', {
 
 		// Set style for arena
 		this.arena.style.position = "absolute";
-		this.arena.style.background = "#000";
+		this.arena.style.backgroundColor = "#000";
 		this.arena.style.userSelect = "none";
 		this.arena.style.webkitUserSelect = "none";
 		this.arena.style.MozUserSelect = "none";
