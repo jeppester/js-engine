@@ -30,7 +30,7 @@ new Class('RoomTransitions', {
         room = new Engine.Room('room4');
         room.addChildren(new View.Rectangle(0, 0, 600, 400, '#FFF'));
         for (i = 0; i < 20; i ++) {
-            room.addChildren(new View.Sprite('Dot', 100 + Math.random() * 400, 100 + Math.random() * 200));
+            room.addChildren(new View.Sprite('Folder.Star3', 100 + Math.random() * 400, 100 + Math.random() * 200));
         }
 
         // Hide loader overlay

@@ -7,31 +7,41 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 	},
 
 	render: function (cameras) {
-		var camerasLength, roomsLength, i, ii, wm, c, w, h;
+		var camerasLength, roomsLength, i, ii, wm, wmT, wmS, c, w, h;
 
 		camerasLength = cameras.length;
 		c = this.context;
 		c.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		c.save();
 
 		for (i = 0; i < camerasLength; i ++) {
 			camera = cameras[i];
 
+			// Save/restore routine is needed for resetting the clip
+			c.save();
+
 			// Setup camera resolution
-			//w = camera.captureRegion.width;
-			//h = camera.captureRegion.height;
+			w = camera.captureRegion.width;
+			h = camera.captureRegion.height;
 
 			// Set camera position
-			wm = this.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
+			wmT = this.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
+			if (camera.captureRegion.width !== 0 && camera.captureRegion.height !== 0) {
+				wmS = this.makeScale(camera.projectionRegion.width / camera.captureRegion.width, camera.projectionRegion.height / camera.captureRegion.height);
+			}
+			else {
+				wmS = this.makeIdentity();
+			}
+			wm = this.matrixMultiply(wmT, wmS);
+			wm = this.matrixMultiply(wm, this.makeTranslation(camera.projectionRegion.x, camera.projectionRegion.y));
 
 			// Set camera projection viewport
 			c.beginPath();
 			c.moveTo(camera.projectionRegion.x, camera.projectionRegion.y);
-			c.lineTo(camera.projectionRegion.x + camera.projectionRegion.width, 0);
+			c.lineTo(camera.projectionRegion.x + camera.projectionRegion.width, camera.projectionRegion.y);
 			c.lineTo(camera.projectionRegion.x + camera.projectionRegion.width, camera.projectionRegion.y + camera.projectionRegion.height);
-			c.lineTo(0, camera.projectionRegion.y + camera.projectionRegion.height);
+			c.lineTo(camera.projectionRegion.x, camera.projectionRegion.y + camera.projectionRegion.height);
 			c.closePath();
-			c.clip()
+			c.clip();
 
 			rooms = [engine.masterRoom, camera.room];
 			roomsLength = rooms.length;
@@ -40,7 +50,6 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 				// Draw rooms
 				this.renderTree(rooms[ii], wm);
 			}
-
 			c.restore();
 		}
 	},
