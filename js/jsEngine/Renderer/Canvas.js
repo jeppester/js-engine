@@ -49,21 +49,35 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 		var i, len, child, localWm, offset;
 
 		localWm = this.matrixMultiplyArray([this.calculateLocalMatrix(object), wm]);
-		offset = this.makeTranslation(-object.offset.x, -object.offset.y);
 
 		if (!object.isVisible()) {
 			return;
 		}
 
+		if (object.renderType !== '') {
+			offset = this.matrixMultiply(this.makeTranslation(-object.offset.x, -object.offset.y), localWm);
+			this.context.setTransform(offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]);
+			this.context.globalAlpha = object.opacity;
+		}
+
 		switch (object.renderType) {
 			case 'textblock':
 			case 'sprite':
-				offset = this.matrixMultiply(offset, localWm);
-
-				this.context.setTransform(offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]);
-				this.context.globalAlpha = object.opacity;
 				this.renderSprite(object);
 				break;
+			case 'circle':
+				this.renderCircle(object);
+				break;
+			case 'line':
+				this.renderLine(object);
+				break;
+			case 'rectangle':
+				this.renderRectangle(object);
+				break;
+			case 'polygon':
+				this.renderPolygon(object);
+				break;
+
 		}
 
 		if (object.children) {
@@ -96,7 +110,97 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 	},
 
 	/**
-	 * Draws the Rectangle object on the canvas (if added as a child of a View)
+	 * Draws a Circle object on the canvas (if added as a child of a View)
+	 *
+	 * @private
+	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Circle
+	 * @param {Math.Vector} drawOffset A vector defining the offset with which to draw the object
+	 */
+	renderCircle: function (object) {
+		var c;
+
+		c = this.context;
+
+		c.strokeStyle = object.strokeStyle;
+        c.fillStyle = object.fillStyle;
+
+		c.beginPath();
+
+		c.arc(0, 0, object.radius, 0, Math.PI * 2, true);
+
+        c.lineWidth = object.lineWidth;
+        c.globalAlpha = object.opacity;
+		c.stroke();
+        c.fill();
+	},
+
+	/**
+	 * Draws a Polygon object on the canvas (if added as a child of a View)
+	 *
+	 * @private
+	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Polygon
+     * @param {Vector} drawOffset A vector defining the offset with which to draw the object
+     */
+	renderPolygon: function (object) {
+		var c, i, len;
+
+		c = this.context;
+
+        c.strokeStyle = object.strokeStyle;
+        c.fillStyle = object.fillStyle;
+
+        if (object.lineDash !== [] && c.setLineDash) {
+            c.setLineDash(object.lineDash);
+        }
+
+		c.beginPath();
+
+        len = object.points.length;
+
+        for (i = 0; i < len; i ++) {
+            c.lineTo(object.points[i].x, object.points[i].y);
+        }
+
+        c.lineWidth = object.lineWidth;
+        c.globalAlpha = object.opacity;
+
+        if (object.closed) {
+            c.closePath();
+            c.fill();
+            c.stroke();
+        }
+        else {
+            c.fill();
+            c.stroke();
+            c.closePath();
+        }
+	},
+
+	/**
+	 * Draws a Line object on the canvas (if added as a child of a View)
+	 *
+	 * @private
+	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Line
+	 */
+	renderLine: function (object) {
+		var c;
+
+		c = this.context;
+
+		c.strokeStyle = object.strokeStyle;
+        c.globalAlpha = object.opacity;
+		c.beginPath();
+
+		c.moveTo(object.a.x, object.a.y);
+		c.lineTo(object.b.x, object.b.y);
+
+        c.lineWidth = object.lineWidth;
+        c.lineCap = object.lineCap;
+		c.stroke();
+	},
+
+	/**
+	 * Draws a Rectangle object on the canvas (if added as a child of a View)
 	 *
 	 * @private
 	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Rectangle

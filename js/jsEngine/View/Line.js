@@ -21,6 +21,7 @@ new Class('View.Line',[Math.Line, View.Child], {
 	 */
 	Line: function (startVector, endVector, strokeStyle, lineWidth, lineCap) {
         this.Child();
+        this.renderType = 'line';
 
         if (engine.enableRedrawRegions) {
             this.LineInitWithRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
@@ -186,23 +187,4 @@ new Class('View.Line',[Math.Line, View.Child], {
 
         return box;/**/
     },
-
-	/**
-	 * Draws the Line object on the canvas (if added as a child of a View)
-	 *
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Line
-	 */
-	drawCanvas: function (c) {
-		c.strokeStyle = this.strokeStyle;
-        c.globalAlpha = this.opacity;
-		c.beginPath();
-
-		c.moveTo(this.a.x, this.a.y);
-		c.lineTo(this.b.x, this.b.y);
-
-        c.lineWidth = this.lineWidth;
-        c.lineCap = this.lineCap;
-		c.stroke();
-	}
 });

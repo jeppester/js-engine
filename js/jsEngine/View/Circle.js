@@ -23,6 +23,7 @@ new Class('View.Circle', [Math.Circle, View.Child], {
 	 */
 	Circle: function (x, y, radius, fillStyle, strokeStyle, lineWidth) {
 		this.Child();
+        this.renderType = 'circle';
 
         if (engine.enableRedrawRegions) {
             this.CircleInitWithRedrawRegions(x, y, radius, fillStyle, strokeStyle, lineWidth);
@@ -105,25 +106,4 @@ new Class('View.Circle', [Math.Circle, View.Child], {
 
         return rect.add(this.parent.getRoomPosition());
     },
-
-	/**
-	 * Draws the Circle object on the canvas (if added as a child of a View)
-	 *
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Circle
-	 * @param {Math.Vector} drawOffset A vector defining the offset with which to draw the object
-	 */
-	drawCanvas: function (c) {
-		c.strokeStyle = this.strokeStyle;
-        c.fillStyle = this.fillStyle;
-
-		c.beginPath();
-
-		c.arc(-this.offset.x, -this.offset.y, this.radius, 0, Math.PI * 2, true);
-
-        c.lineWidth = this.lineWidth;
-        c.globalAlpha = this.opacity;
-		c.stroke();
-        c.fill();
-	}
 });
