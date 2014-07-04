@@ -13,7 +13,7 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 				width: 0,
 				height: 0,
 			}
-		}
+		};
 
 		this.programs = {};
 		this.currentProgram = false;
@@ -36,7 +36,7 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 		// Init shader programs
 		this.programs = {
 			texture: new Renderer.WebGL.TextureShaderProgram(gl)
-		}
+		};
 
 		// Use program
 		this.setProgram(this.programs.texture);
@@ -50,7 +50,7 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 	render: function (cameras) {
 		var camerasLength, roomsLength, i, ii, wm, gl, w, h;
 
-		gl = this.gl
+		gl = this.gl;
 		camerasLength = cameras.length;
 
 		for (i = 0; i < camerasLength; i ++) {
@@ -109,6 +109,8 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 				if (this.cache.textures[object.bm.oldSrc]) {
 					delete this.cache.textures[object.bm.oldSrc];
 				}
+				this.renderSprite(object, this.matrixMultiply(offset, localWm));
+				break;
 			case 'sprite':
 				this.renderSprite(object, this.matrixMultiply(offset, localWm));
 				break;
@@ -195,6 +197,7 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);	
 		}
 		else {
+			// gl.NEAREST is better for drawing a part of an image
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);	
 		}
 
@@ -218,4 +221,4 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 			x2, y1,
 			x2, y2]), gl.STATIC_DRAW);
 	},
-})
+});

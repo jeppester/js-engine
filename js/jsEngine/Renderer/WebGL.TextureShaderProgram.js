@@ -73,6 +73,20 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 	},
 
 	initBuffers: function (gl) {
+		// Regular texture coordinate buffer (the coordinates are always the same)
+		this.cache.regularTextCoordBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.regularTextCoordBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+			0.0,  0.0,
+			1.0,  0.0,
+			0.0,  1.0,
+			0.0,  1.0,
+			1.0,  0.0,
+			1.0,  1.0]), gl.STATIC_DRAW);
+
+		// Animated texture coordinate (the coordinates will be unique for each draw)
+		this.cache.animatedTextCoordBuffer = gl.createBuffer();
+
 		// Rectangle corner buffer
 		this.cache.rectangleCornerBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
@@ -82,29 +96,15 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 
 	// Use the same texture coordinate buffer for all non-animated sprites
 	setRegularTextCoordBuffer: function (gl) {
-		// If the texture coordinate buffer doesn't already exist, create it
-		if (this.cache.regularTextCoordBuffer === false) {
-			this.cache.regularTextCoordBuffer = gl.createBuffer();
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.regularTextCoordBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-				0.0,  0.0,
-				1.0,  0.0,
-				0.0,  1.0,
-				0.0,  1.0,
-				1.0,  0.0,
-				1.0,  1.0]), gl.STATIC_DRAW);
-		}
-
 		// Enable the texture coord buffer
 		if (this.cache.currentBuffer !== this.cache.regularTextCoordBuffer) {
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.regularTextCoordBuffer);
-
 			gl.enableVertexAttribArray(this.locations.a_texCoord);
 			gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
 
 			this.cache.currentBuffer = this.cache.regularTextCoordBuffer;
-
 			
+			// Bind rectangle corner buffer again (when needed instead of all the time) 
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
 		}
 	},
@@ -121,11 +121,6 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 
 		y1 = 0;
 		y2 = 1;
-
-		// If the texture coordinate buffer doesn't already exist, create it
-		if (this.cache.animatedTextCoordBuffer === false) {
-			this.cache.animatedTextCoordBuffer = gl.createBuffer();			
-		}
 
 		// Enable the texture coord buffer
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.animatedTextCoordBuffer);

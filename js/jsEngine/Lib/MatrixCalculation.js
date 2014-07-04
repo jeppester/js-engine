@@ -1,12 +1,12 @@
 new Class('Lib.MatrixCalculation', {
 	calculateLocalMatrix: function (object) {
-	    var origin, scale, rotation, position;
+		var origin, scale, rotation, position;
 
-	    scale    = this.makeScale(object.widthScale * object.size, object.heightScale * object.size);
-	    rotation = this.makeRotation(-object.direction);
-	    position = this.makeTranslation(object.x, object.y);
+		scale    = this.makeScale(object.widthScale * object.size, object.heightScale * object.size);
+		rotation = this.makeRotation(-object.direction);
+		position = this.makeTranslation(object.x, object.y);
 
-	    return this.matrixMultiplyArray([scale, rotation, position]);
+		return this.matrixMultiplyArray([scale, rotation, position]);
 	},
 
 	makeIdentity: function() {
@@ -82,8 +82,8 @@ new Class('Lib.MatrixCalculation', {
 	matrixMultiplyArray: function(matrices) {
 		var r, i, len;
 
-		r = matrices[0]
-		len = matrices.length
+		r = matrices[0];
+		len = matrices.length;
 
 		for (i = 1; i < len; i ++) {
 			r = this.matrixMultiply(r, matrices[i]);

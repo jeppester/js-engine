@@ -131,16 +131,16 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 		c = this.context;
 
 		c.strokeStyle = object.strokeStyle;
-        c.fillStyle = object.fillStyle;
+		c.fillStyle = object.fillStyle;
 
 		c.beginPath();
 
 		c.arc(0, 0, object.radius, 0, Math.PI * 2, true);
 
-        c.lineWidth = object.lineWidth;
-        c.globalAlpha = object.opacity;
+		c.lineWidth = object.lineWidth;
+		c.globalAlpha = object.opacity;
 		c.stroke();
-        c.fill();
+		c.fill();
 	},
 
 	/**
@@ -148,41 +148,41 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 	 *
 	 * @private
 	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Polygon
-     * @param {Vector} drawOffset A vector defining the offset with which to draw the object
-     */
+	 * @param {Vector} drawOffset A vector defining the offset with which to draw the object
+	 */
 	renderPolygon: function (object) {
 		var c, i, len;
 
 		c = this.context;
 
-        c.strokeStyle = object.strokeStyle;
-        c.fillStyle = object.fillStyle;
+		c.strokeStyle = object.strokeStyle;
+		c.fillStyle = object.fillStyle;
 
-        if (object.lineDash !== [] && c.setLineDash) {
-            c.setLineDash(object.lineDash);
-        }
+		if (object.lineDash !== [] && c.setLineDash) {
+			c.setLineDash(object.lineDash);
+		}
 
 		c.beginPath();
 
-        len = object.points.length;
+		len = object.points.length;
 
-        for (i = 0; i < len; i ++) {
-            c.lineTo(object.points[i].x, object.points[i].y);
-        }
+		for (i = 0; i < len; i ++) {
+			c.lineTo(object.points[i].x, object.points[i].y);
+		}
 
-        c.lineWidth = object.lineWidth;
-        c.globalAlpha = object.opacity;
+		c.lineWidth = object.lineWidth;
+		c.globalAlpha = object.opacity;
 
-        if (object.closed) {
-            c.closePath();
-            c.fill();
-            c.stroke();
-        }
-        else {
-            c.fill();
-            c.stroke();
-            c.closePath();
-        }
+		if (object.closed) {
+			c.closePath();
+			c.fill();
+			c.stroke();
+		}
+		else {
+			c.fill();
+			c.stroke();
+			c.closePath();
+		}
 	},
 
 	/**
@@ -197,14 +197,14 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 		c = this.context;
 
 		c.strokeStyle = object.strokeStyle;
-        c.globalAlpha = object.opacity;
+		c.globalAlpha = object.opacity;
 		c.beginPath();
 
 		c.moveTo(object.a.x, object.a.y);
 		c.lineTo(object.b.x, object.b.y);
 
-        c.lineWidth = object.lineWidth;
-        c.lineCap = object.lineCap;
+		c.lineWidth = object.lineWidth;
+		c.lineCap = object.lineCap;
 		c.stroke();
 	},
 
@@ -213,15 +213,15 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 	 *
 	 * @private
 	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Rectangle
-     * @param {Vector} cameraOffset A vector defining the offset with which to draw the object
-     */
+	 * @param {Vector} cameraOffset A vector defining the offset with which to draw the object
+	 */
 	renderRectangle: function (object) {
 		var c;
 
 		c = this.context;
 
-        c.strokeStyle = object.strokeStyle;
-        c.fillStyle = object.fillStyle;
+		c.strokeStyle = object.strokeStyle;
+		c.fillStyle = object.fillStyle;
 
 		c.beginPath();
 
@@ -231,9 +231,9 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 		c.lineTo(0, object.height);
 		c.closePath();
 
-        c.lineWidth = object.lineWidth;
-        c.fill();
-        c.stroke();
+		c.lineWidth = object.lineWidth;
+		c.fill();
+		c.stroke();
 	},
 
 	// Legacy, used for collisions (should be replaced by matrix math)
@@ -244,34 +244,34 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 	 * @private
 	 */
 	transformCanvasContext: function (object, context) {
-	    // Draw Sprite on canvas
-	    var c, x, y;
+		// Draw Sprite on canvas
+		var c, x, y;
 
-	    c = context;
+		c = context;
 
-	    if (engine.avoidSubPixelRendering) {
-	        x = Math.round(object.x);
-	        y = Math.round(object.y);
-	    }
-	    else {
-	        x = object.x;
-	        y = object.y;
-	    }
+		if (engine.avoidSubPixelRendering) {
+			x = Math.round(object.x);
+			y = Math.round(object.y);
+		}
+		else {
+			x = object.x;
+			y = object.y;
+		}
 
-	    // Apply drawing options if they are needed (this saves a lot of resources)
-	    c.globalAlpha = object.opacity;
-	    if (object.composite !== 'source-over') {
-	        c.globalCompositeOperation = object.composite;
-	    }
-	    if (x !== 0 || y !== 0) {
-	        c.translate(x, y);
-	    }
-	    if (object.direction !== 0) {
-	        c.rotate(object.direction);
-	    }
-	    if (object.size !== 1 || object.widthScale !== 1 || object.heightScale !== 1) {
-	        c.scale(object.widthScale * object.size, object.heightScale * object.size);
-	    }
+		// Apply drawing options if they are needed (this saves a lot of resources)
+		c.globalAlpha = object.opacity;
+		if (object.composite !== 'source-over') {
+			c.globalCompositeOperation = object.composite;
+		}
+		if (x !== 0 || y !== 0) {
+			c.translate(x, y);
+		}
+		if (object.direction !== 0) {
+			c.rotate(object.direction);
+		}
+		if (object.size !== 1 || object.widthScale !== 1 || object.heightScale !== 1) {
+			c.scale(object.widthScale * object.size, object.heightScale * object.size);
+		}
 	},
 
 	/**
@@ -280,33 +280,33 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 	 * @private
 	 */
 	restoreCanvasContext: function (object, context) {
-	    // Draw Sprite on canvas
-	    var c, x, y;
+		// Draw Sprite on canvas
+		var c, x, y;
 
-	    c = context;
+		c = context;
 
-	    if (engine.avoidSubPixelRendering) {
-	        x = Math.round(object.x);
-	        y = Math.round(object.y);
-	    }
-	    else {
-	        x = object.x;
-	        y = object.y;
-	    }
+		if (engine.avoidSubPixelRendering) {
+			x = Math.round(object.x);
+			y = Math.round(object.y);
+		}
+		else {
+			x = object.x;
+			y = object.y;
+		}
 
-	    // Apply drawing options if they are needed (this saves a lot of resources)
-	    if (object.size !== 1 || object.widthScale !== 1 || object.heightScale !== 1) {
-	        c.scale(1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size));
-	    }
-	    if (object.direction !== 0) {
-	        c.rotate(-object.direction);
-	    }
-	    if (x !== 0 || y !== 0) {
-	        c.translate(-x, -y);
-	    }
-	    if (object.composite !== 'source-over') {
-	        c.globalCompositeOperation = 'source-over';
-	    }
-	    c.globalAlpha = object.opacity;
+		// Apply drawing options if they are needed (this saves a lot of resources)
+		if (object.size !== 1 || object.widthScale !== 1 || object.heightScale !== 1) {
+			c.scale(1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size));
+		}
+		if (object.direction !== 0) {
+			c.rotate(-object.direction);
+		}
+		if (x !== 0 || y !== 0) {
+			c.translate(-x, -y);
+		}
+		if (object.composite !== 'source-over') {
+			c.globalCompositeOperation = 'source-over';
+		}
+		c.globalAlpha = object.opacity;
 	},
-})
+});

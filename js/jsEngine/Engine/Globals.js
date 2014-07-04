@@ -234,7 +234,7 @@ SPEED_PIXELS_PER_FRAME		= 2;
  * Top left offset
  * @type {String}
  */
-OFFSET_TOP_LEFT 			= 'tl';
+OFFSET_TOP_LEFT				= 'tl';
 /**
  * Top center offset
  * @type {String}
@@ -393,7 +393,7 @@ ALIGNMENT_RIGHT				= 'right';
 		}
 
 		callback();
-	}
+	};
 
 	/**
 	 * Room transition global for entering a new room by sliding the current room to the left
@@ -414,7 +414,7 @@ ALIGNMENT_RIGHT				= 'right';
 			easing: options.easing || 'quadInOut',
 			duration: options.duration || 2000,
 			loop: engine.masterRoom.loops.eachFrame,
-		}
+		};
 
 		for (i = 0; i < engine.cameras.length; i ++) {
 			camera = engine.cameras[i];
@@ -435,11 +435,12 @@ ALIGNMENT_RIGHT				= 'right';
 			this.play();
 			engine.cameras = engine.cameras.filter(function (camera) {
 				return newCams.indexOf(camera) !== -1;
-			})
+			});
 
 			callback();
 		}, animOptions.duration);
-	}
+	};
+
 	/**
 	 * Room transition global for entering a new room by squeezing the old room out and sliding the new room in
 	 *
@@ -459,7 +460,7 @@ ALIGNMENT_RIGHT				= 'right';
 			easing: options.easing || 'quadInOut',
 			duration: options.duration || 2000,
 			loop: engine.masterRoom.loops.eachFrame,
-		}
+		};
 
 		for (i = 0; i < engine.cameras.length; i ++) {
 			camera = engine.cameras[i];
@@ -482,11 +483,12 @@ ALIGNMENT_RIGHT				= 'right';
 			this.play();
 			engine.cameras = engine.cameras.filter(function (camera) {
 				return newCams.indexOf(camera) !== -1;
-			})
+			});
 
 			callback();
 		}, animOptions.duration);
-	}
+	};
+
 	/**
 	 * Room transition global for squeezing the old room out and squeezing the new room in
 	 *
@@ -506,7 +508,7 @@ ALIGNMENT_RIGHT				= 'right';
 			easing: options.easing || 'quadInOut',
 			duration: options.duration || 2000,
 			loop: engine.masterRoom.loops.eachFrame,
-		}
+		};
 
 		console.log(options.from);
 
@@ -531,11 +533,11 @@ ALIGNMENT_RIGHT				= 'right';
 			this.play();
 			engine.cameras = engine.cameras.filter(function (camera) {
 				return newCams.indexOf(camera) !== -1;
-			})
+			});
 
 			callback();
 		}, animOptions.duration);
-	}
+	};
 
 	/**
 	 * Room transition global for sliding the old room out and squeezing the new room in
@@ -556,7 +558,7 @@ ALIGNMENT_RIGHT				= 'right';
 			easing: options.easing || 'quadInOut',
 			duration: options.duration || 2000,
 			loop: engine.masterRoom.loops.eachFrame,
-		}
+		};
 
 		console.log(options.from);
 
@@ -581,9 +583,9 @@ ALIGNMENT_RIGHT				= 'right';
 			this.play();
 			engine.cameras = engine.cameras.filter(function (camera) {
 				return newCams.indexOf(camera) !== -1;
-			})
+			});
 
 			callback();
 		}, animOptions.duration);
-	}
+	};
 })();

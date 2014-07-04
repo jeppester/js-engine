@@ -462,7 +462,6 @@ new Class('Engine.Loader', {
 					}
 					if (!format) {
 						throw new Error('Sound was not available in a supported format: ' + theme.name + "/sfx/" + path.replace(/\./g, '/')); //dev
-						continue;
 					}
 					res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, '/') + '.' + format);
 					theme.music[path] = new Sound.Music(res);
@@ -529,7 +528,6 @@ new Class('Engine.Loader', {
 
                 if (engine.host.supportedAudio.indexOf(format) === -1) {
                     throw new Error('Sound format is not supported:', format); //dev
-                    return;
                 }
                 res = new Audio(path);
                 theme.sfx[resourceString] = new Sound.Effect(res);
@@ -546,7 +544,6 @@ new Class('Engine.Loader', {
 
                 if (engine.host.supportedAudio.indexOf(format) === -1) {
                     throw new Error('Sound format is not supported:', format); //dev
-                    return;
                 }
                 res = new Audio(path);
                 theme.music[resourceString] = new Music(res);

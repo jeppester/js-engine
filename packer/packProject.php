@@ -121,44 +121,44 @@ else {
 		$e . 'Polyfill/requestAnimationFrame.js',
 		$e . 'Polyfill/Array.prototype.forEach.js',
 
-        $e . 'Engine/Class.js',
+		$e . 'Engine/Class.js',
 		$e . 'Engine/Globals.js',
 		$e . 'Engine/Engine.js',
-        $e . 'Engine/Loader.js',
+		$e . 'Engine/Loader.js',
 
-        $e . 'Lib/Animatable.js',
-        $e . 'Lib/MatrixCalculation.js',
+		$e . 'Lib/Animatable.js',
+		$e . 'Lib/MatrixCalculation.js',
 
-        $e . 'Renderer/WebGL.js',
-        $e . 'Renderer/WebGL.TextureShaderProgram.js',
-        $e . 'Renderer/Canvas.js',
+		$e . 'Renderer/WebGL.js',
+		$e . 'Renderer/WebGL.TextureShaderProgram.js',
+		$e . 'Renderer/Canvas.js',
 
-        $e . 'Math/Vector.js',
-        $e . 'Math/Line.js',
-        $e . 'Math/Circle.js',
-        $e . 'Math/Rectangle.js',
-        $e . 'Math/Polygon.js',
+		$e . 'Math/Vector.js',
+		$e . 'Math/Line.js',
+		$e . 'Math/Circle.js',
+		$e . 'Math/Rectangle.js',
+		$e . 'Math/Polygon.js',
 
-        $e . 'View/Child.js',
-        $e . 'View/Line.js',
-        $e . 'View/Circle.js',
-        $e . 'View/Rectangle.js',
-        $e . 'View/Polygon.js',
-        $e . 'View/Container.js',
-        $e . 'View/Sprite.js',
-        $e . 'View/Collidable.js',
-        $e . 'View/TextBlock.js',
-        $e . 'View/GameObject.js',
+		$e . 'View/Child.js',
+		$e . 'View/Line.js',
+		$e . 'View/Circle.js',
+		$e . 'View/Rectangle.js',
+		$e . 'View/Polygon.js',
+		$e . 'View/Container.js',
+		$e . 'View/Sprite.js',
+		$e . 'View/Collidable.js',
+		$e . 'View/TextBlock.js',
+		$e . 'View/GameObject.js',
 
-        $e . 'Engine/Room.js',
-        $e . 'Engine/Camera.js',
-        $e . 'Engine/CustomLoop.js',
+		$e . 'Engine/Room.js',
+		$e . 'Engine/Camera.js',
+		$e . 'Engine/CustomLoop.js',
 
-        $e . 'Input/Keyboard.js',
-        $e . 'Input/Pointer.js',
+		$e . 'Input/Keyboard.js',
+		$e . 'Input/Pointer.js',
 
-        $e . 'Sound/Effect.js',
-        $e . 'Sound/Music.js'
+		$e . 'Sound/Effect.js',
+		$e . 'Sound/Music.js'
 	);
 }
 

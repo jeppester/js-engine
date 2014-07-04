@@ -70,4 +70,4 @@ function Class(className, inherits, functions) {
             newClass.prototype[propName] = functions[propName];
         }
 	}
-};
+}

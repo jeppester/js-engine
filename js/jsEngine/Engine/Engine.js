@@ -914,7 +914,8 @@ new Class('Engine', {
 			t = t / d * 2;
 			if (t < 1) {
 				return b + c * t * t / 2;
-			} else {
+			}
+			else {
 				t --;
 				return b + c * (1 - t * (t - 2)) / 2;
 			}
@@ -934,7 +935,8 @@ new Class('Engine', {
 			a = c / Math.abs(c);
 			if (t < 1) {
 				return b + a * Math.pow(Math.abs(c), t) / 2;
-			} else {
+			}
+			else {
 				t --;
 				return b + c - a * Math.pow(Math.abs(c), 1 - t) / 2;
 			}

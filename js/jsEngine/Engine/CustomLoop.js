@@ -404,10 +404,12 @@ new Class('Engine.CustomLoop', {
 				}
 				if (typeof a.callback === "string") {
 					eval(a.callback);
-				} else {
+				}
+				else {
 					a.callback.call(a.obj);
 				}
-			} else {
+			}
+			else {
 				// If the animation is still running: Ease the animation of each property
 				for (propId in a.prop) {
 					if (a.prop.hasOwnProperty(propId)) {

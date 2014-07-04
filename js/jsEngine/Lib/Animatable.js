@@ -1,9 +1,9 @@
 new Class('Lib.Animatable', {
-    /**
-     * @name Lib.Animatable
-     * @class
-     */
-    /** @scope Animatable */
+	/**
+	 * @name Lib.Animatable
+	 * @class
+	 */
+	/** @scope Animatable */
 
 	/**
 	 * Used for animating numeric properties of the owner of the function.
@@ -61,13 +61,13 @@ new Class('Lib.Animatable', {
 		// Remove properties that are equal to their end value
 		c = 0;
 		for (i in anim.prop) {
-            if (anim.prop.hasOwnProperty(i)) {
-                if (anim.prop[i].begin === anim.prop[i].end && !this.propertyIsAnimated(i)) {
-                    delete anim.prop[i];
-                } else {
-                    c ++;
-                }
-            }
+			if (anim.prop.hasOwnProperty(i)) {
+				if (anim.prop[i].begin === anim.prop[i].end && !this.propertyIsAnimated(i)) {
+					delete anim.prop[i];
+				} else {
+					c ++;
+				}
+			}
 		}
 
 		// If there are no properties left to animate and the animation does not have a callback function, do nothing

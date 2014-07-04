@@ -244,7 +244,7 @@ new Class('Math.Rectangle', [Math.Vector], {
                 object.x < this.x + this.width &&
                 object.y > this.y &&
                 object.y < this.y + this.height
-            )
+            );
         }
 
         return this.getPolygon().contains(object);
