@@ -70,7 +70,8 @@ new Class('Sound.Effect', {
 			}
 		}
 
-		//console.log('To many playbacks of the same sound: ' + this.source.src);
+		console.log('Too many playbacks of the same sound: ' + this.source.src); // dev
+		
 		return false;
 	},
 
