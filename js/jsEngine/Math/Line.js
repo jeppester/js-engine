@@ -255,6 +255,28 @@ new Class('Math.Line',[Lib.Animatable], {
 		} //dev
 	},
 
+	/**
+	 * Creates a rectangular polygon based on the line segment and a width
+	 * 
+	 * @param {Number} width The wished width of the created polygon
+	 */
+	createPolygonFromWidth: function (width) {
+		var dir, ort, a, b, c, d;
+
+		dir = this.a.copy().subtract(this.b).getDirection();
+		console.log(dir);
+
+		dir -= Math.PI / 2;
+		ort = new Math.Vector().setFromDirection(dir, width / 2);
+
+		a = this.a.copy().add(ort);
+		b = this.a.copy().subtract(ort);
+		c = this.b.copy().subtract(ort);
+		d = this.b.copy().add(ort);
+
+		return new Math.Polygon([a, b, c, d]);
+	},
+
     /**
      * Creates a polygon with the same points as the line.
      *
