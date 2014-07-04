@@ -130,6 +130,7 @@ else {
         $e . 'Lib/MatrixCalculation.js',
 
         $e . 'Renderer/WebGL.js',
+        $e . 'Renderer/WebGL.TextureShaderProgram.js',
         $e . 'Renderer/Canvas.js',
 
         $e . 'Math/Vector.js',

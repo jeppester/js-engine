@@ -50,6 +50,7 @@
 		enginePath + '/Lib/MatrixCalculation.js',
 
 		enginePath + '/Renderer/WebGL.js',
+		enginePath + '/Renderer/WebGL.TextureShaderProgram.js',
 		enginePath + '/Renderer/Canvas.js',
 
 
