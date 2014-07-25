@@ -22,7 +22,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Sets the start- and end points from two Vector's.
-	 * 
+	 *
 	 * @param {Math.Vector} startVector A Vector representing the start point of the line
 	 * @param {Vector} endVector A Vector representing the end point of the line
 	 * @return {Math.Line} The resulting Line object (itself)
@@ -39,7 +39,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Sets the start- and end points directly from x- and y-coordinates.
-	 * 
+	 *
 	 * @param {number} x1 The start points' x-coordinate
 	 * @param {number} y1 The start points' y-coordinate
 	 * @param {number} x2 The end points' x-coordinate
@@ -60,7 +60,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Copies the Line object
-	 * 
+	 *
 	 * @return {Math.Line} A copy of the Line object (which can be modified without changing the original object)
 	 */
 	copy: function () {
@@ -69,7 +69,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Moves the line by moving the start- and the end point
-	 * 
+	 *
 	 * @param {number} x The value to add to both points' x-coordinates
 	 * @param {number} y The value to add to both points' y-coordinates
 	 * @return {Math.Line} The resulting Line object (itself)
@@ -83,7 +83,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Rotates the line around the zero-vector.
-	 * 
+	 *
 	 * @param {number} direction The number of radians to rotate the line
 	 * @return {Math.Line} The resulting Line object (itself)
 	 */
@@ -98,7 +98,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Scales the line by multiplying the start- and end points
-	 * 
+	 *
 	 * @param {number} scaleH A factor with which to scale the Line horizontally.
 	 * @param {number} [scaleV=scaleH] A factor with which to scale the Line vertically
 	 * @return {Math.Line} The resulting Line object (itself)
@@ -113,7 +113,7 @@ new Class('Math.Line',[Lib.Animatable], {
 	/**
 	 * Adds a vector to the start- and end points of the line.
 	 * Can by used for the same purpose as move, but takes a vector as argument.
-	 * 
+	 *
 	 * @param {Math.Vector} vector A vector to add to the line's start- and end points
 	 * @return {Math.Line} The resulting Line object (itself)
 	 */
@@ -126,7 +126,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Subtracts a vector from the start- and end points of the line.
-	 * 
+	 *
 	 * @param {Math.Vector} vector A vector to subtract from the line's start- and end points
 	 * @return {Math.Line} The resulting Line object (itself)
 	 */
@@ -139,7 +139,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Divides the start- and end points of the line with a vector.
-	 * 
+	 *
 	 * @param {Math.Vector} vector A vector to divide the line's start- and end points with
 	 * @return {Math.Line} The resulting Line object (itself)
 	 */
@@ -152,7 +152,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Multiplies the start- and end points of the line with a vector.
-	 * 
+	 *
 	 * @param {Math.Vector} vector A vector to multiply the line's start- and end points with
 	 * @return {Math.Line} The resulting Line object (itself)
 	 */
@@ -165,7 +165,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Checks whether the line intersects with another line or polygon.
-	 * 
+	 *
 	 * @param {Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object Geometric object to check for an intersection with
 	 * @return {boolean} True if the checked object intersects with the line, false if not
 	 */
@@ -199,7 +199,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Calculates the length of the line.
-	 * 
+	 *
 	 * @return {number} The length of the line
 	 */
 	getLength: function () {
@@ -208,7 +208,7 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Calculates the shortest distance from the Line object to another geometric object
-	 * 
+	 *
 	 * @param {Math.Vector|Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object The object to calculate the distance to
 	 * @return {number} The distance
 	 */
@@ -257,17 +257,17 @@ new Class('Math.Line',[Lib.Animatable], {
 
 	/**
 	 * Creates a rectangular polygon based on the line segment and a width
-	 * 
+   *
 	 * @param {Number} width The wished width of the created polygon
 	 */
 	createPolygonFromWidth: function (width) {
-		var dir, ort, a, b, c, d;
+		var v, r, ort, a, b, c, d;
 
-		dir = this.a.copy().subtract(this.b).getDirection();
-		console.log(dir);
+		v = this.a.copy().subtract(this.b);
+		v.set(v.y, -v.x);
 
-		dir -= Math.PI / 2;
-		ort = new Math.Vector().setFromDirection(dir, width / 2);
+		r =  (width / 2) / v.getLength();
+		ort = v.scale(r);
 
 		a = this.a.copy().add(ort);
 		b = this.a.copy().subtract(ort);
