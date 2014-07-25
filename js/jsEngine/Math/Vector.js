@@ -14,13 +14,12 @@ new Class('Math.Vector', [Lib.Animatable], {
 	 */
 	Vector: function (x, y) {
         this.set(x, y);
-        this.opacity = 1;
 	},
     /** @scope Math.Vector */
 
 	/**
 	 * Sets the vector from x- and y values.
-	 * 
+	 *
 	 * @param {number} [x=0] The x-value to set for the vector
 	 * @param {number} [y=0] The y-value to set for the vector
 	 * @return {Math.Vector} The resulting Vector object (itself)
@@ -34,7 +33,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Calculates and sets the vector from a direction and a length.
-	 * 
+	 *
 	 * @param {number} direction The direction (in radians)
 	 * @param {number} length The length
 	 * @return {Math.Vector} The resulting Vector object (itself)
@@ -51,7 +50,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Copies the Vector object
-	 * 
+	 *
 	 * @return {Math.Vector} A copy of the Vector object (which can be modified without changing the original object)
 	 */
 	copy: function () {
@@ -60,7 +59,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Moves the vector by adding a value to its x-property and another value to its y-property.
-	 * 
+	 *
 	 * @param {number} x The value to add to the x-property (can be negative)
 	 * @param {number} y The value to add to the y-property (can be negative)
 	 * @return {Math.Vector} The resulting Vector object (itself)
@@ -77,7 +76,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Rotates the vector around the zero-vector.
-	 * 
+	 *
 	 * @param {number} direction The number of radians to rotate the vector
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
@@ -91,7 +90,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Scales the vector by multiplying the x- and y values.
-	 * 
+	 *
 	 * @param {number} scaleH A factor with which to scale the Vector horizontally. If scaleH is undefined, both width and height will be scaled after this factor
 	 * @param {number} scaleV A factor with which to scale the Vector vertically
 	 * @return {Math.Vector} The resulting Vector object (itself)
@@ -109,7 +108,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 	/**
 	 * Adds another vector to the Vector.
 	 * Can by used for the same purpose as move, but takes a vector as argument.
-	 * 
+	 *
 	 * @param {Math.Vector} vector A vector to add to the Vector
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
@@ -131,7 +130,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Subtracts another vector from the Vector.
-	 * 
+	 *
 	 * @param {Math.Vector} vector A vector to subtract from the Vector
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
@@ -153,7 +152,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Divides the Vector with another vector.
-	 * 
+	 *
 	 * @param {Math.Vector} vector A vector to divide the Vector with
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
@@ -175,7 +174,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Multiplies the Vector with another vector.
-	 * 
+	 *
 	 * @param {Math.Vector} vector A vector to multiply the Vector with
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
@@ -190,7 +189,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Calculates the cross product of the Vector and another vector
-	 * 
+	 *
 	 * @param {Math.Vector} vector The vector to use for the calculation
 	 * @return {number} The dot product
 	 */
@@ -202,7 +201,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Calculates the cross product of the Vector and another vector
-	 * 
+	 *
 	 * @param {Math.Vector} vector The vector to use for the calculation
 	 * @return {number} The cross product
 	 */
@@ -214,7 +213,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Calculates the length of the Vector
-	 * 
+	 *
 	 * @return {number} The vector's length
 	 */
 	getLength: function () {
@@ -223,7 +222,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Calculates the direction of the Vector
-	 * 
+	 *
 	 * @return {number} The vector's direction (in radians)
 	 */
 	getDirection: function () {
@@ -232,7 +231,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Calculates the direction to another Vector
-	 * 
+	 *
 	 * @param {Math.Vector} point A Vector to calculate the direction to
 	 * @return {number} The direction to the object
 	 */
@@ -244,7 +243,7 @@ new Class('Math.Vector', [Lib.Animatable], {
 
 	/**
 	 * Calculates the shortest distance from the Vector object to another geometric object
-	 * 
+	 *
 	 * @param {Math.Vector|Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object The object to calculate the distance to
 	 * @return {number} The distance
 	 */
