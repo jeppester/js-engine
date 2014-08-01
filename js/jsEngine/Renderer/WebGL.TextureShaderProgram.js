@@ -13,6 +13,7 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 		this.program = gl.createProgram();
 
 		this.initShaders(gl);
+		this.bindLocations(gl);
 		this.initBuffers(gl);
 	},
 
@@ -62,7 +63,9 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 		gl.attachShader(this.program, fragmentShader);
 
 		gl.linkProgram(this.program);
+	},
 
+	bindLocations: function (gl) {
 		this.locations = {
 			a_texCoord:		gl.getAttribLocation(this.program, "a_texCoord"),
 			a_position:		gl.getAttribLocation(this.program, "a_position"),
@@ -90,8 +93,9 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 		// Rectangle corner buffer
 		this.cache.rectangleCornerBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
-		gl.enableVertexAttribArray(this.locations.a_position);
-		gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
+
+		// Remember that the current buffer is the rectanglecornerbuffer
+		this.cache.currentBuffer = this.cache.rectangleCornerBuffer;
 	},
 
 	// Use the same texture coordinate buffer for all non-animated sprites
@@ -103,13 +107,13 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 			gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
 
 			this.cache.currentBuffer = this.cache.regularTextCoordBuffer;
-			
-			// Bind rectangle corner buffer again (when needed instead of all the time) 
+
+			// Bind rectangle corner buffer again (when needed instead of all the time)
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
 		}
 	},
 
-	// Set a texture coordinate buffer for a specific animated object 
+	// Set a texture coordinate buffer for a specific animated object
 	setAnimatedTextCoordBuffer: function (gl, object) {
 		var x1, x2, y1, y2;
 
@@ -139,5 +143,11 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 
 		// Bind rectangle corner buffer again (when needed instead of all the time)
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
+	},
+
+	// When returning to the program reset the buffer
+	onSet: function (gl) {
+		gl.enableVertexAttribArray(this.locations.a_position);
+		gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
 	},
 });

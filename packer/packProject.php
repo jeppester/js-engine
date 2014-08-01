@@ -114,10 +114,10 @@ else {
 	echo "Non-packed JsEngine detected\n";
 
 	// If not minified, include all engine files separately
-	array_push($files, 
+	array_push($files,
 		$e . 'Extension/Array.js',
 		$e . 'Extension/Object.js',
-		
+
 		$e . 'Polyfill/requestAnimationFrame.js',
 		$e . 'Polyfill/Array.prototype.forEach.js',
 
@@ -131,6 +131,7 @@ else {
 
 		$e . 'Renderer/WebGL.js',
 		$e . 'Renderer/WebGL.TextureShaderProgram.js',
+		$e . 'Renderer/WebGL.ColorShaderProgram.js',
 		$e . 'Renderer/Canvas.js',
 
 		$e . 'Math/Vector.js',
@@ -265,7 +266,7 @@ if ($options['engineOnly']) {
 else {
 	echo "Saving game to game.packed.js\n";
 	file_put_contents($options['outputDir'] . '/'. 'game.min.js', $packedJS);
-	
+
 	if (!$options['ignoreHTML']) {
 		echo "Saving HTML-file with fixed references to " . $options['outputDir'] . '/' . $outputFileName . "\n\n";
 		file_put_contents($options['outputDir'] . '/' . $outputFileName, str_replace($options['engineDir'] . $options['engineFile'], 'game.min.js', $gameFile));

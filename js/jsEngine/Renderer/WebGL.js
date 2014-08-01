@@ -35,16 +35,36 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 
 		// Init shader programs
 		this.programs = {
-			texture: new Renderer.WebGL.TextureShaderProgram(gl)
+			texture: new Renderer.WebGL.TextureShaderProgram(gl),
+			color: new Renderer.WebGL.ColorShaderProgram(gl),
 		};
-
-		// Use program
-		this.setProgram(this.programs.texture);
 	},
 
 	setProgram: function (program) {
-		this.currentProgram = program;
-		this.gl.useProgram(program.program);
+		if (this.currentProgram !== program) {
+			var gl;
+			gl = this.gl;
+
+			// Set program
+			this.currentProgram = program;
+			gl.useProgram(program.program);
+
+			// Bind stuff
+			program.onSet(gl);
+
+			// Set current resolution var
+			gl.uniform2f(
+				program.locations.u_resolution,
+				this.cache.currentResolution.width,
+				this.cache.currentResolution.height
+			);
+
+			// Set current alpha
+			gl.uniform1f(
+				this.currentProgram.locations.u_alpha,
+				this.cache.currentAlpha
+			);
+		}
 	},
 
 	render: function (cameras) {
@@ -63,7 +83,9 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 				this.cache.currentResolution.width = w;
 				this.cache.currentResolution.height = w;
 
-				gl.uniform2f(this.currentProgram.locations.u_resolution, w, h);
+				if (this.currentProgram) {
+					gl.uniform2f(this.currentProgram.locations.u_resolution, w, h);
+				}
 			}
 
 			// Set camera position
@@ -101,18 +123,27 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 		// Set object alpha (because alpha is used by ALL rendered objects)
 		if (this.cache.currentAlpha !== object.opacity) {
 			this.cache.currentAlpha = object.opacity;
-			gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
+
+			if (this.currentProgram) {
+				gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
+			}
 		}
 
 		switch (object.renderType) {
 			case 'textblock':
+				this.setProgram(this.programs.texture);
 				if (this.cache.textures[object.bm.oldSrc]) {
 					delete this.cache.textures[object.bm.oldSrc];
 				}
 				this.renderSprite(object, this.matrixMultiply(offset, localWm));
 				break;
 			case 'sprite':
+				this.setProgram(this.programs.texture);
 				this.renderSprite(object, this.matrixMultiply(offset, localWm));
+				break;
+			case 'line':
+				this.setProgram(this.programs.color);
+				this.renderLine(object, this.matrixMultiply(offset, localWm));
 				break;
 		}
 
@@ -187,24 +218,45 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 
 		// Upload the image into the texture.
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-		
+
 		// Set texture wrapping
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		
+
 		if (image.imageLength === 1) {
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);	
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		}
 		else {
 			// gl.NEAREST is better for drawing a part of an image
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);	
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 		}
 
 		gl.bindTexture(gl.TEXTURE_2D, null);
 		this.cache.textures[image.src] = texture;
 
 		return texture;
+	},
+
+	renderLine: function (object, wm) {
+		var gl, len, coords;
+
+		gl = this.gl;
+		l = this.currentProgram.locations;
+
+		// Set color
+		// !!Use white for now!!
+		gl.uniform4fv(l.u_color, [1, 1, 1, 1]);
+
+		// Set geometry
+		coords = object.createPolygonFromWidth(object.lineWidth).getCoordinates();
+		this.setConvexPolygon(gl, coords);
+
+		// Set matrix
+		gl.uniformMatrix3fv(l.u_matrix, false, wm);
+
+		// Draw
+		gl.drawArrays(gl.TRIANGLES, 0, 6);
 	},
 
 	setPlane: function(gl, x, y, width, height) {
@@ -221,4 +273,9 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 			x2, y1,
 			x2, y2]), gl.STATIC_DRAW);
 	},
+
+	// Use TRIANGLE_FAN for this
+	setConvexPolygon: function(gl, coords) {
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
+	}
 });

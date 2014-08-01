@@ -51,6 +51,7 @@
 
 		enginePath + '/Renderer/WebGL.js',
 		enginePath + '/Renderer/WebGL.TextureShaderProgram.js',
+		enginePath + '/Renderer/WebGL.ColorShaderProgram.js',
 		enginePath + '/Renderer/Canvas.js',
 
 
@@ -77,7 +78,7 @@
 
 		enginePath + '/Input/Keyboard.js',
 		enginePath + '/Input/Pointer.js',
-		
+
 		enginePath + '/Sound/Effect.js',
 		enginePath + '/Sound/Music.js',
 	]);
