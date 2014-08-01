@@ -10,7 +10,7 @@ new Class('Renderer.WebGL.ColorShaderProgram', {
 
 		this.cache = {
 			currentBuffer: this.vertexBuffer,
-		}
+		};
 	},
 
 	initShaders: function (gl) {
@@ -19,6 +19,7 @@ new Class('Renderer.WebGL.ColorShaderProgram', {
 		// Vertex shader
 		vertexCode = '\
 			attribute vec2 a_position;\
+			\
 			uniform vec2 u_resolution;\
 			uniform mat3 u_matrix;\
 			\
@@ -45,11 +46,14 @@ new Class('Renderer.WebGL.ColorShaderProgram', {
 		fragmentCode = '\
 			precision mediump float;\
 			\
-			uniform vec4 u_color;\
+			uniform int u_color;\
 			uniform float u_alpha;\
 			\
 			void main() {\
-				gl_FragColor = vec4(u_color.rgb, u_alpha);\
+				float rValue = float(u_color / 256 / 256);\
+				float gValue = float(u_color / 256 - int(rValue * 256.0));\
+				float bValue = float(u_color - int(rValue * 256.0 * 256.0) - int(gValue * 256.0));\
+				gl_FragColor = vec4(rValue / 255.0, gValue / 255.0, bValue / 255.0, u_alpha);\
 			}';
 		fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 		gl.shaderSource(fragmentShader, fragmentCode);
@@ -68,18 +72,20 @@ new Class('Renderer.WebGL.ColorShaderProgram', {
 		this.locations = {
 			a_position:		gl.getAttribLocation(this.program, "a_position"),
 			u_resolution:	gl.getUniformLocation(this.program, "u_resolution"),
-			u_matrix:			gl.getUniformLocation(this.program, "u_matrix"),
+			u_matrix:		gl.getUniformLocation(this.program, "u_matrix"),
+			u_color:		gl.getUniformLocation(this.program, "u_color"),
+			u_alpha:		gl.getUniformLocation(this.program, "u_alpha"),
 		};
 	},
 
 	initBuffers: function (gl) {
 		// Vertex buffer
 		this.vertexBuffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 	},
 
 	// When returning to the program reset the buffer
 	onSet: function (gl) {
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 		gl.enableVertexAttribArray(this.locations.a_position);
 		gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
 	},

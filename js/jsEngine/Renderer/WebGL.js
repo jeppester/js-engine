@@ -81,7 +81,7 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 			h = camera.captureRegion.height;
 			if (this.cache.currentResolution.width !== w || this.cache.currentResolution.height !== h) {
 				this.cache.currentResolution.width = w;
-				this.cache.currentResolution.height = w;
+				this.cache.currentResolution.height = h;
 
 				if (this.currentProgram) {
 					gl.uniform2f(this.currentProgram.locations.u_resolution, w, h);
@@ -239,14 +239,25 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 	},
 
 	renderLine: function (object, wm) {
-		var gl, len, coords;
+		var gl, l, len, coords, color, a, b, c;
 
 		gl = this.gl;
 		l = this.currentProgram.locations;
 
+		if (object.strokeStyle.length === 4) {
+			color = object.strokeStyle;
+			a = color.substr(1,1);
+			b = color.substr(2,1);
+			c = color.substr(3,1);
+			color = parseInt("0x" + a + a + b + b + c + c);
+		}
+		else {
+			color = parseInt("0x" + object.strokeStyle.substr(1, 6));
+		}
+
 		// Set color
 		// !!Use white for now!!
-		gl.uniform4fv(l.u_color, [1, 1, 1, 1]);
+		gl.uniform1i(l.u_color, color);
 
 		// Set geometry
 		coords = object.createPolygonFromWidth(object.lineWidth).getCoordinates();
@@ -256,7 +267,7 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 		gl.uniformMatrix3fv(l.u_matrix, false, wm);
 
 		// Draw
-		gl.drawArrays(gl.TRIANGLES, 0, 6);
+		gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 	},
 
 	setPlane: function(gl, x, y, width, height) {
@@ -274,7 +285,6 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 			x2, y2]), gl.STATIC_DRAW);
 	},
 
-	// Use TRIANGLE_FAN for this
 	setConvexPolygon: function(gl, coords) {
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
 	}

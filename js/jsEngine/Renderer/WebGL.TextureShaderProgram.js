@@ -92,10 +92,6 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 
 		// Rectangle corner buffer
 		this.cache.rectangleCornerBuffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
-
-		// Remember that the current buffer is the rectanglecornerbuffer
-		this.cache.currentBuffer = this.cache.rectangleCornerBuffer;
 	},
 
 	// Use the same texture coordinate buffer for all non-animated sprites
@@ -147,6 +143,7 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 
 	// When returning to the program reset the buffer
 	onSet: function (gl) {
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer)
 		gl.enableVertexAttribArray(this.locations.a_position);
 		gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
 	},
