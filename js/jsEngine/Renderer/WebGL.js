@@ -145,6 +145,10 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 				this.setProgram(this.programs.color);
 				this.renderLine(object, this.matrixMultiply(offset, localWm));
 				break;
+			case 'rectangle':
+				this.setProgram(this.programs.color);
+				this.renderRectangle(object, this.matrixMultiply(offset, localWm));
+				break;
 		}
 
 		if (object.children) {
@@ -273,11 +277,71 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 		gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 	},
 
+	renderRectangle: function (object, wm) {
+		var gl, l, color, a, b, c;
+
+		gl = this.gl;
+		l = this.currentProgram.locations;
+
+		// Set matrix (it is the same for both fill and stroke)
+		gl.uniformMatrix3fv(l.u_matrix, false, wm);
+
+		// Draw fill
+		if (object.fillStyle !== 'transparent') {
+			// Decide color
+			if (object.fillStyle.length === 4) {
+				color = object.fillStyle;
+				a = color.substr(1,1);
+				b = color.substr(2,1);
+				c = color.substr(3,1);
+				color = parseInt("0x" + a + a + b + b + c + c);
+			}
+			else {
+				color = parseInt("0x" + object.fillStyle.substr(1, 6));
+			}
+
+			// Set color
+			gl.uniform1i(l.u_color, color);
+
+			// Set geometry (no need to set x and y as they already in the world matrix)
+			this.setPlane(gl, 0, 0, object.width, object.height);
+
+			// Draw
+			gl.drawArrays(gl.TRIANGLES, 0, 6);
+		}
+
+		// Draw stroke
+		if (object.strokeStyle !== 'transparent') {
+			// Decide color
+			if (object.strokeStyle.length === 4) {
+				color = object.strokeStyle;
+				a = color.substr(1,1);
+				b = color.substr(2,1);
+				c = color.substr(3,1);
+				color = parseInt("0x" + a + a + b + b + c + c);
+			}
+			else {
+				color = parseInt("0x" + object.strokeStyle.substr(1, 6));
+			}
+
+			// Set color
+			gl.uniform1i(l.u_color, color);
+
+			// Set geometry (no need to set x and y as they already in the world matrix)
+			this.setPlaneOutline(gl, 0, 0, object.width, object.height, object.lineWidth);
+
+			// Draw
+			gl.drawArrays(gl.TRIANGLES, 0, 24);
+		}
+	},
+
 	setPlane: function(gl, x, y, width, height) {
-		var x1 = x;
-		var x2 = x + width;
-		var y1 = y;
-		var y2 = y + height;
+		var x1, x2, y1, y2;
+
+		x1 = x;
+		x2 = x + width;
+		y1 = y;
+		y2 = y + height;
 
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
 			x1, y1,
@@ -288,7 +352,42 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 			x2, y2]), gl.STATIC_DRAW);
 	},
 
+	setPlaneOutline: function(gl, x, y, width, height, outlineWidth) {
+		var ox1, ox2, oy1, oy2, ix1, ix2, iy1, iy2;
+
+		outlineWidth /= 2;
+
+		ox1 = x - outlineWidth;
+		ox2 = x + width + outlineWidth;
+		oy1 = y - outlineWidth;
+		oy2 = y + height + outlineWidth;
+
+		ix1 = x + outlineWidth;
+		ix2 = x + width - outlineWidth;
+		iy1 = y + outlineWidth;
+		iy2 = y + height - outlineWidth;
+
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+			// Top line
+			ox1, oy1, ox2, oy1, ix1, iy1,
+			ix1, iy1, ix2, iy1, ox2, oy1,
+
+			// Left line
+			ox1, oy1, ox1, oy2, ix1, iy1,
+			ix1, iy1, ix1, iy2, ox1, oy2,
+
+			// Bottom line
+			ix1, iy2, ox1, oy2, ox2, oy2,
+			ix1, iy2, ix2, iy2, ox2, oy2,
+
+			// Right line
+			ox2, oy1, ox2, oy2, ix2, iy1,
+			ix2, iy1, ix2, iy2, ox2, oy2,
+
+			]), gl.STATIC_DRAW);
+	},
+
 	setConvexPolygon: function(gl, coords) {
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
-	}
+	},
 });
