@@ -7,10 +7,10 @@ new Class('GeometricObjectCollision', {
         circle = new View.Circle(300, 200, 80, "#F11", "#F11");
 
         // Add different objects to calculate the distance to
-        line = new View.Line(null, null, "#FFF").setFromCoordinates(20, 320, 80, 380);
-        polygon = new View.Polygon([], "#FFF", "#FFF").setFromCoordinates(540, 40, 535, 70.5, 560, 70.5, 540, 50, 560, 35);
-        rectangle = new View.Rectangle(20.5, 130.5, 100, 40, "#FFF", "#FFF");
-        circle2 = new View.Circle(530, 330, 50, "#FFF", "#FFF");
+        line = new View.Line(null, null, "#F00", 6).setFromCoordinates(20, 320, 80, 380);
+        polygon = new View.Polygon([], "#FFF", "#F00", 6).setFromCoordinates(540, 40, 535, 70.5, 560, 70.5, 540, 50, 560, 35);
+        rectangle = new View.Rectangle(20.5, 130.5, 100, 40, "#FFF", "#F00", 6);
+        circle2 = new View.Circle(530, 330, 50, "#FFF", "#F00", 6);
 
         // Add a text block for showing the distance between the circle and the line
         textOptions = {color: '#FFF'}
@@ -36,16 +36,16 @@ new Class('GeometricObjectCollision', {
         var dx = 0, dy = 0;
 
         if (keyboard.isDown(KEY_LEFT)) {
-            dx = -engine.convertSpeed(100);
+            dx = -engine.convertSpeed(200);
         }
         if (keyboard.isDown(KEY_RIGHT)) {
-            dx = engine.convertSpeed(100);
+            dx = engine.convertSpeed(200);
         }
         if (keyboard.isDown(KEY_UP)) {
-            dy = -engine.convertSpeed(100);
+            dy = -engine.convertSpeed(200);
         }
         if (keyboard.isDown(KEY_DOWN)) {
-            dy = engine.convertSpeed(100);
+            dy = engine.convertSpeed(200);
         }
         circle.move(dx, dy);
 
@@ -56,4 +56,3 @@ new Class('GeometricObjectCollision', {
         text5.string = 'Distance to rectangle: ' + Math.round(circle.getDistance(rectangle)) + (circle.intersects(rectangle) ? ' (intersects)' : '');
     }
 });
-
