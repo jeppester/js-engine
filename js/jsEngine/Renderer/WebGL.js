@@ -144,6 +144,9 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 				this.setProgram(this.programs.color);
 				this.currentProgram.renderRectangle(gl, object, this.matrixMultiply(offset, localWm));
 				break;
+			case 'circle':
+				this.setProgram(this.programs.color);
+				this.currentProgram.renderCircle(gl, object, this.matrixMultiply(offset, localWm));
 		}
 
 		if (object.children) {

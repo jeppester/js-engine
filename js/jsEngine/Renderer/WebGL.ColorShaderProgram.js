@@ -126,7 +126,7 @@ new Class('Renderer.WebGL.ColorShaderProgram', [Lib.WebGLHelpers], {
 	},
 
 	renderRectangle: function (gl, object, wm) {
-		var l, color, a, b, c;
+		var l;
 
 		l = this.locations;
 
@@ -135,20 +135,8 @@ new Class('Renderer.WebGL.ColorShaderProgram', [Lib.WebGLHelpers], {
 
 		// Draw fill
 		if (object.fillStyle !== 'transparent') {
-			// Decide color
-			if (object.fillStyle.length === 4) {
-				color = object.fillStyle;
-				a = color.substr(1,1);
-				b = color.substr(2,1);
-				c = color.substr(3,1);
-				color = parseInt("0x" + a + a + b + b + c + c);
-			}
-			else {
-				color = parseInt("0x" + object.fillStyle.substr(1, 6));
-			}
-
 			// Set color
-			gl.uniform1i(l.u_color, color);
+			gl.uniform1i(l.u_color, this.colorFromCSSString(object.fillStyle));
 
 			// Set geometry (no need to set x and y as they already in the world matrix)
 			this.setPlane(gl, 0, 0, object.width, object.height);
@@ -157,22 +145,10 @@ new Class('Renderer.WebGL.ColorShaderProgram', [Lib.WebGLHelpers], {
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 		}
 
-		// Draw stroke
+		// Draw stroke (if not transparent)
 		if (object.strokeStyle !== 'transparent') {
-			// Decide color
-			if (object.strokeStyle.length === 4) {
-				color = object.strokeStyle;
-				a = color.substr(1,1);
-				b = color.substr(2,1);
-				c = color.substr(3,1);
-				color = parseInt("0x" + a + a + b + b + c + c);
-			}
-			else {
-				color = parseInt("0x" + object.strokeStyle.substr(1, 6));
-			}
-
 			// Set color
-			gl.uniform1i(l.u_color, color);
+			gl.uniform1i(l.u_color, this.colorFromCSSString(object.strokeStyle));
 
 			// Set geometry (no need to set x and y as they already in the world matrix)
 			this.setPlaneOutline(gl, 0, 0, object.width, object.height, object.lineWidth);
@@ -181,4 +157,51 @@ new Class('Renderer.WebGL.ColorShaderProgram', [Lib.WebGLHelpers], {
 			gl.drawArrays(gl.TRIANGLES, 0, 24);
 		}
 	},
+
+	renderCircle: function (gl, object, wm) {
+		var l, perimeter, segmentsCount;
+
+		l = this.locations;
+
+		// Set matrix (it is the same for both fill and stroke)
+		gl.uniformMatrix3fv(l.u_matrix, false, wm);
+
+		// Device how many segments we want
+		if (object.radius < 10) {
+			segmentsCount = 12;
+		}
+		else if (object.radius < 50) {
+			segmentsCount = 30;
+		}
+		else if (object.radius < 100) {
+			segmentsCount = 50;
+		}
+		else {
+			segmentsCount = 80;
+		}
+
+		// Draw fill
+		if (object.fillStyle !== 'transparent') {
+			// Set color
+			gl.uniform1i(l.u_color, this.colorFromCSSString(object.fillStyle));
+
+			// Set geometry (no need to set x and y as they already in the world matrix)
+			this.setCircle(gl, 0, 0, segmentsCount, object.radius);
+
+			// Draw
+			gl.drawArrays(gl.TRIANGLE_FAN, 0, segmentsCount);
+		}
+
+		// Draw stroke (if not transparent)
+		if (object.strokeStyle !== 'transparent') {
+			// Set color
+			gl.uniform1i(l.u_color, this.colorFromCSSString(object.strokeStyle));
+
+			// Set geometry (no need to set x and y as they already in the world matrix)
+			this.setCircleOutline(gl, 0, 0, segmentsCount, object.radius, object.lineWidth);
+
+			// Draw
+			gl.drawArrays(gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2);
+		}
+	}
 });
