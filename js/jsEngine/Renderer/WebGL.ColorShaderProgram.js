@@ -115,7 +115,7 @@ new Class('Renderer.WebGL.ColorShaderProgram', [Lib.WebGLHelpers], {
 		gl.uniform1i(l.u_color, color);
 
 		// Set geometry
-		coords = object.createPolygonFromWidth(object.lineWidth).getCoordinates();
+		coords = object.createPolygonFromWidth(object.lineWidth, object.lineCap === "square").getCoordinates();
 		this.setConvexPolygon(gl, coords);
 
 		// Set matrix
@@ -123,6 +123,14 @@ new Class('Renderer.WebGL.ColorShaderProgram', [Lib.WebGLHelpers], {
 
 		// Draw
 		gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+		// Draw circle line caps (TODO: this should be done together with the line itself to prevent opacity issues)
+		if (object.lineCap === "round") {
+			this.setCircle(gl, object.a.x, object.a.y, 20, object.lineWidth / 2)
+			gl.drawArrays(gl.TRIANGLE_FAN, 0, 20);
+			this.setCircle(gl, object.b.x, object.b.y, 20, object.lineWidth / 2)
+			gl.drawArrays(gl.TRIANGLE_FAN, 0, 20);
+		}
 	},
 
 	renderRectangle: function (gl, object, wm) {

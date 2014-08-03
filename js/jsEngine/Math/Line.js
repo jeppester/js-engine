@@ -259,9 +259,12 @@ new Class('Math.Line',[Lib.Animatable], {
 	 * Creates a rectangular polygon based on the line segment and a width
    *
 	 * @param {Number} width The wished width of the created polygon
+	 * @param {Boolean} caps Whether or not the created polygon should have caps (the size of the width)
 	 */
-	createPolygonFromWidth: function (width) {
+	createPolygonFromWidth: function (width, caps) {
 		var v, r, ort, a, b, c, d;
+
+		caps = caps || false;
 
 		v = this.a.copy().subtract(this.b);
 		v.set(v.y, -v.x);
@@ -273,6 +276,13 @@ new Class('Math.Line',[Lib.Animatable], {
 		b = this.a.copy().subtract(ort);
 		c = this.b.copy().subtract(ort);
 		d = this.b.copy().add(ort);
+
+		if (caps) {
+			a.move(-ort.y, ort.x);
+			b.move(-ort.y, ort.x);
+			c.move(ort.y, -ort.x);
+			d.move(ort.y, -ort.x);
+		}
 
 		return new Math.Polygon([a, b, c, d]);
 	},

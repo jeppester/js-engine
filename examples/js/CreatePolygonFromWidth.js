@@ -9,21 +9,39 @@ new Class('CreatePolygonFromWidth', {
     },
 
     onLoaded: function() {
-        var line, p1, p2, p3, p4, tests, t, i;
+        var line, tests, t, i;
 
-        line = new Math.Line().setFromCoordinates(10, 10, 590, 390);
-        p1 = new View.Polygon(line.createPolygonFromWidth(10).getPoints(), "#88F");
+        polygons = [];
 
-        line = new Math.Line().setFromCoordinates(10, 390, 590, 10);
-        p2 = new View.Polygon(line.createPolygonFromWidth(10).getPoints(), "#8F8");
+        line = new Math.Line().setFromCoordinates(10, 10, 590, 350);
+        polygons.push(new View.Polygon(line.createPolygonFromWidth(10).getPoints(), "#88F"));
+
+        line = new Math.Line().setFromCoordinates(10, 30, 590, 370);
+        polygons.push(new View.Polygon(line.createPolygonFromWidth(10, true).getPoints(), "#88F"));
+
+        line = new Math.Line().setFromCoordinates(10, 370, 590, 10);
+        polygons.push(new View.Polygon(line.createPolygonFromWidth(10).getPoints(), "#8F8"));
+
+        line = new Math.Line().setFromCoordinates(10, 390, 590, 30);
+        polygons.push(new View.Polygon(line.createPolygonFromWidth(10, true).getPoints(), "#8F8"));
 
         line = new Math.Line().setFromCoordinates(10, 200, 590, 200);
-        p3 = new View.Polygon(line.createPolygonFromWidth(10).getPoints(), "#F88");
+        polygons.push(new View.Polygon(line.createPolygonFromWidth(10).getPoints(), "#F88"));
+
+        line = new Math.Line().setFromCoordinates(10, 220, 590, 220);
+        polygons.push(new View.Polygon(line.createPolygonFromWidth(10, true).getPoints(), "#F88"));
 
         line = new Math.Line().setFromCoordinates(300, 10, 300, 390);
-        p4 = new View.Polygon(line.createPolygonFromWidth(10).getPoints(), "#FFF");
+        polygons.push(new View.Polygon(line.createPolygonFromWidth(10).getPoints(), "#FFF"));
 
-        engine.currentRoom.addChildren(p1, p2, p3, p4);
+        line = new Math.Line().setFromCoordinates(320, 10, 320, 390);
+        polygons.push(new View.Polygon(line.createPolygonFromWidth(10, true).getPoints(), "#FFF"));
+
+        polygons.push(new View.Line(new Math.Vector(10, 10), new Math.Vector(590, 10), "#88F", 10, 'butt'));
+        polygons.push(new View.Line(new Math.Vector(10, 30), new Math.Vector(590, 30), "#88F", 10, 'round'));
+        polygons.push(new View.Line(new Math.Vector(10, 50), new Math.Vector(590, 50), "#88F", 10, 'square'));
+
+        engine.currentRoom.addChildren.apply(engine.currentRoom, polygons);
 
         // Speed tests
         tests = 10000
