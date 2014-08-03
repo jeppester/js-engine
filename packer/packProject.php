@@ -128,6 +128,7 @@ else {
 
 		$e . 'Lib/Animatable.js',
 		$e . 'Lib/MatrixCalculation.js',
+		$e . 'Lib/WebGLHelpers.js',
 
 		$e . 'Renderer/WebGL.js',
 		$e . 'Renderer/WebGL.TextureShaderProgram.js',

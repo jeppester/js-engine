@@ -1,4 +1,4 @@
-new Class('Renderer.WebGL.ColorShaderProgram', {
+new Class('Renderer.WebGL.ColorShaderProgram', [Lib.WebGLHelpers], {
 	ColorShaderProgram: function (gl) {
 		var initShaders, initBuffers, program, locations;
 
@@ -88,5 +88,97 @@ new Class('Renderer.WebGL.ColorShaderProgram', {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 		gl.enableVertexAttribArray(this.locations.a_position);
 		gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
+	},
+
+	// Draw functions
+	renderLine: function (gl, object, wm) {
+		var l, len, coords, color, a, b, c;
+
+		l = this.locations;
+
+		// If the line is transparent, do nothing
+		if (object.strokeStyle === "transparent") {
+			return
+		}
+		else if (object.strokeStyle.length === 4) {
+			color = object.strokeStyle;
+			a = color.substr(1,1);
+			b = color.substr(2,1);
+			c = color.substr(3,1);
+			color = parseInt("0x" + a + a + b + b + c + c);
+		}
+		else {
+			color = parseInt("0x" + object.strokeStyle.substr(1, 6));
+		}
+
+		// Set color
+		gl.uniform1i(l.u_color, color);
+
+		// Set geometry
+		coords = object.createPolygonFromWidth(object.lineWidth).getCoordinates();
+		this.setConvexPolygon(gl, coords);
+
+		// Set matrix
+		gl.uniformMatrix3fv(l.u_matrix, false, wm);
+
+		// Draw
+		gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+	},
+
+	renderRectangle: function (gl, object, wm) {
+		var l, color, a, b, c;
+
+		l = this.locations;
+
+		// Set matrix (it is the same for both fill and stroke)
+		gl.uniformMatrix3fv(l.u_matrix, false, wm);
+
+		// Draw fill
+		if (object.fillStyle !== 'transparent') {
+			// Decide color
+			if (object.fillStyle.length === 4) {
+				color = object.fillStyle;
+				a = color.substr(1,1);
+				b = color.substr(2,1);
+				c = color.substr(3,1);
+				color = parseInt("0x" + a + a + b + b + c + c);
+			}
+			else {
+				color = parseInt("0x" + object.fillStyle.substr(1, 6));
+			}
+
+			// Set color
+			gl.uniform1i(l.u_color, color);
+
+			// Set geometry (no need to set x and y as they already in the world matrix)
+			this.setPlane(gl, 0, 0, object.width, object.height);
+
+			// Draw
+			gl.drawArrays(gl.TRIANGLES, 0, 6);
+		}
+
+		// Draw stroke
+		if (object.strokeStyle !== 'transparent') {
+			// Decide color
+			if (object.strokeStyle.length === 4) {
+				color = object.strokeStyle;
+				a = color.substr(1,1);
+				b = color.substr(2,1);
+				c = color.substr(3,1);
+				color = parseInt("0x" + a + a + b + b + c + c);
+			}
+			else {
+				color = parseInt("0x" + object.strokeStyle.substr(1, 6));
+			}
+
+			// Set color
+			gl.uniform1i(l.u_color, color);
+
+			// Set geometry (no need to set x and y as they already in the world matrix)
+			this.setPlaneOutline(gl, 0, 0, object.width, object.height, object.lineWidth);
+
+			// Draw
+			gl.drawArrays(gl.TRIANGLES, 0, 24);
+		}
 	},
 });

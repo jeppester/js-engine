@@ -1,4 +1,4 @@
-new Class('Renderer.WebGL.TextureShaderProgram', {
+new Class('Renderer.WebGL.TextureShaderProgram', [Lib.WebGLHelpers], {
 	TextureShaderProgram: function (gl) {
 		var initShaders, initBuffers, program, locations;
 
@@ -8,6 +8,8 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 			animatedTextCoordBuffer: false,
 			rectangleCornerBuffer: false,
 			currentBuffer: false,
+			currentTexture: undefined,
+			textures: {},
 		};
 
 		this.program = gl.createProgram();
@@ -146,5 +148,90 @@ new Class('Renderer.WebGL.TextureShaderProgram', {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer)
 		gl.enableVertexAttribArray(this.locations.a_position);
 		gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
+	},
+
+	// Draw functions
+	renderSprite: function(gl, object, wm) {
+		var t, l;
+
+		l = this.locations;
+
+		if (object.renderType === 'textblock' && this.cache.textures[object.bm.oldSrc]) {
+			delete this.cache.textures[object.bm.oldSrc];
+		}
+
+		// Bind the texture (if it is not already the binded)
+		t = this.getSpriteTexture(gl, object);
+		if (this.cache.currentTexture !== t) {
+			this.cache.currentTexture = t;
+
+			// Set the correct texture coordinate buffer
+			if (object.imageLength === 1) {
+				this.setRegularTextCoordBuffer(gl);
+			}
+			else {
+				// Set the right sub image
+				if (engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed) {
+					object.imageNumber = object.imageNumber + (object.animationSpeed > 0 ? 1 : -1);
+
+					object.animationLastSwitch = engine.gameTime;
+
+					if (object.imageNumber === object.imageLength) {
+						object.imageNumber = object.animationLoops ? 0 : object.imageLength - 1;
+					}
+					else if (object.imageNumber === -1) {
+						object.imageNumber = object.animationLoops ? object.imageLength - 1 : 0;
+					}
+				}
+
+				// Set create and set texture coordinate buffer for the object
+				this.setAnimatedTextCoordBuffer(gl, object);
+			}
+
+			// Set a rectangle the same size as the image
+			gl.bindTexture(gl.TEXTURE_2D, t);
+			this.setPlane(gl, 0, 0, object.clipWidth, object.clipHeight);
+		}
+
+		// Set matrix
+		gl.uniformMatrix3fv(l.u_matrix, false, wm);
+
+		// Draw the rectangle.
+		gl.drawArrays(gl.TRIANGLES, 0, 6);
+	},
+
+	getSpriteTexture: function (gl, object) {
+		return this.cache.textures[object.bm.src] || this.createSpriteTexture(gl, object.bm);
+	},
+
+	createSpriteTexture: function (gl, image) {
+		var texture;
+
+		// Create a texture.
+		texture = gl.createTexture();
+
+		// Bind the texture
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+
+		// Upload the image into the texture.
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+		// Set texture wrapping
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+		if (image.imageLength === 1) {
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		}
+		else {
+			// gl.NEAREST is better for drawing a part of an image
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		}
+
+		gl.bindTexture(gl.TEXTURE_2D, null);
+		this.cache.textures[image.src] = texture;
+
+		return texture;
 	},
 });

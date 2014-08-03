@@ -6,9 +6,7 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 
 		// Cache variables
 		this.cache = {
-			currentTexture: undefined,
 			currentAlpha: undefined,
-			textures: {},
 			currentResolution: {
 				width: 0,
 				height: 0,
@@ -130,24 +128,21 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 		}
 
 		switch (object.renderType) {
+			// Texture based objects
 			case 'textblock':
-				this.setProgram(this.programs.texture);
-				if (this.cache.textures[object.bm.oldSrc]) {
-					delete this.cache.textures[object.bm.oldSrc];
-				}
-				this.renderSprite(object, this.matrixMultiply(offset, localWm));
-				break;
 			case 'sprite':
 				this.setProgram(this.programs.texture);
-				this.renderSprite(object, this.matrixMultiply(offset, localWm));
+				this.currentProgram.renderSprite(gl, object, this.matrixMultiply(offset, localWm));
 				break;
+
+			// Geometric objects
 			case 'line':
 				this.setProgram(this.programs.color);
-				this.renderLine(object, this.matrixMultiply(offset, localWm));
+				this.currentProgram.renderLine(gl, object, this.matrixMultiply(offset, localWm));
 				break;
 			case 'rectangle':
 				this.setProgram(this.programs.color);
-				this.renderRectangle(object, this.matrixMultiply(offset, localWm));
+				this.currentProgram.renderRectangle(gl, object, this.matrixMultiply(offset, localWm));
 				break;
 		}
 
@@ -157,237 +152,5 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 				this.renderTree(object.children[i], localWm);
 			}
 		}
-	},
-
-	renderSprite: function(object, wm) {
-		var gl, t, l;
-
-		gl = this.gl;
-		l = this.currentProgram.locations;
-
-		// Bind the texture (if it is not already the binded)
-		t = this.getSpriteTexture(object);
-		if (this.cache.currentTexture !== t) {
-			this.cache.currentTexture = t;
-
-			// Set the correct texture coordinate buffer
-			if (object.imageLength === 1) {
-				this.currentProgram.setRegularTextCoordBuffer(gl);
-			}
-			else {
-				// Set the right sub image
-				if (engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed) {
-					object.imageNumber = object.imageNumber + (object.animationSpeed > 0 ? 1 : -1);
-
-					object.animationLastSwitch = engine.gameTime;
-
-					if (object.imageNumber === object.imageLength) {
-						object.imageNumber = object.animationLoops ? 0 : object.imageLength - 1;
-					}
-					else if (object.imageNumber === -1) {
-						object.imageNumber = object.animationLoops ? object.imageLength - 1 : 0;
-					}
-				}
-
-				// Set create and set texture coordinate buffer for the object
-				this.currentProgram.setAnimatedTextCoordBuffer(gl, object);
-			}
-
-			// Set a rectangle the same size as the image
-			gl.bindTexture(gl.TEXTURE_2D, t);
-			this.setPlane(gl, 0, 0, object.clipWidth, object.clipHeight);
-		}
-
-		// Set matrix
-		gl.uniformMatrix3fv(l.u_matrix, false, wm);
-
-		// Draw the rectangle.
-		gl.drawArrays(gl.TRIANGLES, 0, 6);
-	},
-
-	getSpriteTexture: function (object) {
-		return this.cache.textures[object.bm.src] || this.createSpriteTexture(object.bm);
-	},
-
-	createSpriteTexture: function (image) {
-		var gl, texture;
-
-		gl = this.gl;
-
-		// Create a texture.
-		texture = gl.createTexture();
-
-		// Bind the texture
-		gl.bindTexture(gl.TEXTURE_2D, texture);
-
-		// Upload the image into the texture.
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-		// Set texture wrapping
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-
-		if (image.imageLength === 1) {
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		}
-		else {
-			// gl.NEAREST is better for drawing a part of an image
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-		}
-
-		gl.bindTexture(gl.TEXTURE_2D, null);
-		this.cache.textures[image.src] = texture;
-
-		return texture;
-	},
-
-	renderLine: function (object, wm) {
-		var gl, l, len, coords, color, a, b, c;
-
-		gl = this.gl;
-		l = this.currentProgram.locations;
-
-		// If the line is transparent, do nothing
-		if (object.strokeStyle === "transparent") {
-			return
-		}
-		else if (object.strokeStyle.length === 4) {
-			color = object.strokeStyle;
-			a = color.substr(1,1);
-			b = color.substr(2,1);
-			c = color.substr(3,1);
-			color = parseInt("0x" + a + a + b + b + c + c);
-		}
-		else {
-			color = parseInt("0x" + object.strokeStyle.substr(1, 6));
-		}
-
-		// Set color
-		gl.uniform1i(l.u_color, color);
-
-		// Set geometry
-		coords = object.createPolygonFromWidth(object.lineWidth).getCoordinates();
-		this.setConvexPolygon(gl, coords);
-
-		// Set matrix
-		gl.uniformMatrix3fv(l.u_matrix, false, wm);
-
-		// Draw
-		gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
-	},
-
-	renderRectangle: function (object, wm) {
-		var gl, l, color, a, b, c;
-
-		gl = this.gl;
-		l = this.currentProgram.locations;
-
-		// Set matrix (it is the same for both fill and stroke)
-		gl.uniformMatrix3fv(l.u_matrix, false, wm);
-
-		// Draw fill
-		if (object.fillStyle !== 'transparent') {
-			// Decide color
-			if (object.fillStyle.length === 4) {
-				color = object.fillStyle;
-				a = color.substr(1,1);
-				b = color.substr(2,1);
-				c = color.substr(3,1);
-				color = parseInt("0x" + a + a + b + b + c + c);
-			}
-			else {
-				color = parseInt("0x" + object.fillStyle.substr(1, 6));
-			}
-
-			// Set color
-			gl.uniform1i(l.u_color, color);
-
-			// Set geometry (no need to set x and y as they already in the world matrix)
-			this.setPlane(gl, 0, 0, object.width, object.height);
-
-			// Draw
-			gl.drawArrays(gl.TRIANGLES, 0, 6);
-		}
-
-		// Draw stroke
-		if (object.strokeStyle !== 'transparent') {
-			// Decide color
-			if (object.strokeStyle.length === 4) {
-				color = object.strokeStyle;
-				a = color.substr(1,1);
-				b = color.substr(2,1);
-				c = color.substr(3,1);
-				color = parseInt("0x" + a + a + b + b + c + c);
-			}
-			else {
-				color = parseInt("0x" + object.strokeStyle.substr(1, 6));
-			}
-
-			// Set color
-			gl.uniform1i(l.u_color, color);
-
-			// Set geometry (no need to set x and y as they already in the world matrix)
-			this.setPlaneOutline(gl, 0, 0, object.width, object.height, object.lineWidth);
-
-			// Draw
-			gl.drawArrays(gl.TRIANGLES, 0, 24);
-		}
-	},
-
-	setPlane: function(gl, x, y, width, height) {
-		var x1, x2, y1, y2;
-
-		x1 = x;
-		x2 = x + width;
-		y1 = y;
-		y2 = y + height;
-
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-			x1, y1,
-			x2, y1,
-			x1, y2,
-			x1, y2,
-			x2, y1,
-			x2, y2]), gl.STATIC_DRAW);
-	},
-
-	setPlaneOutline: function(gl, x, y, width, height, outlineWidth) {
-		var ox1, ox2, oy1, oy2, ix1, ix2, iy1, iy2;
-
-		outlineWidth /= 2;
-
-		ox1 = x - outlineWidth;
-		ox2 = x + width + outlineWidth;
-		oy1 = y - outlineWidth;
-		oy2 = y + height + outlineWidth;
-
-		ix1 = x + outlineWidth;
-		ix2 = x + width - outlineWidth;
-		iy1 = y + outlineWidth;
-		iy2 = y + height - outlineWidth;
-
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-			// Top line
-			ox1, oy1, ox2, oy1, ix1, iy1,
-			ix1, iy1, ix2, iy1, ox2, oy1,
-
-			// Left line
-			ox1, oy1, ox1, oy2, ix1, iy1,
-			ix1, iy1, ix1, iy2, ox1, oy2,
-
-			// Bottom line
-			ix1, iy2, ox1, oy2, ox2, oy2,
-			ix1, iy2, ix2, iy2, ox2, oy2,
-
-			// Right line
-			ox2, oy1, ox2, oy2, ix2, iy1,
-			ix2, iy1, ix2, iy2, ox2, oy2,
-
-			]), gl.STATIC_DRAW);
-	},
-
-	setConvexPolygon: function(gl, coords) {
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
 	},
 });
