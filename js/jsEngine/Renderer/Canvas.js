@@ -139,8 +139,8 @@ new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
 
 		c.lineWidth = object.lineWidth;
 		c.globalAlpha = object.opacity;
-		c.stroke();
 		c.fill();
+		c.stroke();
 	},
 
 	/**
