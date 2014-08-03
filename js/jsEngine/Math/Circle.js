@@ -21,7 +21,7 @@ new Class('Math.Circle', [Lib.Animatable], {
 
 	/**
 	 * Sets the properties of the circle.
-	 * 
+	 *
 	 * @param {number} x The x-coordinate for the center of the circle
 	 * @param {number} y The y-coordinate for the center of the circle
 	 * @param {number} radius The radius for the circle
@@ -41,7 +41,7 @@ new Class('Math.Circle', [Lib.Animatable], {
 
 	/**
 	 * Copies the Circle object.
-	 * 
+	 *
 	 * @return {Math.Circle} A copy of the Circle object (which can be modified without changing the original object)
 	 */
 	copy: function () {
@@ -50,7 +50,7 @@ new Class('Math.Circle', [Lib.Animatable], {
 
 	/**
 	 * Moves the Circle by adding a value to its x-coordinate and another value to its y-coordinate.
-	 * 
+	 *
 	 * @param {number} x The value to add to the x-coordinate (can be negative)
 	 * @param {number} y The value to add to the y-coordinate (can be negative)
 	 * @return {Math.Circle} The resulting Circle object (itself)
@@ -67,7 +67,7 @@ new Class('Math.Circle', [Lib.Animatable], {
 
 	/**
 	 * Moves the Circle to a fixed position by setting its x- and y-coordinates.
-	 * 
+	 *
 	 * @param {number} x The x-coordinate of the position to move the Circle to
 	 * @param {number} y The y-coordinate of the position to move the Circle to
 	 * @return {Math.Circle} The resulting Circle object (itself)
@@ -86,7 +86,7 @@ new Class('Math.Circle', [Lib.Animatable], {
 	 * Scales the Circle object by multiplying it radius with a factor.
 	 * Please notice that, opposite to the Polygon and Line objects, the position of the Circle will not be changed by scaling it, since the center of the circle will not be scaled.
 	 * Also: since ellipses are not supported yet, circles cannot be scaled with various factors horizontally and vertically, like the other geometric objects.
-	 * 
+	 *
 	 * @param {number} factor A factor with which to scale the Circle
 	 * @return {Math.Circle} The resulting Circle object (itself)
 	 */
@@ -99,8 +99,17 @@ new Class('Math.Circle', [Lib.Animatable], {
 	},
 
 	/**
+	 * Calculates the perimeter of the circle
+	 *
+	 * @return {number} The perimeter of the Circle
+	 */
+	getPerimeter: function () {
+		return this.radius * 2 * Math.PI;
+	},
+
+	/**
 	 * Calculates the area of the Circle.
-	 * 
+	 *
 	 * @return {number} The area of the Circle
 	 */
 	getArea: function () {
@@ -109,7 +118,7 @@ new Class('Math.Circle', [Lib.Animatable], {
 
 	/**
 	 * Calculates the shortest distance from the Circle object to another geometric object
-	 * 
+	 *
 	 * @param {Math.Vector|Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object The object to calculate the distance to
 	 * @return {number} The distance
 	 */
@@ -136,7 +145,7 @@ new Class('Math.Circle', [Lib.Animatable], {
 
 	/**
 	 * Checks whether or not the Circle contains another geometric object.
-	 * 
+	 *
 	 * @param {Math.Vector|Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object A geometric object to check
 	 * @return {boolean} True if the Rectangle contains the checked object, false if not
 	 */
@@ -176,7 +185,7 @@ new Class('Math.Circle', [Lib.Animatable], {
 
 	/**
 	 * Checks whether or not the Circle intersects with another geometric object.
-	 * 
+	 *
 	 * @param {Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object A geometric object to check. Supported objects are
 	 * @return {boolean} True if the Circle intersects with the checked object, false if not
 	 */
