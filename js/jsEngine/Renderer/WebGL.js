@@ -244,7 +244,11 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 		gl = this.gl;
 		l = this.currentProgram.locations;
 
-		if (object.strokeStyle.length === 4) {
+		// If the line is transparent, do nothing
+		if (object.strokeStyle === "transparent") {
+			return
+		}
+		else if (object.strokeStyle.length === 4) {
 			color = object.strokeStyle;
 			a = color.substr(1,1);
 			b = color.substr(2,1);
@@ -256,7 +260,6 @@ new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
 		}
 
 		// Set color
-		// !!Use white for now!!
 		gl.uniform1i(l.u_color, color);
 
 		// Set geometry
