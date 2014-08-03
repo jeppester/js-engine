@@ -45,7 +45,7 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
         this.strokeStyle = strokeStyle || "#000";
 
         hidden = {
-            lineWidth: lineWidth || 0,
+            lineWidth: lineWidth || 1,
         };
 
         Object.defineProperty(this, 'lineWidth', {
@@ -71,7 +71,7 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
             height: height || 0,
             fillStyle: fillStyle || "#000",
             strokeStyle: strokeStyle || "#000",
-            lineWidth: lineWidth || 0,
+            lineWidth: lineWidth || 1,
         };
 
         // Put getters and setters on points values
@@ -127,7 +127,7 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
 
     /**
      * Parses an offset global into an actual Math.Vector offset that fits the instance
-     * 
+     *
      * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
      * @return {Math.Vector} The offset vector the offset global corresponds to for the instance
      */
