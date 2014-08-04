@@ -187,4 +187,14 @@ new Class('View.Line',[Math.Line, View.Child], {
 
         return box;/**/
     },
+
+    /**
+     * Override View.Child's isVisible-function, making the line invisible if its points share the same coordinates
+     * Above is how canvas does by default (but other renderers should do this by default as well)
+     * 
+     * @return {Boolean} Whether or not the line is "visible" (if not, renderers will not try to draw it)
+     */
+    isVisible: function () {
+        return View.Child.prototype.isVisible.call(this) && (this.a.x !== this.b.x || this.a.y !== this.b.y);
+    }
 });

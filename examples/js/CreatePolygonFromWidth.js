@@ -41,6 +41,7 @@ new Class('CreatePolygonFromWidth', {
         polygons.push(new View.Line(new Math.Vector(10, 50), new Math.Vector(590, 350), "#88F", 10, 'butt'));
         polygons.push(new View.Line(new Math.Vector(10, 70), new Math.Vector(590, 370), "#88F", 10, 'round'));
         polygons.push(new View.Line(new Math.Vector(10, 90), new Math.Vector(590, 390), "#88F", 10, 'square'));
+        polygons.push(l = new View.Line(new Math.Vector(10, 110), new Math.Vector(590, 110), "#88F", 10, 'round'));
 
         engine.currentRoom.addChildren.apply(engine.currentRoom, polygons);
 
