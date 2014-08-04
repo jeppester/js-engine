@@ -259,12 +259,12 @@ new Class('Math.Line',[Lib.Animatable], {
 	 * Creates a rectangular polygon based on the line segment and a width
    *
 	 * @param {Number} width The wished width of the created polygon
-	 * @param {Boolean} caps Whether or not the created polygon should have caps (the size of the width)
+	 * @param {String} lineCap The type of line capsulation, supported types are: "butt", "square", "round"
 	 */
-	createPolygonFromWidth: function (width, caps) {
-		var v, r, ort, a, b, c, d;
+	createPolygonFromWidth: function (width, lineCap) {
+		var v, r, ort, a, b, c, d, points, i, startAngle, segmentRad, angle;
 
-		caps = caps || false;
+		lineCap = lineCap || "butt";
 
 		v = this.a.copy().subtract(this.b);
 		v.set(v.y, -v.x);
@@ -272,19 +272,47 @@ new Class('Math.Line',[Lib.Animatable], {
 		r =  (width / 2) / v.getLength();
 		ort = v.scale(r);
 
-		a = this.a.copy().add(ort);
-		b = this.a.copy().subtract(ort);
-		c = this.b.copy().subtract(ort);
-		d = this.b.copy().add(ort);
+		if (lineCap !== "round") {
+			a = this.a.copy().add(ort);
+			b = this.a.copy().subtract(ort);
+			c = this.b.copy().subtract(ort);
+			d = this.b.copy().add(ort);
 
-		if (caps) {
-			a.move(-ort.y, ort.x);
-			b.move(-ort.y, ort.x);
-			c.move(ort.y, -ort.x);
-			d.move(ort.y, -ort.x);
+			if (lineCap === "square") {
+				a.move(-ort.y, ort.x);
+				b.move(-ort.y, ort.x);
+				c.move(ort.y, -ort.x);
+				d.move(ort.y, -ort.x);
+			}
+
+			return new Math.Polygon([a, b, c, d]);
+		}
+		else {
+			// To make round caps, make the line as two half circles, one half relative til point a, the other half relative to point b
+			points = new Array(32);
+			startAngle = ort.getDirection();
+			width /= 2;
+			segmentRad = Math.PI / 15;
+
+			for (i = 0; i < 16; i ++) {
+				angle = startAngle + segmentRad * i;
+				points[i] = new Math.Vector(
+					this.a.x + width * Math.cos(angle),
+					this.a.y + width * Math.sin(angle)
+				)
+			}
+
+			for (i = 0; i < 16; i ++) {
+				angle = startAngle + segmentRad * (i + 15);
+				points[i + 16] = new Math.Vector(
+					this.b.x + width * Math.cos(angle),
+					this.b.y + width * Math.sin(angle)
+				)
+			}
+
+			return new Math.Polygon(points);
 		}
 
-		return new Math.Polygon([a, b, c, d]);
 	},
 
     /**
