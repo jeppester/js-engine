@@ -560,8 +560,8 @@ new Class('Engine', {
 
 		// If muting, check all sounds whether they are being played, if so stop the playback
 		if (muted) {
-			loader.getAllSounds().forEach(function () {
-				this.stopAll();
+			loader.getAllSounds().forEach(function (s) {
+				s.stopAll();
 			});
 		}
 
@@ -578,8 +578,8 @@ new Class('Engine', {
 
 		// If muting, check all sounds whether they are being played, if so stop the playback
 		if (muted) {
-			loader.getAllMusic().forEach(function () {
-				this.stop();
+			loader.getAllMusic().forEach(function (m) {
+				m.stop();
 			});
 		}
 

@@ -30,7 +30,7 @@ new Class('View.Container', [View.Child], {
 
 	/**
 	 * Adds children to a View object. If the object that the children are added to, is a descendant of the current room, the children will be drawn on the stage when added. The added children will be drawn above the current children.
-	 * 
+	 *
 	 * @param {View.Child} child1 A child to add to the View object
 	 * @param {View.Child} child2 Another child to add...
 	 * @return {View.Child[]} An array containing the added children
@@ -59,12 +59,12 @@ new Class('View.Container', [View.Child], {
 				child.refreshSource();
 			}
 		}
-		return arguments; 
+		return arguments;
 	},
 
 	/**
 	 * Adds a child to a View object, below an already added child. This means that the inserted child (or children) will be drawn below the child which they are inserted below.
-	 * 
+	 *
 	 * @param {View.Child|View.Child[]} insertChildren Child or array of children to insert before an existing child
 	 * @param {View.Child} child Current child to insert other children before
 	 * @return {View.Child[]} Array of the inserted children
@@ -96,7 +96,7 @@ new Class('View.Container', [View.Child], {
 
 			child.parent = this;
 			engine.enableRedrawRegions && child.onAfterChange();
-			
+
 			if (child.refreshSource) {
 				child.refreshSource();
 			}
@@ -108,7 +108,7 @@ new Class('View.Container', [View.Child], {
 	/**
 	 * Fetches an array of all the View's children.
 	 * This will not return a pointer, so changing the returned array will not change the View's children.
-	 * 
+	 *
 	 * @return {View.Child[]} Array containing all of the View's children
 	 */
 	getChildren: function () {
@@ -125,7 +125,7 @@ new Class('View.Container', [View.Child], {
 
 	/**
 	 * Sets theme of an View. Children whose theme is not already set, will inherit the set theme. To enforce the theme to all children, use the recursive argument.
-	 * 
+	 *
 	 * @param {string} themeName The name of the theme to apply as the object's theme
 	 * @param {boolean} [recursive=false] Whether or not the set theme will be applied to children for which a theme has already been set. If this argument is unset, it will default to false
 	 */
@@ -162,7 +162,7 @@ new Class('View.Container', [View.Child], {
 
 	/**
 	 * Executes a function for the View and all of the its children.
-	 * 
+	 *
 	 * @param {function} func Function to execute
 	 */
 	applyToThisAndChildren: function (func) {
@@ -182,7 +182,7 @@ new Class('View.Container', [View.Child], {
 
 	/**
 	 * Gets the complete region that will used for drawing on next redraw
-	 * 
+	 *
 	 * @return {Math.Rectangle} A rectangle representing the region
 	 */
 	getCombinedRedrawRegion: function () {
@@ -219,7 +219,7 @@ new Class('View.Container', [View.Child], {
 
 	/**
 	 * Removes one or more children from the View.
-	 * 
+	 *
 	 * @param {View.Child} child1 A child to add to the View object
 	 * @param {View.Child} child2 Another child to remove...
 	 * @return {View.Child[]} An array of the children which was removed. If an object, which was supplied as argument, was not a child of the View, it will not appear in the returned array
@@ -245,26 +245,26 @@ new Class('View.Container', [View.Child], {
 
 	/**
 	 * Removes all children from the View.
-	 * 
+	 *
 	 * @param {boolean} purge Whether or not to purge the removed children, meaning that their scheduled functions and loop-attached functions will be removed. (true by default)
 	 */
 	removeAllChildren: function (purge) {
 		purge = purge !== undefined ? purge : true;
-		
+
 		var rmChild;
 
 		rmChild = this.children.splice(0, this.children.length);
-		rmChild.forEach(function () {
-			this.parent = undefined;
+		rmChild.forEach(function (c) {
+			c.parent = undefined;
 			if (purge) {
-				engine.purge(this);
+				engine.purge(c);
 			}
 		});
 	},
 
 	/**
 	 * Draws all children and grandchildren of an object that inherits the View class. It is usually not necessary to call this function since it is automatically called by the engine's redraw loop.
-	 * 
+	 *
 	 * @param {CanvasRenderingContext2D} c A canvas' 2d context to draw the children on
 	 * @param {Math.Rectangle} area A rectangle specifying the area to draw
 	 * @param {boolean} forceRedraw Whether or not to force a redraw even though draw caching is enabled (this option is actually used when caching the view)
@@ -314,7 +314,7 @@ new Class('View.Container', [View.Child], {
 				}
 				else if (child.isVisible()) {
 					engine.drawCalls ++; //dev
-					
+
 					child.transformCanvasContext(c);
 					child.drawCanvas(c);
 					child.restoreCanvasContext(c);
@@ -322,7 +322,7 @@ new Class('View.Container', [View.Child], {
 			}
 		}
 
-		
+
 		this.restoreCanvasContext(c);
 	},
 

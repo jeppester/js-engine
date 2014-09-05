@@ -376,7 +376,7 @@ ALIGNMENT_RIGHT				= 'right';
 
 	/**
 	 * Room transition global for entering a new room with no transition (this is default)
-	 * 
+	 *
 	 * @global
 	 * @param {Engine.Room} oldRoom The room that is left
 	 * @param {Engine.Room} newRoom The room that is entered
@@ -425,10 +425,10 @@ ALIGNMENT_RIGHT				= 'right';
 				newCams.push(newCam);
 			}
 		}
-		
+
 		engine.cameras.push.apply(engine.cameras, newCams);
-		newCams.forEach(function () {
-			slideIn(this, options.from, animOptions);
+		newCams.forEach(function (c) {
+			slideIn(c, options.from, animOptions);
 		});
 
 		engine.masterRoom.loops.eachFrame.schedule(oldRoom, function () {
@@ -472,11 +472,11 @@ ALIGNMENT_RIGHT				= 'right';
 				newCams.push(newCam);
 			}
 		}
-		
+
 		engine.cameras.push.apply(engine.cameras, newCams);
 
-		newCams.forEach(function () {
-			slideIn(this, options.from, animOptions);
+		newCams.forEach(function (c) {
+			slideIn(c, options.from, animOptions);
 		});
 
 		engine.masterRoom.loops.eachFrame.schedule(oldRoom, function () {
@@ -522,11 +522,11 @@ ALIGNMENT_RIGHT				= 'right';
 				newCams.push(newCam);
 			}
 		}
-		
+
 		engine.cameras.push.apply(engine.cameras, newCams);
 
-		newCams.forEach(function () {
-			squeezeIn(this, options.from, animOptions);
+		newCams.forEach(function (c) {
+			squeezeIn(c, options.from, animOptions);
 		});
 
 		engine.masterRoom.loops.eachFrame.schedule(oldRoom, function () {
@@ -572,11 +572,11 @@ ALIGNMENT_RIGHT				= 'right';
 				newCams.push(newCam);
 			}
 		}
-		
+
 		engine.cameras.push.apply(engine.cameras, newCams);
 
-		newCams.forEach(function () {
-			squeezeIn(this, options.from, animOptions);
+		newCams.forEach(function (c) {
+			squeezeIn(c, options.from, animOptions);
 		});
 
 		engine.masterRoom.loops.eachFrame.schedule(oldRoom, function () {

@@ -116,9 +116,9 @@ new Class('Input.Pointer', {
 		this.mouse.x = roomPos.x;
 		this.mouse.y = roomPos.y;
 
-		this.mouse.buttons.forEach(function () {
-			this.x = pointer.mouse.x;
-			this.y = pointer.mouse.y;
+		this.mouse.buttons.forEach(function (b) {
+			b.x = pointer.mouse.x;
+			b.y = pointer.mouse.y;
 		});
 
 		this.mouse.lastMoved = new Date().getTime();

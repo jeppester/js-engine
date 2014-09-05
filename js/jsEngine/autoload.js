@@ -37,8 +37,6 @@
 		enginePath + '/Extension/Object.js',
 
 		enginePath + '/Polyfill/requestAnimationFrame.js',
-		enginePath + '/Polyfill/Array.prototype.forEach.js',
-
 
 		enginePath + '/Engine/Class.js',
 		enginePath + '/Engine/Globals.js',

@@ -160,8 +160,8 @@ new Class('View.Collidable', [View.Sprite], {
 			parents = obj.getParents();
 			parents.reverse();
 			parents.push(obj);
-			parents.forEach(function () {
-				Renderer.Canvas.prototype.transformCanvasContext(this, c);
+			parents.forEach(function (p) {
+				Renderer.Canvas.prototype.transformCanvasContext(p, c);
 			})
 
 			c.drawImage(
@@ -181,8 +181,8 @@ new Class('View.Collidable', [View.Sprite], {
 			);
 
 			parents.reverse();
-			parents.forEach(function () {
-				Renderer.Canvas.prototype.restoreCanvasContext(this, c);
+			parents.forEach(function (p) {
+				Renderer.Canvas.prototype.restoreCanvasContext(p, c);
 			});
 		}
 
@@ -371,9 +371,9 @@ new Class('View.Collidable', [View.Sprite], {
 					if (ret.positions.length) {
 						ret.combinedPosition = new Math.Vector();
 						ret.combinedPosition.pixelCount = 0;
-						ret.positions.forEach(function () {
-							ret.combinedPosition.add(this.scale(this.pixelCount));
-							ret.combinedPosition.pixelCount += this.pixelCount;
+						ret.positions.forEach(function (p) {
+							ret.combinedPosition.add(p.scale(p.pixelCount));
+							ret.combinedPosition.pixelCount += p.pixelCount;
 						});
 						ret.combinedPosition.scale(1 / ret.combinedPosition.pixelCount);
 					}
