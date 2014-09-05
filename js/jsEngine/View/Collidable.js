@@ -111,109 +111,17 @@ new Class('View.Collidable', [View.Sprite], {
 	 */
 	maskCollidesWith: function (objects, getCollisionPosition) {
 		if (objects === undefined) {throw new Error('Missing argument: objects'); } //dev
-		var canvas, mask, ctx, roomPos, parents, obj, bitmap, i, ii, data, length, pixel, pxArr, x, y, avX, avY, retVector;
+		var bitmap, i, length, pixel, pxArr, x, y, avX, avY, retVector;
 
 		if (!Array.prototype.isPrototypeOf(objects)) {
 			objects = [objects];
 		}
 		getCollisionPosition = getCollisionPosition !== undefined ? getCollisionPosition : false;
 
-	 	// Get mask from loader object
-		mask = this.mask;
-
-		// Create a new canvas for checking for a collision
-		canvas = document.createElement('canvas');
-		canvas.width = Math.ceil(this.clipWidth);
-		canvas.height = Math.ceil(this.clipHeight);
-
-		// Add canvas for debugging
-		/*if (document.getElementById('colCanvas')) {
-			document.body.removeChild(document.getElementById('colCanvas'));
-		}
-		document.body.appendChild(canvas);/**/
-
-		canvas.id = 'colCanvas';
-
-		c = canvas.getContext('2d');
-
-		c.fillStyle = "#FFF";
-
-		c.fillRect(0, 0, canvas.width, canvas.height);
-		c.save();
-
-		c.translate(this.offset.x, this.offset.y);
-
-		parents = this.getParents();
-		parents.unshift(this);
-		for (i = 0; i < parents.length; i ++) {
-			Renderer.Canvas.prototype.restoreCanvasContext(parents[i], c);
-		}
-
-		// Draw other objects
-		//roomPos = this.getRoomPosition();
-		for (i = 0; i < objects.length; i++) {
-			obj = objects[i];
-
-			// If the checked object is "this", do nothing (this situation should maybe result in an error)
-			if (obj === this) {continue; }
-
-			parents = obj.getParents();
-			parents.reverse();
-			parents.push(obj);
-			parents.forEach(function (p) {
-				Renderer.Canvas.prototype.transformCanvasContext(p, c);
-			})
-
-			c.drawImage(
-				obj.mask,
-
-				// Define image cutout
-				(obj.clipWidth + obj.bm.spacing) * obj.imageNumber,
-				0,
-				obj.clipWidth,
-				obj.clipHeight,
-
-				// Define position and width on canvas
-				- obj.offset.x,
-				- obj.offset.y,
-				obj.clipWidth,
-				obj.clipHeight
-			);
-
-			parents.reverse();
-			parents.forEach(function (p) {
-				Renderer.Canvas.prototype.restoreCanvasContext(p, c);
-			});
-		}
-
-		c.restore();
-		c.globalAlpha = 0.5;
-		c.fillRect(0, 0, canvas.width, canvas.height);
-		c.translate(canvas.width / 2, canvas.height / 2);
-
-		// Draw checked object
-		c.drawImage(
-			mask,
-
-			// Define image cutout
-			(this.clipWidth + this.bm.spacing) * this.imageNumber,
-			0,
-			this.clipWidth,
-			this.clipHeight,
-
-			// Define position and width on canvas
-			-this.clipWidth / 2,
-			-this.clipHeight / 2,
-			this.clipWidth,
-			this.clipHeight
-		);
-
-		bitmap = c.getImageData(0, 0, canvas.width, canvas.height);
-		data = bitmap.data;
-		length = data.length / 4;
+	 	bitmap = this.createCollisionBitmap(objects);
+		length = bitmap.data.length / 4;
 
 		pxArr = [];
-
 		for (pixel = 0; pixel < length; pixel += this.collisionResolution) {
 			// To get better spread of the checked pixels, increase the pixel each time we're on a new line
 			x = pixel % bitmap.width;
@@ -226,9 +134,7 @@ new Class('View.Collidable', [View.Sprite], {
 			}
 
 			// Log the checked pixel
-			//console.log(pixel % canvas.width, Math.floor(pixel / canvas.width));
-
-			if (data[pixel * 4] < 127) {
+			if (bitmap.data[pixel * 4] < 127) {
 				if (getCollisionPosition) {
 					if (y === undefined) {
 						y = Math.floor(pixel / bitmap.width);
@@ -291,6 +197,123 @@ new Class('View.Collidable', [View.Sprite], {
 		}
 
 		return false;
+	},
+
+	createCollisionBitmap: function (objects) {
+		var obj, canvas, mask, c, parents, i, wm, lm, dt, calc;
+
+			// Get mask from loader object
+		mask = this.mask;
+		calc = Mixin.MatrixCalculation.prototype;
+
+		// Create a new canvas for checking for a collision
+		canvas = document.createElement('canvas');
+		canvas.width = Math.ceil(this.clipWidth);
+		canvas.height = Math.ceil(this.clipHeight);
+
+		// Add canvas for debugging
+		/*canvas.id = 'colCanvas';
+		if (document.getElementById('colCanvas')) {
+			document.body.removeChild(document.getElementById('colCanvas'));
+		}
+		document.body.appendChild(canvas);/**/
+
+		c = canvas.getContext('2d');
+		c.fillStyle = "#FFF";
+		c.fillRect(0, 0, canvas.width, canvas.height);
+		c.translate(this.offset.x, this.offset.y);
+
+		parents = this.getParents();
+		parents.unshift(this);
+
+		lm = calc.makeIdentity();
+		console.log(lm);
+
+		// Reset transform to the world matrix
+		for (i = 0; i < parents.length; i ++) {
+			lm = calc.matrixMultiply(lm, calc.calculateLocalMatrix(parents[i]));
+		}
+
+		// Find determinant
+		dt = calc.getDeterminant(lm);
+		console.log(dt);
+
+		// If determinant is 0, the object is invisible (thus cannot collide)
+		if (dt === 0) {
+			throw new Error('Trying to detect collision for invisble object') // dev
+		}
+
+		// Set world matrix to the inverted local matrix of the target object
+		wm = calc.matrixMultiplyNumber(calc.getTranspose(lm), dt);
+
+		console.log(lm);
+		console.log(wm);
+
+		window.lm = lm;
+		window.wm = wm;
+		window.calc = calc;
+
+		throw new Error('Test!');
+
+		// Draw other objects
+		for (i = 0; i < objects.length; i++) {
+			obj = objects[i];
+
+			// If the checked object is "this", do nothing (this situation should maybe result in an error)
+			if (obj === this) {continue; }
+
+			// Create local matrix (to add to the world matrix)
+			parents = obj.getParents();
+			parents.reverse();
+			parents.push(obj);
+			parents.forEach(function (p) {
+				Renderer.Canvas.prototype.transformCanvasContext(p, c);
+			})
+
+			c.drawImage(
+				obj.mask,
+
+				// Define image cutout
+				(obj.clipWidth + obj.bm.spacing) * obj.imageNumber,
+				0,
+				obj.clipWidth,
+				obj.clipHeight,
+
+				// Define position and width on canvas
+				- obj.offset.x,
+				- obj.offset.y,
+				obj.clipWidth,
+				obj.clipHeight
+			);
+
+			parents.reverse();
+			parents.forEach(function (p) {
+				Renderer.Canvas.prototype.restoreCanvasContext(p, c);
+			});
+		}
+
+		c.globalAlpha = 0.5;
+		c.fillRect(0, 0, canvas.width, canvas.height);
+		c.translate(canvas.width / 2, canvas.height / 2);
+
+		// Draw checked object
+		c.drawImage(
+			mask,
+
+			// Define image cutout
+			(this.clipWidth + this.bm.spacing) * this.imageNumber,
+			0,
+			this.clipWidth,
+			this.clipHeight,
+
+			// Define position and width on canvas
+			-this.clipWidth / 2,
+			-this.clipHeight / 2,
+			this.clipWidth,
+			this.clipHeight
+		);
+
+		return c.getImageData(0, 0, canvas.width, canvas.height);
 	},
 
 	/**
@@ -396,60 +419,4 @@ new Class('View.Collidable', [View.Sprite], {
 			return false;
 		}
 	},
-
-	/**
-	 * Draws the collidable object's bounding box to the arena. Use engine option "drawBoundingBoxes" to draw all bounding boxes.
-	 *
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the bounding box
-	 */
-	drawBoundingBox: function (c) {
-		var pol;
-
-		pol = this.mask.bBox.copy().move(-this.offset.x, -this.offset.y);
-		c.beginPath();
-		c.moveTo(pol.points[0].x, pol.points[0].y);
-		c.lineTo(pol.points[1].x, pol.points[1].y);
-		c.lineTo(pol.points[2].x, pol.points[2].y);
-		c.lineTo(pol.points[3].x, pol.points[3].y);
-		c.closePath();
-
-		c.strokeStyle = "#0F0";
-		c.lineWidth = 1;
-
-		c.stroke();
-	},
-
-	/**
-	 * Draws the object's collision mask to the arena. Use engine option "drawMasks" to draw all masks.
-	 *
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the mask
-	 */
-	drawMask: function (c) {
-		// Draw Sprite on canvas
-		if (!this.mask) {
-			return;
-		}
-
-		try {
-			c.drawImage(
-				this.mask,
-
-				(this.clipWidth + this.bm.spacing) * this.imageNumber,
-				0,
-				this.clipWidth,
-				this.clipHeight,
-
-				- this.offset.x,
-				- this.offset.y,
-				this.clipWidth,
-				this.clipHeight);
-		} catch (e) {
-			console.log(this.source);
-			console.log(this.bm);
-			engine.stopMainLoop();
-			throw new Error(e);
-		}
-1	}
 });

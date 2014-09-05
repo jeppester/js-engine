@@ -184,7 +184,7 @@ new Class('View.Child', [Mixin.Animatable], {
     /**
      * Parses an offset global into an actual Math.Vector offset
      * (this function is only here for convenience and should be replaced by any class that inherits the child class)
-     * 
+     *
      * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
      * @return {Math.Vector} A parsed version of the offset global
      */
@@ -194,7 +194,7 @@ new Class('View.Child', [Mixin.Animatable], {
 
     /**
      * Checks if the child object is inside a room that is currently visible
-     * 
+     *
      * @return {Boolean} Whether or not the child object is currently in a visible room
      */
     isInVisibleRoom: function () {
@@ -208,7 +208,7 @@ new Class('View.Child', [Mixin.Animatable], {
     /**
      * Checks if the child object is in a state where it will get drawn.
      * For this function to return true, the child object has to be both visible and placed in a visible room.
-     * 
+     *
      * @return {Boolean} Whether or not the child object is in a state where it will get drawn
      */
     isDrawn: function () {
@@ -222,12 +222,12 @@ new Class('View.Child', [Mixin.Animatable], {
      */
     getRoomPosition: function () {
         var pos, parents, parent, i;
-        
+
         parents = this.getParents();
 
         if (parents.length && parents[parents.length -1].implements(Engine.Room)) {
             pos = new Math.Vector(this.x, this.y);
-            
+
             for (i = 0; i < parents.length; i ++) {
                 parent = parents[i];
 
@@ -245,7 +245,7 @@ new Class('View.Child', [Mixin.Animatable], {
 
     /**
      * Creates and returns and array of all the child's parents (from closest to farthest)
-     * 
+     *
      * @return {View.Container[]} A list of all the child's parents
      */
     getParents: function () {
@@ -280,7 +280,7 @@ new Class('View.Child', [Mixin.Animatable], {
 
     /**
      * Sets the position of the object relative to its parent
-     * 
+     *
      * @param {number} x The horisontal position
      * @param {number} y The vertical position
      */
@@ -309,7 +309,7 @@ new Class('View.Child', [Mixin.Animatable], {
 
     /**
      * Checks if the objects is visible. This function runs before each draw to ensure that it is necessary
-     * @return {boolean} Whether or not the object is visible (based on its size and opacity vars) 
+     * @return {boolean} Whether or not the object is visible (based on its size and opacity vars)
      */
     isVisible: function () {
         // If sprites size has been modified to zero, do nothing

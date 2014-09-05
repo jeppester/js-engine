@@ -43,6 +43,63 @@ new Class('Mixin.MatrixCalculation', {
 		];
 	},
 
+	getDeterminant: function (matrix) {
+		var a = matrix[0*3+0];
+		var b = matrix[0*3+1];
+		var c = matrix[0*3+2];
+		var d = matrix[1*3+0];
+		var e = matrix[1*3+1];
+		var f = matrix[1*3+2];
+		var g = matrix[2*3+0];
+		var h = matrix[2*3+1];
+		var i = matrix[2*3+2];
+
+		return (a * e * i +
+						b * f * g +
+						c * d * h)
+						-
+					 (c * e * g +
+						b * d * i +
+						a * f * h);
+	},
+
+	getTranspose: function (matrix) {
+		var a = matrix[0*3+0];
+		var b = matrix[0*3+1];
+		var c = matrix[0*3+2];
+		var d = matrix[1*3+0];
+		var e = matrix[1*3+1];
+		var f = matrix[1*3+2];
+		var g = matrix[2*3+0];
+		var h = matrix[2*3+1];
+		var i = matrix[2*3+2];
+
+		return [
+			a, d, g,
+			b, e, h,
+			c, f, i
+		];
+	},
+
+	matrixMultiplyNumber: function (matrix, factor) {
+		var a = matrix[0*3+0];
+		var b = matrix[0*3+1];
+		var c = matrix[0*3+2];
+		var d = matrix[1*3+0];
+		var e = matrix[1*3+1];
+		var f = matrix[1*3+2];
+		var g = matrix[2*3+0];
+		var h = matrix[2*3+1];
+		var i = matrix[2*3+2];
+		var s = factor;
+
+		return [
+			a * s, b * s, c * s,
+			d * s, e * s, f * s,
+			g * s, h * s, i * s
+		];
+	},
+
 	matrixMultiply: function (a, b) {
 		var a00 = a[0*3+0];
 		var a01 = a[0*3+1];
