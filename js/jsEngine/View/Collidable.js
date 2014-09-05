@@ -26,7 +26,7 @@ new Class('View.Collidable', [View.Sprite], {
 
 	/**
 	 * Checks for a collision with other objects' rotated BBoxes. The word polygon is used because the check is actually done by using the Polygon object.
-	 * 
+	 *
 	 * @param {Collidable|Collidable[]} objects Target object, or array of target objects
 	 * @param {boolean} getCollidingObjects Whether or not to return an array of colliding objects (is slower because the check cannot stop when a single collission has been detected)
 	 * @return {Object[]|boolean} If getCollidingObjects is set to true, an array of colliding object, else a boolean representing whether or not a collission was detected.
@@ -69,7 +69,7 @@ new Class('View.Collidable', [View.Sprite], {
 		}
 	},
 
-	
+
 	getTransformedBoundingBox: function () {
 		var box, parents, parent, i;
 
@@ -77,7 +77,7 @@ new Class('View.Collidable', [View.Sprite], {
 
 		parents = this.getParents();
 		parents.unshift(this);
-		
+
 		for (i = 0; i < parents.length; i ++) {
 			parent = parents[i];
 
@@ -99,7 +99,7 @@ new Class('View.Collidable', [View.Sprite], {
 
 	/**
 	 * Checks for a mask based collisions with other Collidable objects.
-	 * 
+	 *
 	 * @param {View.Collidable|View.Collidable[]} objects Target object, or array of target objects
 	 * @param {boolean} getCollisionPosition If true, the function returns an object representing the position of the detected collision. Defaults to false
 	 * @return {Object|boolean} If getCollisionPosition is false, a boolean representing whether or not a collision was detected, else an object of the following type:
@@ -207,7 +207,7 @@ new Class('View.Collidable', [View.Sprite], {
 			this.clipWidth,
 			this.clipHeight
 		);
-		
+
 		bitmap = c.getImageData(0, 0, canvas.width, canvas.height);
 		data = bitmap.data;
 		length = data.length / 4;
@@ -246,10 +246,30 @@ new Class('View.Collidable', [View.Sprite], {
 
 		if (pxArr.length > 0) {
 			// Find the collision pixel's mean value
-			pxArr = pxArr.sortByNumericProperty('x');
+			pxArr = pxArr.sort(function (a, b) {
+				if (a.x === b.x) {
+					return 0;
+				}
+				else if (a.x > b.x) {
+					return 1;
+				}
+				else {
+					return -1;
+				}
+			});
 			avX = (pxArr[0].x + pxArr[pxArr.length - 1].x) / 2;
 
-			pxArr = pxArr.sortByNumericProperty('y');
+			pxArr = pxArr.sort(function (a, b) {
+				if (a.y === b.y) {
+					return 0;
+				}
+				else if (a.y > b.y) {
+					return 1;
+				}
+				else {
+					return -1;
+				}
+			});
 			avY = (pxArr[0].y + pxArr[pxArr.length - 1].y) / 2;
 
 			// Translate the position according to the object's sprite offset
@@ -276,7 +296,7 @@ new Class('View.Collidable', [View.Sprite], {
 	/**
 	 * A "metafunction" for checking if the Collidable collides with another object of the same type.
 	 * This function uses boundingBoxCollidesWith for narrowing down the number of objects to check, then uses maskCollidesWith for doing a precise collision check on the remaining objects.
-	 * 
+	 *
 	 * @param {View.Collidable|View.Collidable[]} objects Target object, or array of target objects
 	 * @param {boolean} getCollisionPosition If true, the function returns an object representing the position of the detected collision. Defaults to false
 	 * @param {boolean} getCollidingObjects If true, the function returns all colliding objects
@@ -307,11 +327,11 @@ new Class('View.Collidable', [View.Sprite], {
 
 		// First, do a bounding box based collision check
 		objects = this.boundingBoxCollidesWith(objects, true);
-		
+
 		if (objects === false) {
 			return false;
 		}
-		
+
 		// If a bounding box collision is detected, do a precise collision check with maskCollidesWith
 		// If getCollisionPosition and getCollidingObjects are both false, just return a boolean
 		if (!getCollisionPosition && !getCollidingObjects) {
@@ -379,7 +399,7 @@ new Class('View.Collidable', [View.Sprite], {
 
 	/**
 	 * Draws the collidable object's bounding box to the arena. Use engine option "drawBoundingBoxes" to draw all bounding boxes.
-	 * 
+	 *
 	 * @private
 	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the bounding box
 	 */
@@ -402,7 +422,7 @@ new Class('View.Collidable', [View.Sprite], {
 
 	/**
 	 * Draws the object's collision mask to the arena. Use engine option "drawMasks" to draw all masks.
-	 * 
+	 *
 	 * @private
 	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the mask
 	 */

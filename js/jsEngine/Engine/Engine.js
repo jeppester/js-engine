@@ -244,7 +244,7 @@ new Class('Engine', {
 
 	/**
 	 * Starts the engine
-	 * 
+	 *
 	 * @private
 	 */
 	initialize: function () {
@@ -391,7 +391,7 @@ new Class('Engine', {
 
 	/**
 	 * Function for resizing the canvas. Not used if engine option "autoResizeCanvas" is false.
-	 * 
+	 *
 	 * @private
 	 */
 	autoResizeCanvas: function () {
@@ -426,7 +426,7 @@ new Class('Engine', {
 
 	/**
 	 * Function for converting between speed units
-	 * 
+	 *
 	 * @param {number} speed The value to convert
 	 * @param {number} from The unit to convert from. Can be SPEED_PIXELS_PER_SECOND or SPEED_PIXELS_PER_FRAME
 	 * @param {number} to The unit to convert to. Can be SPEED_PIXELS_PER_SECOND or SPEED_PIXELS_PER_FRAME
@@ -464,7 +464,7 @@ new Class('Engine', {
 
 	/**
 	 * Leaves the current room and opens another room
-	 * 
+	 *
 	 * @param {Room|string} room A pointer to the desired room, or a string representing the name of the room
 	 * @param {number} transition A room transition constant or function
 	 */
@@ -479,7 +479,10 @@ new Class('Engine', {
 
 		// If a string has been specified, find the room by name
 		if (typeof room === "string") {
-			room = this.roomList.getElementByPropertyValue('name', room);
+			room = this.roomList.filter(function (r) {
+				return r.name === room
+			})[0];
+
 			if (!room) {throw new Error('Could not find a room with the specified name'); } //dev
 		}
 		// Else, check if the room exists on the room list, and if not, throw an error
@@ -502,7 +505,7 @@ new Class('Engine', {
 
 	/**
 	 * Adds a room to the room list. This function is automatically called by the Room class' constructor.
-	 * 
+	 *
 	 * @private
 	 * @param {Room} room The room which should be added
 	 */
@@ -517,7 +520,7 @@ new Class('Engine', {
 
 	/**
 	 * Removes a room from the room list.
-	 * 
+	 *
 	 * @param {Room|string} room A pointer to the room, or a string representing the name of the room, which should be removed
 	 */
 	removeRoom: function(room) {
@@ -549,7 +552,7 @@ new Class('Engine', {
 
 	/**
 	 * Toggles if all sound effects should be muted.
-	 * 
+	 *
 	 * @param {boolean} muted Whether or not the sound effects should be muted
 	 */
 	setSoundsMuted: function (muted) {
@@ -585,7 +588,7 @@ new Class('Engine', {
 
 	/**
 	 * Sets the default theme for the engine objects
-	 * 
+	 *
 	 * @param {string} themeName A string representing the name of the theme
 	 * @param {boolean} enforce Whether or not the enforce the theme on objects for which another theme has already been set
 	 */
@@ -623,7 +626,7 @@ new Class('Engine', {
 
 	/**
 	 * The engine's main loop function (should not be called manually)
-	 * 
+	 *
 	 * @private
 	 */
 	mainLoop: function () {
@@ -678,7 +681,7 @@ new Class('Engine', {
 
 	/**
 	 * Sets the horizontal resolution of the main canvas
-	 * 
+	 *
 	 * @param {number} res The new horizontal resolution
 	 */
 	setCanvasResX: function (res) {
@@ -692,7 +695,7 @@ new Class('Engine', {
 
 	/**
 	 * Sets the vertical resolution of the main canvas
-	 * 
+	 *
 	 * @param {number} res The new vertical resolution
 	 */
 	setCanvasResY: function (res) {
@@ -706,7 +709,7 @@ new Class('Engine', {
 	/**
 	 * Registers an object to the engine. This will give the object an id which can be used for accessing it at a later time.
 	 * Sprites, TextBlock and objects inheriting those objects, are automatically registered when created.
-	 * 
+	 *
 	 * @param {Object} obj The object to register in the engine
 	 * @param {string} id A string with the desired id
 	 * @return {string} The registered id
@@ -736,7 +739,7 @@ new Class('Engine', {
 
 	/**
 	 * Loads and executes one or multiple JavaScript file synchronously
-	 * 
+	 *
 	 * @param {string|string[]} filePaths A file path (string), or an array of file paths to load and execute as JavaScript
 	 */
 	loadFiles: function (filePaths) {
@@ -764,7 +767,7 @@ new Class('Engine', {
 
 	/**
 	 * Uses an http request to fetch the data from a file and runs a callback function with the file data as first parameter
-	 * 
+	 *
 	 * @param {string} url A URL path for the file to load
 	 * @param {string|Object} params A parameter string or an object to JSON-stringify and use as URL parameter (will be send as "data=[JSON String]")
 	 * @param {boolean} async Whether or not the request should be synchronous.
@@ -890,7 +893,7 @@ new Class('Engine', {
 	 * "powerOut"
 	 * "powerInOut"
 	 * "sinusInOut"
-	 * 
+	 *
 	 * @param {number} t The current time (of the animation)
 	 * @param {number} b The start value
 	 * @param {number} c The end value

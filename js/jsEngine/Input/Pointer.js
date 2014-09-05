@@ -57,7 +57,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Registers every onmousedown event to the Mouse object.
-	 * 
+	 *
 	 * @private
 	 * @param {MouseEvent} event Event object passed by the onmousedown event
 	 */
@@ -76,7 +76,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Registers every onmouseup event to the Mouse object.
-	 * 
+	 *
 	 * @private
 	 * @param {MouseEvent} event Event object passed by the onmouseup event
 	 */
@@ -95,7 +95,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Registers every onmousemove event to the Mouse object.
-	 * 
+	 *
 	 * @private
 	 * @param {MouseEvent} event Event object passed by the onmousemove event
 	 */
@@ -131,7 +131,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Registers every ontouchstart event to the Mouse object.
-	 * 
+	 *
 	 * @private
 	 * @param {TouchEvent} event Event object passed by the ontouchstart event
 	 */
@@ -165,7 +165,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Registers every ontouchend event to the Mouse object.
-	 * 
+	 *
 	 * @private
 	 * @param {TouchEvent} event Event object passed by the ontouchend event
 	 */
@@ -178,7 +178,9 @@ new Class('Input.Pointer', {
 			eventTouch = event.changedTouches[i];
 
 			if (event.changedTouches[i].identifier > 20) {
-				pointerTouch = this.touches.getElementByPropertyValue('identifier', eventTouch.identifier);
+				pointerTouch = this.touches.filter(function (t) {
+					return t.identifier === eventTouch.identifier
+				})[0];
 			}
 			else {
 				pointerTouch = this.touches[eventTouch.identifier];
@@ -194,7 +196,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Registers every ontouchmove event to the Mouse object.
-	 * 
+	 *
 	 * @private
 	 * @param {TouchEvent} event Event object passed by the ontouchmove event
 	 */
@@ -206,7 +208,9 @@ new Class('Input.Pointer', {
 			eventTouch = event.touches[i];
 
 			if (event.touches[i].identifier > 20) {
-				pointerTouch = this.touches.getElementByPropertyValue('identifier', eventTouch.identifier);
+				pointerTouch = this.touches.filter(function (t) {
+					return t.identifier === eventTouch.identifier;
+				})[0]
 			}
 			else {
 				pointerTouch = this.touches[eventTouch.identifier];
@@ -226,7 +230,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Checks if the mouse has been moved between the last and the current frame.
-	 * 
+	 *
 	 * @return {boolean} True if the pointer has been moved, false if not
 	 */
 	mouseHasMoved: function () {
@@ -235,7 +239,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Checks if a mouse button or touch is currently down.
-	 * 
+	 *
 	 * @param {number} button A pointer constant representing the pointer to check
 	 * @return {Object[]|boolean} Returns an array containing the pointers that are currently down, or false if no pointers are down
 	 */
@@ -259,7 +263,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Checks if a mouse button or touch has just been pressed (between the last and the current frame).
-	 * 
+	 *
 	 * @param {number} button A pointer constant representing the pointer to check
 	 * @return {Object[]|boolean} Returns an array containing the pointers that have just been pressed, or false if no pressed pointers where detected
 	 */
@@ -360,7 +364,7 @@ new Class('Input.Pointer', {
 
 		// Narrow possible presses down to the pressed pointers within the selected buttons
 		pointers = this.isReleased(button);
-		
+
 		if (!pointers) {return false; }
 
 		// Check each of the pointers to see if they are inside the shape
@@ -420,7 +424,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Returns a string representing the button type.
-	 * 
+	 *
 	 * @private
 	 * @param {number} button A pointer button constant representing the button
 	 * @return {string} A string representing the type of button ("mouse", "touch" or "any")
@@ -442,7 +446,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Checks the state of a pointer object
-	 * 
+	 *
 	 * @private
 	 * @param {Object|Object[]} pointers A pointer object or an array of pointer objects to check the state of
 	 * @param {string} state A state to check for "pressed", "released" or "down"
@@ -481,7 +485,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Converts a coordinate which is relative to the main canvas to a position in the room (based on the room's cameras)
-	 * 
+	 *
 	 * @private
 	 * @param {Math.Vector} vector A vector representing a position which is relative to the main canvas
 	 * @return {Math.Vector} vector A vector representing the calculated position relative to the room
@@ -537,7 +541,7 @@ new Class('Input.Pointer', {
 	/**
 	 * Checks if an area defined by a geometric shape, or its outside, is hovered by the mouse pointer.
 	 * The shape can be any geometric object that has a contains function (Rectangle, Polygon).
-	 * 
+	 *
 	 * @param {Math.Rectangle|Math.Polygon|Math.Circle} shape A geometric shape defining the area to check
      * @param {boolean} outside [Whether or not to check the outside of the specified area]
 	 * @return {boolean} True if the shape if hovered, false if not
@@ -556,7 +560,7 @@ new Class('Input.Pointer', {
 	/**
 	 * Releases a button, and thereby prevents the button from being detected as "pressed" by the isPressed function.
 	 * This function is very useful for preventing one button press from having multiple effects inside the game. For instance on buttons that are placed on top of each other.
-	 * 
+	 *
 	 * @param {number} button The button to release
 	 * @return {boolean} True if the button has now been released, false if the button was not already pressed
 	 */
@@ -587,7 +591,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Checks if the mouse pointer is outside the game arena.
-	 * 
+	 *
 	 * @return {boolean} True if the pointer is outside, false if not
 	 */
 	outside: function () {
@@ -596,7 +600,7 @@ new Class('Input.Pointer', {
 
 	/**
 	 * Resets the mouse cursor, automatically called by the engine before each frame i executed, unless engine.resetCursorOnEachFrame is set to false
-	 * 
+	 *
 	 * @private
 	 */
 	resetCursor: function () {

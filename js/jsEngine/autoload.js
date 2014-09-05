@@ -34,7 +34,6 @@
 
 	// Load all engine files
 	loadFiles([
-		enginePath + '/Extension/Array.js',
 		enginePath + '/Extension/Object.js',
 
 		enginePath + '/Polyfill/requestAnimationFrame.js',

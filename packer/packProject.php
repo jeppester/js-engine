@@ -100,7 +100,7 @@ $files = array();
 // Check if jsEngine-file is already packed
 $e = $options['engineDir'];
 $engineFile = file_get_contents($options['gameDir'] . $e . $options['engineFile']);
-if (preg_match('/Array\.prototype\.sortByNumericProperty/', $engineFile)) {
+if (preg_match('/Object\.prototype\.importProperties/', $engineFile)) {
 	echo "Packed JsEngine detected\n";
 	if ($options['engineOnly']) {
 		echo "Engine already packed, nothing to do\n\n";
@@ -115,7 +115,6 @@ else {
 
 	// If not minified, include all engine files separately
 	array_push($files,
-		$e . 'Extension/Array.js',
 		$e . 'Extension/Object.js',
 
 		$e . 'Polyfill/requestAnimationFrame.js',
