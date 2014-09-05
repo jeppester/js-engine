@@ -1,4 +1,4 @@
-new Class('View.Sprite', [View.Container, Lib.Animatable], {
+new Class('View.Sprite', [View.Container, Mixin.Animatable], {
 	/**
 	 * The constructor for Sprite objects.
 	 *
@@ -6,7 +6,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
      * @class Class for drawing bitmaps with rotation and size.
      *        Usually all graphical objects in a game are sprites or extends this class.
      * @augments View.Container
-     * @augments Lib.Animatable
+     * @augments Mixin.Animatable
      *
      * @property {string} source A resource string representing the bitmap source of the sprite, use setSource() to set the source (do not set it directly)
      * @property {number} direction The direction of the sprite (in radians)

@@ -1,4 +1,4 @@
-new Class('Lib.WebGLHelpers', {
+new Class('Mixin.WebGLHelpers', {
   colorFromCSSString: function (string) {
     var a, b, c;
 

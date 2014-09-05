@@ -46,9 +46,9 @@
 		enginePath + '/Engine/Engine.js',
 		enginePath + '/Engine/Loader.js',
 
-		enginePath + '/Lib/Animatable.js',
-		enginePath + '/Lib/MatrixCalculation.js',
-		enginePath + '/Lib/WebGLHelpers.js',
+		enginePath + '/Mixin/Animatable.js',
+		enginePath + '/Mixin/MatrixCalculation.js',
+		enginePath + '/Mixin/WebGLHelpers.js',
 
 		enginePath + '/Renderer/WebGL.js',
 		enginePath + '/Renderer/WebGL.TextureShaderProgram.js',

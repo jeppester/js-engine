@@ -1,10 +1,10 @@
-new Class('View.TextBlock', [Lib.Animatable, View.Container], {
+new Class('View.TextBlock', [Mixin.Animatable, View.Container], {
 	/**
 	 * The constructor for the TextBlock class.
 	 *
 	 * @name View.TextBlock
 	 * @class A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
-	 * @augments Lib.Animatable
+	 * @augments Mixin.Animatable
 	 * @augments View.Container
 	 *
 	 * @property {string} font A css string representing the font of the text block

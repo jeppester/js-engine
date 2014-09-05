@@ -1,10 +1,10 @@
-new Class('Math.Vector', [Lib.Animatable], {
+new Class('Math.Vector', [Mixin.Animatable], {
 	/**
 	 * Constructor for the Vector class. Uses set-function to set the vector from x- and y values.
 	 *
      * @name Math.Vector
      * @class A math class which is used for handling two-dimensional vectors
-     * @augments Lib.Animatable
+     * @augments Mixin.Animatable
      *
      * @property {number} x The x-value of the vector
      * @property {number} y The y-value of the vector

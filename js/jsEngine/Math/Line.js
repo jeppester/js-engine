@@ -1,10 +1,10 @@
-new Class('Math.Line',[Lib.Animatable], {
+new Class('Math.Line',[Mixin.Animatable], {
 	/**
 	 * Constructor for the Line class. Uses setFromVectors to create the line's start and end points
 	 *
      * @name Math.Line
      * @class A math class which is used for handling lines
-     * @augments Lib.Animatable
+     * @augments Mixin.Animatable
      *
      * @property {Vector} a The line's starting point
      * @property {Vector} b The line's ending point

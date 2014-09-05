@@ -1,4 +1,4 @@
-new Class('Renderer.WebGL.ColorShaderProgram', [Lib.WebGLHelpers], {
+new Class('Renderer.WebGL.ColorShaderProgram', [Mixin.WebGLHelpers], {
 	ColorShaderProgram: function (gl) {
 		var initShaders, initBuffers, program, locations;
 

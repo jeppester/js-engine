@@ -1,6 +1,6 @@
-new Class('Lib.Animatable', {
+new Class('Mixin.Animatable', {
 	/**
-	 * @name Lib.Animatable
+	 * @name Mixin.Animatable
 	 * @class
 	 */
 	/** @scope Animatable */
@@ -16,7 +16,7 @@ new Class('Lib.Animatable', {
 	 * "powerOut"
 	 * "powerInOut"
 	 * "sinusInOut"
-	 * 
+	 *
 	 * @param {object} properties An object containing key-value pairs in the following format:<code>
 	 *                            {
 	 *                            	"[property name]": "[end value]"
@@ -78,11 +78,11 @@ new Class('Lib.Animatable', {
 
 		loop.addAnimation(anim);
 	},
-	/** @scope Lib.Animatable */
+	/** @scope Mixin.Animatable */
 
 	/**
 	 * Checks if the object is currently being animated.
-	 * 
+	 *
 	 * @return {boolean} Whether or not the object is being animated
 	 */
 	isAnimated: function () {
@@ -109,7 +109,7 @@ new Class('Lib.Animatable', {
 
 	/**
 	 * Checks if a specific property is current being animated
-	 * 
+	 *
 	 * @return {boolean} Whether or not the property is being animated
 	 */
 	propertyIsAnimated: function (property) {
@@ -136,7 +136,7 @@ new Class('Lib.Animatable', {
 
 	/**
 	 * Fetches all current animations of the object.
-	 * 
+	 *
 	 * @return {Object[]} An array of all the current animations of the object
 	 */
 	getAnimations: function () {
@@ -187,9 +187,7 @@ new Class('Lib.Animatable', {
 		if (!room) { //dev
 			throw new Error('Schedule requires that the object is added to a room'); //dev
 		} //dev
-		
+
 		room.loops[loopName].schedule(this, func, delay);
 	},
 });
-
-

@@ -1,4 +1,4 @@
-new Class('Lib.MatrixCalculation', {
+new Class('Mixin.MatrixCalculation', {
 	calculateLocalMatrix: function (object) {
 		var origin, scale, rotation, position;
 

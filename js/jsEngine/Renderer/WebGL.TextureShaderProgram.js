@@ -1,4 +1,4 @@
-new Class('Renderer.WebGL.TextureShaderProgram', [Lib.WebGLHelpers], {
+new Class('Renderer.WebGL.TextureShaderProgram', [Mixin.WebGLHelpers], {
 	TextureShaderProgram: function (gl) {
 		var initShaders, initBuffers, program, locations;
 

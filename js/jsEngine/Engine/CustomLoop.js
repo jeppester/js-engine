@@ -361,7 +361,7 @@ new Class('Engine.CustomLoop', {
 	/**
 	 * Stop all animations of a specific object from the loop
 	 * 
-	 * @param {Lib.Animatable} object The object to stop all animations of
+	 * @param {Mixin.Animatable} object The object to stop all animations of
 	 */
 	removeAnimationsOfObject: function (object) {
         var i;

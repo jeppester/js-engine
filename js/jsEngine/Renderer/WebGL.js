@@ -1,4 +1,4 @@
-new Class('Renderer.WebGL', [Lib.MatrixCalculation], {
+new Class('Renderer.WebGL', [Mixin.MatrixCalculation], {
 	WebGL: function (canvas) {
 		var gl, options;
 

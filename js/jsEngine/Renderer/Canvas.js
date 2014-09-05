@@ -1,4 +1,4 @@
-new Class('Renderer.Canvas', [Lib.MatrixCalculation], {
+new Class('Renderer.Canvas', [Mixin.MatrixCalculation], {
 	Canvas: function (canvas) {
 		var gl, options;
 

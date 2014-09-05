@@ -1,10 +1,10 @@
-new Class('Math.Circle', [Lib.Animatable], {
+new Class('Math.Circle', [Mixin.Animatable], {
 	/**
 	 * Constructor for Circle class, uses the set function, to set the properties of the circle.
 	 *
      * @name Math.Circle
      * @class A math class which is used for handling circles
-     * @augments Lib.Animatable
+     * @augments Mixin.Animatable
      *
      * @property {number} x The circle's horizontal position
      * @property {number} y The circle's vertical position

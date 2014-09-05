@@ -126,9 +126,9 @@ else {
 		$e . 'Engine/Engine.js',
 		$e . 'Engine/Loader.js',
 
-		$e . 'Lib/Animatable.js',
-		$e . 'Lib/MatrixCalculation.js',
-		$e . 'Lib/WebGLHelpers.js',
+		$e . 'Mixin/Animatable.js',
+		$e . 'Mixin/MatrixCalculation.js',
+		$e . 'Mixin/WebGLHelpers.js',
 
 		$e . 'Renderer/WebGL.js',
 		$e . 'Renderer/WebGL.TextureShaderProgram.js',
