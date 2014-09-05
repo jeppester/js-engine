@@ -1,9 +1,9 @@
-new Class('Lib.Animatable', {
-    /**
-     * @name Lib.Animatable
-     * @class
-     */
-    /** @scope Animatable */
+new Class('Mixin.Animatable', {
+	/**
+	 * @name Mixin.Animatable
+	 * @class
+	 */
+	/** @scope Animatable */
 
 	/**
 	 * Used for animating numeric properties of the owner of the function.
@@ -16,7 +16,7 @@ new Class('Lib.Animatable', {
 	 * "powerOut"
 	 * "powerInOut"
 	 * "sinusInOut"
-	 * 
+	 *
 	 * @param {object} properties An object containing key-value pairs in the following format:<code>
 	 *                            {
 	 *                            	"[property name]": "[end value]"
@@ -46,6 +46,7 @@ new Class('Lib.Animatable', {
 		anim.callback = opt.callback !== undefined  ?  opt.callback : function () {};
 		anim.easing = opt.easing !== undefined ?  opt.easing : "quadInOut";
 		anim.duration = opt.duration !== undefined ?  opt.duration : 1000;
+		anim.onStep = opt.onStep !== undefined ? opt.onStep : function () {};
 
 		anim.prop = {};
 		for (i in map) {
@@ -60,13 +61,13 @@ new Class('Lib.Animatable', {
 		// Remove properties that are equal to their end value
 		c = 0;
 		for (i in anim.prop) {
-            if (anim.prop.hasOwnProperty(i)) {
-                if (anim.prop[i].begin === anim.prop[i].end && !this.propertyIsAnimated(i)) {
-                    delete anim.prop[i];
-                } else {
-                    c ++;
-                }
-            }
+			if (anim.prop.hasOwnProperty(i)) {
+				if (anim.prop[i].begin === anim.prop[i].end && !this.propertyIsAnimated(i)) {
+					delete anim.prop[i];
+				} else {
+					c ++;
+				}
+			}
 		}
 
 		// If there are no properties left to animate and the animation does not have a callback function, do nothing
@@ -77,11 +78,11 @@ new Class('Lib.Animatable', {
 
 		loop.addAnimation(anim);
 	},
-	/** @scope Lib.Animatable */
+	/** @scope Mixin.Animatable */
 
 	/**
 	 * Checks if the object is currently being animated.
-	 * 
+	 *
 	 * @return {boolean} Whether or not the object is being animated
 	 */
 	isAnimated: function () {
@@ -108,7 +109,7 @@ new Class('Lib.Animatable', {
 
 	/**
 	 * Checks if a specific property is current being animated
-	 * 
+	 *
 	 * @return {boolean} Whether or not the property is being animated
 	 */
 	propertyIsAnimated: function (property) {
@@ -135,7 +136,7 @@ new Class('Lib.Animatable', {
 
 	/**
 	 * Fetches all current animations of the object.
-	 * 
+	 *
 	 * @return {Object[]} An array of all the current animations of the object
 	 */
 	getAnimations: function () {
@@ -186,9 +187,7 @@ new Class('Lib.Animatable', {
 		if (!room) { //dev
 			throw new Error('Schedule requires that the object is added to a room'); //dev
 		} //dev
-		
+
 		room.loops[loopName].schedule(this, func, delay);
 	},
 });
-
-

@@ -25,6 +25,7 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
 	 */
 	Rectangle: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
 		this.Child();
+        this.renderType = 'rectangle';
 
         if (engine.enableRedrawRegions) {
             this.RectangleInitWithRedrawRegions(x, y, width, height, fillStyle, strokeStyle, lineWidth);
@@ -36,11 +37,29 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
     /** @scope View.Rectangle */
 
     RectangleInitWithoutRedrawRegions: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
+        var hidden;
+
         this.width = width || 0;
         this.height = height || 0;
         this.fillStyle = fillStyle || "#000";
         this.strokeStyle = strokeStyle || "#000";
-        this.lineWidth = lineWidth || 1;
+
+        hidden = {
+            lineWidth: lineWidth || 1,
+        };
+
+        Object.defineProperty(this, 'lineWidth', {
+            get: function() {return hidden.lineWidth; },
+            set: function(value) {
+                if (hidden.lineWidth !== value) {
+                    hidden.lineWidth = value;
+                    if (this.offsetGlobal) {
+                        this.offset = this.offsetGlobal;
+                    }
+                }
+            }
+        });
+
         this.set(x, y, width, height);
     },
 
@@ -52,7 +71,7 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
             height: height || 0,
             fillStyle: fillStyle || "#000",
             strokeStyle: strokeStyle || "#000",
-            lineWidth: lineWidth || 1
+            lineWidth: lineWidth || 1,
         };
 
         // Put getters and setters on points values
@@ -107,6 +126,40 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
     },
 
     /**
+     * Parses an offset global into an actual Math.Vector offset that fits the instance
+     *
+     * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
+     * @return {Math.Vector} The offset vector the offset global corresponds to for the instance
+     */
+    parseOffsetGlobal: function (offset) {
+        ret = new Math.Vector();
+
+        // calculate horizontal offset
+        if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
+            ret.x = -this.lineWidth / 2;
+        }
+        else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
+            ret.x = this.width / 2;
+        }
+        else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+            ret.x = this.width + this.lineWidth / 2;
+        }
+
+        // calculate vertical offset
+        if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
+            ret.y = -this.lineWidth / 2;
+        }
+        else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
+            ret.y = this.height / 2;
+        }
+        else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+            ret.y = this.height + this.lineWidth / 2;
+        }
+
+        return ret;
+    },
+
+    /**
      * Calculates the region which the object will fill out when redrawn.
      *
      * @private
@@ -127,35 +180,4 @@ new Class('View.Rectangle', [Math.Rectangle, View.Child], {
 
         return rect.add(this.parent.getRoomPosition());
     },
-
-	/**
-	 * Draws the Rectangle object on the canvas (if added as a child of a View)
-	 *
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Rectangle
-     * @param {Vector} cameraOffset A vector defining the offset with which to draw the object
-     */
-	drawCanvas: function (c) {
-		c.save();
-
-		c.translate(-this.offset.x, -this.offset.y);
-
-        c.strokeStyle = this.strokeStyle;
-        c.fillStyle = this.fillStyle;
-
-		c.beginPath();
-
-		c.moveTo(0, 0);
-		c.lineTo(this.width, 0);
-		c.lineTo(this.width, this.height);
-		c.lineTo(0, this.height);
-		c.closePath();
-
-        c.lineWidth = this.lineWidth;
-        c.fill();
-        c.stroke();
-
-
-		c.restore();
-	}
 });

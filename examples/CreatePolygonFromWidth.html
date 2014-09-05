@@ -27,18 +27,21 @@
 <!-- Start engine -->
 <script type="text/javascript">
 	new Engine({
-		// Set game-class path (Look at this file to start programming your game)
-		gameClassPath: 'js/GeometricObjectCollision.js',
+		// Set main class to load
+		gameClassPath:'js/CreatePolygonFromWidth.js',
 
 		// Set themes to load
 		themes:['Example'],
 
 		//disableWebGL: true,
 
+		// Set arena background-color
+		backgroundColor: "#000",
+
 		// Set resolution of the game
 		canvasResX:600,
 		canvasResY:400
-  });
+    });
 </script>
 
 </body>

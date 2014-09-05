@@ -1,10 +1,10 @@
-new Class('View.TextBlock', [Lib.Animatable, View.Container], {
+new Class('View.TextBlock', [Mixin.Animatable, View.Container], {
 	/**
 	 * The constructor for the TextBlock class.
 	 *
 	 * @name View.TextBlock
 	 * @class A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
-	 * @augments Lib.Animatable
+	 * @augments Mixin.Animatable
 	 * @augments View.Container
 	 *
 	 * @property {string} font A css string representing the font of the text block
@@ -15,8 +15,8 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	 * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
 	 * @property {number} direction The direction of the sprite (in radians)
 	 * @property {number} size A size modifier which modifies both the width and the height of the sprite
-	 * @property {number} widthModifier A size modifier which modifies the width of the sprite
-	 * @property {number} heightModifier A size modifier which modifies the height of the object
+	 * @property {number} widthScale A size modifier which modifies the width of the sprite
+	 * @property {number} heightScale A size modifier which modifies the height of the object
 	 * @property {number} opacity The opacity of the sprite
 	 *
 	 * @param {string} string The string to display inside the TextBlock
@@ -38,12 +38,17 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	TextBlock: function (string, x, y, width, additionalProperties) {
 		if (string === undefined) {throw new Error('Missing argument: string'); } //dev
 
-		var offset;
+		var hidden, offset;
 
 		// Call Vector's and view's constructors
 		this.Container();
+		this.renderType = "textblock";
 		this.x = x !== undefined ? x : 0;
 		this.y = y !== undefined ? y : 0;
+
+		// Animation options
+		this.imageLength = 1;
+		this.imageNumber = 0;
 
 		// Load default options
 		this.clipWidth = parseInt(width, 10) || 200;
@@ -53,9 +58,9 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		this.bmCtx = this.bm.getContext('2d');
 		this.bm.width = this.clipWidth;
 		this.bm.height = 10;
+		this.bm.spacing = 0;
 
-		// Load default options and getters/setters
-		var hidden;
+		// Create getters/setters
 		hidden = {
 			string: '',
 			font: 'normal 14px Verdana',
@@ -119,69 +124,42 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 			}
 		});
 
-		// If an offset static var is used, remove it for now, and convert it later
-		if (additionalProperties && additionalProperties.offset) {
-			if (typeof additionalProperties.offset === 'string') {
-				offset = additionalProperties.offset;
-				delete additionalProperties.offset;
-			}
-			else {
-				offset = undefined;
-			}
-		}
-
 		// Define pseudo properties
 		Object.defineProperty(this, 'width', {
 			get: function () {
-				return Math.abs(this.clipWidth * this.size * this.widthModifier);
+				return Math.abs(this.clipWidth * this.size * this.widthScale);
 			},
 			set: function (value) {
-				var sign = this.widthModifier > 0 ? 1 : -1;
-				this.widthModifier = sign * Math.abs(value / (this.clipWidth * this.size));
+				var sign = this.widthScale > 0 ? 1 : -1;
+				this.widthScale = sign * Math.abs(value / (this.clipWidth * this.size));
 				return value;
 			}
 		});
 		Object.defineProperty(this, 'height', {
 			get: function () {
-				return Math.abs(this.clipHeight * this.size * this.heightModifier);
+				return Math.abs(this.clipHeight * this.size * this.heightScale);
 			},
 			set: function (value) {
-				var sign = this.heightModifier > 0 ? 1 : -1;
-				this.heightModifier = sign * Math.abs(value / (this.clipHeight * this.size));
+				var sign = this.heightScale > 0 ? 1 : -1;
+				this.heightScale = sign * Math.abs(value / (this.clipHeight * this.size));
 				return value
 			}
 		});
 
 		this.lineHeight = additionalProperties && additionalProperties.lineHeight ? additionalProperties.lineHeight: this.font.match(/[0.0-9]+/) * 1.25;
 		
+		offset = OFFSET_TOP_LEFT;
+		if (additionalProperties && additionalProperties.offset) {
+			offset = additionalProperties.offset;
+			delete additionalProperties.offset;
+		}
+
 		// Load additional properties
 		this.importProperties(additionalProperties);
 		this.string = string;
 
-		// Convert static offset var (if such a var has been used)
-		if (offset) {
-			// calculate horizontal offset
-			if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
-				this.offset.x = 0;
-			}
-			else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
-				this.offset.x = this.clipWidth / 2;
-			}
-			else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.x = this.clipWidth;
-			}
-
-			// calculate vertical offset
-			if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = 0;
-			}
-			else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.clipHeight / 2;
-			}
-			else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.clipHeight;
-			}
-		}
+		// Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
+		this.offset = offset;
 
 		if (engine.avoidSubPixelRendering) {
 			this.offset.x = Math.round(this.offset.x);
@@ -189,6 +167,40 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 		}
 	},
 	/** @scope TextBlock */
+
+	/**
+	 * Parses an offset global into an actual Math.Vector offset that fits the instance
+	 * 
+	 * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
+	 * @return {Math.Vector} The offset vector the offset global corresponds to for the instance
+	 */
+	parseOffsetGlobal: function (offset) {
+		ret = new Math.Vector();
+
+		// calculate horizontal offset
+		if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
+			ret.x = 0;
+		}
+		else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
+			ret.x = this.clipWidth / 2;
+		}
+		else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+			ret.x = this.clipWidth;
+		}
+
+		// calculate vertical offset
+		if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
+			ret.y = 0;
+		}
+		else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
+			ret.y = this.clipHeight / 2;
+		}
+		else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+			ret.y = this.clipHeight;
+		}
+
+		return ret;
+	},
 
 	/**
 	 * Breaks the TextBlock's text string into lines.
@@ -279,6 +291,18 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 				this.bmCtx.fillText(this.lines[i], xOffset, this.lineHeight * i + this.font.match(/[0.0-9]+/) * 1);
 			}
 		}
+
+		this.createHash();		
+	},
+
+	createHash: function () {
+		var self;
+
+		self = this;
+		this.bm.oldSrc = this.bm.src;
+		this.bm.src = ['string', 'font', 'alignment', 'color', 'lineHeight', 'clipWidth'].map(function (property) {
+			return self[property];
+		}).join('-|-');
 	},
 
 	/**
@@ -287,33 +311,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 	 */
 	isVisible: function () {
 		// If sprites size has been modified to zero, do nothing
-		return !(this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0 || /^\s*$/.test(this.string));
-	},
-
-	/**
-	 * Draws the cached rendering of the TextBlock object to the canvas.
-	 * 
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the TextBlock
-	 * @param {Vector} cameraOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
-	 */
-	drawCanvas: function (c) {
-		// Draw Sprite on canvas
-		var x, y;
-
-		// Round offset if necessary
-		var offX, offY;
-		if (engine.avoidSubPixelRendering) {
-			offX = Math.round(this.offset.x);
-			offY = Math.round(this.offset.y);
-		}
-		else {
-			offX = this.offset.x;
-			offY = this.offset.y;
-		}
-
-		// Draw bm
-		c.drawImage(this.bm, 0, 0, this.clipWidth, this.clipHeight, - offX, - offY, this.clipWidth, this.clipHeight);
+		return !(this.size === 0 || this.widthScale === 0 || this.heightScale === 0 || /^\s*$/.test(this.string));
 	},
 
 	/**
@@ -327,7 +325,7 @@ new Class('View.TextBlock', [Lib.Animatable, View.Container], {
 
 		ret = new Math.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight);
 		ret = ret.getPolygon();
-		ret = ret.scale(this.size * this.widthModifier, this.size * this.heightModifier);
+		ret = ret.scale(this.size * this.widthScale, this.size * this.heightScale);
 		ret = ret.rotate(this.direction);
 		ret = ret.getBoundingRectangle().add(this.getRoomPosition());
 		ret.x = Math.floor(ret.x - 1);

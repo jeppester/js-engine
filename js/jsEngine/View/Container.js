@@ -19,10 +19,10 @@ new Class('View.Container', [View.Child], {
 		this.children = [];
 		this.Child();
 		this.parent = undefined;
-		this.drawCacheCanvas = document.createElement('canvas');
-		this.drawCacheCtx = this.drawCacheCanvas.getContext('2d');
+		/*this.drawCacheCanvas = document.createElement('canvas');
+		this.drawCacheCtx = Helpers.getCanvasContext(this.drawCacheCanvas);
 		this.drawCacheEnabled = false;
-		this.drawCacheOffset = new Math.Vector();
+		this.drawCacheOffset = new Math.Vector();*/
 
 		this.addChildren.apply(this, Array.prototype.slice.call(arguments));
 	},
@@ -88,6 +88,11 @@ new Class('View.Container', [View.Child], {
 			child = insertChildren[i];
 
 			if (!child.implements(View.Child)) {throw new Error('Argument child has to be of type: Child'); } //dev
+
+			// If the child already has a parent, remove the child from that parent
+			if (child.parent) {
+				child.parent.removeChildren(child);
+			}
 
 			child.parent = this;
 			engine.enableRedrawRegions && child.onAfterChange();
@@ -172,44 +177,6 @@ new Class('View.Container', [View.Child], {
 			else {
 				func.call(this.children[i]);
 			}
-		}
-	},
-
-	/**
-	 * Sets whether or not the view should be cached (and only redrawn when called directly).
-	 * If a view is set to static, the view's canvas will be used for caching a drawing of the view's children.
-	 * 
-	 * @param {boolean} enabled Whether or not draw caching should be enabled or disabled
-	 */
-	setDrawCache: function (enabled) {
-		enabled = enabled === true;
-		if (enabled === this.drawCacheEnabled) {return; }
-
-
-		if (enabled) {
-			this.cacheDrawing();
-		}
-		this.drawCacheEnabled = enabled;
-	},
-
-	/**
-	 * Caches a drawing of the View's children (and itself)
-	 */
-	cacheDrawing: function () {
-		// Calculate the size of the canvas and its offset
-		var drawRegion;
-		drawRegion = this.getCombinedRedrawRegion();
-		drawRegion.move(-this.x, -this.y);
-
-		//console.log(drawRegion);
-
-		if (drawRegion) {
-			this.drawCacheOffset = new Math.Vector(drawRegion.x, drawRegion.y);
-			this.drawCacheCanvas.width = drawRegion.width;
-			this.drawCacheCanvas.height = drawRegion.height;
-
-			// Draw all children to the cache canvas
-			this.draw(this.drawCacheCtx, this.drawCacheOffset.copy().move(this.x, this.y), drawRegion, true);
 		}
 	},
 
@@ -302,16 +269,16 @@ new Class('View.Container', [View.Child], {
 	 * @param {Math.Rectangle} area A rectangle specifying the area to draw
 	 * @param {boolean} forceRedraw Whether or not to force a redraw even though draw caching is enabled (this option is actually used when caching the view)
 	 */
-	draw: function (c, area) {
+	draw: function (c, area, noCache) {
 		if (engine.enableRedrawRegions) {
 			this.drawRedrawRegions(c, area);
 		}
 		else {
-			this.drawWholeCanvas(c);
+			this.drawWholeCanvas(c, noCache);
 		}
 	},
 
-	drawRedrawRegions: function (c, area) {
+	drawWholeCanvas: function (c, noCache) {
 		var i, len, child;
 
 		if (!this.isVisible()) {
@@ -320,11 +287,11 @@ new Class('View.Container', [View.Child], {
 
 		this.transformCanvasContext(c);
 
-		if (this.drawCanvas) {
-			if (!this.currentRedrawRegion) {
-				this.currentRedrawRegion = this.getCombinedRedrawRegion();
-			}
-			if (this.currentRedrawRegion.getOverlap(area)) {
+		if (this.drawCacheEnabled && !noCache) {
+			c.drawImage(this.drawCacheCanvas, 0, 0);
+		}
+		else {
+			if (this.drawCanvas) {
 				engine.drawCalls ++; //dev
 
 				this.drawCanvas(c);
@@ -336,66 +303,25 @@ new Class('View.Container', [View.Child], {
 					this.drawMask(c); //dev
 				} //dev
 			}
-		}
 
-		// Draw children
-		len = this.children.length;
+			// Draw children
+			len = this.children.length;
 
-		for (i = 0; i < len; i ++) {
-			child = this.children[i];
-			if (child.draw) {
-				child.draw(c, area);
-			}
-			else if (child.isVisible() && child.currentRedrawRegion.getOverlap(area)) {
-				engine.drawCalls ++; //dev
-				
-				child.transformCanvasContext(c);
-				child.drawCanvas(c);
-				child.restoreCanvasContext(c);
-			}
-		}
-		
-		this.restoreCanvasContext(c);
-	},
-
-	drawWholeCanvas: function (c) {
-		var i, len, child;
-
-		if (!this.isVisible()) {
-			return;
-		}
-
-		this.transformCanvasContext(c);
-
-		if (this.drawCanvas) {
-			engine.drawCalls ++; //dev
-
-			this.drawCanvas(c);
-
-			if (engine.drawBoundingBoxes && this.drawBoundingBox) { //dev
-				this.drawBoundingBox(c); //dev
-			} //dev
-			if (engine.drawMasks && this.drawMask) { //dev
-				this.drawMask(c); //dev
-			} //dev
-		}
-
-		// Draw children
-		len = this.children.length;
-
-		for (i = 0; i < len; i ++) {
-			child = this.children[i];
-			if (child.draw) {
-				child.draw(c);
-			}
-			else if (child.isVisible()) {
-				engine.drawCalls ++; //dev
-				
-				child.transformCanvasContext(c);
-				child.drawCanvas(c);
-				child.restoreCanvasContext(c);
+			for (i = 0; i < len; i ++) {
+				child = this.children[i];
+				if (child.draw) {
+					child.draw(c);
+				}
+				else if (child.isVisible()) {
+					engine.drawCalls ++; //dev
+					
+					child.transformCanvasContext(c);
+					child.drawCanvas(c);
+					child.restoreCanvasContext(c);
+				}
 			}
 		}
+
 		
 		this.restoreCanvasContext(c);
 	},

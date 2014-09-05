@@ -22,6 +22,7 @@ new Class('Engine.Loader', {
                 "sfx":{},
                 "images":{},
                 "masks": {},
+                "textures": {},
                 "resourcesCount": 0,
                 "resourcesLoaded": 0
             }
@@ -330,7 +331,7 @@ new Class('Engine.Loader', {
 			if (req.status === 404) {console.log('Theme not found: ' + name); continue; }
 
 			// Get theme details
-			codeString = req.responseText + "\n//@ sourceURL=/" + engine.themesPath + '/' + name + '/theme.js';
+			codeString = req.responseText + "\n//# sourceURL=/" + engine.themesPath + '/' + name + '/theme.js';
             eval('theme = ' + codeString);
 
 			// Load inherited themes
@@ -346,6 +347,7 @@ new Class('Engine.Loader', {
 			theme.resourcesCount = 0;
 			theme.resourcesLoaded = 0;
 			theme.masks = {};
+			theme.textures = {};
 
 			// Load all images
 			this.loadResources(theme, theme.images, 'images');
@@ -460,7 +462,6 @@ new Class('Engine.Loader', {
 					}
 					if (!format) {
 						throw new Error('Sound was not available in a supported format: ' + theme.name + "/sfx/" + path.replace(/\./g, '/')); //dev
-						continue;
 					}
 					res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, '/') + '.' + format);
 					theme.music[path] = new Sound.Music(res);
@@ -527,7 +528,6 @@ new Class('Engine.Loader', {
 
                 if (engine.host.supportedAudio.indexOf(format) === -1) {
                     throw new Error('Sound format is not supported:', format); //dev
-                    return;
                 }
                 res = new Audio(path);
                 theme.sfx[resourceString] = new Sound.Effect(res);
@@ -544,7 +544,6 @@ new Class('Engine.Loader', {
 
                 if (engine.host.supportedAudio.indexOf(format) === -1) {
                     throw new Error('Sound format is not supported:', format); //dev
-                    return;
                 }
                 res = new Audio(path);
                 theme.music[resourceString] = new Music(res);

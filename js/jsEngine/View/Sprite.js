@@ -1,4 +1,4 @@
-new Class('View.Sprite', [View.Container, Lib.Animatable], {
+new Class('View.Sprite', [View.Container, Mixin.Animatable], {
 	/**
 	 * The constructor for Sprite objects.
 	 *
@@ -6,7 +6,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
      * @class Class for drawing bitmaps with rotation and size.
      *        Usually all graphical objects in a game are sprites or extends this class.
      * @augments View.Container
-     * @augments Lib.Animatable
+     * @augments Mixin.Animatable
      *
      * @property {string} source A resource string representing the bitmap source of the sprite, use setSource() to set the source (do not set it directly)
      * @property {number} direction The direction of the sprite (in radians)
@@ -16,8 +16,8 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
      * @property {number} animationSpeed The number of images / second in the animation (only relevant if the source is an animation)
      * @property {boolean} animationLoops Whether or not the animation should loop (only relevant if the source is an animation)
      * @property {number} size A size modifier which modifies both the width and the height of the sprite
-     * @property {number} widthModifier A size modifier which modifies the width of the sprite
-     * @property {number} heightModifier A size modifier which modifies the height of the object
+     * @property {number} widthScale A size modifier which modifies the width of the sprite
+     * @property {number} heightScale A size modifier which modifies the height of the object
      * @property {number} opacity The opacity of the sprite
      *
 	 * @param {string} source A string representing the source of the object's bitmap
@@ -40,6 +40,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 
 		// Call Vector's and view's constructors
 		this.Container();
+		this.renderType = "sprite";
 		this.x = x !== undefined ? x : 0;
 		this.y = y !== undefined ? y : 0;
 
@@ -56,40 +57,34 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		this.clipWidth;
 		this.clipHeight;
 
-		offset = OFFSET_MIDDLE_CENTER;
-
-		// If an offset static var is used, remove it for now, and convert it later
-		if (additionalProperties && additionalProperties.offset) {
-			if (typeof additionalProperties.offset === 'string') {
-				offset = additionalProperties.offset;
-				delete additionalProperties.offset;
-			}
-			else {
-				offset = undefined;
-			}
-		}
-
 		// Define pseudo properties
 		Object.defineProperty(this, 'width', {
 			get: function () {
-				return Math.abs(this.clipWidth * this.size * this.widthModifier);
+				return Math.abs(this.clipWidth * this.size * this.widthScale);
 			},
 			set: function (value) {
-				var sign = this.widthModifier > 0 ? 1 : -1;
-				this.widthModifier = sign * Math.abs(value / (this.clipWidth * this.size));
+				var sign = this.widthScale > 0 ? 1 : -1;
+				this.widthScale = sign * Math.abs(value / (this.clipWidth * this.size));
 				return value;
 			}
 		});
 		Object.defineProperty(this, 'height', {
 			get: function () {
-				return Math.abs(this.clipHeight * this.size * this.heightModifier);
+				return Math.abs(this.clipHeight * this.size * this.heightScale);
 			},
 			set: function (value) {
-				var sign = this.heightModifier > 0 ? 1 : -1;
-				this.heightModifier = sign * Math.abs(value / (this.clipHeight * this.size));
-				return value
+				var sign = this.heightScale > 0 ? 1 : -1;
+				this.heightScale = sign * Math.abs(value / (this.clipHeight * this.size));
+				return value;
 			}
 		});
+
+		// If an offset static var is used, remove it for now, and convert it later
+		offset = OFFSET_MIDDLE_CENTER;
+		if (additionalProperties && additionalProperties.offset) {
+			offset = additionalProperties.offset;
+			delete additionalProperties.offset;
+		}
 
 		// Load additional properties
 		this.importProperties(additionalProperties);
@@ -98,36 +93,49 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 			throw new Error('Sprite source was not successfully loaded: ' + source); //dev
 		}
 
-		// Convert static offset var (if such a var has been used)
-		if (offset) {
-			// calculate horizontal offset
-			if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
-				this.offset.x = 0;
-			}
-			else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
-				this.offset.x = this.bm.width / this.imageLength / 2;
-			}
-			else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.x = this.bm.width / this.imageLength;
-			}
-
-			// calculate vertical offset
-			if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = 0;
-			}
-			else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.bm.height / 2;
-			}
-			else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-				this.offset.y = this.bm.height;
-			}
-		}
+		// Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
+		this.offset = offset;
 
 		if (engine.avoidSubPixelRendering) {
 			this.offset.x = Math.round(this.offset.x);
 			this.offset.y = Math.round(this.offset.y);
 		}
 	},
+
+	/**
+	 * Parses an offset global into an actual Math.Vector offset that fits the instance
+	 * 
+	 * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
+	 * @return {Math.Vector} The offset vector the offset global corresponds to for the instance
+	 */
+	parseOffsetGlobal: function (offset) {
+		ret = new Math.Vector();
+
+		// calculate horizontal offset
+		if ([OFFSET_TOP_LEFT, OFFSET_MIDDLE_LEFT, OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
+			ret.x = 0;
+		}
+		else if ([OFFSET_TOP_CENTER, OFFSET_MIDDLE_CENTER, OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
+			ret.x = this.bm.width / this.imageLength / 2;
+		}
+		else if ([OFFSET_TOP_RIGHT, OFFSET_MIDDLE_RIGHT, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+			ret.x = this.bm.width / this.imageLength;
+		}
+
+		// calculate vertical offset
+		if ([OFFSET_TOP_LEFT, OFFSET_TOP_CENTER, OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
+			ret.y = 0;
+		}
+		else if ([OFFSET_MIDDLE_LEFT, OFFSET_MIDDLE_CENTER, OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
+			ret.y = this.bm.height / 2;
+		}
+		else if ([OFFSET_BOTTOM_LEFT, OFFSET_BOTTOM_CENTER, OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+			ret.y = this.bm.height;
+		}
+
+		return ret;
+	},
+
     /** @scope Sprite */
 
 	/**
@@ -173,6 +181,9 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		this.imageNumber = Math.min(this.imageLength - 1, this.imageNumber);
 		this.clipWidth = Math.floor(this.bm.width / this.imageLength);
 		this.clipHeight = this.bm.height;
+		if (this.offsetGlobal) {
+			this.offset = this.offsetGlobal;
+		}
 
 		return this.bm;
 	},
@@ -191,46 +202,6 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 	},
 
 	/**
-	 * Draws the object to the canvas.
-	 * 
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Sprite
-	 * @param {Vector} cameraOffset A Vector defining the offset to subtract from the drawing position (the camera's captureRegion's position)
-	 */
-	drawCanvas: function (c, cameraOffset) {
-		// Round offset if necessary
-		var offX, offY;
-
-		if (engine.avoidSubPixelRendering) {
-            offX = Math.round(this.offset.x);
-            offY = Math.round(this.offset.y);
-        }
-        else {
-            offX = this.offset.x;
-            offY = this.offset.y;
-        }
-
-		// Set the right sub image
-		if (this.imageLength !== 1 && this.animationSpeed !== 0) {
-			if (engine.gameTime - this.animationLastSwitch > 1000 / this.animationSpeed) {
-				this.imageNumber = this.imageNumber + (this.animationSpeed > 0 ? 1 : -1);
-
-				this.animationLastSwitch = engine.gameTime;
-
-				if (this.imageNumber === this.imageLength) {
-					this.imageNumber = this.animationLoops ? 0 : this.imageLength - 1;
-				}
-				else if (this.imageNumber === -1) {
-					this.imageNumber = this.animationLoops ? this.imageLength - 1 : 0;
-				}
-			}
-		}
-
-        // Draw bm
-        c.drawImage(this.bm, (this.clipWidth + this.bm.spacing) * this.imageNumber, 0, this.clipWidth, this.clipHeight, - offX, - offY, this.clipWidth, this.clipHeight);
-	},
-
-	/**
 	 * Calculates the region which the sprite will fill out when redrawn.
 	 * 
 	 * @private
@@ -246,7 +217,7 @@ new Class('View.Sprite', [View.Container, Lib.Animatable], {
 		
 		for (i = 0; i < parents.length; i ++) {
 			parent = parents[i];
-			box.scale(parent.size * parent.widthModifier, parent.size * parent.heightModifier);
+			box.scale(parent.size * parent.widthScale, parent.size * parent.heightScale);
 			box.rotate(parent.direction);
 			box.move(parent.x, parent.y);
 		}

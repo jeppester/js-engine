@@ -1,9 +1,10 @@
-new Class('View.Child', [Lib.Animatable], {
+new Class('View.Child', [Mixin.Animatable], {
     /**
      * @name View.Child
      * @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
      */
     Child: function () {
+        this.renderType = '';
         if (engine.enableRedrawRegions) {
             this.ChildInitWithRedrawRegions();
         }
@@ -20,9 +21,29 @@ new Class('View.Child', [Lib.Animatable], {
         this.opacity = 1;
         this.direction = 0;
         this.size = 1;
-        this.widthModifier = 1;
-        this.heightModifier = 1;
-        this.offset = new Math.Vector();
+        this.widthScale = 1;
+        this.heightScale = 1;
+
+        var hidden = {
+            offset: new Math.Vector(),
+        }
+
+        Object.defineProperty(this, 'offset', {
+            get: function () {
+                return hidden.offset;
+            },
+            set: function (value) {
+                if (typeof value === 'string') {
+                    this.offsetGlobal = value;
+                    hidden.offset = this.parseOffsetGlobal(value);
+                }
+                else {
+                    this.offsetGlobal = false;
+                    hidden.offset = value;
+                }
+                return value;
+            }
+        });
     },
 
     ChildInitWithRedrawRegions: function () {
@@ -37,8 +58,8 @@ new Class('View.Child', [Lib.Animatable], {
             opacity: 1,
             direction: 0,
             size: 1,
-            widthModifier: 1,
-            heightModifier: 1,
+            widthScale: 1,
+            heightScale: 1,
             offset: undefined,
             parentObject: this
         };
@@ -89,20 +110,20 @@ new Class('View.Child', [Lib.Animatable], {
                 }
             }
         });
-        Object.defineProperty(this, 'widthModifier', {
-            get: function() {return hidden.widthModifier; },
+        Object.defineProperty(this, 'widthScale', {
+            get: function() {return hidden.widthScale; },
             set: function(value) {
-                if (hidden.widthModifier !== value) {
-                    hidden.widthModifier = value;
+                if (hidden.widthScale !== value) {
+                    hidden.widthScale = value;
                     this.onAfterChange();
                 }
             }
         });
-        Object.defineProperty(this, 'heightModifier', {
-            get: function() {return hidden.heightModifier; },
+        Object.defineProperty(this, 'heightScale', {
+            get: function() {return hidden.heightScale; },
             set: function(value) {
-                if (hidden.heightModifier !== value) {
-                    hidden.heightModifier = value;
+                if (hidden.heightScale !== value) {
+                    hidden.heightScale = value;
                     this.onAfterChange();
                 }
             }
@@ -161,6 +182,17 @@ new Class('View.Child', [Lib.Animatable], {
     },
 
     /**
+     * Parses an offset global into an actual Math.Vector offset
+     * (this function is only here for convenience and should be replaced by any class that inherits the child class)
+     * 
+     * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
+     * @return {Math.Vector} A parsed version of the offset global
+     */
+    parseOffsetGlobal: function (offset) {
+        return new Math.Vector();
+    },
+
+    /**
      * Checks if the child object is inside a room that is currently visible
      * 
      * @return {Boolean} Whether or not the child object is currently in a visible room
@@ -199,7 +231,7 @@ new Class('View.Child', [Lib.Animatable], {
             for (i = 0; i < parents.length; i ++) {
                 parent = parents[i];
 
-                pos.scale(parent.widthModifier * parent.size, parent.heightModifier * parent.size);
+                pos.scale(parent.widthScale * parent.size, parent.heightScale * parent.size);
                 pos.rotate(parent.direction);
                 pos.move(parent.x, parent.y);
             }
@@ -276,79 +308,11 @@ new Class('View.Child', [Lib.Animatable], {
     },
 
     /**
-     * Prepares the canvas context for drawing the object (applies all transformations)
-     *
-     * @private
-     */
-    transformCanvasContext: function (c) {
-        // Draw Sprite on canvas
-        var x, y;
-
-        if (engine.avoidSubPixelRendering) {
-            x = Math.round(this.x);
-            y = Math.round(this.y);
-        }
-        else {
-            x = this.x;
-            y = this.y;
-        }
-
-        // Apply drawing options if they are needed (this saves a lot of resources)
-        c.globalAlpha = this.opacity;
-        if (this.composite !== 'source-over') {
-            c.globalCompositeOperation = this.composite;
-        }
-        if (x !== 0 || y !== 0) {
-            c.translate(x, y);
-        }
-        if (this.direction !== 0) {
-            c.rotate(this.direction);
-        }
-        if (this.size !== 1 || this.widthModifier !== 1 || this.heightModifier !== 1) {
-            c.scale(this.widthModifier * this.size, this.heightModifier * this.size);
-        }
-    },
-
-    /**
-     * Restores the canvas context after the object has been drawn (restores all transformations)
-     *
-     * @private
-     */
-    restoreCanvasContext: function (c) {
-        // Draw Sprite on canvas
-        var x, y;
-
-        if (engine.avoidSubPixelRendering) {
-            x = Math.round(this.x);
-            y = Math.round(this.y);
-        }
-        else {
-            x = this.x;
-            y = this.y;
-        }
-
-        // Apply drawing options if they are needed (this saves a lot of resources)
-        if (this.size !== 1 || this.widthModifier !== 1 || this.heightModifier !== 1) {
-            c.scale(1 / (this.widthModifier * this.size), 1 / (this.heightModifier * this.size));
-        }
-        if (this.direction !== 0) {
-            c.rotate(-this.direction);
-        }
-        if (x !== 0 || y !== 0) {
-            c.translate(-x, -y);
-        }
-        if (this.composite !== 'source-over') {
-            c.globalCompositeOperation = 'source-over';
-        }
-        c.globalAlpha = this.opacity;
-    },
-
-    /**
      * Checks if the objects is visible. This function runs before each draw to ensure that it is necessary
      * @return {boolean} Whether or not the object is visible (based on its size and opacity vars) 
      */
     isVisible: function () {
         // If sprites size has been modified to zero, do nothing
-        return !(this.size === 0 || this.widthModifier === 0 || this.heightModifier === 0);
+        return !(this.size === 0 || this.widthScale === 0 || this.heightScale === 0);
     }
 });

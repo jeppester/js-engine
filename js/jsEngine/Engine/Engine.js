@@ -1,41 +1,41 @@
-/** For making the engine var unreachable **/
+/* For making the engine var unreachable **/
 (function () {
 /*var main;/**/
 
 new Class('Engine', {
 	/**
 	 * The constructor for the Engine class.
-     *
-     * @name Engine
-     * @class The main game engine class.
-     *        Responsible for the main loop, the main canvas, etc.
-     *
-     * @property {boolean} running Whether or not the engine is currently running
-     * @property {int} canvasResX The main canvas horizontal resolution
-     * @property {int} canvasResY The main canvas vertical resolution
-     * @property {string} enginePath The url to jsEngine's source folder
-     * @property {boolean} focusOnLoad If the engine should focus itself when loaded
-     * @property {string} themesPath The url to jsEngine's theme folder
-     * @property {boolean} drawBoundingBoxes Whether or not the bounding boxes of all collidable objects are drawn
-     * @property {boolean} drawMasks Whether or not the masks of all collidable objects are drawn
-     * @property {boolean} pauseOnBlur Whether or the engine will pause itself when the window is blurred
-     * @property {boolean} disableRightClick Whether or not right click context menu is disabled inside the main canvas
-     * @property {boolean} preventDefaultKeyboard Whether or not preventDefault is called for keyboard events
-     * @property {HTMLElement} arena The HTML element to use as parent to the main canvas
-     * @property {boolean} autoResize Whether or not the arena will autoresize itself to fit the window
-     * @property {boolean} autoResizeLimitToResolution Whether or not the arena should not autoresize itself to be bigger than the main canvas' resolution
-     * @property {int} cachedSoundCopies The number of copies each sound object caches of it's source to enable multiple playbacks
-     * @property {string} gameClassPath The URL of the game's main class
-     * @property {string} loadText The text shown while loading the engine
-     * @property {string} backgroundColor A CSS color string which is used as the background color of the main canvas
-     * @property {number} timeFactor The factor to multiply the time increase with. A factor of 2 will make everything happen with double speed
-     * @property {boolean} resetCursorOnEachFrame Whether or not the mouse cursor will be reset on each frame
-     * @property {boolean} disableTouchScroll Whether or not touch scroll has been disabled
-     * @property {Camera[]} cameras An array containing the engine's cameras
-     * @property {int} defaultCollisionResolution The collision resolution set for all created collidable objects
-     * @property {boolean} soundsMuted Whether or not all sound effects are currently muted
-     * @property {boolean} musicMuted Whether or not all music is currently muted
-     *
+	 *
+	 * @name Engine
+	 * @class The main game engine class.
+	 *        Responsible for the main loop, the main canvas, etc.
+	 *
+	 * @property {boolean} running Whether or not the engine is currently running
+	 * @property {int} canvasResX The main canvas horizontal resolution
+	 * @property {int} canvasResY The main canvas vertical resolution
+	 * @property {string} enginePath The url to jsEngine's source folder
+	 * @property {boolean} focusOnLoad If the engine should focus itself when loaded
+	 * @property {string} themesPath The url to jsEngine's theme folder
+	 * @property {boolean} drawBoundingBoxes Whether or not the bounding boxes of all collidable objects are drawn
+	 * @property {boolean} drawMasks Whether or not the masks of all collidable objects are drawn
+	 * @property {boolean} pauseOnBlur Whether or the engine will pause itself when the window is blurred
+	 * @property {boolean} disableRightClick Whether or not right click context menu is disabled inside the main canvas
+	 * @property {boolean} preventDefaultKeyboard Whether or not preventDefault is called for keyboard events
+	 * @property {HTMLElement} arena The HTML element to use as parent to the main canvas
+	 * @property {boolean} autoResize Whether or not the arena will autoresize itself to fit the window
+	 * @property {boolean} autoResizeLimitToResolution Whether or not the arena should not autoresize itself to be bigger than the main canvas' resolution
+	 * @property {int} cachedSoundCopies The number of copies each sound object caches of it's source to enable multiple playbacks
+	 * @property {string} gameClassPath The URL of the game's main class
+	 * @property {string} loadText The text shown while loading the engine
+	 * @property {string} backgroundColor A CSS color string which is used as the background color of the main canvas
+	 * @property {number} timeFactor The factor to multiply the time increase with. A factor of 2 will make everything happen with double speed
+	 * @property {boolean} resetCursorOnEachFrame Whether or not the mouse cursor will be reset on each frame
+	 * @property {boolean} disableTouchScroll Whether or not touch scroll has been disabled
+	 * @property {Camera[]} cameras An array containing the engine's cameras
+	 * @property {int} defaultCollisionResolution The collision resolution set for all created collidable objects
+	 * @property {boolean} soundsMuted Whether or not all sound effects are currently muted
+	 * @property {boolean} musicMuted Whether or not all music is currently muted
+	 *
 	 * @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
 	 *                 The default options are:
 	 *                 <code>{
@@ -43,13 +43,14 @@ new Class('Engine', {
 	 * 	                "avoidSubPixelRendering": true, // If subpixelrendering should be avoided
 	 * 	                "autoResize": true, // If the arena should autoresize to fit the window (or iframe)
 	 * 	                "autoResizeLimitToResolution": true, // If the autoresizing should be limited to the game's resolution
-	 * 	                "backgroundColor": "#FFF", // The color of the arena's background
+	 * 	                "backgroundColor": "#000", // The color of the arena's background
 	 * 	                "cachedSoundCopies": 5, // How many times sounds should be duplicated to allow multiple playbacks
 	 * 	                "canvasResX": 800, // The horizontal resolution to set for the game's main canvas
 	 * 	                "canvasResY": 600, // The vertical resolution to set for the game's main canvas
 	 * 	                "defaultCollisionResolution": 6, // Res. of collision checking, by default every 6th px is checked
 	 * 	                "disableRightClick": true, // If right clicks inside the arena should be disabled
-	 *                  "preventDefaultKeyboard": true, // Whether or not preventDefault should be called for keyboard events
+	 * 	                "disableWebGL": false, // If WebGL rendering should be disabled
+	 *                  "preventDefaultKeyboard": false, // Whether or not preventDefault should be called for keyboard events
 	 * 	                "disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
 	 * 	                "drawBoundingBoxes": false, // If Collidable object's bounding boxes should be drawn
 	 * 	                "drawMasks": false, // If Collidable object's masks should be drawn
@@ -66,17 +67,17 @@ new Class('Engine', {
 	 *                 }</code>
 	 */
 	Engine: function (options) {
-        // Set global engine variable
-        /**
-         * Global engine var set upon engine initialization
-         * @global
-         */
-        engine = this;
+		// Set global engine variable
+		/**
+		 * Global engine var set upon engine initialization
+		 * @global
+		 */
+		engine = this;
 
 		this.options = options ? options: {};
 		this.load();
 	},
-    /** @scope Engine */
+	/** @scope Engine */
 
 	/**
 	 * Load all files and functions, that are needed before the engine can start.
@@ -137,27 +138,54 @@ new Class('Engine', {
 		this.drawMasks = false;
 		this.pauseOnBlur = true;
 		this.disableRightClick = true;
-		this.preventDefaultKeyboard = true;
+		this.preventDefaultKeyboard = false;
 		this.arena = document.getElementById('arena');
 		this.autoResize = true;
 		this.autoResizeLimitToResolution = true;
 		this.cachedSoundCopies = 5;
 		this.gameClassPath = "js/Game.js";
 		this.loadText = "jsEngine loading...";
-		this.backgroundColor = "#FFF";
+		this.backgroundColor = "#000";
 		this.timeFactor = 1;
 		this.disableTouchScroll = true;
 		this.resetCursorOnEachFrame = true;
 		this.cameras = [];
 		this.defaultCollisionResolution = 6;
-        this.redrawObjects = [];
-        this.enableRedrawRegions = false;
+		this.redrawObjects = [];
+		this.enableRedrawRegions = false;
+		this.disableWebGL = false;
 
 		this.soundsMuted = false;
 		this.musicMuted = false;
 
 		// Copy options to engine (except those which are only used for engine initialization)
-		copyOpt = ['backgroundColor', 'preventDefaultKeyboard', 'enableRedrawRegions', 'resetCursorOnEachFrame', 'disableTouchScroll', 'defaultCollisionResolution', 'focusOnLoad', 'loadText', 'soundsMuted', 'musicMuted', 'cachedSoundCopies', 'avoidSubPixelRendering', 'arena', 'disableRightClick', 'pauseOnBlur', 'drawBoundingBoxes', 'drawMasks', 'canvasResX', 'canvasResY', 'autoResize', 'autoResizeLimitToResolution', 'enginePath', 'themesPath', 'gameClassPath'];
+		copyOpt = [
+			'arena',
+			'autoResize',
+			'autoResizeLimitToResolution',
+			'avoidSubPixelRendering',
+			'backgroundColor',
+			'cachedSoundCopies',
+			'canvasResX',
+			'canvasResY',
+			'defaultCollisionResolution',
+			'disableWebGL',
+			'disableRightClick',
+			'disableTouchScroll',
+			'drawBoundingBoxes',
+			'drawMasks',
+			'enableRedrawRegions',
+			'enginePath',
+			'focusOnLoad',
+			'gameClassPath',
+			'loadText',
+			'musicMuted',
+			'pauseOnBlur',
+			'preventDefaultKeyboard',
+			'resetCursorOnEachFrame',
+			'soundsMuted',
+			'themesPath',
+		];
 		for (i = 0; i < copyOpt.length; i ++) {
 			opt = copyOpt[i];
 			if (this.options[opt] !== undefined) {
@@ -168,18 +196,13 @@ new Class('Engine', {
 
 		// Set style for arena
 		this.arena.style.position = "absolute";
-		this.arena.style.background = "#fff";
+		this.arena.style.backgroundColor = "#000";
 		this.arena.style.userSelect = "none";
 		this.arena.style.webkitUserSelect = "none";
 		this.arena.style.MozUserSelect = "none";
 
-		// Make main canvas
-		this.mainCanvas = document.createElement("canvas");
-		this.mainCanvas.style.display = "block";
-		this.mainCanvas.width = this.canvasResX;
-		this.mainCanvas.height = this.canvasResY;
-		this.mainCtx = this.mainCanvas.getContext('2d');
-		this.arena.appendChild(this.mainCanvas);
+		this.createCanvas();
+		this.initRenderer();
 
 		// If autoresize is set to true, set up autoresize
 		if (this.autoResize) {
@@ -202,10 +225,10 @@ new Class('Engine', {
 		}
 
 		// Create loader object
-        /**
-         * Global Engine.Loader instance which is created upon engine initialization
-         * @global
-         */
+		/**
+		 * Global Engine.Loader instance which is created upon engine initialization
+		 * @global
+		 */
 		loader = new Engine.Loader();
 
 		loader.loadClasses([this.gameClassPath]);
@@ -239,9 +262,9 @@ new Class('Engine', {
 
 		this.fps = 0;
 		this.fpsCounter = 0;
-        this.drawTime = 0;
-        this.drawTimeCounter = 0;
-        this.drawCalls = 0;
+		this.drawTime = 0;
+		this.drawTimeCounter = 0;
+		this.drawCalls = 0;
 
 		// Create a room list (All rooms will add themselves to this list)
 		this.roomList = [];
@@ -272,15 +295,15 @@ new Class('Engine', {
 		}
 
 		// Create objects required by the engine
-        /**
-         * Global instance of Input.Keyboard which is created upon engine initialization
-         * @global
-         */
+		/**
+		 * Global instance of Input.Keyboard which is created upon engine initialization
+		 * @global
+		 */
 		keyboard = new Input.Keyboard();
-        /**
-         * Global instance of Input.Pointer which is created upon engine initialization
-         * @global
-         */
+		/**
+		 * Global instance of Input.Pointer which is created upon engine initialization
+		 * @global
+		 */
 		pointer = new Input.Pointer();
 
 		// Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
@@ -317,6 +340,29 @@ new Class('Engine', {
 	},
 
 	/**
+	 * Creates and prepares the game canvas for being used
+	 */
+	createCanvas: function () {
+		var gl;
+
+		// Make main canvas
+		this.canvas = document.createElement("canvas");
+		this.canvas.style.display = "block";
+		this.canvas.width = this.canvasResX;
+		this.canvas.height = this.canvasResY;
+		this.arena.appendChild(this.canvas);
+	},
+
+	initRenderer: function () {
+		if (!this.disableWebGL && (this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl'))) {
+			this.renderer = new Renderer.WebGL(this.canvas);
+		}
+		else {
+			this.renderer = new Renderer.Canvas(this.canvas);
+		}
+	},
+
+	/**
 	 * Enables or disables canvas autoresize.
 	 *
 	 * @param {boolean} enable Decides whether autoresize should be enabled or disabled
@@ -338,8 +384,8 @@ new Class('Engine', {
 			this.arena.style.left = "50%";
 			this.arena.style.marginLeft = -this.canvasResX / 2 + "px";
 			this.arena.style.marginTop = -this.canvasResY / 2 + "px";
-			this.mainCanvas.style.width = this.canvasResX + "px";
-			this.mainCanvas.style.height = this.canvasResY + "px";
+			this.canvas.style.width = this.canvasResX + "px";
+			this.canvas.style.height = this.canvasResY + "px";
 		}
 	},
 
@@ -374,8 +420,8 @@ new Class('Engine', {
 		this.arena.style.left = "50%";
 		this.arena.style.marginTop = -h / 2 + "px";
 		this.arena.style.marginLeft = -w / 2 + "px";
-		this.mainCanvas.style.height = h + "px";
-		this.mainCanvas.style.width = w + "px";
+		this.canvas.style.height = h + "px";
+		this.canvas.style.width = w + "px";
 	},
 
 	/**
@@ -583,7 +629,7 @@ new Class('Engine', {
 	mainLoop: function () {
 		if (!this.running) {return; }
 
-        var drawTime;
+		var drawTime;
 
 		// Get the current time (for calculating movement based on the precise time change)
 		this.last = this.now;
@@ -605,24 +651,24 @@ new Class('Engine', {
 		this.currentRoom.update();
 
 		// Draw game objects
-        this.drawCalls = 0; //dev
-        drawTime = new Date().getTime(); //dev
-        this.redraw();
-        drawTime = new Date().getTime() - drawTime; //dev
+		this.drawCalls = 0; //dev
+		drawTime = new Date().getTime(); //dev
+		this.redraw();
+		drawTime = new Date().getTime() - drawTime; //dev
 
-        // Count frames per second and calculate mean redraw time
-        if (this.fpsMsCounter < 1000) { //dev
-            this.fpsCounter ++; //dev
-            this.drawTimeCounter += drawTime; //dev
-            this.fpsMsCounter += this.timeIncrease; //dev
-        } //dev
-        else { //dev
-            this.fps = this.fpsCounter; //dev
-            this.drawTime = this.drawTimeCounter / this.fpsCounter; //dev
-            this.fpsCounter = 0; //dev
-            this.drawTimeCounter = 0; //dev
-            this.fpsMsCounter = 0; //dev
-        } //dev
+		// Count frames per second and calculate mean redraw time
+		if (this.fpsMsCounter < 1000) { //dev
+			this.fpsCounter ++; //dev
+			this.drawTimeCounter += drawTime; //dev
+			this.fpsMsCounter += this.timeIncrease; //dev
+		} //dev
+		else { //dev
+			this.fps = this.fpsCounter; //dev
+			this.drawTime = this.drawTimeCounter / this.fpsCounter; //dev
+			this.fpsCounter = 0; //dev
+			this.drawTimeCounter = 0; //dev
+			this.fpsMsCounter = 0; //dev
+		} //dev
 
 		// Schedule the loop to run again
 		requestAnimationFrame(function (time) {
@@ -636,7 +682,7 @@ new Class('Engine', {
 	 * @param {number} res The new horizontal resolution
 	 */
 	setCanvasResX: function (res) {
-		this.mainCanvas.width = res;
+		this.canvas.width = res;
 		this.canvasResX = res;
 
 		if (this.autoResize) {
@@ -650,7 +696,7 @@ new Class('Engine', {
 	 * @param {number} res The new vertical resolution
 	 */
 	setCanvasResY: function (res) {
-		this.mainCanvas.height = res;
+		this.canvas.height = res;
 		this.canvasResY = res;
 		if (this.autoResize) {
 			this.autoResizeCanvas();
@@ -681,6 +727,13 @@ new Class('Engine', {
 		return id;
 	},
 
+	loadFileContent: function (filePath) {
+		req = new XMLHttpRequest();
+		req.open('GET', filePath, false);
+		req.send();
+		return req.responseText;
+	},
+
 	/**
 	 * Loads and executes one or multiple JavaScript file synchronously
 	 * 
@@ -695,10 +748,7 @@ new Class('Engine', {
 
 		for (i = 0; i < filePaths.length; i ++) {
 			// console.log('Loading: ' + filePaths[i])
-			req = new XMLHttpRequest();
-			req.open('GET', filePaths[i], false);
-			req.send();
-			codeString = req.responseText + "\n//@ sourceURL=/" + filePaths[i];
+			codeString = this.loadFileContent(filePaths[i]) + "\n//# sourceURL=/" + filePaths[i];
 			try { //dev
 				eval(codeString);
 			} //dev
@@ -733,7 +783,6 @@ new Class('Engine', {
 		if (typeof params !== 'string') {
 			params = 'data=' + JSON.stringify(params);
 		}
-
 
 		var req;
 
@@ -809,20 +858,9 @@ new Class('Engine', {
 	 * Redraws the canvas by redrawing all cameras
 	 */
 	redraw: function () {
-		var i, c;
-
-		c = this.mainCtx
-
-
-        for (i = 0; i < this.cameras.length; i++) {
-            //this.mainCanvas.getContext('2d').clearRect(0, 0, this.canvasResX, this.canvasResY);
-			this.cameras[i].capture();
-            this.cameras[i].draw(c);
-        }
-
-        this.lastRedrawObjects = this.redrawObjects; //dev
-        this.redrawObjects = [];
-    },
+		// Send cameras to the renderer
+		this.renderer.render(this.cameras);
+	},
 
 	/**
 	 * Downloads a screen dump of the main canvas. Very usable for creating game screenshots directly from browser consoles.
@@ -830,7 +868,7 @@ new Class('Engine', {
 	dumpScreen: function () {
 		var dataString, a;
 
-		dataString = this.mainCanvas.toDataURL().replace(/image\/png/, 'image/octet-stream');
+		dataString = this.canvas.toDataURL().replace(/image\/png/, 'image/octet-stream');
 
 		a = document.createElement('a');
 		a.href = dataString;
@@ -876,7 +914,8 @@ new Class('Engine', {
 			t = t / d * 2;
 			if (t < 1) {
 				return b + c * t * t / 2;
-			} else {
+			}
+			else {
 				t --;
 				return b + c * (1 - t * (t - 2)) / 2;
 			}
@@ -896,7 +935,8 @@ new Class('Engine', {
 			a = c / Math.abs(c);
 			if (t < 1) {
 				return b + a * Math.pow(Math.abs(c), t) / 2;
-			} else {
+			}
+			else {
 				t --;
 				return b + c - a * Math.pow(Math.abs(c), 1 - t) / 2;
 			}
@@ -908,4 +948,4 @@ new Class('Engine', {
 	}
 });
 /** For making the engine var unreachable **/
-}());/**/
+}());

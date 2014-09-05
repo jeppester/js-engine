@@ -361,7 +361,7 @@ new Class('Engine.CustomLoop', {
 	/**
 	 * Stop all animations of a specific object from the loop
 	 * 
-	 * @param {Lib.Animatable} object The object to stop all animations of
+	 * @param {Mixin.Animatable} object The object to stop all animations of
 	 */
 	removeAnimationsOfObject: function (object) {
         var i;
@@ -404,10 +404,12 @@ new Class('Engine.CustomLoop', {
 				}
 				if (typeof a.callback === "string") {
 					eval(a.callback);
-				} else {
+				}
+				else {
 					a.callback.call(a.obj);
 				}
-			} else {
+			}
+			else {
 				// If the animation is still running: Ease the animation of each property
 				for (propId in a.prop) {
 					if (a.prop.hasOwnProperty(propId)) {
@@ -415,6 +417,9 @@ new Class('Engine.CustomLoop', {
 					}
 				}
 			}
+
+			// Execute onStep-callback if any
+			a.onStep && a.onStep();
 		}
 	},
 

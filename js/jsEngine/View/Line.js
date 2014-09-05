@@ -5,7 +5,7 @@ new Class('View.Line',[Math.Line, View.Child], {
      * @name View.Line
      * @class A class which is used for handling lines
      * @augments View.Child
-     * @augments Lib.Animatable
+     * @augments Mixin.Animatable
      *
      * @property {View.Vector} a The line's starting point
      * @property {View.Vector} b The line's ending point
@@ -21,6 +21,7 @@ new Class('View.Line',[Math.Line, View.Child], {
 	 */
 	Line: function (startVector, endVector, strokeStyle, lineWidth, lineCap) {
         this.Child();
+        this.renderType = 'line';
 
         if (engine.enableRedrawRegions) {
             this.LineInitWithRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
@@ -171,7 +172,7 @@ new Class('View.Line',[Math.Line, View.Child], {
         
         for (i = 0; i < parents.length; i ++) {
             parent = parents[i];
-            box.scale(parent.size * parent.widthModifier, parent.size * parent.heightModifier);
+            box.scale(parent.size * parent.widthScale, parent.size * parent.heightScale);
             box.rotate(parent.direction);
             box.move(parent.x, parent.y);
         }
@@ -187,22 +188,13 @@ new Class('View.Line',[Math.Line, View.Child], {
         return box;/**/
     },
 
-	/**
-	 * Draws the Line object on the canvas (if added as a child of a View)
-	 *
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Line
-	 */
-	drawCanvas: function (c) {
-		c.strokeStyle = this.strokeStyle;
-        c.globalAlpha = this.opacity;
-		c.beginPath();
-
-		c.moveTo(this.a.x, this.a.y);
-		c.lineTo(this.b.x, this.b.y);
-
-        c.lineWidth = this.lineWidth;
-        c.lineCap = this.lineCap;
-		c.stroke();
-	}
+    /**
+     * Override View.Child's isVisible-function, making the line invisible if its points share the same coordinates
+     * Above is how canvas does by default (but other renderers should do this by default as well)
+     * 
+     * @return {Boolean} Whether or not the line is "visible" (if not, renderers will not try to draw it)
+     */
+    isVisible: function () {
+        return View.Child.prototype.isVisible.call(this) && (this.a.x !== this.b.x || this.a.y !== this.b.y);
+    }
 });

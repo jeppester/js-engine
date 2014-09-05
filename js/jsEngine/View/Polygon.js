@@ -19,6 +19,7 @@ new Class('View.Polygon',[Math.Polygon, View.Child], {
 	 */
 	Polygon: function (points, fillStyle, strokeStyle, lineWidth) {
         this.Child();
+        this.renderType = "polygon";
 
 		this.setFromPoints(points);
 
@@ -52,46 +53,4 @@ new Class('View.Polygon',[Math.Polygon, View.Child], {
 
         return rect.add(this.parent.getRoomPosition());
     },
-
-	/**
-	 * Draws the Polygon object on the canvas (if added as a child of a View)
-	 *
-	 * @private
-	 * @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Polygon
-     * @param {Vector} drawOffset A vector defining the offset with which to draw the object
-     */
-	drawCanvas: function (c) {
-		var i, len;
-
-		c.translate(-this.offset.x, -this.offset.y);
-
-        c.strokeStyle = this.strokeStyle;
-        c.fillStyle = this.fillStyle;
-
-        if (this.lineDash !== [] && c.setLineDash) {
-            c.setLineDash(this.lineDash);
-        }
-
-		c.beginPath();
-
-        len = this.points.length;
-
-        for (i = 0; i < len; i ++) {
-            c.lineTo(this.points[i].x, this.points[i].y);
-        }
-
-        c.lineWidth = this.lineWidth;
-        c.globalAlpha = this.opacity;
-
-        if (this.closed) {
-            c.closePath();
-            c.fill();
-            c.stroke();
-        }
-        else {
-            c.fill();
-            c.stroke();
-            c.closePath();
-        }
-	}
 });

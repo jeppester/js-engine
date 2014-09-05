@@ -16,19 +16,19 @@ new Class('Math.Polygon', {
 
 	/**
 	 * Sets the points of the polygon from Vector's.
-	 * 
+	 *
 	 * @param {Math.Vector[]} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
 	 * @return {Object} The resulting Polygon object (itself)
 	 */
 	setFromPoints: function (points) {
 		this.points = points;
-		
+
 		return this;
 	},
 
 	/**
 	 * Sets the points of the polygon from a list on point coordinates. Please notice that this function can take as an infinite number of x- and y coordinates as arguments.
-	 * 
+	 *
 	 * @param {number} x1 The x-coordinate for the first point in the polygon
 	 * @param {number} y1 The y-coordinate for the first point in the polygon
 	 * @param {number} x2 The x-coordinate for the second point ...
@@ -56,8 +56,25 @@ new Class('Math.Polygon', {
 	},
 
 	/**
+	 * Gets the polygons points as a list of coordinates
+	 *
+	 * @return {Array} An array of x- and y values
+	 */
+	getCoordinates: function () {
+		var coords, len, i;
+
+		coords = [];
+		len = this.points.length;
+		for (i = 0; i < len; i ++) {
+			coords.push(this.points[i].x, this.points[i].y)
+		}
+
+		return coords;
+	},
+
+	/**
 	 * Moves the Polygon object by moving all of its points.
-	 * 
+	 *
 	 * @param {number} x The value to add to all points' x-coordinates
 	 * @param {number} y The value to add to all points' y-coordinates
 	 * @return {Math.Polygon} The resulting Polygon object (itself)
@@ -71,7 +88,7 @@ new Class('Math.Polygon', {
 
 	/**
 	 * Adds a vector to all points.
-	 * 
+	 *
 	 * @param {Math.Vector} vector A Vector to add to all points
 	 * @return {Math.Polygon} The resulting Polygon object (itself)
 	 */
@@ -89,7 +106,7 @@ new Class('Math.Polygon', {
 
 	/**
 	 * Rotates the Polygon object by rotating all of its points around the zero vector.
-	 * 
+	 *
 	 * @param {number} direction The number of radians to rotate the polygon
 	 * @return {Math.Polygon} The resulting Polygon object (itself)
 	 */
@@ -107,7 +124,7 @@ new Class('Math.Polygon', {
 
 	/**
 	 * Scales the polygon by multiplying all of its points
-	 * 
+	 *
 	 * @param {number} scaleH A factor with which to scale the Polygon horizontally. If scaleH is undefined, both width and height will be scaled after this factor
 	 * @param {number} scaleV A factor with which to scale the Polygon vertically
 	 * @return {Math.Polygon} The resulting Polygon object (itself)
@@ -124,7 +141,7 @@ new Class('Math.Polygon', {
 
 	/**
 	 * Copies the Polygon object
-	 * 
+	 *
 	 * @return {Math.Polygon} A copy of the Polygon object (which can be modified without changing the original object)
 	 */
 	copy: function () {
@@ -133,7 +150,7 @@ new Class('Math.Polygon', {
 
 	/**
 	 * Fetches all of the polygon's points as Vector objects
-	 * 
+	 *
 	 * @return {Math.Vector} An array containing all the points of the polygon, as Vector objects
 	 */
 	getPoints: function () {
@@ -150,7 +167,7 @@ new Class('Math.Polygon', {
 
 	/**
 	 * Fetches all of the polygon's sides as Line objects.
-	 * 
+	 *
 	 * @return {Math.Vector} An array containing all of the polygon's sides as Line objects
 	 */
 	getLines: function () {
@@ -170,7 +187,7 @@ new Class('Math.Polygon', {
 
 	/**
 	 * Calculates the bounding rectangle of the polygon
-	 * 
+	 *
 	 * @return {Math.Rectangle} The bounding rectangle
 	 */
 	getBoundingRectangle: function () {
@@ -194,7 +211,7 @@ new Class('Math.Polygon', {
 
 	/**
 	 * Calculates the shortest distance from the Polygon object to another geometric object
-	 * 
+	 *
 	 * @param {Math.Vector|Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object The object to calculate the distance to
 	 * @return {number} The distance
 	 */
@@ -252,7 +269,7 @@ new Class('Math.Polygon', {
 
 	/**
 	 * Checks whether or not the Polygon contains another geometric object.
-	 * 
+	 *
 	 * @param {Math.Vector|Math.Line|Math.Circle|Math.Rectangle} object A geometric object to check
 	 * @return {boolean} True if the Polygon contains the checked object, false if not
 	 */
@@ -286,7 +303,7 @@ new Class('Math.Polygon', {
 
 	/**
 	 * Checks whether or not the Polygon intersects with another geometric object.
-	 * 
+	 *
 	 * @param {Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object A geometric object to check for intersections with
 	 * @param {boolean} [countIntersections=true] A geometric object to check for intersections with
 	 * @return {boolean} True if the Polygon intersects with the checked object, false if not

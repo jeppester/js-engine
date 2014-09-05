@@ -14,7 +14,7 @@
 			req = new XMLHttpRequest();
 			req.open('GET', filePaths[i], false);
 			req.send();
-			codeString = req.responseText + "\n//@ sourceURL=/" + filePaths[i];
+			codeString = req.responseText + "\n//# sourceURL=/" + filePaths[i];
 			try {
 				eval(codeString);
 			}
@@ -34,43 +34,52 @@
 
 	// Load all engine files
 	loadFiles([
+		enginePath + '/Extension/Array.js',
+		enginePath + '/Extension/Object.js',
+
 		enginePath + '/Polyfill/requestAnimationFrame.js',
 		enginePath + '/Polyfill/Array.prototype.forEach.js',
 
-		enginePath + '/Extension/Array.js',
-		enginePath + '/Extension/Object.js',
 
 		enginePath + '/Engine/Class.js',
 		enginePath + '/Engine/Globals.js',
 		enginePath + '/Engine/Engine.js',
 		enginePath + '/Engine/Loader.js',
 
-		enginePath + '/Lib/Animatable.js',
+		enginePath + '/Mixin/Animatable.js',
+		enginePath + '/Mixin/MatrixCalculation.js',
+		enginePath + '/Mixin/WebGLHelpers.js',
+
+		enginePath + '/Renderer/WebGL.js',
+		enginePath + '/Renderer/WebGL.TextureShaderProgram.js',
+		enginePath + '/Renderer/WebGL.ColorShaderProgram.js',
+		enginePath + '/Renderer/Canvas.js',
+
 
 		enginePath + '/Math/Vector.js',
-	    enginePath + '/Math/Line.js',
-	    enginePath + '/Math/Circle.js',
-	    enginePath + '/Math/Rectangle.js',
-	    enginePath + '/Math/Polygon.js',
+		enginePath + '/Math/Line.js',
+		enginePath + '/Math/Circle.js',
+		enginePath + '/Math/Rectangle.js',
+		enginePath + '/Math/Polygon.js',
 
-	    enginePath + '/View/Child.js',
-	    enginePath + '/View/Line.js',
-	    enginePath + '/View/Circle.js',
-	    enginePath + '/View/Rectangle.js',
-	    enginePath + '/View/Polygon.js',
-	    enginePath + '/View/Container.js',
-	    enginePath + '/View/Sprite.js',
-	    enginePath + '/View/Collidable.js',
-	    enginePath + '/View/TextBlock.js',
-	    enginePath + '/View/GameObject.js',
+		enginePath + '/View/Child.js',
+		enginePath + '/View/Line.js',
+		enginePath + '/View/Circle.js',
+		enginePath + '/View/Rectangle.js',
+		enginePath + '/View/Polygon.js',
+		enginePath + '/View/Container.js',
+		enginePath + '/View/Sprite.js',
+		enginePath + '/View/Collidable.js',
+		enginePath + '/View/TextBlock.js',
+		enginePath + '/View/GameObject.js',
 
-	    enginePath + '/Engine/Room.js',
-	    enginePath + '/Engine/Camera.js',
-	    enginePath + '/Engine/CustomLoop.js',
+		enginePath + '/Engine/Room.js',
+		enginePath + '/Engine/Camera.js',
+		enginePath + '/Engine/CustomLoop.js',
 
-	    enginePath + '/Input/Keyboard.js',
+		enginePath + '/Input/Keyboard.js',
 		enginePath + '/Input/Pointer.js',
-		
+
 		enginePath + '/Sound/Effect.js',
 		enginePath + '/Sound/Music.js',
 	]);

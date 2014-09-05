@@ -15,7 +15,8 @@ function Class(className, inherits, functions) {
     // Create name space if missing
     for (i = 0; i < name.length - 1; i++) {
         // Create eval string
-        str = name.slice(0, i - 1).join('.');
+        str = name.slice(0, i + 1).join('.');
+
         if (eval('window.' + str) === undefined) {
             eval(str + ' = {}');
         }
@@ -69,4 +70,4 @@ function Class(className, inherits, functions) {
             newClass.prototype[propName] = functions[propName];
         }
 	}
-};
+}
