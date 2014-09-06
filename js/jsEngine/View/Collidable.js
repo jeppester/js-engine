@@ -200,7 +200,7 @@ new Class('View.Collidable', [View.Sprite], {
 	},
 
 	createCollisionBitmap: function (objects) {
-		var obj, canvas, mask, c, parents, i, wm, lm, dt, calc;
+		var obj, canvas, mask, c, parents, i, wm, lm, dt, calc, offset;
 
 			// Get mask from loader object
 		mask = this.mask;
@@ -221,39 +221,24 @@ new Class('View.Collidable', [View.Sprite], {
 		c = canvas.getContext('2d');
 		c.fillStyle = "#FFF";
 		c.fillRect(0, 0, canvas.width, canvas.height);
-		c.translate(this.offset.x, this.offset.y);
 
 		parents = this.getParents();
-		parents.unshift(this);
-
-		lm = calc.makeIdentity();
-		console.log(lm);
+		parents.reverse();
+		parents.push(this);
+		lm = calc.makeTranslation(-this.offset.x,-this.offset.y);
 
 		// Reset transform to the world matrix
 		for (i = 0; i < parents.length; i ++) {
 			lm = calc.matrixMultiply(lm, calc.calculateLocalMatrix(parents[i]));
 		}
 
-		// Find determinant
-		dt = calc.getDeterminant(lm);
-		console.log(dt);
+		// Set world matrix to the inverted local matrix of the target object
+		wm = calc.matrixInverse(lm);
 
-		// If determinant is 0, the object is invisible (thus cannot collide)
-		if (dt === 0) {
+		// If getInverse returns false, the object is invisible (thus cannot collide)
+		if (wm === false) {
 			throw new Error('Trying to detect collision for invisble object') // dev
 		}
-
-		// Set world matrix to the inverted local matrix of the target object
-		wm = calc.matrixMultiplyNumber(calc.getTranspose(lm), dt);
-
-		console.log(lm);
-		console.log(wm);
-
-		window.lm = lm;
-		window.wm = wm;
-		window.calc = calc;
-
-		throw new Error('Test!');
 
 		// Draw other objects
 		for (i = 0; i < objects.length; i++) {
@@ -263,12 +248,16 @@ new Class('View.Collidable', [View.Sprite], {
 			if (obj === this) {continue; }
 
 			// Create local matrix (to add to the world matrix)
+			lm = calc.makeIdentity();
 			parents = obj.getParents();
 			parents.reverse();
 			parents.push(obj);
 			parents.forEach(function (p) {
-				Renderer.Canvas.prototype.transformCanvasContext(p, c);
+				lm = calc.matrixMultiply(lm, calc.calculateLocalMatrix(p));
 			})
+			offset = calc.matrixMultiply(wm, lm);
+			offset = calc.matrixMultiply(calc.makeTranslation(-obj.offset.x,-obj.offset.y), offset);
+			c.setTransform(offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]);
 
 			c.drawImage(
 				obj.mask,
@@ -280,21 +269,16 @@ new Class('View.Collidable', [View.Sprite], {
 				obj.clipHeight,
 
 				// Define position and width on canvas
-				- obj.offset.x,
-				- obj.offset.y,
+				0,
+				0,
 				obj.clipWidth,
 				obj.clipHeight
 			);
-
-			parents.reverse();
-			parents.forEach(function (p) {
-				Renderer.Canvas.prototype.restoreCanvasContext(p, c);
-			});
 		}
 
 		c.globalAlpha = 0.5;
 		c.fillRect(0, 0, canvas.width, canvas.height);
-		c.translate(canvas.width / 2, canvas.height / 2);
+		c.setTransform(1, 0, 0, 1, 0, 0);
 
 		// Draw checked object
 		c.drawImage(
@@ -307,8 +291,8 @@ new Class('View.Collidable', [View.Sprite], {
 			this.clipHeight,
 
 			// Define position and width on canvas
-			-this.clipWidth / 2,
-			-this.clipHeight / 2,
+			0,
+			0,
 			this.clipWidth,
 			this.clipHeight
 		);

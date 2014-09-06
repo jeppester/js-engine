@@ -43,7 +43,7 @@ new Class('Mixin.MatrixCalculation', {
 		];
 	},
 
-	getDeterminant: function (matrix) {
+	matrixDeterminant: function (matrix) {
 		var a = matrix[0*3+0];
 		var b = matrix[0*3+1];
 		var c = matrix[0*3+2];
@@ -54,30 +54,83 @@ new Class('Mixin.MatrixCalculation', {
 		var h = matrix[2*3+1];
 		var i = matrix[2*3+2];
 
-		return (a * e * i +
-						b * f * g +
-						c * d * h)
-						-
-					 (c * e * g +
-						b * d * i +
-						a * f * h);
+		return (
+			a * (e * i - f * h) -
+			b * (i * d - f * g) +
+			c * (d * h - e * g)
+		)
 	},
 
-	getTranspose: function (matrix) {
-		var a = matrix[0*3+0];
-		var b = matrix[0*3+1];
-		var c = matrix[0*3+2];
-		var d = matrix[1*3+0];
-		var e = matrix[1*3+1];
-		var f = matrix[1*3+2];
-		var g = matrix[2*3+0];
-		var h = matrix[2*3+1];
-		var i = matrix[2*3+2];
+	matrixInverse: function (matrix) {
+		var det, a, b, c, d, e, f, g, h, i, A, B, C, D, E, F, G, H, I;
+
+		// Get determinant
+		det = this.matrixDeterminant(matrix);
+
+		// If determinant is zero return false;
+		if (det === 0) {
+			return false;
+		}
+
+		// Calculate inverse
+		a = matrix[0*3+0];
+		b = matrix[0*3+1];
+		c = matrix[0*3+2];
+		d = matrix[1*3+0];
+		e = matrix[1*3+1];
+		f = matrix[1*3+2];
+		g = matrix[2*3+0];
+		h = matrix[2*3+1];
+		i = matrix[2*3+2];
+
+		A =   e * i - f * h;
+		B = -(d * i - f * g);
+		C =   d * h - e * g;
+
+		D = -(b * i - c * h);
+		E =   a * i - c * g;
+		F = -(a * h - b * g);
+
+		G =   b * f - c * e;
+		H = -(a * f - c * d);
+		I =   a * e - b * d;
+
+		return this.matrixMultiplyNumber([
+			A, D, G,
+			B, E, H,
+			C, F, I
+		], 1 / det);
+	},
+
+	getNewMatrix: function (matrix) {
+		var a, b, c, d, e, f, g, h, i, A, B, C, D, E, F, G, H, I;
+
+		a = matrix[0*3+0];
+		b = matrix[0*3+1];
+		c = matrix[0*3+2];
+		d = matrix[1*3+0];
+		e = matrix[1*3+1];
+		f = matrix[1*3+2];
+		g = matrix[2*3+0];
+		h = matrix[2*3+1];
+		i = matrix[2*3+2];
+
+		A =   e * i - f * h;
+		B = -(d * i - f * g);
+		C =   d * h - e * g;
+
+		D = -(b * i - c * h);
+		E =   a * i - c * g;
+		F = -(a * h - b * g);
+
+		G =   b * f - c * e;
+		H = -(a * f - c * d);
+		I =   a * e - b * d;
 
 		return [
-			a, d, g,
-			b, e, h,
-			c, f, i
+			A, D, G,
+			B, E, H,
+			C, F, I
 		];
 	},
 
@@ -101,38 +154,38 @@ new Class('Mixin.MatrixCalculation', {
 	},
 
 	matrixMultiply: function (a, b) {
-		var a00 = a[0*3+0];
-		var a01 = a[0*3+1];
-		var a02 = a[0*3+2];
-		var a10 = a[1*3+0];
-		var a11 = a[1*3+1];
-		var a12 = a[1*3+2];
-		var a20 = a[2*3+0];
-		var a21 = a[2*3+1];
-		var a22 = a[2*3+2];
+		var a1 = a[0*3+0];
+		var b1 = a[0*3+1];
+		var c1 = a[0*3+2];
+		var d1 = a[1*3+0];
+		var e1 = a[1*3+1];
+		var f1 = a[1*3+2];
+		var g1 = a[2*3+0];
+		var h1 = a[2*3+1];
+		var i1 = a[2*3+2];
 
-		var b00 = b[0*3+0];
-		var b01 = b[0*3+1];
-		var b02 = b[0*3+2];
-		var b10 = b[1*3+0];
-		var b11 = b[1*3+1];
-		var b12 = b[1*3+2];
-		var b20 = b[2*3+0];
-		var b21 = b[2*3+1];
-		var b22 = b[2*3+2];
+		var a2 = b[0*3+0];
+		var b2 = b[0*3+1];
+		var c2 = b[0*3+2];
+		var d2 = b[1*3+0];
+		var e2 = b[1*3+1];
+		var f2 = b[1*3+2];
+		var g2 = b[2*3+0];
+		var h2 = b[2*3+1];
+		var i2 = b[2*3+2];
 
 		return [
-			a00 * b00 + a01 * b10 + a02 * b20,
-			a00 * b01 + a01 * b11 + a02 * b21,
-			a00 * b02 + a01 * b12 + a02 * b22,
+			a1 * a2 + b1 * d2 + c1 * g2,
+			a1 * b2 + b1 * e2 + c1 * h2,
+			a1 * c2 + b1 * f2 + c1 * i2,
 
-			a10 * b00 + a11 * b10 + a12 * b20,
-			a10 * b01 + a11 * b11 + a12 * b21,
-			a10 * b02 + a11 * b12 + a12 * b22,
+			d1 * a2 + e1 * d2 + f1 * g2,
+			d1 * b2 + e1 * e2 + f1 * h2,
+			d1 * c2 + e1 * f2 + f1 * i2,
 
-			a20 * b00 + a21 * b10 + a22 * b20,
-			a20 * b01 + a21 * b11 + a22 * b21,
-			a20 * b02 + a21 * b12 + a22 * b22
+			g1 * a2 + h1 * d2 + i1 * g2,
+			g1 * b2 + h1 * e2 + i1 * h2,
+			g1 * c2 + h1 * f2 + i1 * i2
 		];
 	},
 
