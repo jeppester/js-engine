@@ -257,46 +257,25 @@ new Class('View.Collidable', [View.Sprite], {
 			})
 			offset = calc.matrixMultiply(wm, lm);
 			offset = calc.matrixMultiply(calc.makeTranslation(-obj.offset.x,-obj.offset.y), offset);
+
+			// Set world transform
 			c.setTransform(offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]);
 
-			c.drawImage(
-				obj.mask,
-
-				// Define image cutout
-				(obj.clipWidth + obj.bm.spacing) * obj.imageNumber,
-				0,
-				obj.clipWidth,
-				obj.clipHeight,
-
-				// Define position and width on canvas
-				0,
-				0,
-				obj.clipWidth,
-				obj.clipHeight
-			);
+			// Draw object mask
+			c.drawImage(obj.mask, (obj.clipWidth + obj.bm.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight);
 		}
 
-		c.globalAlpha = 0.5;
-		c.fillRect(0, 0, canvas.width, canvas.height);
+		// Reset transform
 		c.setTransform(1, 0, 0, 1, 0, 0);
 
-		// Draw checked object
-		c.drawImage(
-			mask,
+		// Draw over other objects to make them semi transparant
+		c.globalAlpha = 0.5;
+		c.fillRect(0, 0, canvas.width, canvas.height);
 
-			// Define image cutout
-			(this.clipWidth + this.bm.spacing) * this.imageNumber,
-			0,
-			this.clipWidth,
-			this.clipHeight,
+		// Draw checked objects mask
+		c.drawImage(mask, (this.clipWidth + this.bm.spacing) * this.imageNumber, 0, this.clipWidth, this.clipHeight, 0, 0, this.clipWidth, this.clipHeight);
 
-			// Define position and width on canvas
-			0,
-			0,
-			this.clipWidth,
-			this.clipHeight
-		);
-
+		// Return collision image data
 		return c.getImageData(0, 0, canvas.width, canvas.height);
 	},
 
