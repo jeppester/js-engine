@@ -1,4 +1,6 @@
-new Class('Math.Line',[Mixin.Animatable], {
+nameSpace('Math');
+
+Math.Line = createClass('Line',[Mixin.Animatable], /** @lends Math.Line.prototype */ {
 	/**
 	 * Constructor for the Line class. Uses setFromVectors to create the line's start and end points
 	 *
@@ -18,7 +20,6 @@ new Class('Math.Line',[Mixin.Animatable], {
 
 		this.setFromVectors(startVector, endVector);
 	},
-    /** @scope Math.Line */
 
 	/**
 	 * Sets the start- and end points from two Vector's.

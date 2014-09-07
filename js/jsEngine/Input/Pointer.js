@@ -1,4 +1,6 @@
-new Class('Input.Pointer', {
+nameSpace('Input');
+
+Input.Pointer = createClass('Pointer', /** @lends Input.Pointer.prototype */ {
 	/**
 	 * Constructor for the Pointer class
 	 *
@@ -53,7 +55,6 @@ new Class('Input.Pointer', {
 			this.touches[button].events = new Array(2);
 		}
 	},
-    /** @scope Input.Pointer */
 
 	/**
 	 * Registers every onmousedown event to the Mouse object.

@@ -1,4 +1,6 @@
-new Class('Engine.Room', [View.Container], {
+nameSpace('Engine');
+
+Engine.Room = createClass('Room', [View.Container], /** @lends Engine.Room.prototype */ {
 	/**
 	 * Constructor for the Room class
 	 *
@@ -28,7 +30,6 @@ new Class('Engine.Room', [View.Container], {
 		this.addLoop('eachFrame', new Engine.CustomLoop());
 		engine.addRoom(this);
 	},
-	/** @scope Engine.Room */
 
 	/**
 	 * Prevents all the room's loops from being executed, this function is used by the engine before making room transitions
@@ -46,7 +47,7 @@ new Class('Engine.Room', [View.Container], {
 
 	/**
 	 * Updates all the room's loops.
-	 * 
+	 *
 	 * @private
 	 */
 	update: function () {
@@ -58,7 +59,7 @@ new Class('Engine.Room', [View.Container], {
 
 		for (i in this.loops) {
 			if (this.loops.hasOwnProperty(i)) {
-				this.loops[i].execute();		
+				this.loops[i].execute();
 			}
 		}
 	},
@@ -66,7 +67,7 @@ new Class('Engine.Room', [View.Container], {
 	/**
 	 * Adds a custom loop to the room.
 	 * After being added, the loop will be executed in each frame.
-	 * 
+	 *
 	 * @param {string} name The name the use for the custom loop in the room. When added the loop can be accessed with: [The room].loops[name]
 	 * @param {Engine.CustomLoop} loop The loop to add
 	 */
@@ -80,7 +81,7 @@ new Class('Engine.Room', [View.Container], {
 
 	/**
 	 * Removes a custom loop from the room.
-	 * 
+	 *
 	 * @param {string} name The name that the custom loop has been added as
 	 */
 	removeLoop: function (name) {

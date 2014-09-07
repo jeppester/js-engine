@@ -1,4 +1,6 @@
-new Class('Renderer.WebGL', [Mixin.MatrixCalculation], {
+nameSpace('Renderer');
+
+Renderer.WebGL = createClass('WebGL', [Mixin.MatrixCalculation], /** @lends Renderer.WebGL.prototype */ {
 	WebGL: function (canvas) {
 		var gl, options;
 

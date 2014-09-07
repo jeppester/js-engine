@@ -1,4 +1,6 @@
-new Class('Math.Vector', [Mixin.Animatable], {
+nameSpace('Math')
+
+Math.Vector = createClass('Vector', [Mixin.Animatable], /** @lends Math.Vector.prototype */ {
 	/**
 	 * Constructor for the Vector class. Uses set-function to set the vector from x- and y values.
 	 *
@@ -15,7 +17,6 @@ new Class('Math.Vector', [Mixin.Animatable], {
 	Vector: function (x, y) {
         this.set(x, y);
 	},
-    /** @scope Math.Vector */
 
 	/**
 	 * Sets the vector from x- and y values.

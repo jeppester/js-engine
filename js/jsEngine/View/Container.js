@@ -1,4 +1,6 @@
-new Class('View.Container', [View.Child], {
+nameSpace('View');
+
+View.Container = createClass('Container', [View.Child], /** @lends View.Container.prototype */ {
 	/**
 	 * Constructor for the View class.
 	 *

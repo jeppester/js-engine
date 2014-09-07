@@ -4,7 +4,7 @@
 
 	// Create file loader function
 	loadFiles = function (filePaths) {
-		var i, req, codeString; /*script, parent;*/
+		var i, req, script;
 
 		if (typeof filePaths === "string") {
 			filePaths = [filePaths];
@@ -22,6 +22,11 @@
 				console.log('Failed loading "' + filePaths[i]);
 				throw new Error(e);
 			}
+
+			// script = document.createElement('script');
+			// script.type = 'text/javascript';
+			// script.src = filePaths[i];
+			// document.body.appendChild(script);
 		}
 
 		if (window.loadedFiles === undefined) {window.loadedFiles = []; }

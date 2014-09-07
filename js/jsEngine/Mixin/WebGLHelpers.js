@@ -1,4 +1,6 @@
-new Class('Mixin.WebGLHelpers', {
+nameSpace('Mixin');
+
+Mixin.WebGLHelpers = createClass( /** @lends Mixin.WebGLHelpers.prototype */ {
   colorFromCSSString: function (string) {
     var a, b, c;
 

@@ -1,4 +1,6 @@
-new Class('View.Sprite', [View.Container, Mixin.Animatable], {
+nameSpace('View');
+
+View.Sprite = createClass('Sprite', [View.Container, Mixin.Animatable], /** @lends View.Sprite.prototype */ {
 	/**
 	 * The constructor for Sprite objects.
 	 *
@@ -104,7 +106,7 @@ new Class('View.Sprite', [View.Container, Mixin.Animatable], {
 
 	/**
 	 * Parses an offset global into an actual Math.Vector offset that fits the instance
-	 * 
+	 *
 	 * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
 	 * @return {Math.Vector} The offset vector the offset global corresponds to for the instance
 	 */
@@ -140,7 +142,7 @@ new Class('View.Sprite', [View.Container, Mixin.Animatable], {
 
 	/**
 	 * Fetches the name of the theme which currently applies to the object.
-	 * 
+	 *
 	 * @return {string} The name of the object's theme
 	 */
 	getTheme: function () {
@@ -169,7 +171,7 @@ new Class('View.Sprite', [View.Container, Mixin.Animatable], {
 	/**
 	 * Updates the source bitmap of the object to correspond to it's current theme (set with setTheme or inherited).
 	 * Calling this function is usually not necessary since it is automatically called when setting the theme of the object itself or it's parent object.
-	 * 
+	 *
 	 * @private
 	 */
 	refreshSource: function () {
@@ -190,7 +192,7 @@ new Class('View.Sprite', [View.Container, Mixin.Animatable], {
 
 	/**
 	 * Sets the bitmap-source of the object. For more information about bitmaps and themes, see themes.
-	 * 
+	 *
 	 * @param {string} source The resource string of the bitmap-source to use for the object
 	 */
 	setSource: function (source) {
@@ -203,18 +205,18 @@ new Class('View.Sprite', [View.Container, Mixin.Animatable], {
 
 	/**
 	 * Calculates the region which the sprite will fill out when redrawn.
-	 * 
+	 *
 	 * @private
 	 * @return {Rectangle} The bounding rectangle of the sprite's redraw
 	 */
 	getRedrawRegion: function () {
 		var box, parents, parent, i;
 
-		box = new Math.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight).getPolygon();	
+		box = new Math.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight).getPolygon();
 
 		parents = this.getParents();
 		parents.unshift(this);
-		
+
 		for (i = 0; i < parents.length; i ++) {
 			parent = parents[i];
 			box.scale(parent.size * parent.widthScale, parent.size * parent.heightScale);

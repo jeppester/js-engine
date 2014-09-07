@@ -1,4 +1,6 @@
-new Class('Engine.Camera', {
+nameSpace('Engine');
+
+Engine.Camera = createClass('Camera', /** @lends Engine.Camera.prototype */ {
     /**
      * Constructor for Camera class
      *

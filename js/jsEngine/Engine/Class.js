@@ -1,25 +1,18 @@
 /**
 * Creates a new jsEngine class
 *
-* @param {string} className The name of the new class
+* @param {string} constructor The name of the createClass' constructor function
 * @param {Class|Class[]|Object} [inherits] A class or an array of classes to inherit functions from (to actually extend an inherited class, run the class' constructor from inside the extending class)
-* @param {Object} functions A map of functions to add to the new class, functions can also be added by using [Class name].prototype.[Function name] = function () {}
+* @param {Object} functions A map of functions to add to the createClass, functions can also be added by using [Class name].prototype.[Function name] = function () {}
 */
-function Class(className, inherits, functions) {
-	var name, constructor, str, i, ii, inheritClass, newClass, propName;
+function createClass(constructor, inherits, functions) {
+	var str, i, ii, inheritClass, newClass, propName;
 
-	// Check if the class is inside a name space
-	name = className.split('.');
-	constructor = name[name.length - 1];
-
-	// Create name space if missing
-	for (i = 0; i < name.length - 1; i++) {
-		// Create eval string
-		str = name.slice(0, i + 1).join('.');
-
-		if (eval('window.' + str) === undefined) {
-			eval(str + ' = {}');
-		}
+	// Support mixins (with no constructors)
+	if (typeof constructor !== 'string') {
+		functions = inherits;
+		inherits = constructor;
+		constructor = undefined;
 	}
 
 	// Check if inherits can be used as argument, otherwise inherits will be used as the properties argument
@@ -28,17 +21,16 @@ function Class(className, inherits, functions) {
 		inherits = undefined;
 	}
 
-	eval('\
-	' + className + ' = function () {\
-		this.'+ name[name.length - 1] +'.apply(this, arguments);\
-	}');
+	if (constructor) {
+		newClass = eval('(function () { this.'+ constructor +'.apply(this, arguments); })');
+		newClass.prototype[constructor] = function () {};
+	}
+	else {
+		newClass = eval('(function () {})');
+	}
 
-	newClass = eval('window.' + className);
 
-	newClass.prototype[constructor] = function () {};
-	newClass.prototype.className = className;
 	newClass.prototype.inheritedClasses = [];
-
 	function inherit(newClass, inheritClass) {
 		var functionName;
 
@@ -54,7 +46,6 @@ function Class(className, inherits, functions) {
 		}
 	}
 	// Inherit functions
-
 	if (inherits) {
 		if (!Array.prototype.isPrototypeOf(inherits)) {throw new Error("Argument inherits is not an array"); } //dev
 
@@ -68,6 +59,24 @@ function Class(className, inherits, functions) {
 	for (propName in functions) {
 		if (functions.hasOwnProperty(propName)) {
 			newClass.prototype[propName] = functions[propName];
+		}
+	}
+
+	return newClass;
+}
+
+function nameSpace(name) {
+	var i;
+
+	name = name.split('.');
+
+	// Create namespace if missing
+	for (i = 0; i < name.length; i++) {
+		// Create eval string
+		str = name.slice(0, i + 1).join('.');
+
+		if (eval('window.' + str) === undefined) {
+			eval(str + ' = {}');
 		}
 	}
 }

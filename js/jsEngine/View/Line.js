@@ -1,4 +1,6 @@
-new Class('View.Line',[Math.Line, View.Child], {
+nameSpace('View');
+
+View.Line = createClass('Line',[Math.Line, View.Child], /** @lends View.Line.prototype */ {
 	/**
 	 * Constructor for the Line class. Uses setFromVectors to create the line's start and end points
 	 *
@@ -155,7 +157,7 @@ new Class('View.Line',[Math.Line, View.Child], {
 
         this.setFromVectors(startVector || new Math.Vector(), endVector || new Math.Vector());
     },
-    
+
     /**
      * Calculates the region which the object will fill out when redrawn.
      *
@@ -169,7 +171,7 @@ new Class('View.Line',[Math.Line, View.Child], {
 
         parents = this.getParents();
         parents.unshift(this);
-        
+
         for (i = 0; i < parents.length; i ++) {
             parent = parents[i];
             box.scale(parent.size * parent.widthScale, parent.size * parent.heightScale);
@@ -191,7 +193,7 @@ new Class('View.Line',[Math.Line, View.Child], {
     /**
      * Override View.Child's isVisible-function, making the line invisible if its points share the same coordinates
      * Above is how canvas does by default (but other renderers should do this by default as well)
-     * 
+     *
      * @return {Boolean} Whether or not the line is "visible" (if not, renderers will not try to draw it)
      */
     isVisible: function () {

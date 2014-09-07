@@ -1,4 +1,6 @@
-new Class('Engine.CustomLoop', {
+nameSpace('Engine');
+
+Engine.CustomLoop = createClass('CustomLoop', /** @lends Engine.CustomLoop.prototype */ {
 	/**
      * @name Engine.CustomLoop
 	 * @class A loop class.
@@ -35,11 +37,10 @@ new Class('Engine.CustomLoop', {
 		this.time = 0;
 		this.execTime = 0;
 	},
-    /** @scope Engine.CustomLoop */
 
 	/**
 	 * Attaches a function to the loop.
-	 * 
+	 *
 	 * @param {Object} caller The object to run the function as
 	 * @param {function} func The function to run on each execution of the custom loop
 	 */
@@ -66,7 +67,7 @@ new Class('Engine.CustomLoop', {
 
 	/**
 	 * Detaches a function from the loop. If the same function is attached multiple times (which is never a good idea), only the first occurrence is detached.
-	 * 
+	 *
 	 * @param {Object} caller The object the function was run as
 	 * @param {function} func The function to detach from the loop
 	 * @return {boolean} Whether or not the function was found and detached
@@ -101,7 +102,7 @@ new Class('Engine.CustomLoop', {
 
 	/**
 	 * Detaches all occurrences of a specific function, no matter the caller.
-	 * 
+	 *
 	 * @param {function} func The function to detach from the loop
 	 * @return {function[]} An array of detached functions
 	 */
@@ -136,13 +137,13 @@ new Class('Engine.CustomLoop', {
 
 	/**
 	 * Detaches all attached functions with a specific caller
-	 * 
+	 *
 	 * @param {Object} caller The object the function was run as
 	 * @return {function[]} An array of detached functions
 	 */
 	detachFunctionsByCaller: function (caller) {
 		if (caller === undefined) {throw new Error('Missing argument: caller'); } //dev
-		
+
 		var removeArray, i;
 
 		removeArray = [];
@@ -173,7 +174,7 @@ new Class('Engine.CustomLoop', {
 	/**
 	 * Schedules a function to be run after a given amount of time in the loop.
 	 * If the loop is paused before the execution has happened, the loop's time will stand still, and therefore the scheduled execution will not happen until the loop is started again.
-	 * 
+	 *
 	 * @param {Object} caller The object with which to run the function (by default the custom loop itself)
 	 * @param {function} func The function to execute
 	 * @param {number} delay The delay in ms
@@ -202,7 +203,7 @@ new Class('Engine.CustomLoop', {
 
 	/**
 	 * Unschedules a single scheduled execution. If multiple similar executions exists, only the first will be unscheduled.
-	 * 
+	 *
 	 * @param {function} func The function to unschedule an execution of
 	 * @param {Object} caller The object with which the function was to be executed (by default the custom loop itself)
 	 * @return {boolean} Whether or not the function was found and unscheduled
@@ -238,7 +239,7 @@ new Class('Engine.CustomLoop', {
 
 	/**
 	 * Unschedule all scheduled executions of a specific function, no matter the caller.
-	 * 
+	 *
 	 * @param {function} func The function to unschedule all executions of
 	 * @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
 	 */
@@ -276,7 +277,7 @@ new Class('Engine.CustomLoop', {
 
 	/**
 	 * Unschedule all executions scheduled with a specific caller
-	 * 
+	 *
 	 * @param {object} caller The caller
 	 * @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
 	 */
@@ -314,7 +315,7 @@ new Class('Engine.CustomLoop', {
 
 	/**
 	 * Unschedules all scheduled executions
-	 * 
+	 *
 	 * @return {function[]} An array of all the unscheduled functions
 	 */
 	unscheduleAll: function () {
@@ -330,7 +331,7 @@ new Class('Engine.CustomLoop', {
 
 	/**
 	 * Adds a new animation to the animator class (done automatically when running the animate-function).
-	 * 
+	 *
 	 * @private
 	 * @param {object} animation An animation object
 	 */
@@ -360,7 +361,7 @@ new Class('Engine.CustomLoop', {
 
 	/**
 	 * Stop all animations of a specific object from the loop
-	 * 
+	 *
 	 * @param {Mixin.Animatable} object The object to stop all animations of
 	 */
 	removeAnimationsOfObject: function (object) {
@@ -376,12 +377,12 @@ new Class('Engine.CustomLoop', {
 
 	/**
 	 * Update the loop's animations in a single loop (called by updateAllLoops)
-	 * 
+	 *
 	 * @private
 	 */
 	updateAnimations: function () {
 		var animId, a, propId, t;
-		
+
 		// Run through the animations to update them
 		for (animId = this.animations.length - 1; animId > -1; animId --) {
 			a = this.animations[animId];

@@ -1,4 +1,4 @@
-new Class('MasksAndBBoxes', {
+createClass('MasksAndBBoxes', {
     MasksAndBBoxes: function () {
         // Make a global reference to the game object
         game = this;

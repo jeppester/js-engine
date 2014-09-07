@@ -1,4 +1,6 @@
-new Class('Math.Polygon', {
+nameSpace('Math');
+
+Math.Polygon = createClass('Polygon', /** @lends Math.Polygon.prototype */ {
 	/**
 	 * The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
 	 *
@@ -12,7 +14,6 @@ new Class('Math.Polygon', {
 	Polygon: function (points) {
 		this.setFromPoints(points);
 	},
-    /** @scope Math.Polygon */
 
 	/**
 	 * Sets the points of the polygon from Vector's.

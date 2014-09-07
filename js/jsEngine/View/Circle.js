@@ -1,4 +1,6 @@
-new Class('View.Circle', [Math.Circle, View.Child], {
+nameSpace('View');
+
+View.Circle = createClass('Circle', [Math.Circle, View.Child], /** @lends View.Circle.prototype */ {
 	/**
 	 * Constructor for Circle class, uses the set function, to set the properties of the circle.
 	 *

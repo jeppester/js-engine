@@ -1,4 +1,6 @@
-new Class('Sound.Music', {
+nameSpace('Sound');
+
+Sound.Music = createClass('Music', /** @lends Sound.Music.prototype */ {
 	/**
 	 * Constructor for the Music class
 	 *
@@ -21,7 +23,7 @@ new Class('Sound.Music', {
 
 	/**
 	 * Starts playback of the object
-	 * 
+	 *
 	 * @param {boolean} loop Whether or not to loop the playback
 	 * @return {boolean} True if the playback has started successfully, false if not
 	 */

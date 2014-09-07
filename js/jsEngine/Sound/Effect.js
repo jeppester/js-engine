@@ -1,4 +1,6 @@
-new Class('Sound.Effect', {
+nameSpace('Sound');
+
+Sound.Effect = createClass('Effect', /** @lends Sound.Effect.prototype */ {
 	/**
 	 * Constructor for the sound class
 	 *
@@ -30,7 +32,7 @@ new Class('Sound.Effect', {
 	/**
 	 * Caches copies of the sound element, to enable simultaneous playback of the sound.
 	 * This function is automatically called when the source sound is ready for playback.
-	 * 
+	 *
 	 * @private
 	 */
 	cacheCopies: function () {
@@ -44,7 +46,7 @@ new Class('Sound.Effect', {
 
 	/**
 	 * Starts a playback of the object. The object supports multiple playbacks. Therefore a playback ID is issued for each playback, making it possible to stop a specific playback, or stop it from looping.
-	 * 
+	 *
 	 * @param {boolean} loop Whether or not to loop the playback
 	 * @return {number|boolean} If playback succeeds: a playback ID representing the playback, else: false
 	 */
@@ -71,13 +73,13 @@ new Class('Sound.Effect', {
 		}
 
 		console.log('Too many playbacks of the same sound: ' + this.source.src); // dev
-		
+
 		return false;
 	},
 
 	/**
 	 * Stops a specific playback of the object
-	 * 
+	 *
 	 * @param {number} playbackId The playback ID of the playback to stop. The ID is generated when a playback is started, and is returned by the play-function
 	 */
 	stop: function (playbackId) {

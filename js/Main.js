@@ -1,8 +1,5 @@
-new Class('Game', {
-    Game: function () {
-        // Make a global reference to the game object
-        game = this;
-
+Main = createClass('Main', {
+    Main: function () {
         /* LOAD GAME DATA FILES (global vars etc.)
          data=[];
          jseSyncLoad([

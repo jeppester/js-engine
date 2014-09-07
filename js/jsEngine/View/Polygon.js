@@ -1,4 +1,6 @@
-new Class('View.Polygon',[Math.Polygon, View.Child], {
+nameSpace('View');
+
+View.Polygon = createClass('Polygon',[Math.Polygon, View.Child], /** @lends View.Polygon.prototype */ {
 	/**
 	 * The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
 	 *

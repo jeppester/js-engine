@@ -1,4 +1,6 @@
-new Class('Renderer.Canvas', [Mixin.MatrixCalculation], {
+nameSpace('Renderer');
+
+Renderer.Canvas = createClass('Canvas', [Mixin.MatrixCalculation], /** @lends Renderer.Canvas.prototype */ {
 	Canvas: function (canvas) {
 		var gl, options;
 

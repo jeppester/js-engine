@@ -1,4 +1,6 @@
-new Class('Math.Rectangle', [Math.Vector], {
+nameSpace('Math');
+
+Math.Rectangle = createClass('Rectangle', [Math.Vector], /** @lends Math.Rectangle.prototype */ {
 	/**
 	 * The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
 	 *
@@ -19,11 +21,10 @@ new Class('Math.Rectangle', [Math.Vector], {
 	Rectangle: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
 		this.set(x, y, width, height);
 	},
-    /** @scope Math.Rectangle */
 
 	/**
 	 * Sets the properties of the rectangle.
-	 * 
+	 *
 	 * @param {number} x The x-coordinate for the rectangle's top left corner
 	 * @param {number} y The y-coordinate for the rectangle's top left corner
 	 * @param {number} width The width of the rectangle
@@ -41,7 +42,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 
 	/**
 	 * Sets the properties of the rectangle from two vectors: one representing the position of the top left corner, another representing the width and height of the rectangle.
-	 * 
+	 *
 	 * @param {Math.Vector} position A Vector representing the position of the top left corner to set for the Rectangle
 	 * @param {Math.Vector} size A Vector representing the size (width and height) to set for the Rectangle
 	 * @return {Math.Rectangle} The resulting Rectangle object (itself)
@@ -61,7 +62,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 
 	/**
 	 * Copies the Rectangle object
-	 * 
+	 *
 	 * @return {Math.Rectangle} A copy of the Rectangle object (which can be modified without changing the original object)
 	 */
 	copy: function () {
@@ -70,7 +71,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 
 	/**
 	 * Moves the Rectangle by adding a value to its x-coordinate and another value to its y-coordinate.
-	 * 
+	 *
 	 * @param {number} x The value to add to the x-coordinate (can be negative)
 	 * @param {number} y The value to add to the y-coordinate (can be negative)
 	 * @return {Math.Rectangle} The resulting Rectangle object (itself)
@@ -87,7 +88,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 
 	/**
 	 * Moves the Rectangle to a fixed position by setting its x- and y-coordinates.
-	 * 
+	 *
 	 * @param {number} x The x-coordinate of the position to move the Rectangle to
 	 * @param {number} y The y-coordinate of the position to move the Rectangle to
 	 * @return {Math.Rectangle} The resulting Rectangle object (itself)
@@ -131,7 +132,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 	/**
 	 * Scales the Rectangle by multiplying the width and height values.
 	 * Please notice that, opposed to the Polygon and Line objects, the position of the Rectangle will not be changed by scaling it, since the position of the top left corner will not be scaled.
-	 * 
+	 *
 	 * @param {number} scaleH A factor with which to scale the Rectangle horizontally. If scaleH is undefined, both width and height will be scaled after this factor
 	 * @param {number} scaleV A factor with which to scale the Rectangle vertically
 	 * @return {Math.Rectangle} The resulting Rectangle object (itself)
@@ -175,7 +176,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 
 	/**
 	 * Creates a polygon with the same points as the rectangle.
-	 * 
+	 *
 	 * @return {Object} The created Polygon object
 	 */
 	getPolygon: function () {
@@ -184,7 +185,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 
 	/**
 	 * Fetches the Rectangles points.
-	 * 
+	 *
 	 * @return {Math.Vector[]} Array of points, in the following order: top left corner, top right corner, bottom right corner, bottom left corner
 	 */
 	getPoints: function () {
@@ -198,7 +199,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 
 	/**
 	 * Calculates the area of the Rectangle.
-	 * 
+	 *
 	 * @return {number} The area of the Rectangle
 	 */
 	getArea: function () {
@@ -207,7 +208,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 
 	/**
 	 * Calculates the diagonal length of the Rectangle
-	 * 
+	 *
 	 * @return {number} The diagonal length of the Rectangle
 	 */
 	getDiagonal: function () {
@@ -216,7 +217,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 
 	/**
 	 * Calculates the shortest distance from the Rectangle object to another geometric object
-	 * 
+	 *
 	 * @param {Math.Vector|Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object The object to calculate the distance to
 	 * @return {number} The distance
 	 */
@@ -226,7 +227,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 
 	/**
 	 * Checks whether or not the Rectangle contains another geometric object.
-	 * 
+	 *
 	 * @param {Math.Vector|Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object A geometric object to check
 	 * @return {boolean} True if the Rectangle contains the checked object, false if not
 	 */
@@ -252,7 +253,7 @@ new Class('Math.Rectangle', [Math.Vector], {
 
 	/**
 	 * Checks whether or not the Rectangle intersects with another geometric object.
-	 * 
+	 *
 	 * @param {Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object A geometric object to check
 	 * @return {boolean} True if the Polygon intersects with the checked object, false if not
 	 */

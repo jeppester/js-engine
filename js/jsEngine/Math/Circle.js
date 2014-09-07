@@ -1,4 +1,6 @@
-new Class('Math.Circle', [Mixin.Animatable], {
+nameSpace('Math');
+
+Math.Circle = createClass('Circle', [Mixin.Animatable], /** @lends Math.Circle.prototype */ {
 	/**
 	 * Constructor for Circle class, uses the set function, to set the properties of the circle.
 	 *
@@ -17,7 +19,6 @@ new Class('Math.Circle', [Mixin.Animatable], {
 	Circle: function (x, y, radius) {
 		this.set(x, y, radius);
 	},
-    /** @scope Math.Circle */
 
 	/**
 	 * Sets the properties of the circle.

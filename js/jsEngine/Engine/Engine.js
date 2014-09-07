@@ -2,7 +2,10 @@
 (function () {
 /*var main;/**/
 
-new Class('Engine', {
+/**
+ * @constructor
+ */
+Engine = createClass('Engine', /** @lends Engine.prototype */ {
 	/**
 	 * The constructor for the Engine class.
 	 *
@@ -56,11 +59,11 @@ new Class('Engine', {
 	 * 	                "drawMasks": false, // If Collidable object's masks should be drawn
 	 * 	                "enginePath": "js/jsEngine", // The path for the engine classes' directory
 	 * 	                "focusOnLoad": true, // Whether or not to focus the engine's window when the engine is ready
-	 * 	                "gameClassPath": "js/Game.js", // The path for the game's main class
+	 * 	                "gameClassPath": "js/Main.js", // The path for the game's main class
 	 * 	                "loadText": 'jsEngine loading...'
 	 * 	                "musicMuted": false, // If all music playback should be initially muted
 	 * 	                "pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
-	 *					"resetCursorOnEachFrame": true // Whether or not the mouse cursor should be reset on each frame
+	 * 	                "resetCursorOnEachFrame": true // Whether or not the mouse cursor should be reset on each frame
 	 * 	                "soundsMuted": false, // If all sound effects should be initially muted
 	 * 	                "themesPath": "themes", // The path to the themes-directory
 	 * 	                "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
@@ -77,7 +80,6 @@ new Class('Engine', {
 		this.options = options ? options: {};
 		this.load();
 	},
-	/** @scope Engine */
 
 	/**
 	 * Load all files and functions, that are needed before the engine can start.
@@ -143,7 +145,7 @@ new Class('Engine', {
 		this.autoResize = true;
 		this.autoResizeLimitToResolution = true;
 		this.cachedSoundCopies = 5;
-		this.gameClassPath = "js/Game.js";
+		this.gameClassPath = "js/Main.js";
 		this.loadText = "jsEngine loading...";
 		this.backgroundColor = "#000";
 		this.timeFactor = 1;
@@ -950,5 +952,6 @@ new Class('Engine', {
 		return b + c;
 	}
 });
+
 /** For making the engine var unreachable **/
 }());

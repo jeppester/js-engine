@@ -1,4 +1,6 @@
-new Class('Engine.Loader', {
+nameSpace('Engine');
+
+Engine.Loader = createClass('Loader', /** @lends Engine.Loader.prototype */ {
 	/**
 	 * Constructor for the Loader class.
 	 * This function will also create a load overlay which will not disappear until the hideOverlay is called.
@@ -35,12 +37,11 @@ new Class('Engine.Loader', {
 		this.loadOverlay.innerHTML = '<div id="loadOverlayText">' + engine.loadText + '</div>';
 		engine.arena.appendChild(this.loadOverlay);
 	},
-    /** @scope Engine.Loader */
 
 	/**
 	 * Fades out the load overlay (which is automatically created by Loader's constructor).
 	 * Remember to call this function, when your game is ready to be shown. Otherwise, the load overlay will never disappear.
-	 * 
+	 *
 	 * @param {function} callback A callback function to run when the overlay has finished fading out
 	 */
 	hideOverlay: function (callback) {
@@ -72,7 +73,7 @@ new Class('Engine.Loader', {
 
 	/**
 	 * Fetches an image from the Loader. This function will automatically be called by objects that implements the Sprite object.
-	 * 
+	 *
 	 * @param {string} resource The resource string of the image that should be fetched
 	 * @param {string} themeName The name of the theme from which the image should be fetched. If unset, the engine's default theme will be used
 	 * @return {HTMLImageElement} The image element corresponding to the resource string and theme
@@ -85,7 +86,7 @@ new Class('Engine.Loader', {
 
 	/**
 	 * Fetches a sound from the Loader.
-	 * 
+	 *
 	 * @param {string} resource The resource string of the sound that should be fetched
 	 * @param {string} themeName The name of the theme from which the sound should be fetched. If unset, the engine's default theme will be used
 	 * @return {Sound.Effect} A Sound object corresponding to the resource string and theme
@@ -98,7 +99,7 @@ new Class('Engine.Loader', {
 
 	/**
 	 * Fetches a music track from the Loader.
-	 * 
+	 *
 	 * @param {string} resource The resource string of the track that should be fetched
 	 * @param {string} themeName The name of the theme from which the track should be fetched. If unset, the engine's default theme will be used
 	 * @return {Sound.Music} A Music object corresponding to the resource string and theme
@@ -112,7 +113,7 @@ new Class('Engine.Loader', {
 	/**
 	 * Creates (or loads from cache) a mask for an image which is loaded by the Loader.
 	 * This function is automatically used by the Collidable object for fetching masks for collision checking.
-	 * 
+	 *
 	 * @param {string} resource The resource string of the image that should be fetched
 	 * @param {string} themeName The name of the theme from which the image should be fetched. If unset, the engine's default theme will be used
 	 * @return {HTMLCanvasElement} A generated mask (canvas element) for the image element corresponding to the resource string and theme
@@ -139,7 +140,7 @@ new Class('Engine.Loader', {
 
 	/**
 	 * Fetches a resource from the Loader's cache. Used by the getImage-, getSound- and getMusic functions.
-	 * 
+	 *
 	 * @private
 	 * @param {string} resource The resource string of the resource that should be fetched
 	 * @param {string} typeString A string representing the resource type, possible values are: "image", "sfx" and "music"
@@ -177,7 +178,7 @@ new Class('Engine.Loader', {
 
 	/**
 	 * Fetches all loaded images' resource strings (from all themes).
-	 * 
+	 *
 	 * @return {string[]} An array containing all loaded images' resource strings
 	 */
 	getImageSources: function () {
@@ -244,7 +245,7 @@ new Class('Engine.Loader', {
 
 	/**
 	 * Fetches all loaded music tracks' resource strings (from all themes).
-	 * 
+	 *
 	 * @return {string[]} An array containing all loaded music tracks' resource strings
 	 */
 	getAllMusic: function () {
@@ -268,8 +269,8 @@ new Class('Engine.Loader', {
 	},
 
 	/**
-	 * Loads JavaScript classes from files. The loaded classes' names must follow the following format: [ClassName].js 
-	 * 
+	 * Loads JavaScript classes from files. The loaded classes' names must follow the following format: [ClassName].js
+	 *
 	 * @param {string[]} paths An array of paths to JavaScripts - containing classes - which should be loaded
 	 * @return {boolean} True, when the classes has been loaded without any errors
 	 */
@@ -305,7 +306,7 @@ new Class('Engine.Loader', {
 
 	/**
 	 * Loads a list of themes. This function is automatically called by the Engine during its startup, for loading the themes specified by the launch options.
-	 * 
+	 *
 	 * @private
 	 * @param {string[]} themeNames An array of theme names (as strings) to load
 	 * @param {function} callback A callback function to run when all the themes has been loaded
@@ -371,7 +372,7 @@ new Class('Engine.Loader', {
 
 	/**
 	 * Loads resources to a theme. This function is used by loadThemes for caching the theme resources.
-	 * 
+	 *
 	 * @private
 	 * @param {Object} theme A theme object to load the resources to
 	 * @param {Object} object An object containing references to theme resources (like the subcategories of theme files)
@@ -563,7 +564,7 @@ new Class('Engine.Loader', {
 	/**
 	 * Generates a mask for an image specified by its resource string.
 	 * This function is used by getMask to fetch and cache masks for each of the loaded images.
-	 * 
+	 *
 	 * @param {string} resourceString A resource string specifying the image to generate a mask for
 	 * @param {number} alphaLimit An alpha value (0-255). Pixel having this alpha value or larger will become black on the mask, pixels with a value below the limit will become completely transparent
 	 * @return {HTMLCanvasElement} A canvas element with the generated mask
@@ -640,7 +641,7 @@ new Class('Engine.Loader', {
 
 	/**
 	 * Checks if all resources - of all themes - has been loaded. This check is automatically called any time a single resource has finished loading.
-	 * 
+	 *
 	 * @private
 	 * @return {boolean} Whether or not all themes' resources has been successfully loaded
 	 */

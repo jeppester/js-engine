@@ -1,4 +1,6 @@
-new Class('View.Rectangle', [Math.Rectangle, View.Child], {
+nameSpace('View');
+
+View.Rectangle = createClass('Rectangle', [Math.Rectangle, View.Child], /** @lends View.Rectangle.prototype */ {
 	/**
 	 * The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
 	 *

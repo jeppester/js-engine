@@ -1,10 +1,6 @@
-new Class('Mixin.Animatable', {
-	/**
-	 * @name Mixin.Animatable
-	 * @class
-	 */
-	/** @scope Animatable */
+nameSpace('Mixin');
 
+Mixin.Animatable = createClass( /** @lends Mixin.Animatable.prototype */ {
 	/**
 	 * Used for animating numeric properties of the owner of the function.
 	 * Available easing functions are:

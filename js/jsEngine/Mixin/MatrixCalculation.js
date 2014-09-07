@@ -1,4 +1,6 @@
-new Class('Mixin.MatrixCalculation', {
+nameSpace('Mixin');
+
+Mixin.MatrixCalculation = createClass( /** @lends Mixin.MatrixCalculation.prototype */ {
 	calculateLocalMatrix: function (object) {
 		var origin, scale, rotation, position;
 

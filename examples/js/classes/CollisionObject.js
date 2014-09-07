@@ -7,7 +7,7 @@ Requires:
 */
 
 // Create a new JsEngine class which extends the Sprite class
-new Class('CollisionObject', [View.GameObject], {
+createClass('CollisionObject', [View.GameObject], {
     // Create constructor (the constructors name is always the class name with lowercase first letter)
     CollisionObject: function (source, x, y, additionalProperties) {
         // Call the sprite constructor to fully extend the sprite and set all sprite properties

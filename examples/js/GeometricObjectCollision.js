@@ -1,4 +1,4 @@
-new Class('GeometricObjectCollision', {
+createClass('GeometricObjectCollision', {
     GeometricObjectCollision: function () {
         // Make a global reference to the game object
         game = this;

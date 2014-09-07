@@ -1,4 +1,6 @@
-new Class('View.Collidable', [View.Sprite], {
+nameSpace('View');
+
+View.Collidable = createClass('Collidable', [View.Sprite], /** @lends View.Collidable.prototype */ {
 	/**
 	 * The constructor for the Collidable class
 	 *

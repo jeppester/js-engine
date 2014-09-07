@@ -1,4 +1,6 @@
-new Class('View.GameObject', [View.Collidable], {
+nameSpace('View');
+
+View.GameObject = createClass('GameObject', [View.Collidable], /** @lends View.GameObject.prototype */ {
 	/**
 	 * The constructor for the GameObject class.
      *
@@ -36,7 +38,7 @@ new Class('View.GameObject', [View.Collidable], {
 		if (y === undefined) {throw new Error('Missing argument: y'); } //dev
 
 		this.Collidable(source, x, y, direction, additionalProperties);
-		
+
 		// Add object to right loop
 		this.loop = this.loop ? this.loop : engine.defaultActivityLoop;
 		this.loop.attachFunction(this, this.updatePosition);
@@ -48,7 +50,7 @@ new Class('View.GameObject', [View.Collidable], {
 
 	/**
 	 * Adds the game object's speed vector to its current position. This function is automatically run in each frame.
-	 * 
+	 *
 	 * @private
 	 */
 	updatePosition: function () {

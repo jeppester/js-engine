@@ -1,4 +1,6 @@
-new Class('Input.Keyboard', {
+nameSpace('Input');
+
+Input.Keyboard = createClass('Keyboard', /** @lends Input.Keyboard.prototype */ {
 	/**
 	 * Constructor for the Keyboard class
 	 *
@@ -31,11 +33,10 @@ new Class('Input.Keyboard', {
 			};
 		}
 	},
-    /** @scope Input.Keyboard */
 
 	/**
 	 * Registers every onkeydown event to the Keyboard object.
-	 * 
+	 *
 	 * @private
 	 * @param {KeyboardEvent} event Event object passed by the onkeydown event
 	 */
@@ -53,7 +54,7 @@ new Class('Input.Keyboard', {
 
 	/**
 	 * Registers every onkeyup event to the Keyboard object.
-	 * 
+	 *
 	 * @private
 	 * @param {KeyboardEvent} event Event object passed by the onkeyup event
 	 */
@@ -71,7 +72,7 @@ new Class('Input.Keyboard', {
 
 	/**
 	 * Checks if a given key is down.
-	 * 
+	 *
 	 * @param {number|string} key A charcode or a string representing the key
 	 * @return {boolean} True if the key is down, false if not
 	 */
@@ -87,7 +88,7 @@ new Class('Input.Keyboard', {
 
 	/**
 	 * Checks if a given key has been pressed (between last and current frame).
-	 * 
+	 *
 	 * @param {number|string} key A charcode or a string representing the key
 	 * @return {boolean} True if the key has been pressed, false if not
 	 */
@@ -103,7 +104,7 @@ new Class('Input.Keyboard', {
 
 	/**
 	 * Checks if a given key has been released (between last and current frame).
-	 * 
+	 *
 	 * @param {number|string} key A charcode or a string representing the key
 	 * @return {boolean} True if the key has been pressed, false if not
 	 */

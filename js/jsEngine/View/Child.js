@@ -1,4 +1,6 @@
-new Class('View.Child', [Mixin.Animatable], {
+nameSpace('View');
+
+View.Child = createClass('Child', [Mixin.Animatable], /** @lends View.Child.prototype */ {
     /**
      * @name View.Child
      * @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class

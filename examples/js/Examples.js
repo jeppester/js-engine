@@ -1,4 +1,4 @@
-new Class('Examples', {
+createClass('Examples', {
     Examples: function () {
         // Make a global reference to the game object
         game = this;

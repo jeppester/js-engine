@@ -1,4 +1,6 @@
-new Class('View.TextBlock', [Mixin.Animatable, View.Container], {
+nameSpace('View');
+
+View.TextBlock = createClass('TextBlock', [Mixin.Animatable, View.Container], /** @lends View.TextBlock.prototype */ {
 	/**
 	 * The constructor for the TextBlock class.
 	 *
@@ -147,7 +149,7 @@ new Class('View.TextBlock', [Mixin.Animatable, View.Container], {
 		});
 
 		this.lineHeight = additionalProperties && additionalProperties.lineHeight ? additionalProperties.lineHeight: this.font.match(/[0.0-9]+/) * 1.25;
-		
+
 		offset = OFFSET_TOP_LEFT;
 		if (additionalProperties && additionalProperties.offset) {
 			offset = additionalProperties.offset;
@@ -170,7 +172,7 @@ new Class('View.TextBlock', [Mixin.Animatable, View.Container], {
 
 	/**
 	 * Parses an offset global into an actual Math.Vector offset that fits the instance
-	 * 
+	 *
 	 * @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
 	 * @return {Math.Vector} The offset vector the offset global corresponds to for the instance
 	 */
@@ -204,7 +206,7 @@ new Class('View.TextBlock', [Mixin.Animatable, View.Container], {
 
 	/**
 	 * Breaks the TextBlock's text string into lines.
-	 * 
+	 *
 	 * @private
 	 */
 	stringToLines: function () {
@@ -254,7 +256,6 @@ new Class('View.TextBlock', [Mixin.Animatable, View.Container], {
 
 	/**
 	 * Calculates and sets the height of the cache canvas based on the number of lines, the font height and the line height
-	 * @return {[type]} [description]
 	 */
 	calculateCanvasHeight: function () {
 		this.bm.height = (this.lines.length - 1) * this.lineHeight + this.font.match(/[0.0-9]+/) * 1.25;
@@ -263,7 +264,7 @@ new Class('View.TextBlock', [Mixin.Animatable, View.Container], {
 
 	/**
 	 * Does the actual rendering of the text, and caches it (for huge performance gains). This function is automatically called each time a property which affects the rendering has been changed (via the right setter functions).
-	 * 
+	 *
 	 * @private
 	 */
 	cacheRendering: function () {
@@ -292,7 +293,7 @@ new Class('View.TextBlock', [Mixin.Animatable, View.Container], {
 			}
 		}
 
-		this.createHash();		
+		this.createHash();
 	},
 
 	createHash: function () {
@@ -307,7 +308,7 @@ new Class('View.TextBlock', [Mixin.Animatable, View.Container], {
 
 	/**
 	 * Checks if the objects is visible. This function runs before each draw to ensure that it is necessary
-	 * @return {boolean} Whether or not the object is visible (based on its size and opacity vars) 
+	 * @return {boolean} Whether or not the object is visible (based on its size and opacity vars)
 	 */
 	isVisible: function () {
 		// If sprites size has been modified to zero, do nothing
@@ -316,7 +317,7 @@ new Class('View.TextBlock', [Mixin.Animatable, View.Container], {
 
 	/**
 	 * Calculates a bounding non-rotated rectangle that the text block will fill when drawn.
-	 * 
+	 *
 	 * @private
 	 * @return {Rectangle} The bounding rectangle of the text block when drawn.
 	 */
