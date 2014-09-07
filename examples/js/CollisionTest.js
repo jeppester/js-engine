@@ -1,4 +1,4 @@
-createClass('CollisionTest', {
+CollisionTest = createClass('CollisionTest', {
     CollisionTest: function () {
         // Make a global reference to the game object
         game = this;

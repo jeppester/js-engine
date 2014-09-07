@@ -7,7 +7,7 @@ Requires:
 */
 
 // Create a new JsEngine class which extends the Sprite class
-createClass('MovableCharacter', [View.Sprite], {
+MovableCharacter = createClass('MovableCharacter', [View.Sprite], {
     // Create constructor (the constructors name is always the class name with lowercase first letter)
     MovableCharacter: function(x, y) {
         // Call the sprite constructor to fully extend the sprite and set all sprite properties
@@ -56,4 +56,3 @@ createClass('MovableCharacter', [View.Sprite], {
         }
     }
 });
-

@@ -1,4 +1,4 @@
-createClass('StressTest', {
+StressTest = createClass('StressTest', {
     StressTest: function () {
         // Make a global reference to the game object
         game = this;
@@ -90,4 +90,3 @@ createClass('StressTest', {
         }
     }
 });
-

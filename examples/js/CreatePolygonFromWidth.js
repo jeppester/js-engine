@@ -1,4 +1,4 @@
-createClass('CreatePolygonFromWidth', {
+CreatePolygonFromWidth = createClass('CreatePolygonFromWidth', {
     CreatePolygonFromWidth: function () {
         // Make a global reference to the game object
         main = this;

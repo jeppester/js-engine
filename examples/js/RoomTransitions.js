@@ -1,4 +1,4 @@
-createClass('RoomTransitions', {
+RoomTransitions = createClass('RoomTransitions', {
     RoomTransitions: function () {
         var i, room;
 
