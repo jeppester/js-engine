@@ -43,7 +43,7 @@
 
 		enginePath + '/Polyfill/requestAnimationFrame.js',
 
-		enginePath + '/Engine/Class.js',
+		enginePath + '/functions.js',
 		enginePath + '/Engine/Globals.js',
 		enginePath + '/Engine/Engine.js',
 		enginePath + '/Engine/Loader.js',

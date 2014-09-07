@@ -118,9 +118,8 @@ else {
 		$e . 'Extension/Object.js',
 
 		$e . 'Polyfill/requestAnimationFrame.js',
-		$e . 'Polyfill/Array.prototype.forEach.js',
 
-		$e . 'Engine/Class.js',
+		$e . 'functions.js',
 		$e . 'Engine/Globals.js',
 		$e . 'Engine/Engine.js',
 		$e . 'Engine/Loader.js',
