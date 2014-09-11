@@ -1,25 +1,25 @@
-StressTest = createClass('StressTest', {
-    StressTest: function () {
-        // Make a global reference to the game object
-        game = this;
+StressTest = function () {
+    // Make a global reference to the game object
+    game = this;
 
-        loader.hideOverlay(function () {
-            game.onLoaded();
-        });
+    loader.hideOverlay(function () {
+        game.onLoaded();
+    });
 
-        this.objectView = new View.Container();
-        this.hudView = new View.Container();
-        engine.currentRoom.addChildren(this.objectView, this.hudView);
+    this.objectView = new View.Container();
+    this.hudView = new View.Container();
+    engine.currentRoom.addChildren(this.objectView, this.hudView);
 
-        fpsCounter = new View.TextBlock('FPS: 0', 10, 10, 100, {color: '#FFF'});
-        objectCounter = new View.TextBlock('Objects: 0', 10, 30, 100, {color: '#FFF'});
-        this.hudView.addChildren(fpsCounter, objectCounter);
+    fpsCounter = new View.TextBlock('FPS: 0', 10, 10, 100, {color: '#FFF'});
+    objectCounter = new View.TextBlock('Objects: 0', 10, 30, 100, {color: '#FFF'});
+    this.hudView.addChildren(fpsCounter, objectCounter);
 
-        engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
-        engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
-        engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
-    },
+    engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
+    engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
+    engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
+};
 
+StressTest.prototype.import({
     onLoaded: function() {
         this.addObjects(2000);
     },

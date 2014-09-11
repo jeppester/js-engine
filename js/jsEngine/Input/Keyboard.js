@@ -1,39 +1,39 @@
 nameSpace('Input');
 
-Input.Keyboard = createClass('Keyboard', /** @lends Input.Keyboard.prototype */ {
-	/**
-	 * Constructor for the Keyboard class
-	 *
-     * @name Input.Keyboard
-     * @class A class that eases checking of the current state of all keys.
-	 */
-	Keyboard: function () {
-		var key;
+/**
+ * Constructor for the Keyboard class
+ *
+ * @name Input.Keyboard
+ * @class A class that eases checking of the current state of all keys.
+ */
+Input.Keyboard = function () {
+	var key;
 
-		document.addEventListener('keydown', function (event) {
-			keyboard.onKeyDown(event);
+	document.addEventListener('keydown', function (event) {
+		keyboard.onKeyDown(event);
 
-			if (engine.preventDefaultKeyboard) {
-				event.preventDefault();
-			}
-		}, false);
-		document.addEventListener('keyup', function (event) {
-			keyboard.onKeyUp(event);
-
-			if (engine.preventDefaultKeyboard) {
-				event.preventDefault();
-			}
-		}, false);
-
-		// Create key array
-		this.keys = new Array(200);
-		for (key = 0; key < this.keys.length; key ++) {
-			this.keys[key] = {
-				events: []
-			};
+		if (engine.preventDefaultKeyboard) {
+			event.preventDefault();
 		}
-	},
+	}, false);
+	document.addEventListener('keyup', function (event) {
+		keyboard.onKeyUp(event);
 
+		if (engine.preventDefaultKeyboard) {
+			event.preventDefault();
+		}
+	}, false);
+
+	// Create key array
+	this.keys = new Array(200);
+	for (key = 0; key < this.keys.length; key ++) {
+		this.keys[key] = {
+			events: []
+		};
+	}
+};
+
+Input.Keyboard.prototype.import(/** @lends Input.Keyboard.prototype */ {
 	/**
 	 * Registers every onkeydown event to the Keyboard object.
 	 *

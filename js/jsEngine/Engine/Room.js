@@ -1,36 +1,38 @@
 nameSpace('Engine');
 
-Engine.Room = createClass('Room', [View.Container], /** @lends Engine.Room.prototype */ {
-	/**
-	 * Constructor for the Room class
-	 *
-	 * @name Engine.Room
-	 * @class A room is the space wherein game objects reside.
-	 *        A room holds a list of objects to draw, and a list of custom loops.
-	 *        If a room is set as the engine's current room (engine.currentRoom); its objects will be drawn, and its custom loops will be executed each time the engine's main loop executes.
-	 *        The engine also has a master room (engine.masterRoom), which is persistent throughout a game (this is the room where you would add persistent objects and custom loops)
-	 * @augments View.Container
-	 *
-	 * @property {string} name The name of the room
-	 * @property {function} onEntered A function which will be executed when the room is entered
-	 * @property {function} onLeft A function which will be executed when the room is left
-	 * @property {Object} loops An object containing the custom loops which has been added to the room
-	 *
-	 * @param {string} name The name of the room. You can use this name later, to enter the room or to remove it
-	 * @param {function} [onEntered=function () {}] A function to run when the room is entered (set as the engine's current room)
-	 * @param {function} [onLeft=function () {}] A function to run when the room is left
-	 */
-	Room: function (name, onEntered, onLeft) {
-		this.Container();
-		this.name = name ? name : engine.roomList.length;
-		this.onEntered = onEntered !== undefined ? onEntered : function () {};
-		this.onLeft = onLeft !== undefined ? onLeft : function () {};
-		this.loops = {};
-		this.paused = false;
-		this.addLoop('eachFrame', new Engine.CustomLoop());
-		engine.addRoom(this);
-	},
+/**
+ * Constructor for the Room class
+ *
+ * @name Engine.Room
+ * @class A room is the space wherein game objects reside.
+ *        A room holds a list of objects to draw, and a list of custom loops.
+ *        If a room is set as the engine's current room (engine.currentRoom); its objects will be drawn, and its custom loops will be executed each time the engine's main loop executes.
+ *        The engine also has a master room (engine.masterRoom), which is persistent throughout a game (this is the room where you would add persistent objects and custom loops)
+ * @augments View.Container
+ *
+ * @property {string} name The name of the room
+ * @property {function} onEntered A function which will be executed when the room is entered
+ * @property {function} onLeft A function which will be executed when the room is left
+ * @property {Object} loops An object containing the custom loops which has been added to the room
+ *
+ * @param {string} name The name of the room. You can use this name later, to enter the room or to remove it
+ * @param {function} [onEntered=function () {}] A function to run when the room is entered (set as the engine's current room)
+ * @param {function} [onLeft=function () {}] A function to run when the room is left
+ */
+Engine.Room = function (name, onEntered, onLeft) {
+	View.Container.call(this);
+	this.name = name ? name : engine.roomList.length;
+	this.onEntered = onEntered !== undefined ? onEntered : function () {};
+	this.onLeft = onLeft !== undefined ? onLeft : function () {};
+	this.loops = {};
+	this.paused = false;
+	this.addLoop('eachFrame', new Engine.CustomLoop());
+	engine.addRoom(this);
+};
 
+Engine.Room.prototype = Object.create(View.Container.prototype);
+
+Engine.Room.prototype.import(/** @lends Engine.Room.prototype */ {
 	/**
 	 * Prevents all the room's loops from being executed, this function is used by the engine before making room transitions
 	 */

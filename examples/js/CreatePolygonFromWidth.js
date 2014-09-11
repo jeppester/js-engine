@@ -1,13 +1,13 @@
-CreatePolygonFromWidth = createClass('CreatePolygonFromWidth', {
-    CreatePolygonFromWidth: function () {
-        // Make a global reference to the game object
-        main = this;
+CreatePolygonFromWidth = function () {
+    // Make a global reference to the game object
+    main = this;
 
-        loader.hideOverlay(function () {
-          main.onLoaded();
-        })
-    },
+    loader.hideOverlay(function () {
+      main.onLoaded();
+    });
+};
 
+CreatePolygonFromWidth.prototype.import({
     onLoaded: function() {
         var line, tests, t, i;
 

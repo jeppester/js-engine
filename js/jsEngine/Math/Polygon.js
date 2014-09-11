@@ -1,20 +1,20 @@
 nameSpace('Math');
 
-Math.Polygon = createClass('Polygon', /** @lends Math.Polygon.prototype */ {
-	/**
-	 * The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
-	 *
-     * @name Math.Polygon
-     * @class A math class which is used for handling polygons
-     *
-     * @property {Math.Vector[]} points An array of the polygon's points. Each point is connect to the previous- and next points, and the first and last points are connected
-     *
-	 * @param {Math.Vector[]} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
-	 */
-	Polygon: function (points) {
-		this.setFromPoints(points);
-	},
+/**
+ * The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
+ *
+ * @name Math.Polygon
+ * @class A math class which is used for handling polygons
+ *
+ * @property {Math.Vector[]} points An array of the polygon's points. Each point is connect to the previous- and next points, and the first and last points are connected
+ *
+ * @param {Math.Vector[]} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
+ */
+Math.Polygon = function (points) {
+	this.setFromPoints(points);
+},
 
+Math.Polygon.prototype.import(/** @lends Math.Polygon.prototype */ {
 	/**
 	 * Sets the points of the polygon from Vector's.
 	 *
@@ -67,7 +67,7 @@ Math.Polygon = createClass('Polygon', /** @lends Math.Polygon.prototype */ {
 		coords = [];
 		len = this.points.length;
 		for (i = 0; i < len; i ++) {
-			coords.push(this.points[i].x, this.points[i].y)
+			coords.push(this.points[i].x, this.points[i].y);
 		}
 
 		return coords;
@@ -94,7 +94,7 @@ Math.Polygon = createClass('Polygon', /** @lends Math.Polygon.prototype */ {
 	 * @return {Math.Polygon} The resulting Polygon object (itself)
 	 */
 	add: function (vector) {
-		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type Vector'); } //dev
+		if (!vector instanceof Math.Vector) {throw new Error('Argument vector should be of type Vector'); } //dev
 
 		var i;
 
@@ -223,21 +223,21 @@ Math.Polygon = createClass('Polygon', /** @lends Math.Polygon.prototype */ {
 		dist = 2E+10308;
 		lines = this.getLines();
 
-		if (object.implements(Math.Vector)) {
+		if (object instanceof Math.Vector) {
 			for (i = 0; i < lines.length; i++) {
 				dist = Math.min(dist, lines[i].getDistance(object));
 				if (dist < 0) {break; }
 			}
 			return dist;
 		}
-		else if (object.implements(Math.Line)) {
+		else if (object instanceof Math.Line) {
 			for (i = 0; i < lines.length; i++) {
 				dist = Math.min(dist, lines[i].getDistance(object));
 				if (dist < 0) {break; }
 			}
 			return dist;
 		}
-		else if (object.implements(Math.Circle)) {
+		else if (object instanceof Math.Circle) {
 			pVector = new Math.Vector(object.x, object.y);
 
 			for (i = 0; i < lines.length; i++) {
@@ -247,10 +247,10 @@ Math.Polygon = createClass('Polygon', /** @lends Math.Polygon.prototype */ {
 
 			return Math.max(0, dist - object.radius);
 		}
-		else if (object.implements(Math.Rectangle)) {
+		else if (object instanceof Math.Rectangle) {
 			return object.getDistance(this);
 		}
-		else if (object.implements(Math.Polygon)) {
+		else if (object instanceof Math.Polygon) {
 			objLines = object.getLines();
 
 			for (i = 0; i < lines.length; i++) {
@@ -275,13 +275,13 @@ Math.Polygon = createClass('Polygon', /** @lends Math.Polygon.prototype */ {
 	 * @return {boolean} True if the Polygon contains the checked object, false if not
 	 */
 	contains: function (object) {
-		if (object.implements(Math.Vector)) {
+		if (object instanceof Math.Vector) {
 			return this.intersects(new Math.Line().setFromCoordinates(-123456, -98765, object.x, object.y), true) % 2;
 		}
-		else if (object.implements(Math.Line)) {
+		else if (object instanceof Math.Line) {
 			return !this.intersects(object) && this.contains(object.a);
 		}
-		else if (object.implements(Math.Circle)) {
+		else if (object instanceof Math.Circle) {
 			// Check that the circle's center is placed inside the Polygon
 			if (this.contains(new Math.Vector(object.x, object.y))) {
 				// If so, return whether or not, the circle does not intersect the polygon
@@ -291,10 +291,10 @@ Math.Polygon = createClass('Polygon', /** @lends Math.Polygon.prototype */ {
 				return false;
 			}
 		}
-		else if (object.implements(Math.Rectangle)) {
+		else if (object instanceof Math.Rectangle) {
 			return this.contains(object.getPolygon());
 		}
-		else if (object.implements(Math.Polygon)) {
+		else if (object instanceof Math.Polygon) {
 			return object.points.length > 0 && !this.intersects(object) && this.contains(object.points[0]);
 		}
 		else { //dev
@@ -317,7 +317,7 @@ Math.Polygon = createClass('Polygon', /** @lends Math.Polygon.prototype */ {
 			intersectionCount = 0;
 		}
 
-		if (object.implements(Math.Line)) {
+		if (object instanceof Math.Line) {
 			lines = this.getLines();
 
 			for (i = 0; i < lines.length; i++) {
@@ -333,7 +333,7 @@ Math.Polygon = createClass('Polygon', /** @lends Math.Polygon.prototype */ {
 				}
 			}
 		}
-		else if (object.implements(Math.Circle)) {
+		else if (object instanceof Math.Circle) {
 			// Check if each line intersects with the circle
 			lines = this.getLines();
 
@@ -348,10 +348,10 @@ Math.Polygon = createClass('Polygon', /** @lends Math.Polygon.prototype */ {
 				}
 			}
 		}
-		else if (object.implements(Math.Rectangle)) {
+		else if (object instanceof Math.Rectangle) {
 			return this.intersects(object.getPolygon());
 		}
-		else if (object.implements(Math.Polygon)) {
+		else if (object instanceof Math.Polygon) {
 			lines = this.getLines();
 			oLines = object.getLines();
 

@@ -1,34 +1,33 @@
 nameSpace('Sound');
 
-Sound.Effect = createClass('Effect', /** @lends Sound.Effect.prototype */ {
-	/**
-	 * Constructor for the sound class
-	 *
-     * @name Sound.Effect
-     * @class A wrapper-class for audio-elements. A Sound object stores multiple copies of the same sound to enable multiple simultaneous playbacks, and provides functions for controlling (start, stop) each playback.
-     *
-     * @property {HTMLAudioElement} source The audio element which is used as the source of the music object
-     *
-	 * @param {HTMLAudioElement} audioElement The Audio element to use as source for the sound object
-     */
-	Effect: function (audioElement) {
-		if (audioElement === undefined) {throw new Error('Missing argument: audioElement'); } //dev
-		if (audioElement.toString() !== "[object HTMLAudioElement]") {throw new Error('Argument audioElement has to be of type HTMLAudioElement'); } //dev
+/**
+ * Constructor for the sound class
+ *
+ * @name Sound.Effect
+ * @class A wrapper-class for audio-elements. A Sound object stores multiple copies of the same sound to enable multiple simultaneous playbacks, and provides functions for controlling (start, stop) each playback.
+ *
+ * @property {HTMLAudioElement} source The audio element which is used as the source of the music object
+ *
+ * @param {HTMLAudioElement} audioElement The Audio element to use as source for the sound object
+ */
+Sound.Effect = function (audioElement) {
+	if (audioElement === undefined) {throw new Error('Missing argument: audioElement'); } //dev
+	if (audioElement.toString() !== "[object HTMLAudioElement]") {throw new Error('Argument audioElement has to be of type HTMLAudioElement'); } //dev
 
-		var snd;
+	var snd;
 
-		this.source = audioElement;
-		this.playbackId = 0;
+	this.source = audioElement;
+	this.playbackId = 0;
 
-		// When ready for playback, prepare copies of the element, to be used for simultaneous playback
-		this.elements = [];
-		snd = this;
-		this.source.addEventListener("canplaythrough", function () {
-			snd.cacheCopies();
-		}, false);
-	},
-    /** @scope Sound.Effect */
+	// When ready for playback, prepare copies of the element, to be used for simultaneous playback
+	this.elements = [];
+	snd = this;
+	this.source.addEventListener("canplaythrough", function () {
+		snd.cacheCopies();
+	}, false);
+};
 
+Sound.Effect.prototype.import(/** @lends Sound.Effect.prototype */ {
 	/**
 	 * Caches copies of the sound element, to enable simultaneous playback of the sound.
 	 * This function is automatically called when the source sound is ready for playback.

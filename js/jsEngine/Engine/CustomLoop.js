@@ -1,43 +1,43 @@
 nameSpace('Engine');
 
-Engine.CustomLoop = createClass('CustomLoop', /** @lends Engine.CustomLoop.prototype */ {
-	/**
-     * @name Engine.CustomLoop
-	 * @class A loop class.
-     *        Contains a list of functions to run each time the loop executes.
-     *        For the loop to be executed, it will have to be added to the current room via the Engine.currentRoom.addLoop.
-     *        A loop also has it's own time that is stopped whenever the loop is not executed. This makes it possible to schedule a function execution that will be "postponed" if the loop gets paused.
-     *
-     * @property {number} framesPerExecution The number of frames between each execution of the custom loop
-     * @property {function} maskFunction A function that will be run before each execution, if the function returns true the execution proceeds as planned, if not, the execution will not be run
-     * @property {number} time The "local" time of the loop. The loop's time is stopped when the loop is not executed.
-     * @property {number} execTime The time it took to perform the last execution
-     *
-	 * @param {number} [framesPerExecution=1] The number of frames between each execution of the custom loop
-	 * @param {function} [maskFunction=function(){}] A function that will be run before each execution, if the function returns true the execution proceeds as planned, if not, the execution will not be run
-	 */
-	CustomLoop: function (framesPerExecution, maskFunction) {
-		this.framesPerExecution = framesPerExecution === undefined ? 1 : framesPerExecution;
-		this.maskFunction = maskFunction === undefined ? function () {return true; } : maskFunction;
+/**
+ * @name Engine.CustomLoop
+ * @class A loop class.
+ *        Contains a list of functions to run each time the loop executes.
+ *        For the loop to be executed, it will have to be added to the current room via the Engine.currentRoom.addLoop.
+ *        A loop also has it's own time that is stopped whenever the loop is not executed. This makes it possible to schedule a function execution that will be "postponed" if the loop gets paused.
+ *
+ * @property {number} framesPerExecution The number of frames between each execution of the custom loop
+ * @property {function} maskFunction A function that will be run before each execution, if the function returns true the execution proceeds as planned, if not, the execution will not be run
+ * @property {number} time The "local" time of the loop. The loop's time is stopped when the loop is not executed.
+ * @property {number} execTime The time it took to perform the last execution
+ *
+ * @param {number} [framesPerExecution=1] The number of frames between each execution of the custom loop
+ * @param {function} [maskFunction=function(){}] A function that will be run before each execution, if the function returns true the execution proceeds as planned, if not, the execution will not be run
+ */
+Engine.CustomLoop = function (framesPerExecution, maskFunction) {
+	this.framesPerExecution = framesPerExecution === undefined ? 1 : framesPerExecution;
+	this.maskFunction = maskFunction === undefined ? function () {return true; } : maskFunction;
 
-		// Attached functions
-		this.functionsQueue = [];
-		this.functions = [];
+	// Attached functions
+	this.functionsQueue = [];
+	this.functions = [];
 
-		// Scheduled executions
-		this.executionsQueue = [];
-		this.executions = [];
+	// Scheduled executions
+	this.executionsQueue = [];
+	this.executions = [];
 
-		// Animations
-		this.animations = [];
+	// Animations
+	this.animations = [];
 
-		// Time tracking
-		this.lastFrame = engine.frames;
-		this.last = engine.now ? engine.now : new Date().getTime();
-		this.time = 0;
-		this.execTime = 0;
-	},
+	// Time tracking
+	this.lastFrame = engine.frames;
+	this.last = engine.now ? engine.now : new Date().getTime();
+	this.time = 0;
+	this.execTime = 0;
+};
 
+Engine.CustomLoop.prototype.import(/** @lends Engine.CustomLoop.prototype */ {
 	/**
 	 * Attaches a function to the loop.
 	 *

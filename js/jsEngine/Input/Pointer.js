@@ -1,61 +1,61 @@
 nameSpace('Input');
 
-Input.Pointer = createClass('Pointer', /** @lends Input.Pointer.prototype */ {
-	/**
-	 * Constructor for the Pointer class
-	 *
-     * @name Input.Pointer
-     * @class A class that eases the use of mouse and touch, by providing functions for checking the current state of both.
-	 */
-	Pointer: function () {
-		var button;
+/**
+ * Constructor for the Pointer class
+ *
+ * @name Input.Pointer
+ * @class A class that eases the use of mouse and touch, by providing functions for checking the current state of both.
+ */
+Input.Pointer = function () {
+	var button;
 
-		if (engine.host.hasTouch) {
-			// Add listeners for touch events
-			document.addEventListener('touchstart', function (event) {
-				pointer.onTouchStart(event);
-			}, false);
-			document.addEventListener('touchend', function (event) {
-				pointer.onTouchEnd(event);
-			}, false);
-			document.addEventListener('touchmove', function (event) {
-				pointer.onTouchMove(event);
-			}, false);
-		}
-		else {
-			// Add listeners for mouse events
-			document.addEventListener('mousedown', function (event) {
-				pointer.onMouseDown(event);
-			}, false);
-			document.addEventListener('mouseup', function (event) {
-				pointer.onMouseUp(event);
-			}, false);
-			document.addEventListener('mousemove', function (event) {
-				engine.host.hasMouse = true;
-				pointer.onMouseMove(event);
-			}, false);
-		}
+	if (engine.host.hasTouch) {
+		// Add listeners for touch events
+		document.addEventListener('touchstart', function (event) {
+			pointer.onTouchStart(event);
+		}, false);
+		document.addEventListener('touchend', function (event) {
+			pointer.onTouchEnd(event);
+		}, false);
+		document.addEventListener('touchmove', function (event) {
+			pointer.onTouchMove(event);
+		}, false);
+	}
+	else {
+		// Add listeners for mouse events
+		document.addEventListener('mousedown', function (event) {
+			pointer.onMouseDown(event);
+		}, false);
+		document.addEventListener('mouseup', function (event) {
+			pointer.onMouseUp(event);
+		}, false);
+		document.addEventListener('mousemove', function (event) {
+			engine.host.hasMouse = true;
+			pointer.onMouseMove(event);
+		}, false);
+	}
 
-		// Setup mouse device
-		this.mouse = new Math.Vector();
-		this.mouse.window = new Math.Vector();
-		this.mouse.buttons = new Array(11);
-		for (button = 0; button < this.mouse.buttons.length; button++) {
-			this.mouse.buttons[button] = new Math.Vector();
-			this.mouse.buttons[button].events = new Array(2);
-		}
-		this.mouse.lastMoved = 0;
+	// Setup mouse device
+	this.mouse = new Math.Vector();
+	this.mouse.window = new Math.Vector();
+	this.mouse.buttons = new Array(11);
+	for (button = 0; button < this.mouse.buttons.length; button++) {
+		this.mouse.buttons[button] = new Math.Vector();
+		this.mouse.buttons[button].events = new Array(2);
+	}
+	this.mouse.lastMoved = 0;
 
-		// Setup touches
-		this.touches = new Array(10);
-		for (button = 0; button < this.touches.length; button++) {
-			this.touches[button] = new Math.Vector();
-			this.touches[button].x = undefined;
-			this.touches[button].y = undefined;
-			this.touches[button].events = new Array(2);
-		}
-	},
+	// Setup touches
+	this.touches = new Array(10);
+	for (button = 0; button < this.touches.length; button++) {
+		this.touches[button] = new Math.Vector();
+		this.touches[button].x = undefined;
+		this.touches[button].y = undefined;
+		this.touches[button].events = new Array(2);
+	}
+};
 
+Input.Pointer.prototype.import(/** @lends Input.Pointer.prototype */ {
 	/**
 	 * Registers every onmousedown event to the Mouse object.
 	 *

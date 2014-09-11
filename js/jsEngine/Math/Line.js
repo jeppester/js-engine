@@ -1,25 +1,29 @@
 nameSpace('Math');
 
-Math.Line = createClass('Line',[Mixin.Animatable], /** @lends Math.Line.prototype */ {
-	/**
-	 * Constructor for the Line class. Uses setFromVectors to create the line's start and end points
-	 *
-     * @name Math.Line
-     * @class A math class which is used for handling lines
-     * @augments Mixin.Animatable
-     *
-     * @property {Vector} a The line's starting point
-     * @property {Vector} b The line's ending point
-     *
-	 * @param {Vector} startVector A Vector representing the start point of the line
-	 * @param {Vector} endVector A Vector representing the end point of the line
-	 */
-	Line: function (startVector, endVector) {
-		startVector = startVector !== undefined ? startVector : new Math.Vector();
-		endVector = endVector !== undefined ? endVector : new Math.Vector();
+/**
+ * Constructor for the Line class. Uses setFromVectors to create the line's start and end points
+ *
+ * @name Math.Line
+ * @class A math class which is used for handling lines
+ * @augments Mixin.Animatable
+ *
+ * @property {Vector} a The line's starting point
+ * @property {Vector} b The line's ending point
+ *
+ * @param {Vector} startVector A Vector representing the start point of the line
+ * @param {Vector} endVector A Vector representing the end point of the line
+ */
+Math.Line = function (startVector, endVector) {
+	startVector = startVector !== undefined ? startVector : new Math.Vector();
+	endVector = endVector !== undefined ? endVector : new Math.Vector();
 
-		this.setFromVectors(startVector, endVector);
-	},
+	this.setFromVectors(startVector, endVector);
+};
+
+Math.Line.prototype.import(Mixin.Animatable);
+
+Math.Line.prototype.import(/** @lends Math.Line.prototype */ {
+
 
 	/**
 	 * Sets the start- and end points from two Vector's.
@@ -29,8 +33,8 @@ Math.Line = createClass('Line',[Mixin.Animatable], /** @lends Math.Line.prototyp
 	 * @return {Math.Line} The resulting Line object (itself)
 	 */
 	setFromVectors: function (startVector, endVector) {
-		if (!startVector.implements(Math.Vector)) {throw new Error('Argument startVector should be of type: Vector'); } //dev
-		if (!endVector.implements(Math.Vector)) {throw new Error('Argument endVector should be of type: Vector'); } //dev
+		if (!startVector instanceof Math.Vector) {throw new Error('Argument startVector should be of type: Vector'); } //dev
+		if (!endVector instanceof Math.Vector) {throw new Error('Argument endVector should be of type: Vector'); } //dev
 
 		this.a = startVector;
 		this.b = endVector;
@@ -171,7 +175,7 @@ Math.Line = createClass('Line',[Mixin.Animatable], /** @lends Math.Line.prototyp
 	 * @return {boolean} True if the checked object intersects with the line, false if not
 	 */
 	intersects: function (object) {
-		if (object.implements(Math.Line)) {
+		if (object instanceof Math.Line) {
 			var c1, c2;
 
 			c1 = (this.b.x - this.a.x) * (object.a.y - this.b.y) - (object.a.x - this.b.x) * (this.b.y - this.a.y);
@@ -184,13 +188,13 @@ Math.Line = createClass('Line',[Mixin.Animatable], /** @lends Math.Line.prototyp
 
 			return c1 * c2 < 0;
 		}
-		else if (object.implements(Math.Circle)) {
+		else if (object instanceof Math.Circle) {
 			return object.intersects(this);
 		}
-		else if (object.implements(Math.Rectangle)) {
+		else if (object instanceof Math.Rectangle) {
 			return object.getPolygon().intersects(this);
 		}
-		else if (object.implements(Math.Polygon)) {
+		else if (object instanceof Math.Polygon) {
 			return object.intersects(this);
 		}
 		else { //dev
@@ -216,7 +220,7 @@ Math.Line = createClass('Line',[Mixin.Animatable], /** @lends Math.Line.prototyp
 	getDistance: function (object) {
 		var ba, ab, bc, ac;
 
-		if (object.implements(Math.Vector)) {
+		if (object instanceof Math.Vector) {
 			// Get all possibly used vectors
 			ba = this.a.copy().subtract(this.b);
 			ab = this.b.copy().subtract(this.a);
@@ -235,7 +239,7 @@ Math.Line = createClass('Line',[Mixin.Animatable], /** @lends Math.Line.prototyp
 				return Math.abs(ab.getCross(ac) / ab.getLength());
 			}
 		}
-		else if (object.implements(Math.Line)) {
+		else if (object instanceof Math.Line) {
 			// If the lines intersect, return 0
 			if (this.intersects(object)) {
 				return 0;
@@ -245,10 +249,10 @@ Math.Line = createClass('Line',[Mixin.Animatable], /** @lends Math.Line.prototyp
 				return Math.min(this.getDistance(object.a), this.getDistance(object.b), object.getDistance(this.a), object.getDistance(this.b));
 			}
 		}
-		else if (object.implements(Math.Rectangle)) {
+		else if (object instanceof Math.Rectangle) {
 			return object.getDistance(this);
 		}
-		else if (object.implements(Math.Circle)) {
+		else if (object instanceof Math.Circle) {
 			return object.getDistance(this);
 		}
 		else { //dev
@@ -300,7 +304,7 @@ Math.Line = createClass('Line',[Mixin.Animatable], /** @lends Math.Line.prototyp
 				points[i] = new Math.Vector(
 					this.a.x + width * Math.cos(angle),
 					this.a.y + width * Math.sin(angle)
-				)
+				);
 			}
 
 			for (i = 0; i < 16; i ++) {
@@ -308,7 +312,7 @@ Math.Line = createClass('Line',[Mixin.Animatable], /** @lends Math.Line.prototyp
 				points[i + 16] = new Math.Vector(
 					this.b.x + width * Math.cos(angle),
 					this.b.y + width * Math.sin(angle)
-				)
+				);
 			}
 
 			return new Math.Polygon(points);

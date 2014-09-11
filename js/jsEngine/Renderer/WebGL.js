@@ -1,45 +1,47 @@
 nameSpace('Renderer');
 
-Renderer.WebGL = createClass('WebGL', [Mixin.MatrixCalculation], /** @lends Renderer.WebGL.prototype */ {
-	WebGL: function (canvas) {
-		var gl, options;
+Renderer.WebGL = function (canvas) {
+	var gl, options;
 
-		this.canvas = canvas;
+	this.canvas = canvas;
 
-		// Cache variables
-		this.cache = {
-			currentAlpha: undefined,
-			currentResolution: {
-				width: 0,
-				height: 0,
-			}
-		};
+	// Cache variables
+	this.cache = {
+		currentAlpha: undefined,
+		currentResolution: {
+			width: 0,
+			height: 0,
+		}
+	};
 
-		this.programs = {};
-		this.currentProgram = false;
+	this.programs = {};
+	this.currentProgram = false;
 
-		// Get gl context
-		options = {
-			premultipliedAlpha: false,
-			alpha: false,
-		};
-		this.gl = canvas.getContext('webgl', options) || canvas.getContext('experimental-webgl', options);
-		gl = this.gl;
+	// Get gl context
+	options = {
+		premultipliedAlpha: false,
+		alpha: false,
+	};
+	this.gl = canvas.getContext('webgl', options) || canvas.getContext('experimental-webgl', options);
+	gl = this.gl;
 
-		// Optimize options
-		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+	// Optimize options
+	gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
 
-		// Set default blending
-		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		gl.enable(gl.BLEND);
+	// Set default blending
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	gl.enable(gl.BLEND);
 
-		// Init shader programs
-		this.programs = {
-			texture: new Renderer.WebGL.TextureShaderProgram(gl),
-			color: new Renderer.WebGL.ColorShaderProgram(gl),
-		};
-	},
+	// Init shader programs
+	this.programs = {
+		texture: new Renderer.WebGL.TextureShaderProgram(gl),
+		color: new Renderer.WebGL.ColorShaderProgram(gl),
+	};
+};
 
+Renderer.WebGL.prototype.import(Mixin.MatrixCalculation);
+
+Renderer.WebGL.prototype.import(/** @lends Renderer.WebGL.prototype */ {
 	setProgram: function (program) {
 		if (this.currentProgram !== program) {
 			var gl;

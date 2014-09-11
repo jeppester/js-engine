@@ -1,6 +1,6 @@
 nameSpace('Mixin');
 
-Mixin.Animatable = createClass( /** @lends Mixin.Animatable.prototype */ {
+Mixin.Animatable = {
 	/**
 	 * Used for animating numeric properties of the owner of the function.
 	 * Available easing functions are:
@@ -186,4 +186,4 @@ Mixin.Animatable = createClass( /** @lends Mixin.Animatable.prototype */ {
 
 		room.loops[loopName].schedule(this, func, delay);
 	},
-});
+};

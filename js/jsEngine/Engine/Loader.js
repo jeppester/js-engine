@@ -1,43 +1,43 @@
 nameSpace('Engine');
 
-Engine.Loader = createClass('Loader', /** @lends Engine.Loader.prototype */ {
-	/**
-	 * Constructor for the Loader class.
-	 * This function will also create a load overlay which will not disappear until the hideOverlay is called.
-	 * Therefore, remember to call hideOverlay, when your game is ready to be shown.
-	 *
-     * @name Engine.Loader
-     * @class Class for loading and storing resources.
-     *        On engine startup a Loader object is instantiated to the global variable "loader".
-     *        This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
-	 */
-	Loader: function () {
-		this.images = {};
-		this.loaded = {
-			classes: []
-		};
-		this.themes = {
-            External: {
-                "name":"External",
-                "inherit":[],
-                "music":{},
-                "sfx":{},
-                "images":{},
-                "masks": {},
-                "textures": {},
-                "resourcesCount": 0,
-                "resourcesLoaded": 0
-            }
-        };
+/**
+ * Constructor for the Loader class.
+ * This function will also create a load overlay which will not disappear until the hideOverlay is called.
+ * Therefore, remember to call hideOverlay, when your game is ready to be shown.
+ *
+ * @name Engine.Loader
+ * @class Class for loading and storing resources.
+ *        On engine startup a Loader object is instantiated to the global variable "loader".
+ *        This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
+ */
+Engine.Loader = function () {
+	this.images = {};
+	this.loaded = {
+		classes: []
+	};
+	this.themes = {
+		External: {
+			"name":"External",
+			"inherit":[],
+			"music":{},
+			"sfx":{},
+			"images":{},
+			"masks": {},
+			"textures": {},
+			"resourcesCount": 0,
+			"resourcesLoaded": 0
+		}
+	};
 
-		// Make load overlay
-		this.loadOverlay = document.createElement('div');
-		this.loadOverlay.setAttribute('style', 'border: 0;position: absolute;top: 0;left: 0;width: 100%;height: 100%;z-index: 100;opacity: 1;');
-		this.loadOverlay.id = "loadOverlay";
-		this.loadOverlay.innerHTML = '<div id="loadOverlayText">' + engine.loadText + '</div>';
-		engine.arena.appendChild(this.loadOverlay);
-	},
+	// Make load overlay
+	this.loadOverlay = document.createElement('div');
+	this.loadOverlay.setAttribute('style', 'border: 0;position: absolute;top: 0;left: 0;width: 100%;height: 100%;z-index: 100;opacity: 1;');
+	this.loadOverlay.id = "loadOverlay";
+	this.loadOverlay.innerHTML = '<div id="loadOverlayText">' + engine.loadText + '</div>';
+	engine.arena.appendChild(this.loadOverlay);
+},
 
+Engine.Loader.prototype.import(/** @lends Engine.Loader.prototype */ {
 	/**
 	 * Fades out the load overlay (which is automatically created by Loader's constructor).
 	 * Remember to call this function, when your game is ready to be shown. Otherwise, the load overlay will never disappear.

@@ -1,32 +1,25 @@
-/*
-CollisionObject (Class example):
-A character that can be moved around using the keyboard
+CollisionObject = function (source, x, y, additionalProperties) {
+    // Call the sprite constructor to fully extend the sprite and set all sprite properties
+    View.GameObject.call(this, source, x, y, 0, additionalProperties);
 
-Requires:
-	Sprite
-*/
+    // Add step function to 'eachFrame'-loop
+    if (this.leftKey !== undefined) {
+        engine.currentRoom.loops.eachFrame.attachFunction(
+            this, // This object (an instance reference is needed by the loop)
+            this.step // The function to call each time the loop executes
+        );
+    }
+
+    engine.currentRoom.loops.collisionChecking.attachFunction(
+        this, // This object (an instance reference is needed by the loop)
+        this.collisionCheck // The function to call each time the loop executes
+    );
+};
+
+ColissionObject.prototype = Object.create(View.GameObject.prototype);
 
 // Create a new JsEngine class which extends the Sprite class
-CollisionObject = createClass('CollisionObject', [View.GameObject], {
-    // Create constructor (the constructors name is always the class name with lowercase first letter)
-    CollisionObject: function (source, x, y, additionalProperties) {
-        // Call the sprite constructor to fully extend the sprite and set all sprite properties
-        this.GameObject(source, x, y, 0, additionalProperties);
-
-        // Add step function to 'eachFrame'-loop
-        if (this.leftKey !== undefined) {
-            engine.currentRoom.loops.eachFrame.attachFunction(
-                this, // This object (an instance reference is needed by the loop)
-                this.step // The function to call each time the loop executes
-            );
-        }
-
-        engine.currentRoom.loops.collisionChecking.attachFunction(
-            this, // This object (an instance reference is needed by the loop)
-            this.collisionCheck // The function to call each time the loop executes
-        );
-    },
-
+CollisionObject.prototype.import({
     step: function () {
         // Check that the arrow keys are down, if so, move the object by increasing or decreasing it's x and y properties
         // Left

@@ -1,6 +1,6 @@
 nameSpace('Mixin');
 
-Mixin.MatrixCalculation = createClass( /** @lends Mixin.MatrixCalculation.prototype */ {
+Mixin.MatrixCalculation = {
 	calculateLocalMatrix: function (object) {
 		var origin, scale, rotation, position;
 
@@ -60,7 +60,7 @@ Mixin.MatrixCalculation = createClass( /** @lends Mixin.MatrixCalculation.protot
 			a * (e * i - f * h) -
 			b * (i * d - f * g) +
 			c * (d * h - e * g)
-		)
+		);
 	},
 
 	matrixInverse: function (matrix) {
@@ -203,4 +203,4 @@ Mixin.MatrixCalculation = createClass( /** @lends Mixin.MatrixCalculation.protot
 
 		return r;
 	},
-});
+};

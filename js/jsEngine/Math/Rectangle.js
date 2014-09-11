@@ -1,27 +1,30 @@
 nameSpace('Math');
 
-Math.Rectangle = createClass('Rectangle', [Math.Vector], /** @lends Math.Rectangle.prototype */ {
-	/**
-	 * The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
-	 *
-     * @name Math.Rectangle
-     * @class A math class which is used for handling non-rotated rectangles
-     * @augments Math.Vector
-     *
-     * @property {number} x The top left corner's x-coordinate
-     * @property {number} y The top left corner's y-coordinate
-     * @property {number} width The width of the rectangle
-     * @property {number} height The height of the rectangle
-     *
-	 * @param {number} x The x-coordinate for the rectangle's top left corner
-	 * @param {number} y The y-coordinate for the rectangle's top left corner
-	 * @param {number} width The width of the rectangle
-	 * @param {number} height The height of the rectangle
-	 */
-	Rectangle: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
-		this.set(x, y, width, height);
-	},
+/**
+ * The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
+ *
+ * @name Math.Rectangle
+ * @class A math class which is used for handling non-rotated rectangles
+ * @augments Math.Vector
+ *
+ * @property {number} x The top left corner's x-coordinate
+ * @property {number} y The top left corner's y-coordinate
+ * @property {number} width The width of the rectangle
+ * @property {number} height The height of the rectangle
+ *
+ * @param {number} x The x-coordinate for the rectangle's top left corner
+ * @param {number} y The y-coordinate for the rectangle's top left corner
+ * @param {number} width The width of the rectangle
+ * @param {number} height The height of the rectangle
+ */
+Math.Rectangle = function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {
+	this.set(x, y, width, height);
+};
 
+// Inherit Vector
+Math.Rectangle.prototype = Object.create(Math.Vector.prototype);
+
+Math.Rectangle.prototype.import(/** @lends Math.Rectangle.prototype */ {
 	/**
 	 * Sets the properties of the rectangle.
 	 *
@@ -233,13 +236,13 @@ Math.Rectangle = createClass('Rectangle', [Math.Vector], /** @lends Math.Rectang
 	 */
 	contains: function (object) {
         // If checked object is a vector, line or rectangle, do fast calculation otherwise convert to polygon and do calculation
-        if (object.implements(Math.Rectangle)) {
+        if (object instanceof Math.Rectangle) {
             return this.contains(new Math.Vector(object.x, object.y)) && this.contains(new Math.Vector(object.x + object.width, object.y + object.height));
         }
-        if (object.implements(Math.Line)) {
+        if (object instanceof Math.Line) {
             return this.contains(object.a) && this.contains(object.b);
         }
-        if (object.implements(Math.Vector)) {
+        if (object instanceof Math.Vector) {
             return (
                 object.x > this.x &&
                 object.x < this.x + this.width &&

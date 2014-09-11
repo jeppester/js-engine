@@ -1,86 +1,81 @@
-/* For making the engine var unreachable **/
-(function () {
-/*var main;/**/
-
 /**
+ * The constructor for the Engine class.
+ *
  * @constructor
+ * @name Engine
+ * @class The main game engine class.
+ *        Responsible for the main loop, the main canvas, etc.
+ *
+ * @property {boolean} running Whether or not the engine is currently running
+ * @property {int} canvasResX The main canvas horizontal resolution
+ * @property {int} canvasResY The main canvas vertical resolution
+ * @property {string} enginePath The url to jsEngine's source folder
+ * @property {boolean} focusOnLoad If the engine should focus itself when loaded
+ * @property {string} themesPath The url to jsEngine's theme folder
+ * @property {boolean} drawBoundingBoxes Whether or not the bounding boxes of all collidable objects are drawn
+ * @property {boolean} drawMasks Whether or not the masks of all collidable objects are drawn
+ * @property {boolean} pauseOnBlur Whether or the engine will pause itself when the window is blurred
+ * @property {boolean} disableRightClick Whether or not right click context menu is disabled inside the main canvas
+ * @property {boolean} preventDefaultKeyboard Whether or not preventDefault is called for keyboard events
+ * @property {HTMLElement} arena The HTML element to use as parent to the main canvas
+ * @property {boolean} autoResize Whether or not the arena will autoresize itself to fit the window
+ * @property {boolean} autoResizeLimitToResolution Whether or not the arena should not autoresize itself to be bigger than the main canvas' resolution
+ * @property {int} cachedSoundCopies The number of copies each sound object caches of it's source to enable multiple playbacks
+ * @property {string} gameClassPath The URL of the game's main class
+ * @property {string} loadText The text shown while loading the engine
+ * @property {string} backgroundColor A CSS color string which is used as the background color of the main canvas
+ * @property {number} timeFactor The factor to multiply the time increase with. A factor of 2 will make everything happen with double speed
+ * @property {boolean} resetCursorOnEachFrame Whether or not the mouse cursor will be reset on each frame
+ * @property {boolean} disableTouchScroll Whether or not touch scroll has been disabled
+ * @property {Camera[]} cameras An array containing the engine's cameras
+ * @property {int} defaultCollisionResolution The collision resolution set for all created collidable objects
+ * @property {boolean} soundsMuted Whether or not all sound effects are currently muted
+ * @property {boolean} musicMuted Whether or not all music is currently muted
+ *
+ * @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
+ *                 The default options are:
+ *                 <code>{
+ * 	                "arena": document.getElementById('arena'), // The element to use as game arena
+ * 	                "avoidSubPixelRendering": true, // If subpixelrendering should be avoided
+ * 	                "autoResize": true, // If the arena should autoresize to fit the window (or iframe)
+ * 	                "autoResizeLimitToResolution": true, // If the autoresizing should be limited to the game's resolution
+ * 	                "backgroundColor": "#000", // The color of the arena's background
+ * 	                "cachedSoundCopies": 5, // How many times sounds should be duplicated to allow multiple playbacks
+ * 	                "canvasResX": 800, // The horizontal resolution to set for the game's main canvas
+ * 	                "canvasResY": 600, // The vertical resolution to set for the game's main canvas
+ * 	                "defaultCollisionResolution": 6, // Res. of collision checking, by default every 6th px is checked
+ * 	                "disableRightClick": true, // If right clicks inside the arena should be disabled
+ * 	                "disableWebGL": false, // If WebGL rendering should be disabled
+ *                  "preventDefaultKeyboard": false, // Whether or not preventDefault should be called for keyboard events
+ * 	                "disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
+ * 	                "drawBoundingBoxes": false, // If Collidable object's bounding boxes should be drawn
+ * 	                "drawMasks": false, // If Collidable object's masks should be drawn
+ * 	                "enginePath": "js/jsEngine", // The path for the engine classes' directory
+ * 	                "focusOnLoad": true, // Whether or not to focus the engine's window when the engine is ready
+ * 	                "gameClassPath": "js/Main.js", // The path for the game's main class
+ * 	                "loadText": 'jsEngine loading...'
+ * 	                "musicMuted": false, // If all music playback should be initially muted
+ * 	                "pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
+ * 	                "resetCursorOnEachFrame": true // Whether or not the mouse cursor should be reset on each frame
+ * 	                "soundsMuted": false, // If all sound effects should be initially muted
+ * 	                "themesPath": "themes", // The path to the themes-directory
+ * 	                "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
+ *                 }</code>
  */
-Engine = createClass('Engine', /** @lends Engine.prototype */ {
+Engine = function (options) {
+	// Set global engine variable
 	/**
-	 * The constructor for the Engine class.
-	 *
-	 * @name Engine
-	 * @class The main game engine class.
-	 *        Responsible for the main loop, the main canvas, etc.
-	 *
-	 * @property {boolean} running Whether or not the engine is currently running
-	 * @property {int} canvasResX The main canvas horizontal resolution
-	 * @property {int} canvasResY The main canvas vertical resolution
-	 * @property {string} enginePath The url to jsEngine's source folder
-	 * @property {boolean} focusOnLoad If the engine should focus itself when loaded
-	 * @property {string} themesPath The url to jsEngine's theme folder
-	 * @property {boolean} drawBoundingBoxes Whether or not the bounding boxes of all collidable objects are drawn
-	 * @property {boolean} drawMasks Whether or not the masks of all collidable objects are drawn
-	 * @property {boolean} pauseOnBlur Whether or the engine will pause itself when the window is blurred
-	 * @property {boolean} disableRightClick Whether or not right click context menu is disabled inside the main canvas
-	 * @property {boolean} preventDefaultKeyboard Whether or not preventDefault is called for keyboard events
-	 * @property {HTMLElement} arena The HTML element to use as parent to the main canvas
-	 * @property {boolean} autoResize Whether or not the arena will autoresize itself to fit the window
-	 * @property {boolean} autoResizeLimitToResolution Whether or not the arena should not autoresize itself to be bigger than the main canvas' resolution
-	 * @property {int} cachedSoundCopies The number of copies each sound object caches of it's source to enable multiple playbacks
-	 * @property {string} gameClassPath The URL of the game's main class
-	 * @property {string} loadText The text shown while loading the engine
-	 * @property {string} backgroundColor A CSS color string which is used as the background color of the main canvas
-	 * @property {number} timeFactor The factor to multiply the time increase with. A factor of 2 will make everything happen with double speed
-	 * @property {boolean} resetCursorOnEachFrame Whether or not the mouse cursor will be reset on each frame
-	 * @property {boolean} disableTouchScroll Whether or not touch scroll has been disabled
-	 * @property {Camera[]} cameras An array containing the engine's cameras
-	 * @property {int} defaultCollisionResolution The collision resolution set for all created collidable objects
-	 * @property {boolean} soundsMuted Whether or not all sound effects are currently muted
-	 * @property {boolean} musicMuted Whether or not all music is currently muted
-	 *
-	 * @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
-	 *                 The default options are:
-	 *                 <code>{
-	 * 	                "arena": document.getElementById('arena'), // The element to use as game arena
-	 * 	                "avoidSubPixelRendering": true, // If subpixelrendering should be avoided
-	 * 	                "autoResize": true, // If the arena should autoresize to fit the window (or iframe)
-	 * 	                "autoResizeLimitToResolution": true, // If the autoresizing should be limited to the game's resolution
-	 * 	                "backgroundColor": "#000", // The color of the arena's background
-	 * 	                "cachedSoundCopies": 5, // How many times sounds should be duplicated to allow multiple playbacks
-	 * 	                "canvasResX": 800, // The horizontal resolution to set for the game's main canvas
-	 * 	                "canvasResY": 600, // The vertical resolution to set for the game's main canvas
-	 * 	                "defaultCollisionResolution": 6, // Res. of collision checking, by default every 6th px is checked
-	 * 	                "disableRightClick": true, // If right clicks inside the arena should be disabled
-	 * 	                "disableWebGL": false, // If WebGL rendering should be disabled
-	 *                  "preventDefaultKeyboard": false, // Whether or not preventDefault should be called for keyboard events
-	 * 	                "disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
-	 * 	                "drawBoundingBoxes": false, // If Collidable object's bounding boxes should be drawn
-	 * 	                "drawMasks": false, // If Collidable object's masks should be drawn
-	 * 	                "enginePath": "js/jsEngine", // The path for the engine classes' directory
-	 * 	                "focusOnLoad": true, // Whether or not to focus the engine's window when the engine is ready
-	 * 	                "gameClassPath": "js/Main.js", // The path for the game's main class
-	 * 	                "loadText": 'jsEngine loading...'
-	 * 	                "musicMuted": false, // If all music playback should be initially muted
-	 * 	                "pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
-	 * 	                "resetCursorOnEachFrame": true // Whether or not the mouse cursor should be reset on each frame
-	 * 	                "soundsMuted": false, // If all sound effects should be initially muted
-	 * 	                "themesPath": "themes", // The path to the themes-directory
-	 * 	                "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
-	 *                 }</code>
-	 */
-	Engine: function (options) {
-		// Set global engine variable
-		/**
-		 * Global engine var set upon engine initialization
-		 * @global
-		 */
-		engine = this;
+	* Global engine var set upon engine initialization
+	* @global
+	*/
+	engine = this;
 
-		this.options = options ? options: {};
-		this.load();
-	},
+	this.options = options ? options: {};
+	this.load();
+};
 
+/** @lends Engine.prototype */
+Engine.prototype.import({
 	/**
 	 * Load all files and functions, that are needed before the engine can start.
 	 *
@@ -436,7 +431,7 @@ Engine = createClass('Engine', /** @lends Engine.prototype */ {
 	 */
 	convertSpeed: function (speed, from, to) {
 		if (speed === undefined) {throw new Error('Missing argument: speed'); } //dev
-		if (speed.implements(Math.Vector)) {
+		if (speed instanceof Math.Vector) {
 			return new Math.Vector(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
 		}
 
@@ -952,6 +947,3 @@ Engine = createClass('Engine', /** @lends Engine.prototype */ {
 		return b + c;
 	}
 });
-
-/** For making the engine var unreachable **/
-}());

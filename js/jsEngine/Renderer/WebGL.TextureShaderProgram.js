@@ -1,25 +1,29 @@
 nameSpace('Renderer.WebGL');
 
-Renderer.WebGL.TextureShaderProgram = createClass('TextureShaderProgram', [Mixin.WebGLHelpers], /** @lends Renderer.WebGL.TextureShaderProgram.prototype */ {
-	TextureShaderProgram: function (gl) {
-		var initShaders, initBuffers, program, locations;
+Renderer.WebGL.TextureShaderProgram = function (gl) {
+	var initShaders, initBuffers, program, locations;
 
-		// Init program
-		this.cache = {
-			regularTextCoordBuffer: false,
-			animatedTextCoordBuffer: false,
-			rectangleCornerBuffer: false,
-			currentBuffer: false,
-			currentTexture: undefined,
-			textures: {},
-		};
+	// Init program
+	this.cache = {
+		regularTextCoordBuffer: false,
+		animatedTextCoordBuffer: false,
+		rectangleCornerBuffer: false,
+		currentBuffer: false,
+		currentTexture: undefined,
+		textures: {},
+	};
 
-		this.program = gl.createProgram();
+	this.program = gl.createProgram();
 
-		this.initShaders(gl);
-		this.bindLocations(gl);
-		this.initBuffers(gl);
-	},
+	this.initShaders(gl);
+	this.bindLocations(gl);
+	this.initBuffers(gl);
+};
+
+Renderer.WebGL.TextureShaderProgram.prototype.import(Mixin.WebGLHelpers);
+
+Renderer.WebGL.TextureShaderProgram.prototype.import(/** @lends Renderer.WebGL.TextureShaderProgram.prototype */ {
+
 
 	initShaders: function (gl) {
 		var vertexCode, fragmentCode, vertexShader, fragmentShader;
@@ -147,7 +151,7 @@ Renderer.WebGL.TextureShaderProgram = createClass('TextureShaderProgram', [Mixin
 
 	// When returning to the program reset the buffer
 	onSet: function (gl) {
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer)
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
 		gl.enableVertexAttribArray(this.locations.a_position);
 		gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
 	},

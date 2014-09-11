@@ -1,108 +1,112 @@
 nameSpace('View');
 
-View.Sprite = createClass('Sprite', [View.Container, Mixin.Animatable], /** @lends View.Sprite.prototype */ {
-	/**
-	 * The constructor for Sprite objects.
-	 *
-     * @name View.Sprite
-     * @class Class for drawing bitmaps with rotation and size.
-     *        Usually all graphical objects in a game are sprites or extends this class.
-     * @augments View.Container
-     * @augments Mixin.Animatable
-     *
-     * @property {string} source A resource string representing the bitmap source of the sprite, use setSource() to set the source (do not set it directly)
-     * @property {number} direction The direction of the sprite (in radians)
-     * @property {int} imageNumber The current image in the animation (0 the source is not an animation)
-     * @property {int} imageLength The number of images in the source (1 the source is not an animation)
-     * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
-     * @property {number} animationSpeed The number of images / second in the animation (only relevant if the source is an animation)
-     * @property {boolean} animationLoops Whether or not the animation should loop (only relevant if the source is an animation)
-     * @property {number} size A size modifier which modifies both the width and the height of the sprite
-     * @property {number} widthScale A size modifier which modifies the width of the sprite
-     * @property {number} heightScale A size modifier which modifies the height of the object
-     * @property {number} opacity The opacity of the sprite
-     *
-	 * @param {string} source A string representing the source of the object's bitmap
-	 * @param {number} [x=0] The x-position of the object in the game arena, in pixels
-	 * @param {number} [y=0] The y-position of the object in the game arena, in pixels
-	 * @param {number} [direction=0] The rotation (in radians) of the object when drawn in the game arena
-	 * @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
-	 *                 The default is:<code>
-     *                 {
-	 *                  size: 1,
-	 * 	                opacity: 1,
-	 * 	                composite: 'source-over',
-	 * 	                offset: new Math.Vector('center', 'center')
-	 *                 }</code>
-	 */
-	Sprite: function (source, x, y, direction, additionalProperties) {
-		if (source === undefined) {throw new Error('Missing argument: source'); } //dev
+/**
+ * The constructor for Sprite objects.
+ *
+ * @name View.Sprite
+ * @class Class for drawing bitmaps with rotation and size.
+ *        Usually all graphical objects in a game are sprites or extends this class.
+ * @augments View.Container
+ * @augments Mixin.Animatable
+ *
+ * @property {string} source A resource string representing the bitmap source of the sprite, use setSource() to set the source (do not set it directly)
+ * @property {number} direction The direction of the sprite (in radians)
+ * @property {int} imageNumber The current image in the animation (0 the source is not an animation)
+ * @property {int} imageLength The number of images in the source (1 the source is not an animation)
+ * @property {Vector} offset The offset with which the sprite will be drawn (to its position)
+ * @property {number} animationSpeed The number of images / second in the animation (only relevant if the source is an animation)
+ * @property {boolean} animationLoops Whether or not the animation should loop (only relevant if the source is an animation)
+ * @property {number} size A size modifier which modifies both the width and the height of the sprite
+ * @property {number} widthScale A size modifier which modifies the width of the sprite
+ * @property {number} heightScale A size modifier which modifies the height of the object
+ * @property {number} opacity The opacity of the sprite
+ *
+ * @param {string} source A string representing the source of the object's bitmap
+ * @param {number} [x=0] The x-position of the object in the game arena, in pixels
+ * @param {number} [y=0] The y-position of the object in the game arena, in pixels
+ * @param {number} [direction=0] The rotation (in radians) of the object when drawn in the game arena
+ * @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
+ *                 The default is:<code>
+ *                 {
+ *                  size: 1,
+ * 	                opacity: 1,
+ * 	                composite: 'source-over',
+ * 	                offset: new Math.Vector('center', 'center')
+ *                 }</code>
+ */
+View.Sprite = function (source, x, y, direction, additionalProperties) {
+	if (source === undefined) {throw new Error('Missing argument: source'); } //dev
 
-		var offset;
+	var offset;
 
-		// Call Vector's and view's constructors
-		this.Container();
-		this.renderType = "sprite";
-		this.x = x !== undefined ? x : 0;
-		this.y = y !== undefined ? y : 0;
+	// Call Vector's and view's constructors
+	View.Container.call(this);
+	this.renderType = "sprite";
+	this.x = x !== undefined ? x : 0;
+	this.y = y !== undefined ? y : 0;
 
-		// Load default options
-		this.source = source;
-		this.direction = direction !== undefined ? direction : 0;
+	// Load default options
+	this.source = source;
+	this.direction = direction !== undefined ? direction : 0;
 
-		// Animation options
-		this.imageNumber = 0;
-		this.imageLength = 1;
-		this.animationSpeed = 30;
-		this.animationLastSwitch = engine.gameTime;
-		this.animationLoops = true;
-		this.clipWidth;
-		this.clipHeight;
+	// Animation options
+	this.imageNumber = 0;
+	this.imageLength = 1;
+	this.animationSpeed = 30;
+	this.animationLastSwitch = engine.gameTime;
+	this.animationLoops = true;
+	this.clipWidth;
+	this.clipHeight;
 
-		// Define pseudo properties
-		Object.defineProperty(this, 'width', {
-			get: function () {
-				return Math.abs(this.clipWidth * this.size * this.widthScale);
-			},
-			set: function (value) {
-				var sign = this.widthScale > 0 ? 1 : -1;
-				this.widthScale = sign * Math.abs(value / (this.clipWidth * this.size));
-				return value;
-			}
-		});
-		Object.defineProperty(this, 'height', {
-			get: function () {
-				return Math.abs(this.clipHeight * this.size * this.heightScale);
-			},
-			set: function (value) {
-				var sign = this.heightScale > 0 ? 1 : -1;
-				this.heightScale = sign * Math.abs(value / (this.clipHeight * this.size));
-				return value;
-			}
-		});
-
-		// If an offset static var is used, remove it for now, and convert it later
-		offset = OFFSET_MIDDLE_CENTER;
-		if (additionalProperties && additionalProperties.offset) {
-			offset = additionalProperties.offset;
-			delete additionalProperties.offset;
+	// Define pseudo properties
+	Object.defineProperty(this, 'width', {
+		get: function () {
+			return Math.abs(this.clipWidth * this.size * this.widthScale);
+		},
+		set: function (value) {
+			var sign = this.widthScale > 0 ? 1 : -1;
+			this.widthScale = sign * Math.abs(value / (this.clipWidth * this.size));
+			return value;
 		}
-
-		// Load additional properties
-		this.importProperties(additionalProperties);
-
-		if (!this.refreshSource()) {
-			throw new Error('Sprite source was not successfully loaded: ' + source); //dev
+	});
+	Object.defineProperty(this, 'height', {
+		get: function () {
+			return Math.abs(this.clipHeight * this.size * this.heightScale);
+		},
+		set: function (value) {
+			var sign = this.heightScale > 0 ? 1 : -1;
+			this.heightScale = sign * Math.abs(value / (this.clipHeight * this.size));
+			return value;
 		}
+	});
 
-		// Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
-		this.offset = offset;
+	// If an offset static var is used, remove it for now, and convert it later
+	offset = OFFSET_MIDDLE_CENTER;
+	if (additionalProperties && additionalProperties.offset) {
+		offset = additionalProperties.offset;
+		delete additionalProperties.offset;
+	}
 
-		if (engine.avoidSubPixelRendering) {
-			this.offset.x = Math.round(this.offset.x);
-			this.offset.y = Math.round(this.offset.y);
-		}
-	},
+	// Load additional properties
+	this.importProperties(additionalProperties);
+
+	if (!this.refreshSource()) {
+		throw new Error('Sprite source was not successfully loaded: ' + source); //dev
+	}
+
+	// Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
+	this.offset = offset;
+
+	if (engine.avoidSubPixelRendering) {
+		this.offset.x = Math.round(this.offset.x);
+		this.offset.y = Math.round(this.offset.y);
+	}
+};
+
+View.Sprite.prototype = Object.create(View.Container.prototype);
+View.Sprite.prototype.import(Mixin.Animatable);
+
+View.Sprite.prototype.import(/** @lends View.Sprite.prototype */ {
 
 	/**
 	 * Parses an offset global into an actual Math.Vector offset that fits the instance

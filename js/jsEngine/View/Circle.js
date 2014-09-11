@@ -1,41 +1,45 @@
 nameSpace('View');
 
-View.Circle = createClass('Circle', [Math.Circle, View.Child], /** @lends View.Circle.prototype */ {
-	/**
-	 * Constructor for Circle class, uses the set function, to set the properties of the circle.
-	 *
-     * @name View.Circle
-     * @class A class which is used for handling circles
-     * @augments Math.Circle
-     * @augments View.Child
-     *
-     * @property {number} x The circle's horizontal position
-     * @property {number} y The circle's vertical position
-     * @property {number} radius The circle's radius
-     * @property {string} strokeStyle The circle's color if added to a view (css color string)
-     * @property {number} lineWidth The circle's width if added to a view (in px)
-     * @property {string} fillStyle The circle's fill color if added to a view (css color string)
-     *
-	 * @param {number} x The x-coordinate for the center of the circle
-	 * @param {number} y The y-coordinate for the center of the circle
-	 * @param {number} radius The radius for the circle
-     * @param {string} [fillStyle = "#000"] The circle's fill color if added to a view (css color string)
-     * @param {string} [strokeStyle = "#000"] The circle's color if added to a view (css color string)
-     * @param {number} [lineWidth = 1] The circle's width if added to a view (in px)
-	 */
-	Circle: function (x, y, radius, fillStyle, strokeStyle, lineWidth) {
-		this.Child();
-        this.renderType = 'circle';
+/**
+ * Constructor for Circle class, uses the set function, to set the properties of the circle.
+ *
+ * @name View.Circle
+ * @class A class which is used for handling circles
+ * @augments Math.Circle
+ * @augments View.Child
+ *
+ * @property {number} x The circle's horizontal position
+ * @property {number} y The circle's vertical position
+ * @property {number} radius The circle's radius
+ * @property {string} strokeStyle The circle's color if added to a view (css color string)
+ * @property {number} lineWidth The circle's width if added to a view (in px)
+ * @property {string} fillStyle The circle's fill color if added to a view (css color string)
+ *
+ * @param {number} x The x-coordinate for the center of the circle
+ * @param {number} y The y-coordinate for the center of the circle
+ * @param {number} radius The radius for the circle
+ * @param {string} [fillStyle = "#000"] The circle's fill color if added to a view (css color string)
+ * @param {string} [strokeStyle = "#000"] The circle's color if added to a view (css color string)
+ * @param {number} [lineWidth = 1] The circle's width if added to a view (in px)
+ */
 
-        if (engine.enableRedrawRegions) {
-            this.CircleInitWithRedrawRegions(x, y, radius, fillStyle, strokeStyle, lineWidth);
-        }
-        else {
-            this.CircleInitWithoutRedrawRegions(x, y, radius, fillStyle, strokeStyle, lineWidth);
-        }
-	},
-    /** @scope View.Circle */
+View.Circle = function (x, y, radius, fillStyle, strokeStyle, lineWidth) {
+	View.Child.call(this);
+	this.renderType = 'circle';
 
+	if (engine.enableRedrawRegions) {
+		this.CircleInitWithRedrawRegions(x, y, radius, fillStyle, strokeStyle, lineWidth);
+	}
+	else {
+		this.CircleInitWithoutRedrawRegions(x, y, radius, fillStyle, strokeStyle, lineWidth);
+	}
+};
+
+View.Circle.prototype = Object.create(View.Child.prototype);
+
+View.Circle.prototype.import(Math.Circle.prototype);
+
+View.Circle.prototype.import(/** @lends View.Circle.prototype */ {
     CircleInitWithoutRedrawRegions: function (x, y, radius, fillStyle, strokeStyle, lineWidth) {
         this.radius = radius;
         this.fillStyle = fillStyle || "#000";

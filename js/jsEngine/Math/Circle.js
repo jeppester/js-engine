@@ -1,24 +1,28 @@
 nameSpace('Math');
 
-Math.Circle = createClass('Circle', [Mixin.Animatable], /** @lends Math.Circle.prototype */ {
-	/**
-	 * Constructor for Circle class, uses the set function, to set the properties of the circle.
-	 *
-     * @name Math.Circle
-     * @class A math class which is used for handling circles
-     * @augments Mixin.Animatable
-     *
-     * @property {number} x The circle's horizontal position
-     * @property {number} y The circle's vertical position
-     * @property {number} radius The circle's radius
-     *
-	 * @param {number} x The x-coordinate for the center of the circle
-	 * @param {number} y The y-coordinate for the center of the circle
-	 * @param {number} radius The radius for the circle
-	 */
-	Circle: function (x, y, radius) {
-		this.set(x, y, radius);
-	},
+/**
+ * Constructor for Circle class, uses the set function, to set the properties of the circle.
+ *
+ * @name Math.Circle
+ * @class A math class which is used for handling circles
+ * @augments Mixin.Animatable
+ *
+ * @property {number} x The circle's horizontal position
+ * @property {number} y The circle's vertical position
+ * @property {number} radius The circle's radius
+ *
+ * @param {number} x The x-coordinate for the center of the circle
+ * @param {number} y The y-coordinate for the center of the circle
+ * @param {number} radius The radius for the circle
+ */
+Math.Circle = function (x, y, radius) {
+	this.set(x, y, radius);
+};
+
+Math.Circle.prototype.import(Mixin.Animatable);
+
+Math.Circle.prototype.import(/** @lends Math.Circle.prototype */ {
+
 
 	/**
 	 * Sets the properties of the circle.
@@ -124,19 +128,19 @@ Math.Circle = createClass('Circle', [Mixin.Animatable], /** @lends Math.Circle.p
 	 * @return {number} The distance
 	 */
 	getDistance: function (object) {
-		if (object.implements(Math.Vector)) {
+		if (object instanceof Math.Vector) {
 			return Math.max(0, object.getDistance(new Math.Vector(this.x, this.y)) - this.radius);
 		}
-		else if (object.implements(Math.Line)) {
+		else if (object instanceof Math.Line) {
 			return Math.max(0, object.getDistance(new Math.Vector(this.x, this.y)) - this.radius);
 		}
-		else if (object.implements(Math.Circle)) {
+		else if (object instanceof Math.Circle) {
 			return Math.max(0, new Math.Vector(this.x, this.y).getDistance(new Math.Vector(object.x, object.y)) - (this.radius + object.radius));
 		}
-		else if (object.implements(Math.Rectangle)) {
+		else if (object instanceof Math.Rectangle) {
 			return object.getDistance(this);
 		}
-		else if (object.implements(Math.Polygon)) {
+		else if (object instanceof Math.Polygon) {
 			return object.getDistance(this);
 		}
 		else { //dev
@@ -153,23 +157,23 @@ Math.Circle = createClass('Circle', [Mixin.Animatable], /** @lends Math.Circle.p
 	contains: function (object) {
 		var i, cDist;
 
-		if (object.implements(Math.Vector)) {
+		if (object instanceof Math.Vector) {
 			return object.copy().move(-this.x, -this.y).getLength() < this.radius;
 		}
-		else if (object.implements(Math.Line)) {
+		else if (object instanceof Math.Line) {
 			return this.contains(object.a) && this.contains(object.b);
 		}
-		else if (object.implements(Math.Circle)) {
+		else if (object instanceof Math.Circle) {
 			// Find the distance between the circles' centres
 			cDist = new Math.Vector(object.x, object.y).move(-this.x, -this.y).getLength();
 
 			// If the sum of the distance and the checked circle's radius is smaller than this circles radius, this circle must contain the other circle
 			return cDist + object.radius < this.radius;
 		}
-		else if (object.implements(Math.Rectangle)) {
+		else if (object instanceof Math.Rectangle) {
 			return this.contains(object.getPolygon());
 		}
-		else if (object.implements(Math.Polygon)) {
+		else if (object instanceof Math.Polygon) {
 			// Check if any of the polygon's points are outside the circle
 			for (i = 0; i < object.points.length; i++) {
 				if (!this.contains(object.points[i])) {
@@ -191,16 +195,16 @@ Math.Circle = createClass('Circle', [Mixin.Animatable], /** @lends Math.Circle.p
 	 * @return {boolean} True if the Circle intersects with the checked object, false if not
 	 */
 	intersects: function (object) {
-		if (object.implements(Math.Line)) {
+		if (object instanceof Math.Line) {
 			return this.contains(object) === false && object.getDistance(this) <= 0;
 		}
-		else if (object.implements(Math.Circle)) {
+		else if (object instanceof Math.Circle) {
 			return !this.contains(object) && !object.contains(this) && new Math.Vector(this.x, this.y).getDistance(new Math.Vector(object.x, object.y)) <= this.radius + object.radius;
 		}
-		else if (object.implements(Math.Rectangle)) {
+		else if (object instanceof Math.Rectangle) {
 			return object.getPolygon().intersects(this);
 		}
-		else if (object.implements(Math.Polygon)) {
+		else if (object instanceof Math.Polygon) {
 			return object.intersects(this);
 		}
 		else { //dev

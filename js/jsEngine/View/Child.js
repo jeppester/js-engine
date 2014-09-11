@@ -1,22 +1,23 @@
 nameSpace('View');
 
-View.Child = createClass('Child', [Mixin.Animatable], /** @lends View.Child.prototype */ {
-    /**
-     * @name View.Child
-     * @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
-     */
-    Child: function () {
-        this.renderType = '';
-        if (engine.enableRedrawRegions) {
-            this.ChildInitWithRedrawRegions();
-        }
-        else {
-            this.ChildInitWithoutRedrawRegions();
-        }
-        engine.registerObject(this);
-    },
-    /** @scope View.Child */
+/**
+ * @name View.Child
+ * @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
+ */
+View.Child = function () {
+    this.renderType = '';
+    if (engine.enableRedrawRegions) {
+        this.ChildInitWithRedrawRegions();
+    }
+    else {
+        this.ChildInitWithoutRedrawRegions();
+    }
+    engine.registerObject(this);
+};
 
+View.Child.prototype.import(Mixin.Animatable);
+
+View.Child.prototype.import(/** @lends View.Child.prototype */ {
     ChildInitWithoutRedrawRegions: function () {
         this.x = 0;
         this.y = 0;
@@ -28,7 +29,7 @@ View.Child = createClass('Child', [Mixin.Animatable], /** @lends View.Child.prot
 
         var hidden = {
             offset: new Math.Vector(),
-        }
+        };
 
         Object.defineProperty(this, 'offset', {
             get: function () {
@@ -227,7 +228,7 @@ View.Child = createClass('Child', [Mixin.Animatable], /** @lends View.Child.prot
 
         parents = this.getParents();
 
-        if (parents.length && parents[parents.length -1].implements(Engine.Room)) {
+        if (parents.length && parents[parents.length -1] instanceof Engine.Room) {
             pos = new Math.Vector(this.x, this.y);
 
             for (i = 0; i < parents.length; i ++) {
@@ -277,7 +278,7 @@ View.Child = createClass('Child', [Mixin.Animatable], /** @lends View.Child.prot
 
         ancestor = parents[parents.length -1];
 
-        return ancestor.implements(Engine.Room) ? ancestor : false;
+        return ancestor instanceof Engine.Room ? ancestor : false;
     },
 
     /**

@@ -1,6 +1,6 @@
 nameSpace('Mixin');
 
-Mixin.WebGLHelpers = createClass( /** @lends Mixin.WebGLHelpers.prototype */ {
+Mixin.WebGLHelpers = {
   colorFromCSSString: function (string) {
     var a, b, c;
 
@@ -113,4 +113,4 @@ Mixin.WebGLHelpers = createClass( /** @lends Mixin.WebGLHelpers.prototype */ {
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
   },
-});
+};

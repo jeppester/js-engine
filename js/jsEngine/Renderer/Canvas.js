@@ -1,13 +1,15 @@
 nameSpace('Renderer');
 
-Renderer.Canvas = createClass('Canvas', [Mixin.MatrixCalculation], /** @lends Renderer.Canvas.prototype */ {
-	Canvas: function (canvas) {
-		var gl, options;
+Renderer.Canvas = function (canvas) {
+	var gl, options;
 
-		this.canvas = canvas;
-		this.context = canvas.getContext('2d');
-	},
+	this.canvas = canvas;
+	this.context = canvas.getContext('2d');
+};
 
+Renderer.Canvas.prototype.import(Mixin.MatrixCalculation);
+
+Renderer.Canvas.prototype.import(/** @lends Renderer.Canvas.prototype */ {
 	render: function (cameras) {
 		var camerasLength, roomsLength, i, ii, wm, wmT, wmS, c, w, h;
 

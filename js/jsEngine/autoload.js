@@ -10,23 +10,16 @@
 			filePaths = [filePaths];
 		}
 
+		// Load first file
 		for (i = 0; i < filePaths.length; i ++) {
 			req = new XMLHttpRequest();
 			req.open('GET', filePaths[i], false);
 			req.send();
-			codeString = req.responseText + "\n//# sourceURL=/" + filePaths[i];
-			try {
-				eval(codeString);
-			}
-			catch (e) {
-				console.log('Failed loading "' + filePaths[i]);
-				throw new Error(e);
-			}
 
-			// script = document.createElement('script');
-			// script.type = 'text/javascript';
-			// script.src = filePaths[i];
-			// document.body.appendChild(script);
+			script = document.createElement('script');
+			script.type = 'text/javascript';
+			script.text = req.responseText + "\n//# sourceURL=/" + filePaths[i];
+			document.body.appendChild(script);
 		}
 
 		if (window.loadedFiles === undefined) {window.loadedFiles = []; }
@@ -56,7 +49,6 @@
 		enginePath + '/Renderer/WebGL.TextureShaderProgram.js',
 		enginePath + '/Renderer/WebGL.ColorShaderProgram.js',
 		enginePath + '/Renderer/Canvas.js',
-
 
 		enginePath + '/Math/Vector.js',
 		enginePath + '/Math/Line.js',

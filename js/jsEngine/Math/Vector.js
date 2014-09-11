@@ -1,23 +1,24 @@
-nameSpace('Math')
+nameSpace('Math');
 
-Math.Vector = createClass('Vector', [Mixin.Animatable], /** @lends Math.Vector.prototype */ {
-	/**
-	 * Constructor for the Vector class. Uses set-function to set the vector from x- and y values.
-	 *
-     * @name Math.Vector
-     * @class A math class which is used for handling two-dimensional vectors
-     * @augments Mixin.Animatable
-     *
-     * @property {number} x The x-value of the vector
-     * @property {number} y The y-value of the vector
-     *
-	 * @param {number} [x=0] The x-value to set for the vector
-	 * @param {number} [y=0] The y-value to set for the vector
-	 */
-	Vector: function (x, y) {
-        this.set(x, y);
-	},
+/**
+ * Constructor for the Vector class. Uses set-function to set the vector from x- and y values.
+ *
+ * @name Math.Vector
+ * @class A math class which is used for handling two-dimensional vectors
+ * @augments Mixin.Animatable
+ *
+ * @property {number} x The x-value of the vector
+ * @property {number} y The y-value of the vector
+ * @param {number} [x=0] The x-value to set for the vector
+ * @param {number} [y=0] The y-value to set for the vector
+ */
+Math.Vector = function (x, y) {
+			this.set(x, y);
+};
 
+Math.Vector.prototype.import(Mixin.Animatable);
+
+Math.Vector.prototype.import(/** @lends Math.Vector.prototype */ {
 	/**
 	 * Sets the vector from x- and y values.
 	 *
@@ -114,7 +115,7 @@ Math.Vector = createClass('Vector', [Mixin.Animatable], /** @lends Math.Vector.p
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
 	add: function (vector) {
-		if (vector.implements(Math.Vector)) {
+		if (vector instanceof Math.Vector) {
 			this.x += vector.x;
 			this.y += vector.y;
 		}
@@ -136,7 +137,7 @@ Math.Vector = createClass('Vector', [Mixin.Animatable], /** @lends Math.Vector.p
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
 	subtract: function (vector) {
-		if (vector.implements(Math.Vector)) {
+		if (vector instanceof Math.Vector) {
 			this.x -= vector.x;
 			this.y -= vector.y;
 		}
@@ -158,7 +159,7 @@ Math.Vector = createClass('Vector', [Mixin.Animatable], /** @lends Math.Vector.p
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
 	divide: function (vector) {
-		if (vector.implements(Math.Vector)) {
+		if (vector instanceof Math.Vector) {
 			this.x /= vector;
 			this.y /= vector;
 		}
@@ -180,7 +181,7 @@ Math.Vector = createClass('Vector', [Mixin.Animatable], /** @lends Math.Vector.p
 	 * @return {Math.Vector} The resulting Vector object (itself)
 	 */
 	multiply: function (vector) {
-		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type Vector'); } //dev
+		if (!vector instanceof Math.Vector) {throw new Error('Argument vector should be of type Vector'); } //dev
 
 		this.x *= vector.x;
 		this.y *= vector.y;
@@ -195,7 +196,7 @@ Math.Vector = createClass('Vector', [Mixin.Animatable], /** @lends Math.Vector.p
 	 * @return {number} The dot product
 	 */
 	getDot: function (vector) {
-		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type: Vector'); } //dev
+		if (!vector instanceof Math.Vector) {throw new Error('Argument vector should be of type: Vector'); } //dev
 
 		return this.x * vector.x + this.y * vector.y;
 	},
@@ -207,7 +208,7 @@ Math.Vector = createClass('Vector', [Mixin.Animatable], /** @lends Math.Vector.p
 	 * @return {number} The cross product
 	 */
 	getCross: function (vector) {
-		if (!vector.implements(Math.Vector)) {throw new Error('Argument vector should be of type: Vector'); } //dev
+		if (!vector instanceof Math.Vector) {throw new Error('Argument vector should be of type: Vector'); } //dev
 
 		return this.x * vector.y - this.y * vector.x;
 	},
@@ -237,7 +238,7 @@ Math.Vector = createClass('Vector', [Mixin.Animatable], /** @lends Math.Vector.p
 	 * @return {number} The direction to the object
 	 */
 	getDirectionTo: function (point) {
-		if (!point.implements(Math.Vector)) {throw new Error('Only Vectors or objects inheriting Vector are supported'); } //dev
+		if (!point instanceof Math.Vector) {throw new Error('Only Vectors or objects inheriting Vector are supported'); } //dev
 
 		return point.copy().subtract(this).getDirection();
 	},
@@ -249,19 +250,19 @@ Math.Vector = createClass('Vector', [Mixin.Animatable], /** @lends Math.Vector.p
 	 * @return {number} The distance
 	 */
 	getDistance: function (object) {
-		if (object.implements(Math.Vector)) {
+		if (object instanceof Math.Vector) {
 			return object.copy().subtract(this).getLength();
 		}
-		if (object.implements(Math.Line)) {
+		if (object instanceof Math.Line) {
 			return object.getDistance(this);
 		}
-		if (object.implements(Math.Circle)) {
+		if (object instanceof Math.Circle) {
 			return object.getDistance(this);
 		}
-		if (object.implements(Math.Rectangle)) {
+		if (object instanceof Math.Rectangle) {
 			return object.getDistance(this);
 		}
-		if (object.implements(Math.Polygon)) {
+		if (object instanceof Math.Polygon) {
 			return object.getDistance(this);
 		}
 		throw new Error('Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon'); //dev

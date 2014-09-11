@@ -1,39 +1,42 @@
 nameSpace('View');
 
-View.Line = createClass('Line',[Math.Line, View.Child], /** @lends View.Line.prototype */ {
-	/**
-	 * Constructor for the Line class. Uses setFromVectors to create the line's start and end points
-	 *
-     * @name View.Line
-     * @class A class which is used for handling lines
-     * @augments View.Child
-     * @augments Mixin.Animatable
-     *
-     * @property {View.Vector} a The line's starting point
-     * @property {View.Vector} b The line's ending point
-     * @property {string} strokeStyle The line's color if added to a view (css color string)
-     * @property {string} lineWidth The line's width if added to a view (in px)
-     * @property {string} lineCap The line's cap style if added to a view
-     *
-	 * @param {View.Vector} startVector A Vector representing the start point of the line
-	 * @param {View.Vector} endVector A Vector representing the end point of the line
-	 * @param {string} [strokeStyle="#000"] The line's color if added to a view (css color string)
-	 * @param {number} [lineWidth=1] The line's width if added to a view (in px)
-     * @param {string} [lineCap='butt'] The line's cap style if added to a view
-	 */
-	Line: function (startVector, endVector, strokeStyle, lineWidth, lineCap) {
-        this.Child();
-        this.renderType = 'line';
+/**
+ * Constructor for the Line class. Uses setFromVectors to create the line's start and end points
+ *
+ * @name View.Line
+ * @class A class which is used for handling lines
+ * @augments View.Child
+ * @augments Mixin.Animatable
+ *
+ * @property {View.Vector} a The line's starting point
+ * @property {View.Vector} b The line's ending point
+ * @property {string} strokeStyle The line's color if added to a view (css color string)
+ * @property {string} lineWidth The line's width if added to a view (in px)
+ * @property {string} lineCap The line's cap style if added to a view
+ *
+ * @param {View.Vector} startVector A Vector representing the start point of the line
+ * @param {View.Vector} endVector A Vector representing the end point of the line
+ * @param {string} [strokeStyle="#000"] The line's color if added to a view (css color string)
+ * @param {number} [lineWidth=1] The line's width if added to a view (in px)
+ * @param {string} [lineCap='butt'] The line's cap style if added to a view
+ */
+View.Line = function (startVector, endVector, strokeStyle, lineWidth, lineCap) {
+	View.Child.call(this);
+	this.renderType = 'line';
 
-        if (engine.enableRedrawRegions) {
-            this.LineInitWithRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
-        }
-        else {
-            this.LineInitWithoutRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
-        }
-    },
-    /** @scope View.Line */
+	if (engine.enableRedrawRegions) {
+			this.LineInitWithRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
+	}
+	else {
+			this.LineInitWithoutRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
+	}
+};
 
+View.Line.prototype = Object.create(View.Child);
+
+View.Line.prototype.import(Math.Line.prototype);
+
+View.Line.prototype.import(/** @lends View.Line.prototype */ {
     LineInitWithoutRedrawRegions: function (startVector, endVector, strokeStyle, lineWidth, lineCap) {
         this.strokeStyle = strokeStyle || "#000";
         this.lineWidth = lineWidth || 1;

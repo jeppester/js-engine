@@ -1,20 +1,22 @@
 nameSpace('Renderer.WebGL');
 
-Renderer.WebGL.ColorShaderProgram = createClass('ColorShaderProgram', [Mixin.WebGLHelpers], /** @lends Renderer.WebGL.ColorShaderProgram.prototype */ {
-	ColorShaderProgram: function (gl) {
-		var initShaders, initBuffers, program, locations;
+Renderer.WebGL.ColorShaderProgram = function (gl) {
+	var initShaders, initBuffers, program, locations;
 
-		this.program = gl.createProgram();
+	this.program = gl.createProgram();
 
-		this.initShaders(gl);
-		this.bindLocations(gl);
-		this.initBuffers(gl);
+	this.initShaders(gl);
+	this.bindLocations(gl);
+	this.initBuffers(gl);
 
-		this.cache = {
-			currentBuffer: this.vertexBuffer,
-		};
-	},
+	this.cache = {
+		currentBuffer: this.vertexBuffer,
+	};
+};
 
+Renderer.WebGL.ColorShaderProgram.prototype.import(Mixin.WebGLHelpers);
+
+Renderer.WebGL.ColorShaderProgram.prototype.import(/** @lends Renderer.WebGL.ColorShaderProgram.prototype */ {
 	initShaders: function (gl) {
 		var vertexCode, fragmentCode, vertexShader, fragmentShader;
 

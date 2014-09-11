@@ -1,11 +1,11 @@
-MasksAndBBoxes = createClass('MasksAndBBoxes', {
-    MasksAndBBoxes: function () {
-        // Make a global reference to the game object
-        game = this;
+MasksAndBBoxes = function () {
+    // Make a global reference to the game object
+    game = this;
 
-        this.onLoaded();
-    },
+    this.onLoaded();
+};
 
+MasksAndBBoxes.prototype.import({
     onLoaded: function() {
         // Hide loader overlay
         loader.hideOverlay();
@@ -23,7 +23,7 @@ MasksAndBBoxes = createClass('MasksAndBBoxes', {
             }, {
                 duration: 10000,
                 callback: this.animation
-            })
+            });
         };
         object.animation();
 

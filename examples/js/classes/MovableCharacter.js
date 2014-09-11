@@ -1,25 +1,17 @@
-/*
-MovableCharacter (Class example):
-A character that can be moved around using the keyboard
+MovableCharacter = function(x, y) {
+    // Call the sprite constructor to fully extend the sprite and set all sprite properties
+    View.Sprite.call(this, 'Character', x, y, 0);
 
-Requires:
-	Sprite
-*/
+    // Add step function to the current room's eachFrame'-loop
+    engine.currentRoom.loops.eachFrame.attachFunction(
+        this, // This object (an instance reference is needed by the engine)
+        this.step // The function to call each time the loop executes
+    );
+};
 
-// Create a new JsEngine class which extends the Sprite class
-MovableCharacter = createClass('MovableCharacter', [View.Sprite], {
-    // Create constructor (the constructors name is always the class name with lowercase first letter)
-    MovableCharacter: function(x, y) {
-        // Call the sprite constructor to fully extend the sprite and set all sprite properties
-        this.Sprite('Character', x, y, 0);
+MovableCharacter.prototype = Object.create(View.Sprite.prototype);
 
-        // Add step function to the current room's eachFrame'-loop
-        engine.currentRoom.loops.eachFrame.attachFunction(
-            this, // This object (an instance reference is needed by the engine)
-            this.step // The function to call each time the loop executes
-        );
-    },
-
+MovableCharacter.prototype.import({
     step: function() {
         // Check that the arrow keys are down, if so, move the object by increasing or decreasing it's x and y properties
         // Left

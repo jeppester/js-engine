@@ -1,33 +1,36 @@
 nameSpace('View');
 
-View.Container = createClass('Container', [View.Child], /** @lends View.Container.prototype */ {
-	/**
-	 * Constructor for the View class.
-	 *
-	 * @name View.Container
-	 * @class A class for objects that are to be drawn on the canvas (or to contain drawn objects)
-	 *        All objects which are drawn on the game's canvas extends the View-class.
-	 * @augments View.Child
-	 *
-	 * @property {View.Child[]} children The view's children
-	 * @property {View.Container} parent The parent of the view or undefined if the view is an orphan
-	 * @property {boolean} drawCacheEnabled Whether or not draw caching is enabled
-	 *
-	 * @param {View.Child} child1 A child to add to the view upon creation
-	 * @param {View.Child} child2 An other child to add to the view upon creation
-	 * @param {View.Child} child3 A third ...
-	 */
-	Container: function (child1, child2, child3) {
-		this.children = [];
-		this.Child();
-		this.parent = undefined;
-		/*this.drawCacheCanvas = document.createElement('canvas');
-		this.drawCacheCtx = Helpers.getCanvasContext(this.drawCacheCanvas);
-		this.drawCacheEnabled = false;
-		this.drawCacheOffset = new Math.Vector();*/
+/**
+ * Constructor for the View class.
+ *
+ * @name View.Container
+ * @class A class for objects that are to be drawn on the canvas (or to contain drawn objects)
+ *        All objects which are drawn on the game's canvas extends the View-class.
+ * @augments View.Child
+ *
+ * @property {View.Child[]} children The view's children
+ * @property {View.Container} parent The parent of the view or undefined if the view is an orphan
+ * @property {boolean} drawCacheEnabled Whether or not draw caching is enabled
+ *
+ * @param {View.Child} child1 A child to add to the view upon creation
+ * @param {View.Child} child2 An other child to add to the view upon creation
+ * @param {View.Child} child3 A third ...
+ */
+View.Container = function (child1, child2, child3) {
+	this.children = [];
+	View.Child.call(this);
+	this.parent = undefined;
+	/*this.drawCacheCanvas = document.createElement('canvas');
+	this.drawCacheCtx = Helpers.getCanvasContext(this.drawCacheCanvas);
+	this.drawCacheEnabled = false;
+	this.drawCacheOffset = new Math.Vector();*/
 
-		this.addChildren.apply(this, Array.prototype.slice.call(arguments));
-	},
+	this.addChildren.apply(this, Array.prototype.slice.call(arguments));
+};
+
+View.Container.prototype = Object.create(View.Child.prototype);
+
+View.Container.prototype.import(/** @lends View.Container.prototype */ {
 	/** @scope View.Container */
 
 	/**
@@ -44,7 +47,7 @@ View.Container = createClass('Container', [View.Child], /** @lends View.Containe
 		for (i = 0; i < arguments.length; i ++) {
 			child = arguments[i];
 
-			if (!child.implements(View.Child)) {throw new Error('Argument child has to be of type: View.Child'); } //dev
+			if (!child instanceof View.Child) {throw new Error('Argument child has to be of type: View.Child'); } //dev
 
 			// If the child already has a parent, remove the child from that parent
 			if (child.parent) {
@@ -89,7 +92,7 @@ View.Container = createClass('Container', [View.Child], /** @lends View.Containe
 		for (i = 0; i < insertChildren.length; i ++) {
 			child = insertChildren[i];
 
-			if (!child.implements(View.Child)) {throw new Error('Argument child has to be of type: Child'); } //dev
+			if (!child instanceof View.Child) {throw new Error('Argument child has to be of type: Child'); } //dev
 
 			// If the child already has a parent, remove the child from that parent
 			if (child.parent) {
