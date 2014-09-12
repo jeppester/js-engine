@@ -36,9 +36,9 @@ View.Rectangle = function (x, y, width, height, fillStyle, strokeStyle, lineWidt
 	}
 };
 
-View.Rectangle.prototype = Object.create(View.Child.prototype);
+View.Rectangle.prototype = Object.create(Math.Rectangle.prototype);
 
-View.Rectangle.prototype.import(Math.Rectangle.prototype);
+View.Rectangle.prototype.import(View.Child.prototype);
 
 View.Rectangle.prototype.import(/** @lends View.Rectangle.prototype */ {
 	RectangleInitWithoutRedrawRegions: function (x, y, width, height, fillStyle, strokeStyle, lineWidth) {

@@ -100,7 +100,7 @@ $files = array();
 // Check if jsEngine-file is already packed
 $e = $options['engineDir'];
 $engineFile = file_get_contents($options['gameDir'] . $e . $options['engineFile']);
-if (preg_match('/Object\.prototype\.importProperties/', $engineFile)) {
+if (preg_match('/Object\.prototype\.import/', $engineFile)) {
 	echo "Packed JsEngine detected\n";
 	if ($options['engineOnly']) {
 		echo "Engine already packed, nothing to do\n\n";

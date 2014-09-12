@@ -32,9 +32,9 @@ View.Polygon = function (points, fillStyle, strokeStyle, lineWidth) {
 	this.lineDash = [];
 };
 
-View.Polygon.prototype = Object.create(View.Child.prototype);
+View.Polygon.prototype = Object.create(Math.Polygon.prototype);
 
-View.Polygon.import(Math.Polygon.prototype);
+View.Polygon.prototype.import(View.Child.prototype);
 
 View.Polygon.prototype.import(/** @lends View.Polygon.prototype */ {
     /**

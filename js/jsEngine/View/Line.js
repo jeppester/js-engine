@@ -32,9 +32,9 @@ View.Line = function (startVector, endVector, strokeStyle, lineWidth, lineCap) {
 	}
 };
 
-View.Line.prototype = Object.create(View.Child);
+View.Line.prototype = Object.create(Math.Line.prototype);
 
-View.Line.prototype.import(Math.Line.prototype);
+View.Line.prototype.import(View.Child.prototype);
 
 View.Line.prototype.import(/** @lends View.Line.prototype */ {
     LineInitWithoutRedrawRegions: function (startVector, endVector, strokeStyle, lineWidth, lineCap) {

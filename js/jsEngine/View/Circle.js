@@ -35,9 +35,9 @@ View.Circle = function (x, y, radius, fillStyle, strokeStyle, lineWidth) {
 	}
 };
 
-View.Circle.prototype = Object.create(View.Child.prototype);
+View.Circle.prototype = Object.create(Math.Circle.prototype);
 
-View.Circle.prototype.import(Math.Circle.prototype);
+View.Circle.prototype.import(View.Child.prototype);
 
 View.Circle.prototype.import(/** @lends View.Circle.prototype */ {
     CircleInitWithoutRedrawRegions: function (x, y, radius, fillStyle, strokeStyle, lineWidth) {

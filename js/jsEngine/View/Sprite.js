@@ -88,7 +88,7 @@ View.Sprite = function (source, x, y, direction, additionalProperties) {
 	}
 
 	// Load additional properties
-	this.importProperties(additionalProperties);
+	this.import(additionalProperties);
 
 	if (!this.refreshSource()) {
 		throw new Error('Sprite source was not successfully loaded: ' + source); //dev

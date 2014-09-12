@@ -42,7 +42,7 @@ View.TextBlock = function (string, x, y, width, additionalProperties) {
 	var hidden, offset;
 
 	// Call Vector's and view's constructors
-	this.Container();
+	View.Container.call(this);
 	this.renderType = "textblock";
 	this.x = x !== undefined ? x : 0;
 	this.y = y !== undefined ? y : 0;
@@ -156,7 +156,7 @@ View.TextBlock = function (string, x, y, width, additionalProperties) {
 	}
 
 	// Load additional properties
-	this.importProperties(additionalProperties);
+	this.import(additionalProperties);
 	this.string = string;
 
 	// Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
