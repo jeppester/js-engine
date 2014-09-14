@@ -14,6 +14,9 @@ CollisionStressTest = function () {
     this.objectCounter = new View.TextBlock('Objects: 0', 10, 30, 100, {color: '#FFF'});
     this.collisionDisplay = new View.TextBlock('Collides: No', 10, 50, 100, {color: '#FFF'});
     this.collider = new View.Collidable('Character', 300, 200);
+
+    window.collider = this.collider;
+
     this.hudView.addChildren(this.collider, this.fpsCounter, this.objectCounter, this.collisionDisplay);
 
     engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));

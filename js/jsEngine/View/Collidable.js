@@ -18,7 +18,7 @@ nameSpace('View');
  * @param {object} [additionalProperties] An object containing key-value pairs that will be set as properties for the created object. Can be used for setting advanced options such as sprite offset and opacity.
  */
 View.Collidable = function (source, x, y, direction, additionalProperties) {
-	View.Sprite.call(source, x, y, direction, additionalProperties);
+	View.Sprite.call(this, source, x, y, direction, additionalProperties);
 
 	this.mask = this.mask ? this.mask : loader.getMask(source, this.getTheme());
 	this.collisionResolution = this.collisionResolution ? this.collisionResolution : engine.defaultCollisionResolution;
@@ -203,11 +203,11 @@ View.Collidable.prototype.import(/** @lends View.Collidable.prototype */ {
 	},
 
 	createCollisionBitmap: function (objects) {
-		var obj, canvas, mask, c, parents, i, wm, lm, dt, calc, offset;
+		var obj, canvas, mask, c, parents, i, ii, wm, lm, dt, calc, offset;
 
 			// Get mask from loader object
 		mask = this.mask;
-		calc = Mixin.MatrixCalculation.prototype;
+		calc = Mixin.MatrixCalculation;
 
 		// Create a new canvas for checking for a collision
 		canvas = document.createElement('canvas');
@@ -215,7 +215,7 @@ View.Collidable.prototype.import(/** @lends View.Collidable.prototype */ {
 		canvas.height = Math.ceil(this.clipHeight);
 
 		// Add canvas for debugging
-		/*canvas.id = 'colCanvas';
+		canvas.id = 'colCanvas';
 		if (document.getElementById('colCanvas')) {
 			document.body.removeChild(document.getElementById('colCanvas'));
 		}
@@ -228,12 +228,14 @@ View.Collidable.prototype.import(/** @lends View.Collidable.prototype */ {
 		parents = this.getParents();
 		parents.reverse();
 		parents.push(this);
-		lm = calc.makeTranslation(-this.offset.x,-this.offset.y);
+		lm = calc.makeIdentity();
 
 		// Reset transform to the world matrix
 		for (i = 0; i < parents.length; i ++) {
 			lm = calc.matrixMultiply(lm, calc.calculateLocalMatrix(parents[i]));
 		}
+
+		lm = calc.matrixMultiply(lm, calc.makeTranslation(-this.offset.x,-this.offset.y));
 
 		// Set world matrix to the inverted local matrix of the target object
 		wm = calc.matrixInverse(lm);
@@ -255,9 +257,9 @@ View.Collidable.prototype.import(/** @lends View.Collidable.prototype */ {
 			parents = obj.getParents();
 			parents.reverse();
 			parents.push(obj);
-			parents.forEach(function (p) {
-				lm = calc.matrixMultiply(lm, calc.calculateLocalMatrix(p));
-			})
+			for (ii = 0; ii < parents.length; ii ++) {
+				lm = calc.matrixMultiply(lm, calc.calculateLocalMatrix(parents[ii]));
+			}
 			offset = calc.matrixMultiply(wm, lm);
 			offset = calc.matrixMultiply(calc.makeTranslation(-obj.offset.x,-obj.offset.y), offset);
 

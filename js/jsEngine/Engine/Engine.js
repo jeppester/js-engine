@@ -740,22 +740,22 @@ Engine.prototype.import({
 	 * @param {string|string[]} filePaths A file path (string), or an array of file paths to load and execute as JavaScript
 	 */
 	loadFiles: function (filePaths) {
-		var i, req, codeString;
+		var i, req, script;
 
 		if (typeof filePaths === "string") {
 			filePaths = [filePaths];
 		}
 
+		// Load first file
 		for (i = 0; i < filePaths.length; i ++) {
-			// console.log('Loading: ' + filePaths[i])
-			codeString = this.loadFileContent(filePaths[i]) + "\n//# sourceURL=/" + filePaths[i];
-			try { //dev
-				eval(codeString);
-			} //dev
-			catch (e) { //dev
-				console.log('Failed loading "' + filePaths[i]); //dev
-				throw new Error(e); //dev
-			} //dev
+			req = new XMLHttpRequest();
+			req.open('GET', filePaths[i], false);
+			req.send();
+
+			script = document.createElement('script');
+			script.type = 'text/javascript';
+			script.text = req.responseText + "\n//# sourceURL=/" + filePaths[i];
+			document.body.appendChild(script);
 		}
 
 		if (window.loadedFiles === undefined) {window.loadedFiles = []; }

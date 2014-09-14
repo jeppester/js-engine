@@ -36,7 +36,7 @@ View.GameObject = function (source, x, y, direction, additionalProperties) {
 	if (x === undefined) {throw new Error('Missing argument: x'); } //dev
 	if (y === undefined) {throw new Error('Missing argument: y'); } //dev
 
-	this.Collidable(source, x, y, direction, additionalProperties);
+	View.Collidable.call(this, source, x, y, direction, additionalProperties);
 
 	// Add object to right loop
 	this.loop = this.loop ? this.loop : engine.defaultActivityLoop;

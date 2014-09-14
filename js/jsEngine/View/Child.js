@@ -6,19 +6,14 @@ nameSpace('View');
  */
 View.Child = function () {
     this.renderType = '';
-    if (engine.enableRedrawRegions) {
-        this.ChildInitWithRedrawRegions();
-    }
-    else {
-        this.ChildInitWithoutRedrawRegions();
-    }
+    this.initWithoutRedrawRegions();
     engine.registerObject(this);
 };
 
 View.Child.prototype.import(Mixin.Animatable);
 
 View.Child.prototype.import(/** @lends View.Child.prototype */ {
-    ChildInitWithoutRedrawRegions: function () {
+    initWithoutRedrawRegions: function () {
         this.x = 0;
         this.y = 0;
         this.opacity = 1;
@@ -49,7 +44,7 @@ View.Child.prototype.import(/** @lends View.Child.prototype */ {
         });
     },
 
-    ChildInitWithRedrawRegions: function () {
+    initWithRedrawRegions: function () {
         this.hasChanged = false;
 
         // Define hidden vars

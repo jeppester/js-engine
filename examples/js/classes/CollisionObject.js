@@ -16,7 +16,7 @@ CollisionObject = function (source, x, y, additionalProperties) {
     );
 };
 
-ColissionObject.prototype = Object.create(View.GameObject.prototype);
+CollisionObject.prototype = Object.create(View.GameObject.prototype);
 
 // Create a new JsEngine class which extends the Sprite class
 CollisionObject.prototype.import({

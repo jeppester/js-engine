@@ -143,7 +143,7 @@ View.TextBlock = function (string, x, y, width, additionalProperties) {
 		set: function (value) {
 			var sign = this.heightScale > 0 ? 1 : -1;
 			this.heightScale = sign * Math.abs(value / (this.clipHeight * this.size));
-			return value
+			return value;
 		}
 	});
 

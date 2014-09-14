@@ -33,8 +33,8 @@ MasksAndBBoxes.prototype.import({
             50, // y-position
             0 // Direction (in radians)
         );
-        object2.checkCollision = function () {
-            if (this.collidesWith(object)) {
+        object.checkCollision = function () {
+            if (this.collidesWith(object2)) {
                 text.string = 'Collides';
             }
             else {
@@ -42,9 +42,9 @@ MasksAndBBoxes.prototype.import({
             }
         };
 
-        text = new View.TextBlock('', 6, 4, 80);
+        text = new View.TextBlock('', 6, 4, 80, {color: '#FFF'});
 
-        engine.currentRoom.loops.eachFrame.attachFunction(object2, object2.checkCollision);
+        engine.currentRoom.loops.eachFrame.attachFunction(object, object.checkCollision);
 
         engine.currentRoom.addChildren(object, object2, text);
     }
