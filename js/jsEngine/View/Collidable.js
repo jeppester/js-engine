@@ -205,7 +205,7 @@ View.Collidable.prototype.import(/** @lends View.Collidable.prototype */ {
 	createCollisionBitmap: function (objects) {
 		var obj, canvas, mask, c, parents, i, ii, wm, lm, dt, calc, offset;
 
-			// Get mask from loader object
+		// Get mask from loader object
 		mask = this.mask;
 		calc = Mixin.MatrixCalculation;
 
@@ -215,7 +215,7 @@ View.Collidable.prototype.import(/** @lends View.Collidable.prototype */ {
 		canvas.height = Math.ceil(this.clipHeight);
 
 		// Add canvas for debugging
-		canvas.id = 'colCanvas';
+		/*canvas.id = 'colCanvas';
 		if (document.getElementById('colCanvas')) {
 			document.body.removeChild(document.getElementById('colCanvas'));
 		}
@@ -226,19 +226,15 @@ View.Collidable.prototype.import(/** @lends View.Collidable.prototype */ {
 		c.fillRect(0, 0, canvas.width, canvas.height);
 
 		parents = this.getParents();
-		parents.reverse();
-		parents.push(this);
-		lm = calc.makeIdentity();
+		parents.unshift(this);
 
 		// Reset transform to the world matrix
+		wm = calc.makeIdentity();
+		wm = calc.matrixMultiply(calc.makeTranslation(this.offset.x, this.offset.y), wm);
+
 		for (i = 0; i < parents.length; i ++) {
-			lm = calc.matrixMultiply(lm, calc.calculateLocalMatrix(parents[i]));
+			wm = calc.matrixMultiply(calc.calculateInverseLocalMatrix(parents[i]), wm);
 		}
-
-		lm = calc.matrixMultiply(lm, calc.makeTranslation(-this.offset.x,-this.offset.y));
-
-		// Set world matrix to the inverted local matrix of the target object
-		wm = calc.matrixInverse(lm);
 
 		// If getInverse returns false, the object is invisible (thus cannot collide)
 		if (wm === false) {
@@ -258,9 +254,9 @@ View.Collidable.prototype.import(/** @lends View.Collidable.prototype */ {
 			parents.reverse();
 			parents.push(obj);
 			for (ii = 0; ii < parents.length; ii ++) {
-				lm = calc.matrixMultiply(lm, calc.calculateLocalMatrix(parents[ii]));
+				lm = calc.matrixMultiply(calc.calculateLocalMatrix(parents[ii]), lm);
 			}
-			offset = calc.matrixMultiply(wm, lm);
+			offset = calc.matrixMultiply(lm, wm);
 			offset = calc.matrixMultiply(calc.makeTranslation(-obj.offset.x,-obj.offset.y), offset);
 
 			// Set world transform

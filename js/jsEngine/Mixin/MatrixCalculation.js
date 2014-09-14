@@ -2,13 +2,31 @@ nameSpace('Mixin');
 
 Mixin.MatrixCalculation = {
 	calculateLocalMatrix: function (object) {
-		var origin, scale, rotation, position;
+		var scale, rotation, position;
 
 		scale    = this.makeScale(object.widthScale * object.size, object.heightScale * object.size);
 		rotation = this.makeRotation(-object.direction);
 		position = this.makeTranslation(object.x, object.y);
 
-		return this.matrixMultiplyArray([scale, rotation, position]);
+		return this.matrixMultiplyArray([
+			scale,
+			rotation,
+			position,
+		]);
+	},
+
+	calculateInverseLocalMatrix: function (object) {
+		var scale, rotation, position;
+
+		scale    = this.makeScale(1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size));
+		rotation = this.makeRotation(object.direction);
+		position = this.makeTranslation(-object.x, -object.y);
+
+		return this.matrixMultiplyArray([
+			position,
+			rotation,
+			scale,
+		]);
 	},
 
 	makeIdentity: function() {
