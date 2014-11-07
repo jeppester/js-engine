@@ -345,19 +345,12 @@ class Engine.Loader
     throw new Error("Missing argument: theme")  if theme is undefined #dev
     throw new Error("Missing argument: object")  if object is undefined #dev
     throw new Error("Missing argument: typeString")  if typeString is undefined #dev
-    onload = undefined
-    res = undefined
-    path = undefined
-    i = undefined
-    format = undefined
-    images = undefined
-    onload = ->
-      theme = undefined
-      return  if @hasAttribute("data-loaded")
-      @setAttribute "data-loaded", "true"
-      theme = loader.themes[@getAttribute("data-theme")]
+    onload = (event)=>
+      return if event.target.hasAttribute("data-loaded")
+      event.target.setAttribute "data-loaded", "true"
+      theme = @themes[event.target.getAttribute("data-theme")]
       theme.resourcesLoaded++
-      loader.checkAllLoaded()
+      @checkAllLoaded()
       return
 
     for path of object

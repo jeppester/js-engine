@@ -18,41 +18,39 @@ The constructor for the Polygon class. Uses the setFromPoints-function to set th
 @param {string} [strokeStyle = "#000"] The polygon's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The polygon's width if added to a view (in px)
 ###
-View.Polygon = (points, fillStyle, strokeStyle, lineWidth) ->
-  View.Child.call this
-  @renderType = "polygon"
-  @setFromPoints points
-  @fillStyle = fillStyle or "#000"
-  @strokeStyle = strokeStyle or "#000"
-  @lineWidth = lineWidth or 1
-  @opacity = 1
-  @closed = 1
-  @lineDash = []
-  return
+class View.Polygon extends Math.Polygon
+  constructor: (points, fillStyle, strokeStyle, lineWidth) ->
+    # "Fake" extend child (to get view.child properties)
+    View.Child.call this
+    @renderType = "polygon"
+    @setFromPoints points
+    @fillStyle = fillStyle or "#000"
+    @strokeStyle = strokeStyle or "#000"
+    @lineWidth = lineWidth or 1
+    @opacity = 1
+    @closed = 1
+    @lineDash = []
+    return
 
-View.Polygon:: = Object.create(Math.Polygon::)
+  ###
+  Calculates the region which the object will fill out when redrawn.
+
+  @private
+  @return {Rectangle} The bounding rectangle of the redraw
+  ###
+  getRedrawRegion: ->
+    ln = undefined
+
+    # Get bounding rectangle
+    rect = @getBoundingRectangle()
+
+    # line width
+    ln = Math.ceil(@lineWidth / 2)
+    rect.x -= ln
+    rect.y -= ln
+    rect.width += ln * 2
+    rect.height += ln * 2
+    rect.add @parent.getRoomPosition()
+
+# Mix in View.Child
 View.Polygon::import View.Child::
-###
-@lends View.Polygon.prototype
-###
-
-###
-Calculates the region which the object will fill out when redrawn.
-
-@private
-@return {Rectangle} The bounding rectangle of the redraw
-###
-View.Polygon::import getRedrawRegion: ->
-  ln = undefined
-  
-  # Get bounding rectangle
-  rect = @getBoundingRectangle()
-  
-  # line width
-  ln = Math.ceil(@lineWidth / 2)
-  rect.x -= ln
-  rect.y -= ln
-  rect.width += ln * 2
-  rect.height += ln * 2
-  rect.add @parent.getRoomPosition()
-

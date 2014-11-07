@@ -36,145 +36,137 @@ composite: 'source-over',
 offset: new Math.Vector(0, 0)
 }</code>
 ###
-View.TextBlock = (string, x, y, width, additionalProperties) ->
-  throw new Error("Missing argument: string")  if string is undefined #dev
-  hidden = undefined
-  offset = undefined
+class View.TextBlock extends View.Container
+  constructor: (string, x, y, width, additionalProperties) ->
+    throw new Error("Missing argument: string")  if string is undefined #dev
 
-  # Call Vector's and view's constructors
-  View.Container.call this
-  @renderType = "textblock"
-  @x = (if x isnt undefined then x else 0)
-  @y = (if y isnt undefined then y else 0)
+    # Call Vector's and view's constructors
+    super()
+    @renderType = "textblock"
+    @x = (if x isnt undefined then x else 0)
+    @y = (if y isnt undefined then y else 0)
 
-  # Animation options
-  @imageLength = 1
-  @imageNumber = 0
+    # Animation options
+    @imageLength = 1
+    @imageNumber = 0
 
-  # Load default options
-  @clipWidth = parseInt(width, 10) or 200
-  @lines = []
-  @lineWidth = []
-  @bm = document.createElement("canvas")
-  @bmCtx = @bm.getContext("2d")
-  @bm.width = @clipWidth
-  @bm.height = 10
-  @bm.spacing = 0
+    # Load default options
+    @clipWidth = parseInt(width, 10) or 200
+    @lines = []
+    @lineWidth = []
+    @bm = document.createElement("canvas")
+    @bmCtx = @bm.getContext("2d")
+    @bm.width = @clipWidth
+    @bm.height = 10
+    @bm.spacing = 0
 
-  # Create getters/setters
-  hidden =
-    string: ""
-    font: "normal 14px Verdana"
-    alignment: "left"
-    color: "#000000"
-    lineHeight: 0
+    # Create getters/setters
+    hidden =
+      string: ""
+      font: "normal 14px Verdana"
+      alignment: "left"
+      color: "#000000"
+      lineHeight: 0
 
-  Object.defineProperty this, "string",
-    get: ->
-      hidden.string
+    Object.defineProperty this, "string",
+      get: ->
+        hidden.string
 
-    set: (value) ->
-      hidden.string = (if typeof value is "string" then value else value.toString())
-      @stringToLines()
-      @cacheRendering()
-      engine.enableRedrawRegions and @onAfterChange()
-      value
+      set: (value) ->
+        hidden.string = (if typeof value is "string" then value else value.toString())
+        @stringToLines()
+        @cacheRendering()
+        engine.enableRedrawRegions and @onAfterChange()
+        value
 
-  Object.defineProperty this, "font",
-    get: ->
-      hidden.font
+    Object.defineProperty this, "font",
+      get: ->
+        hidden.font
 
-    set: (value) ->
-      throw new Error("font should be of type: string")  if typeof value isnt "string" #dev
-      return value  if value is hidden.font
-      hidden.font = value
-      @stringToLines()
-      @cacheRendering()
-      engine.enableRedrawRegions and @onAfterChange()
-      value
+      set: (value) ->
+        throw new Error("font should be of type: string")  if typeof value isnt "string" #dev
+        return value  if value is hidden.font
+        hidden.font = value
+        @stringToLines()
+        @cacheRendering()
+        engine.enableRedrawRegions and @onAfterChange()
+        value
 
-  Object.defineProperty this, "alignment",
-    get: ->
-      hidden.alignment
+    Object.defineProperty this, "alignment",
+      get: ->
+        hidden.alignment
 
-    set: (value) ->
-      throw new Error("alignment should be one of the following: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT")  if [ #dev
-        "left"
-        "center"
-        "right"
-      ].indexOf(value) is -1
-      return value  if value is hidden.alignment
-      hidden.alignment = value
-      @cacheRendering()
-      engine.enableRedrawRegions and @onAfterChange()
-      value
+      set: (value) ->
+        throw new Error("alignment should be one of the following: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT")  if [ #dev
+          "left"
+          "center"
+          "right"
+        ].indexOf(value) is -1
+        return value  if value is hidden.alignment
+        hidden.alignment = value
+        @cacheRendering()
+        engine.enableRedrawRegions and @onAfterChange()
+        value
 
-  Object.defineProperty this, "color",
-    get: ->
-      hidden.color
+    Object.defineProperty this, "color",
+      get: ->
+        hidden.color
 
-    set: (value) ->
-      throw new Error("color should be a CSS color string")  unless /#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})/.test(value) #dev
-      return value  if value is hidden.color
-      hidden.color = value
-      @cacheRendering()
-      engine.enableRedrawRegions and @onAfterChange()
-      value
+      set: (value) ->
+        throw new Error("color should be a CSS color string")  unless /#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})/.test(value) #dev
+        return value  if value is hidden.color
+        hidden.color = value
+        @cacheRendering()
+        engine.enableRedrawRegions and @onAfterChange()
+        value
 
-  Object.defineProperty this, "lineHeight",
-    get: ->
-      hidden.lineHeight
+    Object.defineProperty this, "lineHeight",
+      get: ->
+        hidden.lineHeight
 
-    set: (value) ->
-      hidden.lineHeight = (if typeof value isnt "number" then value else parseFloat(value))
-      @calculateCanvasHeight()
-      @cacheRendering()
-      engine.enableRedrawRegions and @onAfterChange()
-      value
+      set: (value) ->
+        hidden.lineHeight = (if typeof value isnt "number" then value else parseFloat(value))
+        @calculateCanvasHeight()
+        @cacheRendering()
+        engine.enableRedrawRegions and @onAfterChange()
+        value
 
 
-  # Define pseudo properties
-  Object.defineProperty this, "width",
-    get: ->
-      Math.abs @clipWidth * @size * @widthScale
+    # Define pseudo properties
+    Object.defineProperty this, "width",
+      get: ->
+        Math.abs @clipWidth * @size * @widthScale
 
-    set: (value) ->
-      sign = (if @widthScale > 0 then 1 else -1)
-      @widthScale = sign * Math.abs(value / (@clipWidth * @size))
-      value
+      set: (value) ->
+        sign = (if @widthScale > 0 then 1 else -1)
+        @widthScale = sign * Math.abs(value / (@clipWidth * @size))
+        value
 
-  Object.defineProperty this, "height",
-    get: ->
-      Math.abs @clipHeight * @size * @heightScale
+    Object.defineProperty this, "height",
+      get: ->
+        Math.abs @clipHeight * @size * @heightScale
 
-    set: (value) ->
-      sign = (if @heightScale > 0 then 1 else -1)
-      @heightScale = sign * Math.abs(value / (@clipHeight * @size))
-      value
+      set: (value) ->
+        sign = (if @heightScale > 0 then 1 else -1)
+        @heightScale = sign * Math.abs(value / (@clipHeight * @size))
+        value
 
-  @lineHeight = (if additionalProperties and additionalProperties.lineHeight then additionalProperties.lineHeight else @font.match(/[0.0-9]+/) * 1.25)
-  offset = OFFSET_TOP_LEFT
-  if additionalProperties and additionalProperties.offset
-    offset = additionalProperties.offset
-    delete additionalProperties.offset
+    @lineHeight = (if additionalProperties and additionalProperties.lineHeight then additionalProperties.lineHeight else @font.match(/[0.0-9]+/) * 1.25)
+    offset = OFFSET_TOP_LEFT
+    if additionalProperties and additionalProperties.offset
+      offset = additionalProperties.offset
+      delete additionalProperties.offset
 
-  # Load additional properties
-  @import additionalProperties
-  @string = string
+    # Load additional properties
+    @import additionalProperties
+    @string = string
 
-  # Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
-  @offset = offset
-  if engine.avoidSubPixelRendering
-    @offset.x = Math.round(@offset.x)
-    @offset.y = Math.round(@offset.y)
-  return
-
-View.TextBlock:: = Object.create(View.Container::)
-View.TextBlock::import Mixin.Animatable
-View.TextBlock::import
-  ###
-  @lends View.TextBlock.prototype
-  ###
+    # Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
+    @offset = offset
+    if engine.avoidSubPixelRendering
+      @offset.x = Math.round(@offset.x)
+      @offset.y = Math.round(@offset.y)
+    return
 
   ###
   Parses an offset global into an actual Math.Vector offset that fits the instance
@@ -353,3 +345,6 @@ View.TextBlock::import
     ret.width = Math.ceil(ret.width + 2)
     ret.height = Math.ceil(ret.height + 2)
     ret
+
+# Mix in animatable
+View.TextBlock::import Mixin.Animatable

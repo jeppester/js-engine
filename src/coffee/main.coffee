@@ -1,3 +1,3 @@
 engine = new Engine
   gameClass: Game
-  themes: ["Empty"]
+  themes: ["Example"]

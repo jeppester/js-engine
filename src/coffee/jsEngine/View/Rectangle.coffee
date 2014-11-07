@@ -24,18 +24,17 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {string} [strokeStyle = "#000"] The rectangle's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The rectangle's width if added to a view (in px)
 ###
-View.Rectangle = (x, y, width, height, fillStyle, strokeStyle, lineWidth) ->
-  View.Child.call this
-  @renderType = "rectangle"
-  if engine.enableRedrawRegions
-    @RectangleInitWithRedrawRegions x, y, width, height, fillStyle, strokeStyle, lineWidth
-  else
-    @RectangleInitWithoutRedrawRegions x, y, width, height, fillStyle, strokeStyle, lineWidth
-  return
+class View.Rectangle extends Math.Rectangle
+  constructor: (x, y, width, height, fillStyle, strokeStyle, lineWidth) ->
+    # "Fake" extend child (to get view.child properties)
+    View.Child.call this
+    @renderType = "rectangle"
+    if engine.enableRedrawRegions
+      @RectangleInitWithRedrawRegions x, y, width, height, fillStyle, strokeStyle, lineWidth
+    else
+      @RectangleInitWithoutRedrawRegions x, y, width, height, fillStyle, strokeStyle, lineWidth
+    return
 
-View.Rectangle:: = Object.create(Math.Rectangle::)
-View.Rectangle::import View.Child::
-View.Rectangle::import
   ###
   @lends View.Rectangle.prototype
   ###
@@ -194,3 +193,6 @@ View.Rectangle::import
     rect.width += ln * 2
     rect.height += ln * 2
     rect.add @parent.getRoomPosition()
+
+# Mix in View.Child
+View.Rectangle::import View.Child::
