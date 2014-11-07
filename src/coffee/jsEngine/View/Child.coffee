@@ -20,7 +20,8 @@ class View.Child
     @widthScale = 1
     @heightScale = 1
     hidden = offset: new Math.Vector()
-    Object.defineProperty this, "offset",
+
+    Object.defineProperty @, "offset",
       get: ->
         hidden.offset
 

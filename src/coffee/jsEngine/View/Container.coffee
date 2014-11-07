@@ -16,24 +16,18 @@ All objects which are drawn on the game's canvas extends the View-class.
 @param {View.Child} child2 An other child to add to the view upon creation
 @param {View.Child} child3 A third ...
 ###
-View.Container = (child1, child2, child3) ->
-  @children = []
-  View.Child.call this
-  @parent = undefined
+class View.Container extends View.Child
+  constructor: (child1, child2, child3) ->
+    @children = []
+    super()
+    @parent = undefined
 
-  #this.drawCacheCanvas = document.createElement('canvas');
-  #	this.drawCacheCtx = Helpers.getCanvasContext(this.drawCacheCanvas);
-  #	this.drawCacheEnabled = false;
-  #	this.drawCacheOffset = new Math.Vector();
-  @addChildren.apply this, Array::slice.call(arguments)
-  return
-
-View.Container:: = Object.create(View.Child::)
-View.Container::import
-  ###
-  @lends View.Container.prototype
-  @scope View.Container
-  ###
+    #this.drawCacheCanvas = document.createElement('canvas');
+    #	this.drawCacheCtx = Helpers.getCanvasContext(this.drawCacheCanvas);
+    #	this.drawCacheEnabled = false;
+    #	this.drawCacheOffset = new Math.Vector();
+    @addChildren.apply this, Array::slice.call(arguments)
+    return
 
   ###
   Adds children to a View object. If the object that the children are added to, is a descendant of the current room, the children will be drawn on the stage when added. The added children will be drawn above the current children.

@@ -21,7 +21,7 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 ###
 class Engine.Room extends View.Container
   constructor: (name, onEntered, onLeft) ->
-    super this
+    super()
     @name = (if name then name else engine.roomList.length)
     @onEntered = (if onEntered isnt undefined then onEntered else ->)
     @onLeft = (if onLeft isnt undefined then onLeft else ->)
