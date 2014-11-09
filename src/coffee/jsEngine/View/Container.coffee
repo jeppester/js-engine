@@ -17,7 +17,7 @@ All objects which are drawn on the game's canvas extends the View-class.
 @param {View.Child} child3 A third ...
 ###
 class View.Container extends View.Child
-  constructor: (child1, child2, child3) ->
+  constructor: (children...) ->
     @children = []
     super()
     @parent = undefined
@@ -26,7 +26,10 @@ class View.Container extends View.Child
     #	this.drawCacheCtx = Helpers.getCanvasContext(this.drawCacheCanvas);
     #	this.drawCacheEnabled = false;
     #	this.drawCacheOffset = new Math.Vector();
-    @addChildren.apply this, Array::slice.call(arguments)
+    @addChildren.apply this, children
+
+    # Make an objectcreator for this object
+    @create = new Engine.ObjectCreator(@)
     return
 
   ###
