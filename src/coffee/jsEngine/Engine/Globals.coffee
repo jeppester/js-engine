@@ -520,3 +520,60 @@ ALIGNMENT_RIGHT = "right"
 
   return
 )()
+
+# EASING FUNCTIONS
+###
+  @param {number} t The current time (of the animation)
+  @param {number} b The start value
+  @param {number} c The end value
+  @param {number} d The animation time
+  @{number} The current value (at the given time in the animation)
+###
+EASING_LINEAR = (t, b, c, d) ->
+  t /= d
+  b + c * t
+
+EASING_QUAD_IN = (t, b, c, d) ->
+  t /= d
+  b + c * t * t
+
+EASING_QUAD_OUT = (t, b, c, d) ->
+  t /= d
+  b - c * t * (t - 2)
+
+EASING_QUAD_IN_OUT = (t, b, c, d) ->
+  t = t / d * 2
+  if t < 1
+    b + c * t * t / 2
+  else
+    t--
+    b + c * (1 - t * (t - 2)) / 2
+
+EASING_POWER_IN = (t, b, c, d) ->
+  t /= d
+
+  # a determines if c is positive or negative
+  a = c / Math.abs(c)
+  b + a * Math.pow(Math.abs(c), t)
+
+EASING_POWER_OUT = (t, b, c, d) ->
+  t /= d
+
+  # a determines if c is positive or negative
+  a = c / Math.abs(c)
+  b + c - a * Math.pow(Math.abs(c), 1 - t)
+
+EASING_POWER_IN_OUT = (t, b, c, d) ->
+  t = t / d * 2
+
+  # a determines if c is positive or negative
+  a = c / Math.abs(c)
+  if t < 1
+    b + a * Math.pow(Math.abs(c), t) / 2
+  else
+    t--
+    b + c - a * Math.pow(Math.abs(c), 1 - t) / 2
+
+EASING_SINUS_IN_OUT = (t, b, c, d) ->
+  t /= d
+  b + c * (1 + Math.cos(Math.PI * (1 + t))) / 2

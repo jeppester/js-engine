@@ -349,10 +349,9 @@ class Engine.CustomLoop
         else
           a.callback.call a.obj
       else
-
         # If the animation is still running: Ease the animation of each property
         for propId of a.prop
-          a.obj[propId] = engine.ease(a.easing, t, a.prop[propId].begin, a.prop[propId].end - a.prop[propId].begin, a.duration)  if a.prop.hasOwnProperty(propId)
+          a.obj[propId] = a.easing t, a.prop[propId].begin, a.prop[propId].end - a.prop[propId].begin, a.duration if a.prop.hasOwnProperty(propId)
 
       # Execute onStep-callback if any
       a.onStep and a.onStep()
