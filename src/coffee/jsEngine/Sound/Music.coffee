@@ -13,8 +13,8 @@ Constructor for the Music class
 ###
 class Sound.Music
   constructor: (audioElement) ->
-    throw new Error("Missing argument: audioElement")  if audioElement is undefined #dev
-    throw new Error("Argument audioElement has to be of type HTMLAudioElement")  if audioElement.toString() isnt "[object HTMLAudioElement]" #dev
+    throw new Error("Missing argument: audioElement") if audioElement is undefined #dev
+    throw new Error("Argument audioElement has to be of type HTMLAudioElement") if audioElement.toString() isnt "[object HTMLAudioElement]" #dev
     @source = audioElement
     @paused = false
     return
@@ -26,10 +26,10 @@ class Sound.Music
   @return {boolean} True if the playback has started successfully, false if not
   ###
   play: (loop_) ->
-    return false  if engine.musicMuted
+    return false if engine.musicMuted
     @source.play()
     @paused = false
-    @source.loop = "loop"  if loop_
+    @source.loop = "loop" if loop_
     true
 
   ###
