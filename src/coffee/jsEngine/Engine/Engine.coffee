@@ -229,7 +229,6 @@ class Engine
     @loader.loadThemes @options.themes
     return
 
-
   ###
   Starts the engine
 
@@ -305,7 +304,6 @@ class Engine
     console.log "jsEngine started" #dev
     return
 
-
   ###
   Creates and prepares the game canvas for being used
   ###
@@ -326,7 +324,6 @@ class Engine
     else
       @renderer = new Renderer.Canvas(@canvas)
     return
-
 
   ###
   Enables or disables canvas autoresize.
@@ -352,7 +349,6 @@ class Engine
       @canvas.style.width = @canvasResX + "px"
       @canvas.style.height = @canvasResY + "px"
     return
-
 
   ###
   Function for resizing the canvas. Not used if engine option "autoResizeCanvas" is false.
@@ -387,7 +383,6 @@ class Engine
     @canvas.style.height = h + "px"
     @canvas.style.width = w + "px"
     return
-
 
   ###
   Function for converting between speed units
@@ -447,7 +442,6 @@ class Engine
 
     oldRoom
 
-
   ###
   Adds a room to the room list. This function is automatically called by the Room class' constructor.
 
@@ -461,7 +455,6 @@ class Engine
     #dev
     @roomList.push room
     return
-
 
   ###
   Removes a room from the room list.
@@ -488,7 +481,6 @@ class Engine
     @roomList.splice i, 1
     return
 
-
   ###
   Toggles if all sound effects should be muted.
 
@@ -505,7 +497,6 @@ class Engine
 
     @soundsMuted = muted
     return
-
 
   ###
   Toggles if all music should be muted.
@@ -524,7 +515,6 @@ class Engine
     @musicMuted = muted
     return
 
-
   ###
   Sets the default theme for the engine objects
 
@@ -538,7 +528,6 @@ class Engine
     @defaultTheme = themeName
     @currentRoom.setTheme undefined, enforce
     return
-
 
   ###
   Starts the engine's main loop
@@ -554,7 +543,6 @@ class Engine
     engine.mainLoop()
     return
 
-
   ###
   Stops the engine's main loop
   ###
@@ -562,7 +550,6 @@ class Engine
     return  unless @running
     @running = false
     return
-
 
   ###
   The engine's main loop function (should not be called manually)
@@ -593,7 +580,7 @@ class Engine
     # Draw game objects
     @drawCalls = 0 #dev
     drawTime = new Date().getTime() #dev
-    @redraw()
+    @renderer.render @cameras
     drawTime = new Date().getTime() - drawTime #dev
 
     # Count frames per second and calculate mean redraw time
@@ -601,14 +588,12 @@ class Engine
       @fpsCounter++ #dev
       @drawTimeCounter += drawTime #dev
       @fpsMsCounter += @timeIncrease #dev
-    #dev
     else #dev
       @fps = @fpsCounter #dev
       @drawTime = @drawTimeCounter / @fpsCounter #dev
       @fpsCounter = 0 #dev
       @drawTimeCounter = 0 #dev
       @fpsMsCounter = 0 #dev
-    #dev
 
     # Schedule the loop to run again
     requestAnimationFrame (time) ->
@@ -616,7 +601,6 @@ class Engine
       return
 
     return
-
 
   ###
   Sets the horizontal resolution of the main canvas
@@ -629,7 +613,6 @@ class Engine
     @autoResizeCanvas()  if @autoResize
     return
 
-
   ###
   Sets the vertical resolution of the main canvas
 
@@ -640,7 +623,6 @@ class Engine
     @canvasResY = res
     @autoResizeCanvas()  if @autoResize
     return
-
 
   ###
   Registers an object to the engine. This will give the object an id which can be used for accessing it at a later time.
@@ -668,7 +650,6 @@ class Engine
     req.send()
     req.responseText
 
-
   ###
   Loads and executes one or multiple JavaScript file synchronously
 
@@ -694,7 +675,6 @@ class Engine
     window.loadedFiles = []  if window.loadedFiles is undefined
     window.loadedFiles = window.loadedFiles.concat(filePaths)
     return
-
 
   ###
   Uses an http request to fetch the data from a file and runs a callback function with the file data as first parameter
@@ -725,13 +705,10 @@ class Engine
     req.send params
     unless async
       if req.readyState is 4 and req.status is 200 #dev
-        callback.call caller, req.responseText
-      #dev
+        callback.call caller, req.responseText #dev
       else #dev
         throw new Error("XMLHttpRequest failed: " + url) #dev
     return
-
-  #dev
 
   ###
   Removes an object from all engine loops, views, and from the object index
@@ -771,17 +748,6 @@ class Engine
     delete @objectIndex[obj.id]
 
     return
-
-
-  ###
-  Redraws the canvas by redrawing all cameras
-  ###
-  redraw: ->
-
-    # Send cameras to the renderer
-    @renderer.render @cameras
-    return
-
 
   ###
   Downloads a screen dump of the main canvas. Very usable for creating game screenshots directly from browser consoles.
