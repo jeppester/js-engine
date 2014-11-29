@@ -31,33 +31,28 @@ speed: new Math.Vector(0, 0)
 }
 </code>
 ###
-View.GameObject = (source, x, y, direction, additionalProperties) ->
-  throw new Error("Missing argument: source")  if source is undefined #dev
-  throw new Error("Missing argument: x")  if x is undefined #dev
-  throw new Error("Missing argument: y")  if y is undefined #dev
-  View.Collidable.call this, source, x, y, direction, additionalProperties
+class View.GameObject extends View.Collidable
+  constructor: (source, x, y, direction, additionalProperties) ->
+    throw new Error("Missing argument: source")  if source is undefined #dev
+    throw new Error("Missing argument: x")  if x is undefined #dev
+    throw new Error("Missing argument: y")  if y is undefined #dev
+    super source, x, y, direction, additionalProperties
 
-  # Add object to right loop
-  @loop = (if @loop then @loop else engine.defaultActivityLoop)
-  @loop.attachFunction this, @updatePosition
-  @speed = (if @speed then @speed else new Math.Vector(0, 0))
-  @alive = true
-  return
+    # Add object to right loop
+    @loop = (if @loop then @loop else engine.defaultActivityLoop)
+    @loop.attachFunction this, @updatePosition
+    @speed = (if @speed then @speed else new Math.Vector(0, 0))
+    @alive = true
+    return
 
-View.GameObject:: = Object.create(View.Collidable::)
-###
-@lends View.GameObject.prototype
-###
+  ###
+  Adds the game object's speed vector to its current position. This function is automatically run in each frame.
 
-###
-Adds the game object's speed vector to its current position. This function is automatically run in each frame.
-
-@private
-###
-View.GameObject::import updatePosition: ->
-
-  # If the object is "alive", add its speed vector to its position
-  if @alive
-    @x += engine.convertSpeed(@speed.x)
-    @y += engine.convertSpeed(@speed.y)
-  return
+  @private
+  ###
+  updatePosition: ->
+    # If the object is "alive", add its speed vector to its position
+    if @alive
+      @x += engine.convertSpeed(@speed.x)
+      @y += engine.convertSpeed(@speed.y)
+    return

@@ -25,6 +25,9 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} [lineWidth = 1] The rectangle's width if added to a view (in px)
 ###
 class View.Rectangle extends Math.Rectangle
+  # Mix in View.Child
+  Object::import.call @::, View.Child::
+
   constructor: (x, y, width, height, fillStyle, strokeStyle, lineWidth) ->
     # "Fake" extend child (to get view.child properties)
     View.Child.call this
@@ -193,6 +196,3 @@ class View.Rectangle extends Math.Rectangle
     rect.width += ln * 2
     rect.height += ln * 2
     rect.add @parent.getRoomPosition()
-
-# Mix in View.Child
-View.Rectangle::import View.Child::

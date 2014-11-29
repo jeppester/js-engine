@@ -5,6 +5,9 @@ nameSpace "View"
 @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
 ###
 class View.Child
+  # Mix in animatable
+  Object::import.call @::, Mixin.Animatable
+
   constructor: ->
     @renderType = ""
     @initWithoutRedrawRegions()
@@ -286,6 +289,3 @@ class View.Child
 
     # If sprites size has been modified to zero, do nothing
     not (@size is 0 or @widthScale is 0 or @heightScale is 0)
-
-# Mix in animatable
-View.Child::import Mixin.Animatable

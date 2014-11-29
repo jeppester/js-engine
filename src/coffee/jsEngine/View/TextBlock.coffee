@@ -37,6 +37,9 @@ offset: new Math.Vector(0, 0)
 }</code>
 ###
 class View.TextBlock extends View.Container
+  # Mix in animatable
+  Object::import.call @::, Mixin.Animatable
+  
   constructor: (string, x, y, width, additionalProperties) ->
     throw new Error("Missing argument: string")  if string is undefined #dev
 
@@ -345,6 +348,3 @@ class View.TextBlock extends View.Container
     ret.width = Math.ceil(ret.width + 2)
     ret.height = Math.ceil(ret.height + 2)
     ret
-
-# Mix in animatable
-View.TextBlock::import Mixin.Animatable

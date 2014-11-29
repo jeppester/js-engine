@@ -1,5 +1,8 @@
 nameSpace "Renderer"
 class Renderer.Canvas
+  # Mix in matrix calculation
+  Object::import.call @::, Mixin.MatrixCalculation
+
   constructor: (canvas) ->
     gl = undefined
     options = undefined
@@ -181,6 +184,3 @@ class Renderer.Canvas
     c.fill()
     c.stroke()
     return
-
-# Mix in matric calculation
-Renderer.Canvas::import Mixin.MatrixCalculation

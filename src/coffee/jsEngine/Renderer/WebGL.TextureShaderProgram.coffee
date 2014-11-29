@@ -1,30 +1,29 @@
 nameSpace "Renderer.WebGL"
-Renderer.WebGL.TextureShaderProgram = (gl) ->
-  initShaders = undefined
-  initBuffers = undefined
-  program = undefined
-  locations = undefined
+class Renderer.WebGL.TextureShaderProgram
+  # Import WebGL helpers
+  Object::import.call @::, Mixin.WebGLHelpers
 
-  # Init program
-  @cache =
-    regularTextCoordBuffer: false
-    animatedTextCoordBuffer: false
-    rectangleCornerBuffer: false
-    currentBuffer: false
-    currentTexture: undefined
-    textures: {}
+  constructor: (gl) ->
+    initShaders = undefined
+    initBuffers = undefined
+    program = undefined
+    locations = undefined
 
-  @program = gl.createProgram()
-  @initShaders gl
-  @bindLocations gl
-  @initBuffers gl
-  return
+    # Init program
+    @cache =
+      regularTextCoordBuffer: false
+      animatedTextCoordBuffer: false
+      rectangleCornerBuffer: false
+      currentBuffer: false
+      currentTexture: undefined
+      textures: {}
 
-Renderer.WebGL.TextureShaderProgram::import Mixin.WebGLHelpers
-Renderer.WebGL.TextureShaderProgram::import
-  ###
-  @lends Renderer.WebGL.TextureShaderProgram.prototype
-  ###
+    @program = gl.createProgram()
+    @initShaders gl
+    @bindLocations gl
+    @initBuffers gl
+    return
+
   initShaders: (gl) ->
     vertexCode = undefined
     fragmentCode = undefined
@@ -225,7 +224,6 @@ Renderer.WebGL.TextureShaderProgram::import
     if image.imageLength is 1
       gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR
     else
-
       # gl.NEAREST is better for drawing a part of an image
       gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST
     gl.bindTexture gl.TEXTURE_2D, null

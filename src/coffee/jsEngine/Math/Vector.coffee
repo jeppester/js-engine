@@ -13,6 +13,9 @@ Constructor for the Vector class. Uses set-function to set the vector from x- an
 @param {number} [y=0] The y-value to set for the vector
 ###
 class Math.Vector
+  # Mixin animatable
+  Object::import.call @::, Mixin.Animatable
+
   constructor: (x, y) ->
     @set x, y
     return
@@ -214,6 +217,3 @@ class Math.Vector
     return object.getDistance(this) if object instanceof Math.Rectangle
     return object.getDistance(this) if object instanceof Math.Polygon
     throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon") #dev
-
-# Mixin animatable
-Math.Vector::import Mixin.Animatable

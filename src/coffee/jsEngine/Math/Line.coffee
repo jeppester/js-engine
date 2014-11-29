@@ -14,6 +14,9 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {Vector} endVector A Vector representing the end point of the line
 ###
 class Math.Line
+  # Mix in animatable
+  Object::import.call @::, Mixin.Animatable
+
   constructor: (startVector, endVector) ->
     startVector = (if startVector isnt undefined then startVector else new Math.Vector())
     endVector = (if endVector isnt undefined then endVector else new Math.Vector())
@@ -289,6 +292,3 @@ class Math.Line
       @a.copy()
       @b.copy()
     ])
-
-# Mix in animatable
-Math.Line::import Mixin.Animatable

@@ -1,5 +1,8 @@
 nameSpace "Renderer.WebGL"
 class Renderer.WebGL.ColorShaderProgram
+  # Import webgl helpers
+  Object::import.call @::, Mixin.WebGLHelpers
+
   constructor: (gl) ->
     initShaders = undefined
     initBuffers = undefined
@@ -203,6 +206,3 @@ class Renderer.WebGL.ColorShaderProgram
       # Draw
       gl.drawArrays gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2
     return
-
-# Import webgl helpers
-Renderer.WebGL.ColorShaderProgram::import Mixin.WebGLHelpers

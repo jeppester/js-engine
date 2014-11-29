@@ -35,6 +35,9 @@ offset: new Math.Vector('center', 'center')
 }</code>
 ###
 class View.Sprite extends View.Container
+  # Mix in animatable
+  Object::import.call @::, Mixin.Animatable
+
   constructor: (source, x, y, direction, additionalProperties) ->
     throw new Error("Missing argument: source") if source is undefined #dev
 
@@ -218,6 +221,3 @@ class View.Sprite extends View.Container
     box.width = Math.ceil(box.width + 1)
     box.height = Math.ceil(box.height + 1)
     box
-
-# Mix in animatable
-View.Sprite::import Mixin.Animatable

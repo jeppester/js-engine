@@ -22,21 +22,19 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {string} [strokeStyle = "#000"] The circle's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The circle's width if added to a view (in px)
 ###
-View.Circle = (x, y, radius, fillStyle, strokeStyle, lineWidth) ->
-  View.Child.call this
-  @renderType = "circle"
-  if engine.enableRedrawRegions
-    @CircleInitWithRedrawRegions x, y, radius, fillStyle, strokeStyle, lineWidth
-  else
-    @CircleInitWithoutRedrawRegions x, y, radius, fillStyle, strokeStyle, lineWidth
-  return
+class View.Circle extends Math.Circle
+  # Mix in View.Child
+  Object::import.call @::, View.Child::
 
-View.Circle:: = Object.create(Math.Circle::)
-View.Circle::import View.Child::
-View.Circle::import
-  ###
-  @lends View.Circle.prototype
-  ###
+  constructor: (x, y, radius, fillStyle, strokeStyle, lineWidth) ->
+    View.Child.call @
+    @renderType = "circle"
+    if engine.enableRedrawRegions
+      @CircleInitWithRedrawRegions x, y, radius, fillStyle, strokeStyle, lineWidth
+    else
+      @CircleInitWithoutRedrawRegions x, y, radius, fillStyle, strokeStyle, lineWidth
+    return
+
   CircleInitWithoutRedrawRegions: (x, y, radius, fillStyle, strokeStyle, lineWidth) ->
     @radius = radius
     @fillStyle = fillStyle or "#000"
@@ -97,7 +95,6 @@ View.Circle::import
 
     @set x, y, radius
     return
-
 
   ###
   Calculates the region which the object will fill out when redrawn.

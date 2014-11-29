@@ -20,21 +20,19 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {number} [lineWidth=1] The line's width if added to a view (in px)
 @param {string} [lineCap='butt'] The line's cap style if added to a view
 ###
-View.Line = (startVector, endVector, strokeStyle, lineWidth, lineCap) ->
-  View.Child.call this
-  @renderType = "line"
-  if engine.enableRedrawRegions
-    @LineInitWithRedrawRegions startVector, endVector, strokeStyle, lineWidth, lineCap
-  else
-    @LineInitWithoutRedrawRegions startVector, endVector, strokeStyle, lineWidth, lineCap
-  return
+class View.Line extends Math.Line
+  # Mix in View.Child
+  Object::import.call @::, View.Child::
 
-View.Line:: = Object.create(Math.Line::)
-View.Line::import View.Child::
-View.Line::import
-  ###
-  @lends View.Line.prototype
-  ###
+  constructor: (startVector, endVector, strokeStyle, lineWidth, lineCap) ->
+    View.Child.call this
+    @renderType = "line"
+    if engine.enableRedrawRegions
+      @LineInitWithRedrawRegions startVector, endVector, strokeStyle, lineWidth, lineCap
+    else
+      @LineInitWithoutRedrawRegions startVector, endVector, strokeStyle, lineWidth, lineCap
+    return
+
   LineInitWithoutRedrawRegions: (startVector, endVector, strokeStyle, lineWidth, lineCap) ->
     @strokeStyle = strokeStyle or "#000"
     @lineWidth = lineWidth or 1

@@ -16,6 +16,9 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {number} radius The radius for the circle
 ###
 class Math.Circle
+  # Mix in animatable
+  Object::import.call @::, Mixin.Animatable
+
   constructor: (x, y, radius) ->
     @set x, y, radius
     return
@@ -177,6 +180,3 @@ class Math.Circle
     else #dev
       throw new Error("Argument object has to be of type: Line, Circle, Rectangle or Polygon") #dev
     return #dev
-
-# Mix in animatable
-Math.Circle::import Mixin.Animatable

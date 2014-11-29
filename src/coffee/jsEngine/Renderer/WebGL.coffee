@@ -1,5 +1,8 @@
 nameSpace "Renderer"
 class Renderer.WebGL
+  # Mix in matrix calculation
+  Object::import.call @::, Mixin.MatrixCalculation
+
   constructor: (canvas) ->
     @canvas = canvas
 
@@ -125,6 +128,3 @@ class Renderer.WebGL
         @renderTree object.children[i], localWm
         i++
     return
-
-# Mix in matrix calculation
-Renderer.WebGL::import Mixin.MatrixCalculation
