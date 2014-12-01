@@ -3,12 +3,6 @@ fs = require 'fs'
 coffee = require 'coffee-script'
 fs.rmdirRecSync = require './rmdir-recursive-sync'
 
-# Clear cache
-tmpDir = './tmp'
-fs.rmdirRecSync tmpDir if fs.existsSync tmpDir
-fs.mkdirSync tmpDir
-fs.mkdirSync tmpDir + '/lib'
-
 cache = {}
 
 # Middleware
