@@ -2,6 +2,7 @@ nameSpace "Engine"
 class Engine.ObjectCreator
   constructor: (container)->
     @container = container
+    
   Container: (children...) ->
     a = arguments
     o = new View.Container
