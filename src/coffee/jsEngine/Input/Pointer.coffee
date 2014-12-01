@@ -78,7 +78,6 @@ class Input.Pointer
       button.events.unshift new Date().getTime()
     return
 
-
   ###
   Registers every onmouseup event to the Mouse object.
 
@@ -94,7 +93,6 @@ class Input.Pointer
       button.events = button.events.slice(0, 1)
       button.events.unshift -new Date().getTime()
     return
-
 
   ###
   Registers every onmousemove event to the Mouse object.
@@ -127,7 +125,6 @@ class Input.Pointer
       @cursor.y = @mouse.y
     return
 
-
   ###
   Registers every ontouchstart event to the Mouse object.
 
@@ -139,14 +136,10 @@ class Input.Pointer
 
     # Update pressed touches
     for eventTouch in event.changedTouches
-      if eventTouch.identifier > 20
-        touchNumber = @findTouchNumber()
-      else
-        touchNumber = eventTouch.identifier
-
+      touchNumber = @findTouchNumber()
       pointerTouch = @touches[touchNumber]
       pointerTouch.identifier = eventTouch.identifier
-      pointerTouch.events = pointerTouch.events.slice(0, 1)
+      pointerTouch.events = pointerTouch.events.slice 0, 1
       pointerTouch.events.unshift new Date().getTime()
 
     # Update all touch positions
@@ -161,28 +154,18 @@ class Input.Pointer
   ###
   onTouchEnd: (event) ->
     throw new Error("Missing argument: event") if event is undefined #dev
-    i = undefined
-    eventTouch = undefined
-    pointerTouch = undefined
 
     # Update unpressed touches
-    i = 0
-    while i < event.changedTouches.length
-      eventTouch = event.changedTouches[i]
-      if event.changedTouches[i].identifier > 20
-        pointerTouch = @touches.filter((t) ->
-          t.identifier is eventTouch.identifier
-        )[0]
-      else
-        pointerTouch = @touches[eventTouch.identifier]
+    for eventTouch in event.changedTouches
+      pointerTouch = @touches.filter((t) ->
+        t.identifier is eventTouch.identifier
+      )[0]
       pointerTouch.events = pointerTouch.events.slice(0, 1)
       pointerTouch.events.unshift -new Date().getTime()
-      i++
 
     # Update all touch positions
     @onTouchMove event
     return
-
 
   ###
   Registers every ontouchmove event to the Mouse object.
@@ -192,19 +175,11 @@ class Input.Pointer
   ###
   onTouchMove: (event) ->
     throw new Error("Missing argument: event") if event is undefined #dev
-    i = undefined
-    eventTouch = undefined
-    pointerTouch = undefined
-    roomPos = undefined
-    i = 0
-    while i < event.touches.length
-      eventTouch = event.touches[i]
-      if event.touches[i].identifier > 20
-        pointerTouch = @touches.filter((t) ->
-          t.identifier is eventTouch.identifier
-        )[0]
-      else
-        pointerTouch = @touches[eventTouch.identifier]
+
+    for eventTouch in event.touches
+      pointerTouch = @touches.filter((t) ->
+        t.identifier is eventTouch.identifier
+      )[0]
       pointerTouch.set eventTouch.pageX - engine.arena.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - engine.arena.offsetTop - engine.canvas.offsetTop + document.body.scrollTop
       pointerTouch.x = pointerTouch.x / engine.arena.offsetWidth * engine.canvasResX
       pointerTouch.y = pointerTouch.y / engine.arena.offsetHeight * engine.canvasResY
@@ -213,9 +188,7 @@ class Input.Pointer
       roomPos = @calculateRoomPosition(pointerTouch)
       pointerTouch.x = roomPos.x
       pointerTouch.y = roomPos.y
-      i++
     return
-
 
   ###
   Checks if the mouse has been moved between the last and the current frame.
@@ -224,7 +197,6 @@ class Input.Pointer
   ###
   mouseHasMoved: ->
     engine.last < @mouse.lastMoved
-
 
   ###
   Checks if a mouse button or touch is currently down.
@@ -244,7 +216,6 @@ class Input.Pointer
         pointers = @mouse.buttons.concat(@touches)
     @checkPointer pointers, "down"
 
-
   ###
   Checks if a mouse button or touch has just been pressed (between the last and the current frame).
 
@@ -262,7 +233,6 @@ class Input.Pointer
       when "any"
         pointers = @mouse.buttons.concat(@touches)
     @checkPointer pointers, "pressed"
-
 
   ###
   Checks if a mouse button or touch just been released (between the last and the current frame).
@@ -302,22 +272,18 @@ class Input.Pointer
 
     # Narrow possible presses down to the pressed pointers within the selected buttons
     pointers = @isPressed(button)
-    return false unless pointers
 
     # Check each of the pointers to see if they are inside the shape
     ret = []
-    i = 0
-    while i < pointers.length
-      pointer = pointers[i]
+    for pointer in pointers
       continue if pointer.x is false or pointer.y is false
       if not outside and shape.contains(pointer)
         ret.push pointer
-      else ret.push pointer if outside and not shape.contains(pointer)
-      i++
+      else
+        ret.push pointer if outside and not shape.contains(pointer)
 
     # Return the pointers which are inside the shape
-    (if ret.length then ret else false)
-
+    ret
 
   ###
   Checks if an area defined by a geometric shape, or its outside, has just been released (between the last and the current frame).
@@ -332,29 +298,21 @@ class Input.Pointer
     button = (if button isnt undefined then button else MOUSE_TOUCH_ANY)
     throw new Error("Missing argument: shape") if shape is undefined #dev
     throw new Error("Argument shape has implement a \"contains\"-function") if typeof shape.contains isnt "function" #dev
-    i = undefined
-    pointers = undefined
-    pointer = undefined
-    ret = undefined
 
     # Narrow possible presses down to the pressed pointers within the selected buttons
     pointers = @isReleased(button)
-    return false unless pointers
 
     # Check each of the pointers to see if they are inside the shape
     ret = []
-    i = 0
-    while i < pointers.length
-      pointer = pointers[i]
+    for pointer in pointers
       continue if pointer.x is false or pointer.y is false
       if not outside and shape.contains(pointer)
         ret.push pointer
-      else ret.push pointer if outside and not shape.contains(pointer)
-      i++
+      else
+        ret.push pointer if outside and not shape.contains(pointer)
 
     # Return the pointers which are inside the shape
-    (if ret.length then ret else false)
-
+    ret
 
   ###
   Checks if an area defined by a geometric shape, or its outside, is down (currently clicked by mouse or touch).
@@ -369,29 +327,21 @@ class Input.Pointer
     button = (if button isnt undefined then button else MOUSE_TOUCH_ANY)
     throw new Error("Missing argument: shape") if shape is undefined #dev
     throw new Error("Argument shape has implement a \"contains\"-function") if typeof shape.contains isnt "function" #dev
-    i = undefined
-    pointers = undefined
-    pointer = undefined
-    ret = undefined
 
     # Narrow possible pointers down to the pointers which are down within the selected buttons
-    pointers = @isDown(button)
-    return false unless pointers
+    pointers = @isDown button
 
     # Check each of the pointers to see if they are inside the shape
     ret = []
-    i = 0
-    while i < pointers.length
-      pointer = pointers[i]
+    for pointer in pointers
       continue if pointer.x is false or pointer.y is false
       if not outside and shape.contains(pointer)
         ret.push pointer
-      else ret.push pointer if outside and not shape.contains(pointer)
-      i++
+      else
+        ret.push pointer if outside and not shape.contains(pointer)
 
     # Return the pointers which are inside the shape
-    (if ret.length then ret else false)
-
+    ret
 
   ###
   Returns a string representing the button type.
@@ -435,9 +385,7 @@ class Input.Pointer
           ret.push pointer if -pointer.events[0] > engine.last || -pointer.events[1] > engine.last
         when "down"
           ret.push pointer if pointer.events[0] > 0
-
-    (if ret.length then ret else false)
-
+    ret
 
   ###
   Converts a coordinate which is relative to the main canvas to a position in the room (based on the room's cameras)
@@ -474,7 +422,6 @@ class Input.Pointer
         return ret
     ret
 
-
   ###
   Finds the first available spot in the Pointer.touches-array, used for registering the touches as numbers from 0-9.
   In Google Chrome, each touch's identifier can be used directly since the numbers - starting from 0 - are reused, when the a touch is released.
@@ -484,13 +431,9 @@ class Input.Pointer
   @return {number|boolean} The first available spot in the Pointer.touches-array where a new touch can be registered. If no spot is available, false is returned
   ###
   findTouchNumber: ->
-    i = undefined
-    i = 0
-    while i < @touches.length
-      return i unless @checkPointer(@touches[i], "down")
-      i++
+    for touch, i in @touches
+      return i unless touch.events[0] > 0
     false
-
 
   ###
   Checks if an area defined by a geometric shape, or its outside, is hovered by the mouse pointer.
@@ -505,7 +448,6 @@ class Input.Pointer
       return true
     else return true if outside and (not shape.contains(@mouse))
     false
-
 
   ###
   Releases a button, and thereby prevents the button from being detected as "pressed" by the isPressed function.
@@ -540,7 +482,6 @@ class Input.Pointer
       i++
     unpressed
 
-
   ###
   Checks if the mouse pointer is outside the game arena.
 
@@ -548,7 +489,6 @@ class Input.Pointer
   ###
   outside: ->
     new Math.Rectangle(engine.arena.offsetLeft, engine.arena.offsetTop, engine.arena.offsetWidth, engine.arena.offsetHeight).contains(@mouse.window) is false
-
 
   ###
   Resets the mouse cursor, automatically called by the engine before each frame i executed, unless engine.resetCursorOnEachFrame is set to false
@@ -558,7 +498,6 @@ class Input.Pointer
   resetCursor: ->
     engine.arena.style.cursor = "default"
     return
-
 
   ###
   Sets the mouse cursor for the arena.
