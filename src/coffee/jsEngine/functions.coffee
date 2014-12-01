@@ -8,6 +8,6 @@ nameSpace = (name) ->
 
     # Create eval string
     str = name.slice(0, i + 1).join(".")
-    eval str + " = {}"  if eval("window." + str) is undefined
+    eval str + " = {}" if eval("window." + str) is undefined
     i++
   return

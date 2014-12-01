@@ -119,7 +119,7 @@ class View.Sprite extends View.Container
       OFFSET_BOTTOM_CENTER
     ].indexOf(offset) isnt -1
       ret.x = @bm.width / @imageLength / 2
-    else ret.x = @bm.width / @imageLength  if [
+    else ret.x = @bm.width / @imageLength if [
       OFFSET_TOP_RIGHT
       OFFSET_MIDDLE_RIGHT
       OFFSET_BOTTOM_RIGHT
@@ -138,7 +138,7 @@ class View.Sprite extends View.Container
       OFFSET_MIDDLE_RIGHT
     ].indexOf(offset) isnt -1
       ret.y = @bm.height / 2
-    else ret.y = @bm.height  if [
+    else ret.y = @bm.height if [
       OFFSET_BOTTOM_LEFT
       OFFSET_BOTTOM_CENTER
       OFFSET_BOTTOM_RIGHT
@@ -179,7 +179,7 @@ class View.Sprite extends View.Container
     @imageNumber = Math.min(@imageLength - 1, @imageNumber)
     @clipWidth = Math.floor(@bm.width / @imageLength)
     @clipHeight = @bm.height
-    @offset = @offsetGlobal  if @offsetGlobal
+    @offset = @offsetGlobal if @offsetGlobal
     @bm
 
   ###
@@ -188,8 +188,8 @@ class View.Sprite extends View.Container
   @param {string} source The resource string of the bitmap-source to use for the object
   ###
   setSource: (source) ->
-    throw new Error("Missing argument: source")  if source is undefined #dev
-    return  if @source is source
+    throw new Error("Missing argument: source") if source is undefined #dev
+    return if @source is source
     @source = source
     @refreshSource()
     return

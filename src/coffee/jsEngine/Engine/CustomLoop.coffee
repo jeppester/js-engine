@@ -44,9 +44,9 @@ class Engine.CustomLoop
   @param {function} func The function to run on each execution of the custom loop
   ###
   attachFunction: (caller, func) ->
-    throw new Error("Missing argument: caller")  if caller is undefined #dev
-    throw new Error("Missing argument: func")  if func is undefined #dev
-    throw new Error("Argument func must be of type function")  if typeof func isnt "function" #dev
+    throw new Error("Missing argument: caller") if caller is undefined #dev
+    throw new Error("Missing argument: func") if func is undefined #dev
+    throw new Error("Argument func must be of type function") if typeof func isnt "function" #dev
     @functionsQueue.push
       object: caller
       activity: func
@@ -73,8 +73,8 @@ class Engine.CustomLoop
   @return {boolean} Whether or not the function was found and detached
   ###
   detachFunction: (caller, func) ->
-    throw new Error("Missing argument: caller")  if caller is undefined #dev
-    throw new Error("Missing argument: func")  if func is undefined #dev
+    throw new Error("Missing argument: caller") if caller is undefined #dev
+    throw new Error("Missing argument: func") if func is undefined #dev
     i = undefined
     a = undefined
 
@@ -105,18 +105,18 @@ class Engine.CustomLoop
   @return {function[]} An array of detached functions
   ###
   detachFunctionsByFunction: (func) ->
-    throw new Error("Missing argument: func")  if func is undefined #dev
+    throw new Error("Missing argument: func") if func is undefined #dev
     removeArray = undefined
     i = undefined
     removeArray = []
 
     # Search activities and remove function
     i = @functions.length
-    removeArray.push @functions.splice(i, 1)  if func is @functions[i].func  while i--
+    removeArray.push @functions.splice(i, 1) if func is @functions[i].func while i--
 
     # Search activities queue and remove function
     i = @functionsQueue.length
-    removeArray.push @functionsQueue.splice(i, 1)  if func is @functions[i].func  while i--
+    removeArray.push @functionsQueue.splice(i, 1) if func is @functions[i].func while i--
     if removeArray.length
       removeArray
     else
@@ -130,18 +130,18 @@ class Engine.CustomLoop
   @return {function[]} An array of detached functions
   ###
   detachFunctionsByCaller: (caller) ->
-    throw new Error("Missing argument: caller")  if caller is undefined #dev
+    throw new Error("Missing argument: caller") if caller is undefined #dev
     removeArray = undefined
     i = undefined
     removeArray = []
 
     # From activities
     i = @functions.length
-    removeArray.push @functions.splice(i, 1)  if caller is @functions[i].object  while i--
+    removeArray.push @functions.splice(i, 1) if caller is @functions[i].object while i--
 
     # From activities queue
     i = @functionsQueue.length
-    removeArray.push @functionsQueue.splice(i, 1)  if caller is @functionsQueue[i].object  while i--
+    removeArray.push @functionsQueue.splice(i, 1) if caller is @functionsQueue[i].object while i--
     if removeArray.length
       removeArray
     else
@@ -157,9 +157,9 @@ class Engine.CustomLoop
   @param {number} delay The delay in ms
   ###
   schedule: (caller, func, delay) ->
-    throw new Error("Missing argument: caller")  if caller is undefined #dev
-    throw new Error("Missing argument: function")  if func is undefined #dev
-    throw new Error("Missing argument: delay")  if delay is undefined #dev
+    throw new Error("Missing argument: caller") if caller is undefined #dev
+    throw new Error("Missing argument: function") if func is undefined #dev
+    throw new Error("Missing argument: delay") if delay is undefined #dev
     @executionsQueue.push
       func: func
       execTime: @time + delay
@@ -187,8 +187,8 @@ class Engine.CustomLoop
   @return {boolean} Whether or not the function was found and unscheduled
   ###
   unschedule: (caller, func) ->
-    throw new Error("Missing argument: caller")  if caller is undefined #dev
-    throw new Error("Missing argument: function")  if func is undefined #dev
+    throw new Error("Missing argument: caller") if caller is undefined #dev
+    throw new Error("Missing argument: function") if func is undefined #dev
     i = undefined
     exec = undefined
 
@@ -219,7 +219,7 @@ class Engine.CustomLoop
   @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
   ###
   unscheduleByFunction: (func) ->
-    throw new Error("Missing argument: func")  if func is undefined #dev
+    throw new Error("Missing argument: func") if func is undefined #dev
     unscheduledArray = undefined
     i = undefined
     exec = undefined
@@ -227,11 +227,11 @@ class Engine.CustomLoop
     i = @executions.length
     while i--
       exec = @executions[i]
-      unscheduledArray.push @executions.splice(i, 1)  if func is exec.func
+      unscheduledArray.push @executions.splice(i, 1) if func is exec.func
     i = @executionsQueue.length
     while i--
       exec = @executionsQueue[i]
-      unscheduledArray.push @executionsQueue.splice(i, 1)  if func is exec.func
+      unscheduledArray.push @executionsQueue.splice(i, 1) if func is exec.func
     if unscheduledArray.length
       unscheduledArray
     else
@@ -245,7 +245,7 @@ class Engine.CustomLoop
   @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
   ###
   unscheduleByCaller: (caller) ->
-    throw new Error("Missing argument: caller")  if caller is undefined #dev
+    throw new Error("Missing argument: caller") if caller is undefined #dev
     unscheduledArray = undefined
     i = undefined
     exec = undefined
@@ -253,11 +253,11 @@ class Engine.CustomLoop
     i = @executions.length
     while i--
       exec = @executions[i]
-      unscheduledArray.push @executions.splice(i, 1)  if caller is exec.caller
+      unscheduledArray.push @executions.splice(i, 1) if caller is exec.caller
     i = @executionsQueue.length
     while i--
       exec = @executionsQueue[i]
-      unscheduledArray.push @executionsQueue.splice(i, 1)  if caller is exec.caller
+      unscheduledArray.push @executionsQueue.splice(i, 1) if caller is exec.caller
     if unscheduledArray.length
       unscheduledArray
     else
@@ -284,7 +284,7 @@ class Engine.CustomLoop
   @param {object} animation An animation object
   ###
   addAnimation: (animation) ->
-    throw new Error("Missing argument: animation")  if animation is undefined #dev
+    throw new Error("Missing argument: animation") if animation is undefined #dev
     anim = undefined
     propList = undefined
     currentAnimations = undefined
@@ -301,7 +301,7 @@ class Engine.CustomLoop
     while i < currentAnimations.length
       cur = currentAnimations[i]
       for propName of cur.prop
-        delete cur.prop[propName]  if propList.indexOf(propName) isnt -1  if cur.prop.hasOwnProperty(propName)
+        delete cur.prop[propName] if propList.indexOf(propName) isnt -1 if cur.prop.hasOwnProperty(propName)
       i++
     @animations.push anim
     return
@@ -315,7 +315,7 @@ class Engine.CustomLoop
   removeAnimationsOfObject: (object) ->
     i = undefined
     i = @animations.length
-    @animations.splice i, 1  if object is @animations[i].obj  while i--
+    @animations.splice i, 1 if object is @animations[i].obj while i--
     return
 
 
@@ -334,7 +334,7 @@ class Engine.CustomLoop
     animId = @animations.length - 1
     while animId > -1
       a = @animations[animId]
-      continue  if a is undefined
+      continue if a is undefined
       t = @time - a.start
       if t > a.duration
 
@@ -343,7 +343,7 @@ class Engine.CustomLoop
 
         # If the animation has ended: delete it and set the animated properties to their end values
         for propId of a.prop
-          a.obj[propId] = a.prop[propId].end  if a.prop.hasOwnProperty(propId)
+          a.obj[propId] = a.prop[propId].end if a.prop.hasOwnProperty(propId)
         if typeof a.callback is "string"
           eval a.callback
         else
@@ -368,8 +368,8 @@ class Engine.CustomLoop
     i = undefined
     exec = undefined
     timer = new Date().getTime()
-    return  if not @maskFunction() or engine.frames % @framesPerExecution
-    @time += engine.gameTimeIncrease  if engine.frames - @lastFrame is @framesPerExecution
+    return if not @maskFunction() or engine.frames % @framesPerExecution
+    @time += engine.gameTimeIncrease if engine.frames - @lastFrame is @framesPerExecution
     @lastFrame = engine.frames
     @last = engine.now
 
@@ -379,7 +379,7 @@ class Engine.CustomLoop
     # Execute scheduled executions
     i = @executions.length
     while i--
-      continue  if i >= @executions.length
+      continue if i >= @executions.length
       exec = @executions[i]
       if @time >= exec.execTime
         exec.func.call exec.caller
@@ -390,7 +390,7 @@ class Engine.CustomLoop
     while i < @functions.length
       exec = @functions[i]
       #dev
-      throw new Error("Trying to exec non-existent attached function")  unless exec.activity #dev
+      throw new Error("Trying to exec non-existent attached function") unless exec.activity #dev
       #dev
       exec.activity.call exec.object
       i++

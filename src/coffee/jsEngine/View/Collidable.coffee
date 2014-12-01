@@ -32,8 +32,8 @@ class View.Collidable extends View.Sprite
   @return {Object[]|boolean} If getCollidingObjects is set to true, an array of colliding object, else a boolean representing whether or not a collission was detected.
   ###
   boundingBoxCollidesWith: (objects, getCollidingObjects) ->
-    throw new Error("Missing argument: objects")  if objects is undefined #dev
-    objects = [objects]  unless Array::isPrototypeOf(objects)
+    throw new Error("Missing argument: objects") if objects is undefined #dev
+    objects = [objects] unless Array::isPrototypeOf(objects)
     getCollidingObjects = (if getCollidingObjects isnt undefined then getCollidingObjects else false)
     pol1 = undefined
     pol2 = undefined
@@ -71,9 +71,9 @@ class View.Collidable extends View.Sprite
     i = 0
     while i < parents.length
       parent = parents[i]
-      box.scale parent.size * parent.widthScale, parent.size * parent.heightScale  if parent.size isnt 1 or parent.widthScale isnt 1 or parent.heightScale isnt 1
-      box.rotate parent.direction  if parent.direction isnt 0
-      box.move parent.x, parent.y  if parent.x isnt 0 or parent.y isnt 0
+      box.scale parent.size * parent.widthScale, parent.size * parent.heightScale if parent.size isnt 1 or parent.widthScale isnt 1 or parent.heightScale isnt 1
+      box.rotate parent.direction if parent.direction isnt 0
+      box.move parent.x, parent.y if parent.x isnt 0 or parent.y isnt 0
       i++
     box
 
@@ -91,7 +91,7 @@ class View.Collidable extends View.Sprite
   }</code>
   ###
   maskCollidesWith: (objects, getCollisionPosition) ->
-    throw new Error("Missing argument: objects")  if objects is undefined #dev
+    throw new Error("Missing argument: objects") if objects is undefined #dev
     bitmap = undefined
     i = undefined
     length = undefined
@@ -102,7 +102,7 @@ class View.Collidable extends View.Sprite
     avX = undefined
     avY = undefined
     retVector = undefined
-    objects = [objects]  unless Array::isPrototypeOf(objects)
+    objects = [objects] unless Array::isPrototypeOf(objects)
     getCollisionPosition = (if getCollisionPosition isnt undefined then getCollisionPosition else false)
     bitmap = @createCollisionBitmap(objects)
     length = bitmap.data.length / 4
@@ -115,12 +115,12 @@ class View.Collidable extends View.Sprite
       if @collisionResolution > 1 and x < @collisionResolution
         y = Math.floor(pixel / bitmap.width)
         pixel -= x
-        pixel += Math.floor(@collisionResolution / 2)  if y % 2
+        pixel += Math.floor(@collisionResolution / 2) if y % 2
 
       # Log the checked pixel
       if bitmap.data[pixel * 4] < 127
         if getCollisionPosition
-          y = Math.floor(pixel / bitmap.width)  if y is undefined
+          y = Math.floor(pixel / bitmap.width) if y is undefined
           pxArr.push
             x: x
             y: y
@@ -211,7 +211,7 @@ class View.Collidable extends View.Sprite
       i++
 
     # If getInverse returns false, the object is invisible (thus cannot collide)
-    throw new Error("Trying to detect collision for invisble object")  if wm is false # dev
+    throw new Error("Trying to detect collision for invisble object") if wm is false # dev
 
     # Draw other objects
     i = 0
@@ -219,7 +219,7 @@ class View.Collidable extends View.Sprite
       obj = objects[i]
 
       # If the checked object is "this", do nothing (this situation should maybe result in an error)
-      continue  if obj is this
+      continue if obj is this
 
       # Create local matrix (to add to the world matrix)
       lm = calc.makeIdentity()
@@ -273,17 +273,17 @@ class View.Collidable extends View.Sprite
   If both getCollisionPosition and getCollidingObjects are true, the objects-array will contain all colliding objects, and the positions-array will contain each colliding object's collision position
   ###
   collidesWith: (objects, getCollisionPosition, getCollidingObjects) ->
-    throw new Error("Missing argument: objects")  if objects is undefined #dev
+    throw new Error("Missing argument: objects") if objects is undefined #dev
     ret = undefined
     i = undefined
     position = undefined
-    objects = [objects]  unless Array::isPrototypeOf(objects)
+    objects = [objects] unless Array::isPrototypeOf(objects)
     getCollidingObjects = (if getCollidingObjects isnt undefined then getCollidingObjects else false)
-    return false  if @size is 0 or @widthScale is 0 or @heightScale is 0
+    return false if @size is 0 or @widthScale is 0 or @heightScale is 0
 
     # First, do a bounding box based collision check
     objects = @boundingBoxCollidesWith(objects, true)
-    return false  if objects is false
+    return false if objects is false
 
     # If a bounding box collision is detected, do a precise collision check with maskCollidesWith
     # If getCollisionPosition and getCollidingObjects are both false, just return a boolean
@@ -332,7 +332,7 @@ class View.Collidable extends View.Sprite
         else
           i = 0
           while i < objects.length
-            ret.objects.push objects[i]  if @maskCollidesWith(objects[i])
+            ret.objects.push objects[i] if @maskCollidesWith(objects[i])
             i++
     if ret.positions.length + ret.objects.length isnt 0
       ret

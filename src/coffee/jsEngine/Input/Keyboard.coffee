@@ -11,12 +11,12 @@ class Input.Keyboard
     key = undefined
     document.addEventListener "keydown", (event) =>
       @onKeyDown event
-      event.preventDefault()  if engine.preventDefaultKeyboard
+      event.preventDefault() if engine.preventDefaultKeyboard
       return
     , false
     document.addEventListener "keyup", (event) =>
       @onKeyUp event
-      event.preventDefault()  if engine.preventDefaultKeyboard
+      event.preventDefault() if engine.preventDefaultKeyboard
       return
     , false
 
@@ -36,7 +36,7 @@ class Input.Keyboard
   ###
   onKeyDown: (event) ->
     key = undefined
-    throw new Error("Missing argument: event")  if event is undefined #dev
+    throw new Error("Missing argument: event") if event is undefined #dev
     unless @isDown(event.keyCode)
       key = @keys[event.keyCode]
       key.events = key.events.slice(0, 1)
@@ -52,7 +52,7 @@ class Input.Keyboard
   ###
   onKeyUp: (event) ->
     key = undefined
-    throw new Error("Missing argument: event")  if event is undefined #dev
+    throw new Error("Missing argument: event") if event is undefined #dev
     if @isDown(event.keyCode)
       key = @keys[event.keyCode]
       key.events = key.events.slice(0, 1)
@@ -67,8 +67,8 @@ class Input.Keyboard
   @return {boolean} True if the key is down, false if not
   ###
   isDown: (key) ->
-    throw new Error("Missing argument: key")  if key is undefined #dev
-    key = key.toUpperCase().charCodeAt(0)  if typeof key is "string"
+    throw new Error("Missing argument: key") if key is undefined #dev
+    key = key.toUpperCase().charCodeAt(0) if typeof key is "string"
     @keys[key].events.length and @keys[key].events[0] > 0
 
 
@@ -79,8 +79,8 @@ class Input.Keyboard
   @return {boolean} True if the key has been pressed, false if not
   ###
   isPressed: (key) ->
-    throw new Error("Missing argument: key")  if key is undefined #dev
-    key = key.toUpperCase().charCodeAt(0)  if typeof key is "string"
+    throw new Error("Missing argument: key") if key is undefined #dev
+    key = key.toUpperCase().charCodeAt(0) if typeof key is "string"
     @keys[key].events.length and @keys[key].events[0] > engine.last
 
 
@@ -91,6 +91,6 @@ class Input.Keyboard
   @return {boolean} True if the key has been pressed, false if not
   ###
   isReleased: (key) ->
-    throw new Error("Missing argument: key")  if key is undefined #dev
-    key = key.toUpperCase().charCodeAt(0)  if typeof key is "string"
+    throw new Error("Missing argument: key") if key is undefined #dev
+    key = key.toUpperCase().charCodeAt(0) if typeof key is "string"
     @keys[key].events.length and -@keys[key].events[0] > engine.last

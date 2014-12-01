@@ -40,14 +40,14 @@ class View.Container extends View.Child
   @return {View.Child[]} An array containing the added children
   ###
   addChildren: (child1, child2) ->
-    return  if arguments.length is 0
+    return if arguments.length is 0
     i = 0
     while i < arguments.length
       child = arguments[i]
-      throw new Error("Argument child has to be of type: View.Child")  if not child instanceof View.Child #dev
+      throw new Error("Argument child has to be of type: View.Child") if not child instanceof View.Child #dev
 
       # If the child already has a parent, remove the child from that parent
-      child.parent.removeChildren child  if child.parent
+      child.parent.removeChildren child if child.parent
 
       # Add the child
       @children.push child
@@ -55,7 +55,7 @@ class View.Container extends View.Child
       engine.enableRedrawRegions and child.onAfterChange()
 
       # Refresh the child's sprite (it might have changed)
-      child.refreshSource()  if child.refreshSource
+      child.refreshSource() if child.refreshSource
       i++
     arguments
 
@@ -68,8 +68,8 @@ class View.Container extends View.Child
   @return {View.Child[]} Array of the inserted children
   ###
   insertBelow: (insertChildren, child) ->
-    throw new Error("Missing argument: insertChildren")  if insertChildren is undefined #dev
-    throw new Error("Missing argument: child")  if child is undefined #dev
+    throw new Error("Missing argument: insertChildren") if insertChildren is undefined #dev
+    throw new Error("Missing argument: child") if child is undefined #dev
     arr = undefined
     i = undefined
     unless Array::isPrototypeOf(insertChildren)
@@ -84,13 +84,13 @@ class View.Container extends View.Child
     i = 0
     while i < insertChildren.length
       child = insertChildren[i]
-      throw new Error("Argument child has to be of type: Child")  if not child instanceof View.Child #dev
+      throw new Error("Argument child has to be of type: Child") if not child instanceof View.Child #dev
 
       # If the child already has a parent, remove the child from that parent
-      child.parent.removeChildren child  if child.parent
+      child.parent.removeChildren child if child.parent
       child.parent = this
       engine.enableRedrawRegions and child.onAfterChange()
-      child.refreshSource()  if child.refreshSource
+      child.refreshSource() if child.refreshSource
       i++
     insertChildren
 
@@ -120,13 +120,13 @@ class View.Container extends View.Child
   ###
   setTheme: (themeName, recursive) ->
     if themeName
-      throw new Error("Trying to set nonexistent theme: " + themeName)  if loader.themes[themeName] is undefined #dev
+      throw new Error("Trying to set nonexistent theme: " + themeName) if loader.themes[themeName] is undefined #dev
     else
       themeName = undefined
     i = undefined
     recursive = (if recursive isnt undefined then recursive else false)
     @theme = themeName
-    @refreshSource()  if @refreshSource
+    @refreshSource() if @refreshSource
     if recursive
       i = 0
       while i < @children.length
@@ -134,7 +134,7 @@ class View.Container extends View.Child
         i++
     else
       @applyToThisAndChildren ->
-        @refreshSource()  if @refreshSource
+        @refreshSource() if @refreshSource
         return
 
     return
@@ -146,7 +146,7 @@ class View.Container extends View.Child
   @param {function} func Function to execute
   ###
   applyToThisAndChildren: (func) ->
-    throw new Error("Missing argument: function")  if func is undefined #dev
+    throw new Error("Missing argument: function") if func is undefined #dev
     i = undefined
     func.call this
     i = 0
@@ -169,7 +169,7 @@ class View.Container extends View.Child
     addBox = undefined
     i = undefined
     child = undefined
-    box = @getRedrawRegion()  if @getRedrawRegion
+    box = @getRedrawRegion() if @getRedrawRegion
     i = 0
     while i < @children.length
       child = @children[i]
@@ -195,7 +195,7 @@ class View.Container extends View.Child
   @return {View.Child[]} An array of the children which was removed. If an object, which was supplied as argument, was not a child of the View, it will not appear in the returned array
   ###
   removeChildren: (child1, child2) ->
-    throw new Error("This function needs at least one argument")  if arguments.length is 0 #dev
+    throw new Error("This function needs at least one argument") if arguments.length is 0 #dev
     i = undefined
     childId = undefined
     removed = undefined
@@ -222,7 +222,7 @@ class View.Container extends View.Child
     rmChild = @children.splice(0, @children.length)
     rmChild.forEach (c) ->
       c.parent = undefined
-      engine.purge c  if purge
+      engine.purge c if purge
       return
 
     return
@@ -246,7 +246,7 @@ class View.Container extends View.Child
     i = undefined
     len = undefined
     child = undefined
-    return  unless @isVisible()
+    return unless @isVisible()
     @transformCanvasContext c
     if @drawCacheEnabled and not noCache
       c.drawImage @drawCacheCanvas, 0, 0
@@ -255,10 +255,10 @@ class View.Container extends View.Child
         engine.drawCalls++ #dev
         @drawCanvas c
         #dev
-        @drawBoundingBox c  if engine.drawBoundingBoxes and @drawBoundingBox #dev
+        @drawBoundingBox c if engine.drawBoundingBoxes and @drawBoundingBox #dev
         #dev
         #dev
-        @drawMask c  if engine.drawMasks and @drawMask #dev
+        @drawMask c if engine.drawMasks and @drawMask #dev
       #dev
 
       # Draw children

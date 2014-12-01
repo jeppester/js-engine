@@ -98,8 +98,8 @@ class Engine
       @host.browserEngine = "WebKit"
       if navigator.userAgent.match(/iPad|iPhone/)
         @host.device = "iDevice"
-      else @host.device = "Android"  if navigator.userAgent.match(/Android/)
-    else @host.browserEngine = "Trident"  if navigator.userAgent.match(/Trident/)
+      else @host.device = "Android" if navigator.userAgent.match(/Android/)
+    else @host.browserEngine = "Trident" if navigator.userAgent.match(/Trident/)
     audioFormats = [
       "mp3"
       "ogg"
@@ -107,7 +107,7 @@ class Engine
     ]
     i = 0
     while i < audioFormats.length
-      @host.supportedAudio.push audioFormats[i]  if document.createElement("audio").canPlayType("audio/" + audioFormats[i])
+      @host.supportedAudio.push audioFormats[i] if document.createElement("audio").canPlayType("audio/" + audioFormats[i])
       i++
 
     # Load default options
@@ -274,16 +274,7 @@ class Engine
         false
 
     # Create objects required by the engine
-    ###
-    Global instance of Input.Keyboard which is created upon engine initialization
-    @global
-    ###
     @keyboard = new Input.Keyboard()
-
-    ###
-    Global instance of Input.Pointer which is created upon engine initialization
-    @global
-    ###
     @pointer = new Input.Pointer()
 
     # Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
@@ -299,8 +290,8 @@ class Engine
     # Create game object
     new @gameClass()
     @startMainLoop()
-    window.focus()  if @focusOnLoad
-    @onload()  if @onload
+    window.focus() if @focusOnLoad
+    @onload() if @onload
     console.log "jsEngine started" #dev
     return
 
@@ -308,8 +299,6 @@ class Engine
   Creates and prepares the game canvas for being used
   ###
   createCanvas: ->
-    gl = undefined
-
     # Make main canvas
     @canvas = document.createElement("canvas")
     @canvas.style.display = "block"
@@ -393,8 +382,8 @@ class Engine
   @return {number} The resulting value of the conversion
   ###
   convertSpeed: (speed, from, to) ->
-    throw new Error("Missing argument: speed")  if speed is undefined #dev
-    return new Math.Vector(@convertSpeed(speed.x, from, to), @convertSpeed(speed.y, from, to))  if speed instanceof Math.Vector
+    throw new Error("Missing argument: speed") if speed is undefined #dev
+    return new Math.Vector(@convertSpeed(speed.x, from, to), @convertSpeed(speed.y, from, to)) if speed instanceof Math.Vector
     from = (if from isnt undefined then from else SPEED_PIXELS_PER_SECOND)
     to = (if to isnt undefined then to else SPEED_PIXELS_PER_FRAME)
 
@@ -420,18 +409,18 @@ class Engine
   ###
   goToRoom: (room, transition, transitionOptions) ->
     return false if @changingRoom
-    throw new Error("Missing argument: room")  if room is undefined #dev
+    throw new Error("Missing argument: room") if room is undefined #dev
 
     # If a string has been specified, find the room by name
     if typeof room is "string"
       room = @roomList.filter((r) ->
         r.name is room
       )[0]
-      throw new Error("Could not find a room with the specified name")  unless room #dev
+      throw new Error("Could not find a room with the specified name") unless room #dev
 
     # Else, check if the room exists on the room list, and if not, throw an error
     else
-      throw new Error("Room is not on room list, has it been removed?")  if @roomList.indexOf(room) is -1 #dev
+      throw new Error("Room is not on room list, has it been removed?") if @roomList.indexOf(room) is -1 #dev
     transition = (if transition then transition else ROOM_TRANSITION_NONE)
     oldRoom = @currentRoom
     engine.changingRoom = true
@@ -449,9 +438,9 @@ class Engine
   @param {Room} room The room which should be added
   ###
   addRoom: (room) ->
-    throw new Error("Missing argument: room")  if room is undefined #dev
+    throw new Error("Missing argument: room") if room is undefined #dev
     #dev
-    throw new Error("Room is already on room list, rooms are automatically added upon instantiation")  if @roomList.indexOf(room) isnt -1 #dev
+    throw new Error("Room is already on room list, rooms are automatically added upon instantiation") if @roomList.indexOf(room) isnt -1 #dev
     #dev
     @roomList.push room
     return
@@ -462,22 +451,22 @@ class Engine
   @param {Room|string} room A pointer to the room, or a string representing the name of the room, which should be removed
   ###
   removeRoom: (room) ->
-    throw new Error("Missing argument: room")  if room is undefined #dev
+    throw new Error("Missing argument: room") if room is undefined #dev
     index = undefined
 
     # If a string has been specified, find the room by name
     if typeof room is "string"
       room = @roomList.getElementByPropertyValue("name", room)
-      throw new Error("Could not find a room with the specified name")  unless room #dev
+      throw new Error("Could not find a room with the specified name") unless room #dev
 
     # Else, check if the room exists on the room list, and if not, throw an error
     index = @roomList.indexOf(room)
-    throw new Error("Room is not on room list, has it been removed?")  if index is -1 #dev
+    throw new Error("Room is not on room list, has it been removed?") if index is -1 #dev
 
     # Make sure we are not removing the current room, or the master room
     if room is @masterRoom
       throw new Error("Cannot remove master room") #dev
-    else throw new Error("Cannot remove current room, remember to leave the room first, by entering another room (use engine.goToRoom)")  if room is @currentRoom #dev
+    else throw new Error("Cannot remove current room, remember to leave the room first, by entering another room (use engine.goToRoom)") if room is @currentRoom #dev
     @roomList.splice i, 1
     return
 
@@ -522,8 +511,8 @@ class Engine
   @param {boolean} enforce Whether or not the enforce the theme on objects for which another theme has already been set
   ###
   setDefaultTheme: (themeName, enforce) ->
-    throw new Error("Missing argument: themeName")  if themeName is undefined #dev
-    throw new Error("Trying to set nonexistent theme: " + themeName)  if loader.themes[themeName] is undefined #dev
+    throw new Error("Missing argument: themeName") if themeName is undefined #dev
+    throw new Error("Trying to set nonexistent theme: " + themeName) if loader.themes[themeName] is undefined #dev
     enforce = (if enforce isnt undefined then enforce else false)
     @defaultTheme = themeName
     @currentRoom.setTheme undefined, enforce
@@ -533,7 +522,7 @@ class Engine
   Starts the engine's main loop
   ###
   startMainLoop: ->
-    return  if @running
+    return if @running
 
     # Restart the now - last cycle
     @now = new Date().getTime()
@@ -547,7 +536,7 @@ class Engine
   Stops the engine's main loop
   ###
   stopMainLoop: ->
-    return  unless @running
+    return unless @running
     @running = false
     return
 
@@ -557,7 +546,7 @@ class Engine
   @private
   ###
   mainLoop: ->
-    return  unless @running
+    return unless @running
     drawTime = undefined
 
     # Get the current time (for calculating movement based on the precise time change)
@@ -571,7 +560,7 @@ class Engine
     @frames++
 
     # Reset mouse cursor (if told to)
-    @pointer.resetCursor()  if @resetCursorOnEachFrame
+    @pointer.resetCursor() if @resetCursorOnEachFrame
 
     # Execute loops
     @masterRoom.update()
@@ -610,7 +599,7 @@ class Engine
   setCanvasResX: (res) ->
     @canvas.width = res
     @canvasResX = res
-    @autoResizeCanvas()  if @autoResize
+    @autoResizeCanvas() if @autoResize
     return
 
   ###
@@ -621,7 +610,7 @@ class Engine
   setCanvasResY: (res) ->
     @canvas.height = res
     @canvasResY = res
-    @autoResizeCanvas()  if @autoResize
+    @autoResizeCanvas() if @autoResize
     return
 
   ###
@@ -633,12 +622,12 @@ class Engine
   @return {string} The registered id
   ###
   registerObject: (obj, id) ->
-    throw new Error("Missing argument: obj")  if obj is undefined #dev
+    throw new Error("Missing argument: obj") if obj is undefined #dev
     if id is undefined
       @currentId++
       id = "obj" + (@currentId - 1)
     #dev
-    else throw new Error("Object id already taken: " + id)  if @objectIndex[id] isnt undefined #dev
+    else throw new Error("Object id already taken: " + id) if @objectIndex[id] isnt undefined #dev
     #dev
     @objectIndex[id] = obj
     obj.id = id
@@ -659,7 +648,7 @@ class Engine
     i = undefined
     req = undefined
     script = undefined
-    filePaths = [filePaths]  if typeof filePaths is "string"
+    filePaths = [filePaths] if typeof filePaths is "string"
 
     # Load first file
     i = 0
@@ -672,7 +661,7 @@ class Engine
       script.text = req.responseText + "\n//# sourceURL=/" + filePaths[i]
       document.body.appendChild script
       i++
-    window.loadedFiles = []  if window.loadedFiles is undefined
+    window.loadedFiles = [] if window.loadedFiles is undefined
     window.loadedFiles = window.loadedFiles.concat(filePaths)
     return
 
@@ -686,19 +675,19 @@ class Engine
   @param {object} caller An object to call the callback function as.
   ###
   ajaxRequest: (url, params, async, callback, caller) ->
-    throw new Error("Missing argument: url")  if url is undefined #dev
-    throw new Error("Missing argument: callback")  if callback is undefined #dev
+    throw new Error("Missing argument: url") if url is undefined #dev
+    throw new Error("Missing argument: callback") if callback is undefined #dev
     params = (if params isnt undefined then params else "")
     async = (if async isnt undefined then async else true)
     caller = (if caller isnt undefined then caller else window)
 
     # If params is not a string, json-stringify it
-    params = "data=" + JSON.stringify(params)  if typeof params isnt "string"
+    params = "data=" + JSON.stringify(params) if typeof params isnt "string"
     req = undefined
     req = new XMLHttpRequest()
     if async
       req.onreadystatechange = ->
-        callback.call caller, req.responseText  if req.readyState is 4 and req.status is 200
+        callback.call caller, req.responseText if req.readyState is 4 and req.status is 200
         return
     req.open "POST", url, async
     req.setRequestHeader "Content-type", "application/x-www-form-urlencoded"
@@ -721,13 +710,13 @@ class Engine
     loop_ = undefined
     roomId = undefined
     room = undefined
-    throw new Error("Cannot purge object: " + obj)  if obj is undefined #dev
-    obj = @objectIndex[obj]  if typeof obj is "string"
+    throw new Error("Cannot purge object: " + obj) if obj is undefined #dev
+    obj = @objectIndex[obj] if typeof obj is "string"
 
     # Purge ALL children
     if obj.children
       len = obj.children.length
-      engine.purge obj.children[len]  while len--
+      engine.purge obj.children[len] while len--
 
     # Delete all references from rooms and their loops
     roomId = 0
@@ -742,7 +731,7 @@ class Engine
       roomId++
 
     # Delete from viewlist
-    obj.parent.removeChildren obj  if obj.parent
+    obj.parent.removeChildren obj if obj.parent
 
     # Delete from object index
     delete @objectIndex[obj.id]

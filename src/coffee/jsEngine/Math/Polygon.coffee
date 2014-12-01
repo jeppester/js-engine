@@ -41,7 +41,7 @@ class Math.Polygon
     while i < numPoints
       x = arguments[i * 2]
       y = arguments[i * 2 + 1]
-      throw new Error("All arguments should be of type: Number")  if typeof x isnt "number" or typeof y isnt "number" #dev
+      throw new Error("All arguments should be of type: Number") if typeof x isnt "number" or typeof y isnt "number" #dev
       @points.push new Math.Vector(x, y)
       i++
     this
@@ -68,8 +68,8 @@ class Math.Polygon
   @return {Math.Polygon} The resulting Polygon object (itself)
   ###
   move: (x, y) ->
-    throw new Error("Argument x should be of type Number")  if typeof x isnt "number" #dev
-    throw new Error("Argument y should be of type Number")  if typeof y isnt "number" #dev
+    throw new Error("Argument x should be of type Number") if typeof x isnt "number" #dev
+    throw new Error("Argument y should be of type Number") if typeof y isnt "number" #dev
     @add new Math.Vector(x, y)
 
   ###
@@ -79,7 +79,7 @@ class Math.Polygon
   @return {Math.Polygon} The resulting Polygon object (itself)
   ###
   add: (vector) ->
-    throw new Error("Argument vector should be of type Vector")  if not vector instanceof Math.Vector #dev
+    throw new Error("Argument vector should be of type Vector") if not vector instanceof Math.Vector #dev
     i = 0
     while i < @points.length
       @points[i].add vector
@@ -93,7 +93,7 @@ class Math.Polygon
   @return {Math.Polygon} The resulting Polygon object (itself)
   ###
   rotate: (direction) ->
-    throw new Error("Argument direction should be of type Number")  if typeof direction isnt "number" #dev
+    throw new Error("Argument direction should be of type Number") if typeof direction isnt "number" #dev
     i = 0
     while i < @points.length
       @points[i].rotate direction
@@ -156,7 +156,7 @@ class Math.Polygon
   @return {Math.Rectangle} The bounding rectangle
   ###
   getBoundingRectangle: ->
-    throw new Error("Cannot create bounding rectangle for pointless polygon")  if @points.length is 0 #dev
+    throw new Error("Cannot create bounding rectangle for pointless polygon") if @points.length is 0 #dev
     startVector = new Math.Vector(@points[0].x, @points[0].y)
     endVector = startVector.copy()
     i = 0
@@ -182,14 +182,14 @@ class Math.Polygon
       i = 0
       while i < lines.length
         dist = Math.min(dist, lines[i].getDistance(object))
-        break  if dist < 0
+        break if dist < 0
         i++
       dist
     else if object instanceof Math.Line
       i = 0
       while i < lines.length
         dist = Math.min(dist, lines[i].getDistance(object))
-        break  if dist < 0
+        break if dist < 0
         i++
       dist
     else if object instanceof Math.Circle
@@ -197,7 +197,7 @@ class Math.Polygon
       i = 0
       while i < lines.length
         dist = Math.min(dist, lines[i].getDistance(pVector))
-        break  if dist < 0
+        break if dist < 0
         i++
       Math.max 0, dist - object.radius
     else if object instanceof Math.Rectangle
@@ -209,9 +209,9 @@ class Math.Polygon
         ii = 0
         while ii < objLines.length
           dist = Math.min(dist, lines[i].getDistance(objLines[ii]))
-          break  if dist < 0
+          break if dist < 0
           ii++
-        break  if dist < 0
+        break if dist < 0
         i++
       dist
     else #dev
@@ -255,7 +255,7 @@ class Math.Polygon
   ###
   intersects: (object, countIntersections) ->
     countIntersections = (if countIntersections isnt undefined then countIntersections else false)
-    intersectionCount = 0  if countIntersections
+    intersectionCount = 0 if countIntersections
     if object instanceof Math.Line
       lines = @getLines()
       i = 0

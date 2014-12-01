@@ -8,6 +8,6 @@ Object::import = (from) ->
   i = undefined
   for i of from
     if from.hasOwnProperty(i)
-      continue  if i is undefined
+      continue if i is undefined
       this[i] = from[i]
   return

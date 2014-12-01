@@ -62,7 +62,7 @@ class Renderer.Canvas
       @calculateLocalMatrix(object)
       wm
     ])
-    return  unless object.isVisible()
+    return unless object.isVisible()
     if object.renderType isnt ""
       offset = @matrixMultiply(@makeTranslation(-object.offset.x, -object.offset.y), localWm)
       @context.setTransform offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]
@@ -94,7 +94,7 @@ class Renderer.Canvas
         object.animationLastSwitch = engine.gameTime
         if object.imageNumber is object.imageLength
           object.imageNumber = (if object.animationLoops then 0 else object.imageLength - 1)
-        else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0)  if object.imageNumber is -1
+        else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
 
     # Draw bm
     @context.drawImage object.bm, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight
@@ -128,7 +128,7 @@ class Renderer.Canvas
     c = @context
     c.strokeStyle = object.strokeStyle
     c.fillStyle = object.fillStyle
-    c.setLineDash object.lineDash  if object.lineDash isnt [] and c.setLineDash
+    c.setLineDash object.lineDash if object.lineDash isnt [] and c.setLineDash
     c.beginPath()
     len = object.points.length
     i = 0

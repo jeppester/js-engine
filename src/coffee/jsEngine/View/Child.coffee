@@ -238,7 +238,7 @@ class View.Child
     parents = undefined
     parents = []
     parent = this
-    parents.push parent  while (parent = parent.parent) isnt undefined
+    parents.push parent while (parent = parent.parent) isnt undefined
     parents
 
   ###
@@ -250,7 +250,7 @@ class View.Child
     parents = undefined
     ancestor = undefined
     parents = @getParents()
-    return false  if parents.length is 0
+    return false if parents.length is 0
     ancestor = parents[parents.length - 1]
     (if ancestor instanceof Engine.Room then ancestor else false)
 

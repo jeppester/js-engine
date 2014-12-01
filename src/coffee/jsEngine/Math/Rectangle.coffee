@@ -69,8 +69,8 @@ class Math.Rectangle extends Math.Vector
   @return {Math.Rectangle} The resulting Rectangle object (itself)
   ###
   move: (x, y) ->
-    throw new Error("Argument x should be of type: Number")  if typeof x isnt "number" #dev
-    throw new Error("Argument y should be of type: Number")  if typeof y isnt "number" #dev
+    throw new Error("Argument x should be of type: Number") if typeof x isnt "number" #dev
+    throw new Error("Argument y should be of type: Number") if typeof y isnt "number" #dev
     @x += x
     @y += y
     this
@@ -83,8 +83,8 @@ class Math.Rectangle extends Math.Vector
   @return {Math.Rectangle} The resulting Rectangle object (itself)
   ###
   moveTo: (x, y) ->
-    throw new Error("Argument x should be of type: Number")  if typeof x isnt "number" #dev
-    throw new Error("Argument y should be of type: Number")  if typeof y isnt "number" #dev
+    throw new Error("Argument x should be of type: Number") if typeof x isnt "number" #dev
+    throw new Error("Argument y should be of type: Number") if typeof y isnt "number" #dev
     @x = x
     @y = y
     this
@@ -122,7 +122,7 @@ class Math.Rectangle extends Math.Vector
   @return {Math.Rectangle} The resulting Rectangle object (itself)
   ###
   scale: (scaleH, scaleV) ->
-    throw new Error("Argument scaleH should be of type Number")  if typeof scaleH isnt "number" #dev
+    throw new Error("Argument scaleH should be of type Number") if typeof scaleH isnt "number" #dev
     scaleV = (if scaleV isnt undefined then scaleV else scaleH)
     @width *= scaleH
     @height *= scaleV
@@ -208,9 +208,9 @@ class Math.Rectangle extends Math.Vector
   contains: (object) ->
 
     # If checked object is a vector, line or rectangle, do fast calculation otherwise convert to polygon and do calculation
-    return @contains(new Math.Vector(object.x, object.y)) and @contains(new Math.Vector(object.x + object.width, object.y + object.height))  if object instanceof Math.Rectangle
-    return @contains(object.a) and @contains(object.b)  if object instanceof Math.Line
-    return (object.x > @x and object.x < @x + @width and object.y > @y and object.y < @y + @height)  if object instanceof Math.Vector
+    return @contains(new Math.Vector(object.x, object.y)) and @contains(new Math.Vector(object.x + object.width, object.y + object.height)) if object instanceof Math.Rectangle
+    return @contains(object.a) and @contains(object.b) if object instanceof Math.Line
+    return (object.x > @x and object.x < @x + @width and object.y > @y and object.y < @y + @height) if object instanceof Math.Vector
     @getPolygon().contains object
 
   ###

@@ -18,8 +18,8 @@ The projection region decides where the captured region will be drawn on the mai
 ###
 class Engine.Camera
   constructor: (captureRegion, projectionRegion, room) ->
-    throw new Error("Argument captureRegion should be of type: Rectangle")  if not captureRegion instanceof Math.Rectangle #dev
-    throw new Error("Argument projectionRegion should be of type: Rectangle")  if not projectionRegion instanceof Math.Rectangle #dev
+    throw new Error("Argument captureRegion should be of type: Rectangle") if not captureRegion instanceof Math.Rectangle #dev
+    throw new Error("Argument projectionRegion should be of type: Rectangle") if not projectionRegion instanceof Math.Rectangle #dev
     @captureRegion = captureRegion
     @projectionRegion = projectionRegion
     @room = room or engine.currentRoom

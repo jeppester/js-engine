@@ -55,7 +55,7 @@ class View.Rectangle extends Math.Rectangle
       set: (value) ->
         if hidden.lineWidth isnt value
           hidden.lineWidth = value
-          @offset = @offsetGlobal  if @offsetGlobal
+          @offset = @offsetGlobal if @offsetGlobal
         return
 
     @set x, y, width, height
@@ -150,7 +150,7 @@ class View.Rectangle extends Math.Rectangle
       OFFSET_BOTTOM_CENTER
     ].indexOf(offset) isnt -1
       ret.x = @width / 2
-    else ret.x = @width + @lineWidth / 2  if [
+    else ret.x = @width + @lineWidth / 2 if [
       OFFSET_TOP_RIGHT
       OFFSET_MIDDLE_RIGHT
       OFFSET_BOTTOM_RIGHT
@@ -169,7 +169,7 @@ class View.Rectangle extends Math.Rectangle
       OFFSET_MIDDLE_RIGHT
     ].indexOf(offset) isnt -1
       ret.y = @height / 2
-    else ret.y = @height + @lineWidth / 2  if [
+    else ret.y = @height + @lineWidth / 2 if [
       OFFSET_BOTTOM_LEFT
       OFFSET_BOTTOM_CENTER
       OFFSET_BOTTOM_RIGHT

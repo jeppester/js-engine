@@ -26,8 +26,8 @@ Mixin.Animatable =
   </code>
   ###
   animate: (properties, options) ->
-    throw new Error("Missing argument: properties")  if properties is undefined #dev
-    throw new Error("Missing argument: options")  if options is undefined #dev
+    throw new Error("Missing argument: properties") if properties is undefined #dev
+    throw new Error("Missing argument: options") if options is undefined #dev
 
     anim = {}
     map = properties
@@ -59,7 +59,7 @@ Mixin.Animatable =
     # If there are no properties left to animate and the animation does not have a callback function, do nothing
 
     # console.log('Animation skipped, nothing to animate');
-    return  if not c and anim.callback is ->
+    return if not c and anim.callback is ->
 
     loop_.addAnimation anim
     return
@@ -91,7 +91,7 @@ Mixin.Animatable =
           animId = loop_.animations.length - 1
           while animId > -1
             animation = loop_.animations[animId]
-            return true  if animation.obj is this
+            return true if animation.obj is this
             animId--
       roomId++
     false
@@ -119,7 +119,7 @@ Mixin.Animatable =
           animId = loop_.animations.length - 1
           while animId > -1
             animation = loop_.animations[animId]
-            return true  if animation.obj is this and animation.prop[property] isnt undefined
+            return true if animation.obj is this and animation.prop[property] isnt undefined
             animId--
       roomId++
     false
@@ -147,7 +147,7 @@ Mixin.Animatable =
           animId = loop_.animations.length - 1
           while animId > -1
             animation = loop_.animations[animId]
-            animations.push animation  if animation.obj is this
+            animations.push animation if animation.obj is this
             animId--
       roomId++
     animations
@@ -163,7 +163,7 @@ Mixin.Animatable =
     while roomId < engine.roomList.length
       room = engine.roomList[roomId]
       for name of room.loops
-        room.loops[name].removeAnimationsOfObject this  if room.loops.hasOwnProperty(name)
+        room.loops[name].removeAnimationsOfObject this if room.loops.hasOwnProperty(name)
       roomId++
     return
 
@@ -172,7 +172,7 @@ Mixin.Animatable =
     loopName = loopName or "eachFrame"
     room = @getRoom()
     #dev
-    throw new Error("Schedule requires that the object is added to a room")  unless room #dev
+    throw new Error("Schedule requires that the object is added to a room") unless room #dev
     #dev
     room.loops[loopName].schedule this, func, delay
     return

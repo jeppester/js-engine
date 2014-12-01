@@ -33,9 +33,9 @@ speed: new Math.Vector(0, 0)
 ###
 class View.GameObject extends View.Collidable
   constructor: (source, x, y, direction, additionalProperties) ->
-    throw new Error("Missing argument: source")  if source is undefined #dev
-    throw new Error("Missing argument: x")  if x is undefined #dev
-    throw new Error("Missing argument: y")  if y is undefined #dev
+    throw new Error("Missing argument: source") if source is undefined #dev
+    throw new Error("Missing argument: x") if x is undefined #dev
+    throw new Error("Missing argument: y") if y is undefined #dev
     super source, x, y, direction, additionalProperties
 
     # Add object to right loop

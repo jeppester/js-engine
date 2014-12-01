@@ -41,7 +41,7 @@ class View.TextBlock extends View.Container
   Object::import.call @::, Mixin.Animatable
   
   constructor: (string, x, y, width, additionalProperties) ->
-    throw new Error("Missing argument: string")  if string is undefined #dev
+    throw new Error("Missing argument: string") if string is undefined #dev
 
     # Call Vector's and view's constructors
     super()
@@ -87,8 +87,8 @@ class View.TextBlock extends View.Container
         hidden.font
 
       set: (value) ->
-        throw new Error("font should be of type: string")  if typeof value isnt "string" #dev
-        return value  if value is hidden.font
+        throw new Error("font should be of type: string") if typeof value isnt "string" #dev
+        return value if value is hidden.font
         hidden.font = value
         @stringToLines()
         @cacheRendering()
@@ -100,12 +100,12 @@ class View.TextBlock extends View.Container
         hidden.alignment
 
       set: (value) ->
-        throw new Error("alignment should be one of the following: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT")  if [ #dev
+        throw new Error("alignment should be one of the following: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT") if [ #dev
           "left"
           "center"
           "right"
         ].indexOf(value) is -1
-        return value  if value is hidden.alignment
+        return value if value is hidden.alignment
         hidden.alignment = value
         @cacheRendering()
         engine.enableRedrawRegions and @onAfterChange()
@@ -116,8 +116,8 @@ class View.TextBlock extends View.Container
         hidden.color
 
       set: (value) ->
-        throw new Error("color should be a CSS color string")  unless /#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})/.test(value) #dev
-        return value  if value is hidden.color
+        throw new Error("color should be a CSS color string") unless /#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})/.test(value) #dev
+        return value if value is hidden.color
         hidden.color = value
         @cacheRendering()
         engine.enableRedrawRegions and @onAfterChange()
@@ -193,7 +193,7 @@ class View.TextBlock extends View.Container
       OFFSET_BOTTOM_CENTER
     ].indexOf(offset) isnt -1
       ret.x = @clipWidth / 2
-    else ret.x = @clipWidth  if [
+    else ret.x = @clipWidth if [
       OFFSET_TOP_RIGHT
       OFFSET_MIDDLE_RIGHT
       OFFSET_BOTTOM_RIGHT
@@ -212,7 +212,7 @@ class View.TextBlock extends View.Container
       OFFSET_MIDDLE_RIGHT
     ].indexOf(offset) isnt -1
       ret.y = @clipHeight / 2
-    else ret.y = @clipHeight  if [
+    else ret.y = @clipHeight if [
       OFFSET_BOTTOM_LEFT
       OFFSET_BOTTOM_CENTER
       OFFSET_BOTTOM_RIGHT
@@ -298,7 +298,7 @@ class View.TextBlock extends View.Container
           xOffset = @clipWidth - @lineWidth[i]
         when "center"
           xOffset = (@clipWidth - @lineWidth[i]) / 2
-      @bmCtx.fillText @lines[i], xOffset, @lineHeight * i + @font.match(/[0.0-9]+/) * 1  if @lines[i]
+      @bmCtx.fillText @lines[i], xOffset, @lineHeight * i + @font.match(/[0.0-9]+/) * 1 if @lines[i]
       i++
     @createHash()
     return

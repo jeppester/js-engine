@@ -56,8 +56,8 @@ class Math.Circle
   @return {Math.Circle} The resulting Circle object (itself)
   ###
   move: (x, y) ->
-    throw new Error("Argument x should be of type: Number")  if typeof x isnt "number" #dev
-    throw new Error("Argument y should be of type: Number")  if typeof y isnt "number" #dev
+    throw new Error("Argument x should be of type: Number") if typeof x isnt "number" #dev
+    throw new Error("Argument y should be of type: Number") if typeof y isnt "number" #dev
     @x += x
     @y += y
     this
@@ -70,8 +70,8 @@ class Math.Circle
   @return {Math.Circle} The resulting Circle object (itself)
   ###
   moveTo: (x, y) ->
-    throw new Error("Argument x should be of type: Number")  if typeof x isnt "number" #dev
-    throw new Error("Argument y should be of type: Number")  if typeof y isnt "number" #dev
+    throw new Error("Argument x should be of type: Number") if typeof x isnt "number" #dev
+    throw new Error("Argument y should be of type: Number") if typeof y isnt "number" #dev
     @x = x
     @y = y
     this
@@ -85,7 +85,7 @@ class Math.Circle
   @return {Math.Circle} The resulting Circle object (itself)
   ###
   scale: (factor) ->
-    throw new Error("Argument factor should be of type Number")  if typeof factor isnt "number" #dev
+    throw new Error("Argument factor should be of type Number") if typeof factor isnt "number" #dev
     @radius *= factor
     this
 
@@ -153,7 +153,7 @@ class Math.Circle
       # Check if any of the polygon's points are outside the circle
       i = 0
       while i < object.points.length
-        return false  unless @contains(object.points[i])
+        return false unless @contains(object.points[i])
         i++
 
       # if not, the circle must contain the polygon

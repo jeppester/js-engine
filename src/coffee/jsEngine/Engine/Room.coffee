@@ -51,10 +51,10 @@ class Engine.Room extends View.Container
   @private
   ###
   update: ->
-    return  if @paused
+    return if @paused
     i = undefined
     for i of @loops
-      @loops[i].execute()  if @loops.hasOwnProperty(i)
+      @loops[i].execute() if @loops.hasOwnProperty(i)
     return
 
   ###
@@ -65,9 +65,9 @@ class Engine.Room extends View.Container
   @param {Engine.CustomLoop} loop The loop to add
   ###
   addLoop: (name, loop_) ->
-    throw new Error("Missing argument: loop")  if loop_ is undefined #dev
-    throw new Error("Missing argument: name")  if name is undefined #dev
-    throw new Error("Name is taken: " + name)  if @loops[name] isnt undefined #dev
+    throw new Error("Missing argument: loop") if loop_ is undefined #dev
+    throw new Error("Missing argument: name") if name is undefined #dev
+    throw new Error("Name is taken: " + name) if @loops[name] isnt undefined #dev
     @loops[name] = loop_
     return
 
@@ -77,8 +77,8 @@ class Engine.Room extends View.Container
   @param {string} name The name that the custom loop has been added as
   ###
   removeLoop: (name) ->
-    throw new Error("Missing argument: name")  if name is undefined #dev
-    throw new Error("The \"eachFrame\" loop cannot be removed")  if name is "eachFrame" #dev
+    throw new Error("Missing argument: name") if name is undefined #dev
+    throw new Error("The \"eachFrame\" loop cannot be removed") if name is "eachFrame" #dev
     delete @loops[name]
 
     return

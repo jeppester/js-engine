@@ -40,8 +40,8 @@ class Math.Vector
   @return {Math.Vector} The resulting Vector object (itself)
   ###
   setFromDirection: (direction, length) ->
-    throw new Error("Argument direction should be of type: Number")  if typeof direction isnt "number" #dev
-    throw new Error("Argument length should be of type: Number")  if typeof length isnt "number" #dev
+    throw new Error("Argument direction should be of type: Number") if typeof direction isnt "number" #dev
+    throw new Error("Argument length should be of type: Number") if typeof length isnt "number" #dev
     @x = Math.cos(direction) * length
     @y = Math.sin(direction) * length
     this
@@ -62,8 +62,8 @@ class Math.Vector
   @return {Math.Vector} The resulting Vector object (itself)
   ###
   move: (x, y) ->
-    throw new Error("Argument x should be of type: Number")  if typeof x isnt "number" #dev
-    throw new Error("Argument y should be of type: Number")  if typeof y isnt "number" #dev
+    throw new Error("Argument x should be of type: Number") if typeof x isnt "number" #dev
+    throw new Error("Argument y should be of type: Number") if typeof y isnt "number" #dev
     @x += x
     @y += y
     this
@@ -75,7 +75,7 @@ class Math.Vector
   @return {Math.Vector} The resulting Vector object (itself)
   ###
   rotate: (direction) ->
-    throw new Error("Argument direction should be of type: Number")  if typeof direction isnt "number" #dev
+    throw new Error("Argument direction should be of type: Number") if typeof direction isnt "number" #dev
     @setFromDirection @getDirection() + direction, @getLength()
     this
 
@@ -87,7 +87,7 @@ class Math.Vector
   @return {Math.Vector} The resulting Vector object (itself)
   ###
   scale: (scaleH, scaleV) ->
-    throw new Error("Argument scaleH should be of type Number")  if typeof scaleH isnt "number" #dev
+    throw new Error("Argument scaleH should be of type Number") if typeof scaleH isnt "number" #dev
     scaleV = (if scaleV isnt undefined then scaleV else scaleH)
     @x *= scaleH
     @y *= scaleV
@@ -153,7 +153,7 @@ class Math.Vector
   @return {Math.Vector} The resulting Vector object (itself)
   ###
   multiply: (vector) ->
-    throw new Error("Argument vector should be of type Vector")  if not vector instanceof Math.Vector #dev
+    throw new Error("Argument vector should be of type Vector") if not vector instanceof Math.Vector #dev
     @x *= vector.x
     @y *= vector.y
     this
@@ -165,7 +165,7 @@ class Math.Vector
   @return {number} The dot product
   ###
   getDot: (vector) ->
-    throw new Error("Argument vector should be of type: Vector")  if not vector instanceof Math.Vector #dev
+    throw new Error("Argument vector should be of type: Vector") if not vector instanceof Math.Vector #dev
     @x * vector.x + @y * vector.y
 
   ###
@@ -175,7 +175,7 @@ class Math.Vector
   @return {number} The cross product
   ###
   getCross: (vector) ->
-    throw new Error("Argument vector should be of type: Vector")  if not vector instanceof Math.Vector #dev
+    throw new Error("Argument vector should be of type: Vector") if not vector instanceof Math.Vector #dev
     @x * vector.y - @y * vector.x
 
   ###
@@ -201,7 +201,7 @@ class Math.Vector
   @return {number} The direction to the object
   ###
   getDirectionTo: (point) ->
-    throw new Error("Only Vectors or objects inheriting Vector are supported")  if not point instanceof Math.Vector #dev
+    throw new Error("Only Vectors or objects inheriting Vector are supported") if not point instanceof Math.Vector #dev
     point.copy().subtract(this).getDirection()
 
   ###

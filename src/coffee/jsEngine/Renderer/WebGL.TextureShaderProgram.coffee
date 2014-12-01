@@ -168,7 +168,7 @@ class Renderer.WebGL.TextureShaderProgram
   # Draw functions
   renderSprite: (gl, object, wm) ->
     l = @locations
-    delete @cache.textures[object.bm.oldSrc]  if object.renderType is "textblock" and @cache.textures[object.bm.oldSrc]
+    delete @cache.textures[object.bm.oldSrc] if object.renderType is "textblock" and @cache.textures[object.bm.oldSrc]
 
     # Bind the texture (if it is not already the binded)
     t = @getSpriteTexture(gl, object)
@@ -186,7 +186,7 @@ class Renderer.WebGL.TextureShaderProgram
           object.animationLastSwitch = engine.gameTime
           if object.imageNumber is object.imageLength
             object.imageNumber = (if object.animationLoops then 0 else object.imageLength - 1)
-          else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0)  if object.imageNumber is -1
+          else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
 
         # Set create and set texture coordinate buffer for the object
         @setAnimatedTextCoordBuffer gl, object

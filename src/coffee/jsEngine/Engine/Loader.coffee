@@ -57,7 +57,7 @@ class Engine.Loader
         engine.arena.removeChild @loadOverlay
         delete @fade
 
-        @fadeCallback()  if @fadeCallback
+        @fadeCallback() if @fadeCallback
         delete @fadeCallback
       return
 
@@ -73,7 +73,7 @@ class Engine.Loader
   @return {HTMLImageElement} The image element corresponding to the resource string and theme
   ###
   getImage: (resource, themeName) ->
-    throw new Error("Missing argument: resource")  if resource is undefined #dev
+    throw new Error("Missing argument: resource") if resource is undefined #dev
     themeName = (if themeName isnt undefined then themeName else engine.defaultTheme)
     @getResource resource, "images", themeName
 
@@ -86,7 +86,7 @@ class Engine.Loader
   @return {Sound.Effect} A Sound object corresponding to the resource string and theme
   ###
   getSound: (resource, themeName) ->
-    throw new Error("Missing argument: resource")  if resource is undefined #dev
+    throw new Error("Missing argument: resource") if resource is undefined #dev
     themeName = (if themeName isnt undefined then themeName else engine.defaultTheme)
     @getResource resource, "sfx", themeName
 
@@ -99,7 +99,7 @@ class Engine.Loader
   @return {Sound.Music} A Music object corresponding to the resource string and theme
   ###
   getMusic: (resource, themeName) ->
-    throw new Error("Missing argument: resource")  if resource is undefined #dev
+    throw new Error("Missing argument: resource") if resource is undefined #dev
     themeName = (if themeName isnt undefined then themeName else engine.defaultTheme)
     @getResource resource, "music", themeName
 
@@ -113,7 +113,7 @@ class Engine.Loader
   @return {HTMLCanvasElement} A generated mask (canvas element) for the image element corresponding to the resource string and theme
   ###
   getMask: (resource, themeName) ->
-    throw new Error("Missing argument: resource")  if resource is undefined #dev
+    throw new Error("Missing argument: resource") if resource is undefined #dev
     themeName = (if themeName isnt undefined then themeName else engine.defaultTheme)
     mask = undefined
 
@@ -141,13 +141,13 @@ class Engine.Loader
   @return {HTMLImageElement|Sound|Music} The resource corresponding to the provided resource string, resource type and theme name
   ###
   getResource: (resource, typeString, themeName) ->
-    throw new Error("Missing argument: resource")  if resource is undefined #dev
-    throw new Error("Missing argument: typeString")  if typeString is undefined #dev
-    throw new Error("Missing argument: themeName")  if themeName is undefined #dev
+    throw new Error("Missing argument: resource") if resource is undefined #dev
+    throw new Error("Missing argument: typeString") if typeString is undefined #dev
+    throw new Error("Missing argument: themeName") if themeName is undefined #dev
     res = undefined
     inh = undefined
     i = undefined
-    resource = resource.replace(/\//g, ".")  if resource.indexOf("/") isnt -1
+    resource = resource.replace(/\//g, ".") if resource.indexOf("/") isnt -1
     res = @themes[themeName][typeString][resource]
 
     # Search for the resource in inherited themes
@@ -157,7 +157,7 @@ class Engine.Loader
         inh = @themes[themeName].inherit[i]
         if @themes[inh]
           res = @themes[inh][typeString][resource]
-          break  if res
+          break if res
         i++
     (if res is undefined then false else res)
 
@@ -182,7 +182,7 @@ class Engine.Loader
       name = undefined
       if object.src isnt undefined
         pushStr = currentDir.join(".")
-        sourceStrings.push pushStr  if sourceStrings.indexOf(pushStr) is -1
+        sourceStrings.push pushStr if sourceStrings.indexOf(pushStr) is -1
       else
         for name of object
           if object.hasOwnProperty(name)
@@ -195,7 +195,7 @@ class Engine.Loader
     i = 0
     while i < @themes[engine.defaultTheme].inherit.length
       inheritTheme = @themes[@themes[engine.defaultTheme].inherit[i]]
-      loopThrough inheritTheme.images  if inheritTheme isnt undefined and inheritTheme.images isnt undefined
+      loopThrough inheritTheme.images if inheritTheme isnt undefined and inheritTheme.images isnt undefined
       i++
     sourceStrings
 
@@ -215,7 +215,7 @@ class Engine.Loader
       if @themes.hasOwnProperty(themeName)
         theme = @themes[themeName]
         for resourceString of theme.sfx
-          res.push theme.sfx[resourceString]  if theme.sfx.hasOwnProperty(resourceString)
+          res.push theme.sfx[resourceString] if theme.sfx.hasOwnProperty(resourceString)
     res
 
 
@@ -234,7 +234,7 @@ class Engine.Loader
       if @themes.hasOwnProperty(themeName)
         theme = @themes[themeName]
         for resourceString of theme.music
-          res.push theme.music[resourceString]  if theme.music.hasOwnProperty(resourceString)
+          res.push theme.music[resourceString] if theme.music.hasOwnProperty(resourceString)
     res
 
 
@@ -245,7 +245,7 @@ class Engine.Loader
   @return {boolean} True, when the classes has been loaded without any errors
   ###
   loadClasses: (paths) ->
-    throw new Error("Missing argument: paths")  if paths is undefined #dev
+    throw new Error("Missing argument: paths") if paths is undefined #dev
     objectName = undefined
     i = undefined
     for i of paths
@@ -253,7 +253,7 @@ class Engine.Loader
 
         # Check that the object is not already loaded
         objectName = paths[i].match(/(\w*)\.\w+$/)[1]
-        continue  if window[objectName]
+        continue if window[objectName]
         engine.loadFiles paths[i]
         @loaded.classes[objectName] = paths[i]
     true
@@ -265,7 +265,7 @@ class Engine.Loader
   reloadAllClasses: ->
     i = undefined
     for i of @loaded.classes
-      engine.loadFiles @loaded.classes[i]  if @loaded.classes.hasOwnProperty(i)
+      engine.loadFiles @loaded.classes[i] if @loaded.classes.hasOwnProperty(i)
     return
 
 
@@ -277,8 +277,8 @@ class Engine.Loader
   @param {function} callback A callback function to run when all the themes has been loaded
   ###
   loadThemes: (themeNames, callback) ->
-    throw new Error("Missing argument: themeNames")  if themeNames is undefined #dev
-    @onthemesloaded = callback  if callback isnt undefined
+    throw new Error("Missing argument: themeNames") if themeNames is undefined #dev
+    @onthemesloaded = callback if callback isnt undefined
     name = undefined
     req = undefined
     i = undefined
@@ -290,7 +290,7 @@ class Engine.Loader
       name = themeNames[i]
 
       # Check that the theme is not already loaded
-      continue  if @themes[name]
+      continue if @themes[name]
 
       # Fetch theme details
       req = new XMLHttpRequest()
@@ -307,7 +307,7 @@ class Engine.Loader
       eval "theme = " + codeString
 
       # Load inherited themes
-      @loadThemes theme.inherit  if theme.inherit.length
+      @loadThemes theme.inherit if theme.inherit.length
 
       # Always inherit "External" theme
       theme.inherit.push "External"
@@ -328,8 +328,8 @@ class Engine.Loader
     # Check if the theme was empty, if so, run callback
     total = 0
     for i of @themes
-      total += @themes[i].resourcesCount  if @themes.hasOwnProperty(i)
-    @onthemesloaded()  if @onthemesloaded  if total is 0
+      total += @themes[i].resourcesCount if @themes.hasOwnProperty(i)
+    @onthemesloaded() if @onthemesloaded if total is 0
     return
 
 
@@ -342,9 +342,9 @@ class Engine.Loader
   @param {string} typeString A string defining the resource type. Supported types are: "images", "sfx" and "music"
   ###
   loadResources: (theme, object, typeString) ->
-    throw new Error("Missing argument: theme")  if theme is undefined #dev
-    throw new Error("Missing argument: object")  if object is undefined #dev
-    throw new Error("Missing argument: typeString")  if typeString is undefined #dev
+    throw new Error("Missing argument: theme") if theme is undefined #dev
+    throw new Error("Missing argument: object") if object is undefined #dev
+    throw new Error("Missing argument: typeString") if typeString is undefined #dev
     onload = (event)=>
       return if event.target.hasAttribute("data-loaded")
       event.target.setAttribute "data-loaded", "true"
@@ -361,7 +361,7 @@ class Engine.Loader
 
             # Get image format
             format = object[path].match(/(png|jpg|jpeg|svg)/)
-            format = format[0]  if format
+            format = format[0] if format
 
             # Start loading iage
             res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, "/") + "." + format
@@ -385,7 +385,7 @@ class Engine.Loader
             format = false
             i = 0
             while i < engine.host.supportedAudio.length
-              format = engine.host.supportedAudio[i]  if object[path].search(engine.host.supportedAudio[i]) isnt -1
+              format = engine.host.supportedAudio[i] if object[path].search(engine.host.supportedAudio[i]) isnt -1
               i++
             unless format
               console.log "Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/")
@@ -400,9 +400,9 @@ class Engine.Loader
             format = false
             i = 0
             while i < engine.host.supportedAudio.length
-              format = engine.host.supportedAudio[i]  if object[path].search(engine.host.supportedAudio[i]) isnt -1
+              format = engine.host.supportedAudio[i] if object[path].search(engine.host.supportedAudio[i]) isnt -1
               i++
-            throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/"))  unless format #dev
+            throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/")) unless format #dev
             res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, "/") + "." + format)
             theme.music[path] = new Sound.Music(res)
             if engine.preloadSounds
@@ -424,8 +424,8 @@ class Engine.Loader
   @param {string} [options = ""] A string defining the resource options (same as the string used for defining animations in a theme file)
   ###
   loadExternalResource: (resourceString, path, onLoaded, typeString, options) ->
-    throw new Error("Missing argument: resourceString")  if resourceString is undefined #dev
-    throw new Error("Missing argument: path")  if path is undefined #dev
+    throw new Error("Missing argument: resourceString") if resourceString is undefined #dev
+    throw new Error("Missing argument: path") if path is undefined #dev
     typeString = typeString or "images"
     onLoaded = onLoaded or ->
 
@@ -449,7 +449,7 @@ class Engine.Loader
         theme.resourcesCount++
       when "sfx"
         format = path.match(/[^\.]*$/)[0]
-        throw new Error("Sound format is not supported:", format)  if engine.host.supportedAudio.indexOf(format) is -1 #dev
+        throw new Error("Sound format is not supported:", format) if engine.host.supportedAudio.indexOf(format) is -1 #dev
         res = new Audio(path)
         theme.sfx[resourceString] = new Sound.Effect(res)
         if engine.preloadSounds
@@ -458,7 +458,7 @@ class Engine.Loader
           theme.resourcesCount++
       when "music"
         format = path.match(/[^\.]*$/)[0]
-        throw new Error("Sound format is not supported:", format)  if engine.host.supportedAudio.indexOf(format) is -1 #dev
+        throw new Error("Sound format is not supported:", format) if engine.host.supportedAudio.indexOf(format) is -1 #dev
         res = new Audio(path)
         theme.music[resourceString] = new Music(res)
         if engine.preloadSounds
@@ -479,7 +479,7 @@ class Engine.Loader
   @return {HTMLCanvasElement} A canvas element with the generated mask
   ###
   generateMask: (resourceString, alphaLimit) ->
-    throw new Error("Missing argument: resourceString")  if resourceString is undefined #dev
+    throw new Error("Missing argument: resourceString") if resourceString is undefined #dev
     alphaLimit = (if alphaLimit isnt undefined then alphaLimit else 255)
     image = undefined
     canvas = undefined
@@ -501,7 +501,7 @@ class Engine.Loader
     canvas.imageLength = image.imageLength
     ctx = canvas.getContext("2d")
     #dev
-    throw new Error("Trying to create mask for non-existing resource: " + resourceString)  if image is false #dev
+    throw new Error("Trying to create mask for non-existing resource: " + resourceString) if image is false #dev
     #dev
     ctx.drawImage image, 0, 0, image.width, image.height
     bitmap = ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -529,8 +529,8 @@ class Engine.Loader
         # Remember the mask's bounding box
         y = Math.floor(pixel / bitmap.width)
         x = pixel - y * bitmap.width
-        x -= Math.floor(image.width / image.imageLength) + image.spacing  while x >= Math.floor(image.width / image.imageLength)
-        continue  if x < 0
+        x -= Math.floor(image.width / image.imageLength) + image.spacing while x >= Math.floor(image.width / image.imageLength)
+        continue if x < 0
         top = Math.min(y, top)
         bottom = Math.max(y + 1, bottom)
         left = Math.min(x, left)
@@ -560,6 +560,6 @@ class Engine.Loader
         total += theme.resourcesCount
         loaded += theme.resourcesLoaded
     if loaded is total
-      @onthemesloaded()  if @onthemesloaded
+      @onthemesloaded() if @onthemesloaded
       return true
     false

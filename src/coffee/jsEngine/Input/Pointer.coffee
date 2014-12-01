@@ -70,7 +70,7 @@ class Input.Pointer
   @param {MouseEvent} event Event object passed by the onmousedown event
   ###
   onMouseDown: (event) ->
-    throw new Error("Missing argument: event")  if event is undefined #dev
+    throw new Error("Missing argument: event") if event is undefined #dev
     @onMouseMove event
     unless @isDown(event.which)
       button = @mouse.buttons[event.which]
@@ -86,7 +86,7 @@ class Input.Pointer
   @param {MouseEvent} event Event object passed by the onmouseup event
   ###
   onMouseUp: (event) ->
-    throw new Error("Missing argument: event")  if event is undefined #dev
+    throw new Error("Missing argument: event") if event is undefined #dev
     button = undefined
     @onMouseMove event
     if @isDown(event.which)
@@ -103,7 +103,7 @@ class Input.Pointer
   @param {MouseEvent} event Event object passed by the onmousemove event
   ###
   onMouseMove: (event) ->
-    throw new Error("Missing argument: event")  if event is undefined #dev
+    throw new Error("Missing argument: event") if event is undefined #dev
     roomPos = undefined
     @mouse.window.set event.pageX, event.pageY
     @mouse.set @mouse.window.x - engine.arena.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, @mouse.window.y - engine.arena.offsetTop - engine.canvas.offsetTop + document.body.scrollTop
@@ -135,7 +135,7 @@ class Input.Pointer
   @param {TouchEvent} event Event object passed by the ontouchstart event
   ###
   onTouchStart: (event) ->
-    throw new Error("Missing argument: event")  if event is undefined #dev
+    throw new Error("Missing argument: event") if event is undefined #dev
 
     # Update pressed touches
     for eventTouch in event.changedTouches
@@ -160,7 +160,7 @@ class Input.Pointer
   @param {TouchEvent} event Event object passed by the ontouchend event
   ###
   onTouchEnd: (event) ->
-    throw new Error("Missing argument: event")  if event is undefined #dev
+    throw new Error("Missing argument: event") if event is undefined #dev
     i = undefined
     eventTouch = undefined
     pointerTouch = undefined
@@ -191,7 +191,7 @@ class Input.Pointer
   @param {TouchEvent} event Event object passed by the ontouchmove event
   ###
   onTouchMove: (event) ->
-    throw new Error("Missing argument: event")  if event is undefined #dev
+    throw new Error("Missing argument: event") if event is undefined #dev
     i = undefined
     eventTouch = undefined
     pointerTouch = undefined
@@ -233,7 +233,7 @@ class Input.Pointer
   @return {Object[]|boolean} Returns an array containing the pointers that are currently down, or false if no pointers are down
   ###
   isDown: (button) ->
-    throw new Error("Missing argument: button")  if button is undefined #dev
+    throw new Error("Missing argument: button") if button is undefined #dev
 
     switch @getButtonType(button)
       when "mouse"
@@ -252,7 +252,7 @@ class Input.Pointer
   @return {Object[]|boolean} Returns an array containing the pointers that have just been pressed, or false if no pressed pointers where detected
   ###
   isPressed: (button) ->
-    throw new Error("Missing argument: button")  if button is undefined #dev
+    throw new Error("Missing argument: button") if button is undefined #dev
     pointers = undefined
     switch @getButtonType(button)
       when "mouse"
@@ -271,7 +271,7 @@ class Input.Pointer
   @return {Object[]|boolean} Returns an array containing the pointers that have just been released, or false if no released pointers where detected
   ###
   isReleased: (button) ->
-    throw new Error("Missing argument: button")  if button is undefined #dev
+    throw new Error("Missing argument: button") if button is undefined #dev
     pointers = undefined
     switch @getButtonType(button)
       when "mouse"
@@ -293,8 +293,8 @@ class Input.Pointer
   ###
   shapeIsPressed: (button, shape, outside) ->
     button = (if button isnt undefined then button else MOUSE_TOUCH_ANY)
-    throw new Error("Missing argument: shape")  if shape is undefined #dev
-    throw new Error("Argument shape has implement a \"contains\"-function")  if typeof shape.contains isnt "function" #dev
+    throw new Error("Missing argument: shape") if shape is undefined #dev
+    throw new Error("Argument shape has implement a \"contains\"-function") if typeof shape.contains isnt "function" #dev
     i = undefined
     pointers = undefined
     pointer = undefined
@@ -302,17 +302,17 @@ class Input.Pointer
 
     # Narrow possible presses down to the pressed pointers within the selected buttons
     pointers = @isPressed(button)
-    return false  unless pointers
+    return false unless pointers
 
     # Check each of the pointers to see if they are inside the shape
     ret = []
     i = 0
     while i < pointers.length
       pointer = pointers[i]
-      continue  if pointer.x is false or pointer.y is false
+      continue if pointer.x is false or pointer.y is false
       if not outside and shape.contains(pointer)
         ret.push pointer
-      else ret.push pointer  if outside and not shape.contains(pointer)
+      else ret.push pointer if outside and not shape.contains(pointer)
       i++
 
     # Return the pointers which are inside the shape
@@ -330,8 +330,8 @@ class Input.Pointer
   ###
   shapeIsReleased: (button, shape, outside) ->
     button = (if button isnt undefined then button else MOUSE_TOUCH_ANY)
-    throw new Error("Missing argument: shape")  if shape is undefined #dev
-    throw new Error("Argument shape has implement a \"contains\"-function")  if typeof shape.contains isnt "function" #dev
+    throw new Error("Missing argument: shape") if shape is undefined #dev
+    throw new Error("Argument shape has implement a \"contains\"-function") if typeof shape.contains isnt "function" #dev
     i = undefined
     pointers = undefined
     pointer = undefined
@@ -339,17 +339,17 @@ class Input.Pointer
 
     # Narrow possible presses down to the pressed pointers within the selected buttons
     pointers = @isReleased(button)
-    return false  unless pointers
+    return false unless pointers
 
     # Check each of the pointers to see if they are inside the shape
     ret = []
     i = 0
     while i < pointers.length
       pointer = pointers[i]
-      continue  if pointer.x is false or pointer.y is false
+      continue if pointer.x is false or pointer.y is false
       if not outside and shape.contains(pointer)
         ret.push pointer
-      else ret.push pointer  if outside and not shape.contains(pointer)
+      else ret.push pointer if outside and not shape.contains(pointer)
       i++
 
     # Return the pointers which are inside the shape
@@ -367,8 +367,8 @@ class Input.Pointer
   ###
   shapeIsDown: (button, shape, outside) ->
     button = (if button isnt undefined then button else MOUSE_TOUCH_ANY)
-    throw new Error("Missing argument: shape")  if shape is undefined #dev
-    throw new Error("Argument shape has implement a \"contains\"-function")  if typeof shape.contains isnt "function" #dev
+    throw new Error("Missing argument: shape") if shape is undefined #dev
+    throw new Error("Argument shape has implement a \"contains\"-function") if typeof shape.contains isnt "function" #dev
     i = undefined
     pointers = undefined
     pointer = undefined
@@ -376,17 +376,17 @@ class Input.Pointer
 
     # Narrow possible pointers down to the pointers which are down within the selected buttons
     pointers = @isDown(button)
-    return false  unless pointers
+    return false unless pointers
 
     # Check each of the pointers to see if they are inside the shape
     ret = []
     i = 0
     while i < pointers.length
       pointer = pointers[i]
-      continue  if pointer.x is false or pointer.y is false
+      continue if pointer.x is false or pointer.y is false
       if not outside and shape.contains(pointer)
         ret.push pointer
-      else ret.push pointer  if outside and not shape.contains(pointer)
+      else ret.push pointer if outside and not shape.contains(pointer)
       i++
 
     # Return the pointers which are inside the shape
@@ -487,7 +487,7 @@ class Input.Pointer
     i = undefined
     i = 0
     while i < @touches.length
-      return i  unless @checkPointer(@touches[i], "down")
+      return i unless @checkPointer(@touches[i], "down")
       i++
     false
 
@@ -503,7 +503,7 @@ class Input.Pointer
   shapeIsHovered: (shape, outside) ->
     if not outside and (shape.contains(@mouse))
       return true
-    else return true  if outside and (not shape.contains(@mouse))
+    else return true if outside and (not shape.contains(@mouse))
     false
 
 
@@ -515,7 +515,7 @@ class Input.Pointer
   @return {boolean} True if the button has now been released, false if the button was not already pressed
   ###
   release: (button) ->
-    throw new Error("Missing argument: button")  if button is undefined #dev
+    throw new Error("Missing argument: button") if button is undefined #dev
     i = undefined
     pointers = undefined
     events = undefined
@@ -523,7 +523,7 @@ class Input.Pointer
 
     # Find pressed pointers that are covered by the given button
     pointers = @isPressed(button)
-    return false  unless pointers
+    return false unless pointers
 
     # Unpress all of the pointers
     i = 0
@@ -568,8 +568,8 @@ class Input.Pointer
   @param {string} A resource string, image path string or css cursor of the cursor
   ###
   setCursor: (cursor) ->
-    throw new Error("Missing argument: cursor")  if cursor is undefined #dev
-    throw new Error("Argument cursor should be of type: string")  if typeof cursor isnt "string" #dev
+    throw new Error("Missing argument: cursor") if cursor is undefined #dev
+    throw new Error("Argument cursor should be of type: string") if typeof cursor isnt "string" #dev
     resource = undefined
 
     # Check if "cursor" is a resource string
@@ -580,7 +580,7 @@ class Input.Pointer
       cursor = "url('" + resource.src + "') 0 0, auto"
 
     # Else, if the cursor is not a single word (a css cursor), use the cursor var as direct image path
-    else cursor = "url('" + cursor + "') 0 0, auto"  unless /^\w*$/.test(cursor)
+    else cursor = "url('" + cursor + "') 0 0, auto" unless /^\w*$/.test(cursor)
 
     # Finally: set the cursor
     engine.arena.style.cursor = cursor

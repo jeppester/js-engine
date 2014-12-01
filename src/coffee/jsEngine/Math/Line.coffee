@@ -31,8 +31,8 @@ class Math.Line
   @return {Math.Line} The resulting Line object (itself)
   ###
   setFromVectors: (startVector, endVector) ->
-    throw new Error("Argument startVector should be of type: Vector")  if not startVector instanceof Math.Vector #dev
-    throw new Error("Argument endVector should be of type: Vector")  if not endVector instanceof Math.Vector #dev
+    throw new Error("Argument startVector should be of type: Vector") if not startVector instanceof Math.Vector #dev
+    throw new Error("Argument endVector should be of type: Vector") if not endVector instanceof Math.Vector #dev
     @a = startVector
     @b = endVector
     this
@@ -82,7 +82,7 @@ class Math.Line
   @return {Math.Line} The resulting Line object (itself)
   ###
   rotate: (direction) ->
-    throw new Error("Argument direction should be of type: Number")  if typeof direction isnt "number" #dev
+    throw new Error("Argument direction should be of type: Number") if typeof direction isnt "number" #dev
     @a.rotate direction
     @b.rotate direction
     this
@@ -156,7 +156,7 @@ class Math.Line
       c2 = undefined
       c1 = (@b.x - @a.x) * (object.a.y - @b.y) - (object.a.x - @b.x) * (@b.y - @a.y)
       c2 = (@b.x - @a.x) * (object.b.y - @b.y) - (object.b.x - @b.x) * (@b.y - @a.y)
-      return false  if c1 * c2 > 0
+      return false if c1 * c2 > 0
       c1 = (object.b.x - object.a.x) * (@a.y - object.b.y) - (@a.x - object.b.x) * (object.b.y - object.a.y)
       c2 = (object.b.x - object.a.x) * (@b.y - object.b.y) - (@b.x - object.b.x) * (object.b.y - object.a.y)
       c1 * c2 < 0

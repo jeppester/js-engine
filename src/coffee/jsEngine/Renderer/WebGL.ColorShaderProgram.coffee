@@ -42,7 +42,7 @@ class Renderer.WebGL.ColorShaderProgram
 
     # Check that the shader did compile
     # dev
-    throw new Error(gl.getShaderInfoLog(vertexShader))  unless gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS) # dev
+    throw new Error(gl.getShaderInfoLog(vertexShader)) unless gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS) # dev
     # dev
     gl.attachShader @program, vertexShader
 
@@ -65,7 +65,7 @@ class Renderer.WebGL.ColorShaderProgram
 
     # Check that the shader did compile
     # dev
-    throw new Error(gl.getShaderInfoLog(fragmentShader))  unless gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS) # dev
+    throw new Error(gl.getShaderInfoLog(fragmentShader)) unless gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS) # dev
     # dev
     gl.attachShader @program, fragmentShader
     gl.linkProgram @program

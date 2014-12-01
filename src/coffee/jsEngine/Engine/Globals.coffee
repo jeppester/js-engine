@@ -327,7 +327,7 @@ ALIGNMENT_RIGHT = "right"
     i = 0
     while i < engine.cameras.length
       camera = engine.cameras[i]
-      camera.room = newRoom  if camera.room is oldRoom
+      camera.room = newRoom if camera.room is oldRoom
       i++
     callback()
     return

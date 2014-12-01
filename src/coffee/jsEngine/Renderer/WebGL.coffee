@@ -70,7 +70,7 @@ class Renderer.WebGL
       if @cache.currentResolution.width isnt w or @cache.currentResolution.height isnt h
         @cache.currentResolution.width = w
         @cache.currentResolution.height = h
-        gl.uniform2f @currentProgram.locations.u_resolution, w, h  if @currentProgram
+        gl.uniform2f @currentProgram.locations.u_resolution, w, h if @currentProgram
 
       # Set camera position
       wm = @makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
@@ -98,12 +98,12 @@ class Renderer.WebGL
       wm
     ])
     offset = @makeTranslation(-object.offset.x, -object.offset.y)
-    return  unless object.isVisible()
+    return unless object.isVisible()
 
     # Set object alpha (because alpha is used by ALL rendered objects)
     if @cache.currentAlpha isnt object.opacity
       @cache.currentAlpha = object.opacity
-      gl.uniform1f @currentProgram.locations.u_alpha, object.opacity  if @currentProgram
+      gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
     switch object.renderType
 
       # Texture based objects

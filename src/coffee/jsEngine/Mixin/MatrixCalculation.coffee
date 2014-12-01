@@ -97,7 +97,7 @@ Mixin.MatrixCalculation =
     det = @matrixDeterminant(matrix)
 
     # If determinant is zero return false;
-    return false  if det is 0
+    return false if det is 0
 
     # Calculate inverse
     a = matrix[0 * 3 + 0]
