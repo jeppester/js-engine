@@ -7,9 +7,14 @@ jade = require 'jade'
 coffee = require 'coffee-script'
 
 jsEngineBuilder =
-  minifyJsEngine: (outFile, callback) ->
+  minifyJsEngine: (outFile, callback, engineOnly) ->
     # Read dev.jade-file to find necessary files
-    contents = fs.readFileSync('src/jade/dev.jade').toString().match /"js\/(.+)\.js"/g
+    if engineOnly
+      regex = /"js\/(jsEngine\/.+)\.js"/g
+    else
+      regex = /"js\/(.+)\.js"/g
+
+    contents = fs.readFileSync('src/jade/dev.jade').toString().match regex
 
     # Compile and concatenate files
     contents = contents.map (name)->

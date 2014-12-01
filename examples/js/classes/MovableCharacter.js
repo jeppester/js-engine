@@ -15,27 +15,27 @@ MovableCharacter.prototype.import({
     step: function() {
         // Check that the arrow keys are down, if so, move the object by increasing or decreasing it's x and y properties
         // Left
-        if (keyboard.isDown(KEY_LEFT)) {
+        if (engine.keyboard.isDown(KEY_LEFT)) {
             this.x -= engine.convertSpeed(200);
         }
 
         // Right
-        if (keyboard.isDown(KEY_RIGHT)) {
+        if (engine.keyboard.isDown(KEY_RIGHT)) {
             this.x += engine.convertSpeed(200);
         }
 
         // Up
-        if (keyboard.isDown(KEY_UP)) {
+        if (engine.keyboard.isDown(KEY_UP)) {
             this.y -= engine.convertSpeed(200);
         }
 
         // Down
-        if (keyboard.isDown(KEY_DOWN)) {
+        if (engine.keyboard.isDown(KEY_DOWN)) {
             this.y += engine.convertSpeed(200);
         }
 
         // Space
-        if (keyboard.isPressed(KEY_SPACE)) {
+        if (engine.keyboard.isPressed(KEY_SPACE)) {
             // Turn the character around
             this.animate(
                 {
@@ -48,3 +48,10 @@ MovableCharacter.prototype.import({
         }
     }
 });
+
+// Add MovableCharactor to the ObjectCreator
+Engine.ObjectCreator.prototype.MovableCharacter = function(x, y) {
+  var object;
+  object = new MovableCharacter(x, y);
+  return this.container.addChildren(object);
+};

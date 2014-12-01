@@ -83,18 +83,15 @@ Examples.prototype.import({
         // (see commented out example near the beginning of this file)
 
         // For simplicity lets load the class at this point
-        loader.loadClasses([
+        engine.loader.loadClasses([
             'js/classes/MovableCharacter.js'
         ]);
 
         // Now that the object is loaded, lets create an instance of the object
-        movable = new MovableCharacter(
+        movable = this.fgView.create.MovableCharacter(
             300, // x-position
             200 // y-position
         );
-
-        // And lets add the new object out fgView
-        this.fgView.addChildren(movable);
 
         // You should now have a character that you can move around width the arrow keys :)
 
@@ -102,6 +99,6 @@ Examples.prototype.import({
 
 
         // Hide loader overlay now that everything is ready
-        loader.hideOverlay();
+        engine.loader.hideOverlay();
     }
 });

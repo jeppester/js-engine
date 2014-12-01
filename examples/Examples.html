@@ -21,16 +21,17 @@
 </div>
 
 <!-- Load jsEngine -->
-<script type="text/javascript" src="../js/jsEngine/autoload.js"></script>
+<script type="text/javascript" src="jsEngine.min.js"></script>
+<script type="text/javascript" src="js/Examples.js"></script>
 
 <!-- Start engine -->
 <script type="text/javascript">
 	new Engine({
 		// Set main class to load
-		gameClassPath:'js/Examples.js',
+		gameClass: Examples,
 
 		// Set themes to load
-		themes:['Example'],
+		themes: ['Example'],
 
 		// Set arena background-color
 		backgroundColor: "#000",
