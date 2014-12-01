@@ -40,7 +40,6 @@ jsEngineBuilder =
       dest: outDir
     , callback
 
-  # Minifies mixels with phaser
   dist: (outDir, callback) ->
     outDir = outDir || 'dist'
 
@@ -50,7 +49,7 @@ jsEngineBuilder =
     fs.mkdirSync "#{outDir}/assets"
 
     # Minify phaser
-    @minifyJsEngine "#{outDir}/game.min.js", =>
+    @minifyJsEngine "#{outDir}/game.dist.js", =>
       # Compile HTML and copy assets
       @buildHTML "#{outDir}/index.html", =>
         @copyAssets "#{outDir}/assets", =>
@@ -58,6 +57,4 @@ jsEngineBuilder =
           fs.writeFileSync "#{outDir}/game.dist.css", fs.readFileSync('src/css/style.css')
           callback()
 
-
-
-module.exports = mixelsBuilder
+module.exports = jsEngineBuilder
