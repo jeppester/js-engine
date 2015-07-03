@@ -20,7 +20,8 @@ Can check both for precise (bitmap-based) collisions and bounding box collisions
 class View.Collidable extends View.Sprite
   constructor: (source, x, y, direction, additionalProperties) ->
     View.Sprite.call this, source, x, y, direction, additionalProperties
-    @mask = (if @mask then @mask else engine.loader.getMask(source, @getTheme()))
+    @mask = (if @mask then @mask else engine.
+    loader.getMask(source, @getTheme()))
     @collisionResolution = (if @collisionResolution then @collisionResolution else engine.defaultCollisionResolution)
     return
 
