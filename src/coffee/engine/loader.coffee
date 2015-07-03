@@ -483,20 +483,7 @@ module.exports = class Loader
   generateMask: (resourceString, alphaLimit) ->
     throw new Error("Missing argument: resourceString") if resourceString is undefined #dev
     alphaLimit = (if alphaLimit isnt undefined then alphaLimit else 255)
-    image = undefined
-    canvas = undefined
-    ctx = undefined
-    bitmap = undefined
-    data = undefined
-    length = undefined
-    pixel = undefined
-    top = undefined
-    bottom = undefined
-    left = undefined
-    right = undefined
-    x = undefined
-    y = undefined
-    image = loader.getImage(resourceString)
+    image = engine.loader.getImage(resourceString)
     canvas = document.createElement("canvas")
     canvas.width = image.width
     canvas.height = image.height

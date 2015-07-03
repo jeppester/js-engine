@@ -6,7 +6,6 @@ Constructor for the Pointer class
 ###
 module.exports = class Pointer
   constructor: ->
-    button = undefined
     if engine.host.hasTouch
 
       # Add listeners for touch events
@@ -204,7 +203,6 @@ module.exports = class Pointer
   ###
   isDown: (button) ->
     throw new Error("Missing argument: button") if button is undefined #dev
-
     switch @getButtonType(button)
       when "mouse"
         pointers = (if button is MOUSE_ANY then @mouse.buttons else @mouse.buttons[button])
@@ -383,7 +381,7 @@ module.exports = class Pointer
           ret.push pointer if -pointer.events[0] > engine.last || -pointer.events[1] > engine.last
         when "down"
           ret.push pointer if pointer.events[0] > 0
-    ret
+    if ret.length then ret else false
 
   ###
   Converts a coordinate which is relative to the main canvas to a position in the room (based on the room's cameras)
@@ -510,7 +508,7 @@ module.exports = class Pointer
     resource = undefined
 
     # Check if "cursor" is a resource string
-    resource = loader.getImage(cursor)
+    resource = engine.loader.getImage(cursor)
 
     # If the cursor string corresponded to a resource, use the resource's src as cursor
     if resource
