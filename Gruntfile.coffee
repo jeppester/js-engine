@@ -4,7 +4,13 @@ module.exports = (grunt) ->
 
     jade:
       development:
-        files: 'www/index.html': 'src/jade/index.jade'
+        files: [
+          expand: true
+          cwd: "src/jade/examples"
+          src: "**/*.jade"
+          dest: "www/examples"
+          ext: ".html"
+        ]
 
     stylus:
       options:
@@ -18,7 +24,16 @@ module.exports = (grunt) ->
           extensions: ['.coffee', '.jade']
           paths: ['./node_modules','./src']
       development:
-        files: 'www/engine.js': ['src/coffee/engine.coffee']
+        files: [
+          { 'www/engine.js': ['src/coffee/engine.coffee'] }
+          {
+            expand: true
+            cwd: "src/coffee/examples"
+            src: "**/*.coffee"
+            dest: "www/examples/js"
+            ext: ".js"
+          }
+        ]
 
     watch:
       options:
