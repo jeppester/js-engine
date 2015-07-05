@@ -1,4 +1,4 @@
-Vector = require '../geometry/vector'
+Engine = require '../engine'
 
 ###
 @name View.Child
@@ -19,7 +19,7 @@ module.exports = class Child
     @size = 1
     @widthScale = 1
     @heightScale = 1
-    hidden = offset: new Vector()
+    hidden = offset: new Engine.Geometry.Vector()
 
     Object.defineProperty @, "offset",
       get: ->
@@ -180,7 +180,7 @@ module.exports = class Child
   @return {Vector} A parsed version of the offset global
   ###
   parseOffsetGlobal: (offset) ->
-    new Vector()
+    new Engine.Geometry.Vector()
 
   ###
   Checks if the child object is inside a room that is currently visible
@@ -283,6 +283,5 @@ module.exports = class Child
   @return {boolean} Whether or not the object is visible (based on its size and opacity vars)
   ###
   isVisible: ->
-
     # If sprites size has been modified to zero, do nothing
     not (@size is 0 or @widthScale is 0 or @heightScale is 0)

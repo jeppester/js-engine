@@ -385,22 +385,22 @@ module.exports = window.Engine = class Engine
   ###
   convertSpeed: (speed, from, to) ->
     throw new Error("Missing argument: speed") if speed is undefined #dev
-    return new @constructor.Vector(@convertSpeed(speed.x, from, to), @convertSpeed(speed.y, from, to)) if speed instanceof @constructor.Vector
-    from = (if from isnt undefined then from else SPEED_PIXELS_PER_SECOND)
-    to = (if to isnt undefined then to else SPEED_PIXELS_PER_FRAME)
+    return new @constructor.Vector(@convertSpeed(speed.x, from, to), @convertSpeed(speed.y, from, to)) if speed instanceof @constructor.Geometry.Vector
+    from = (if from isnt undefined then from else Engine.Globals.SPEED_PIXELS_PER_SECOND)
+    to = (if to isnt undefined then to else Engine.Globals.SPEED_PIXELS_PER_FRAME)
 
     # Convert all formats to pixels per frame
     switch from
-      when SPEED_PIXELS_PER_SECOND
+      when Engine.Globals.SPEED_PIXELS_PER_SECOND
         speed = speed * @gameTimeIncrease / 1000
       # Convert pixels per frame to the output format
-      when SPEED_PIXELS_PER_FRAME
+      when Engine.Globals.SPEED_PIXELS_PER_FRAME
         speed
 
     switch to
-      when SPEED_PIXELS_PER_SECOND
+      when Engine.Globals.SPEED_PIXELS_PER_SECOND
         speed = speed / @gameTimeIncrease * 1000
-      when SPEED_PIXELS_PER_FRAME
+      when Engine.Globals.SPEED_PIXELS_PER_FRAME
         speed
 
   ###
@@ -781,20 +781,20 @@ Engine.Renderers.WebGLRenderer = require './renderer/webgl'
 Engine.Renderers.CanvasRenderer = require './renderer/canvas'
 
 Engine.Sounds = {}
-Engine.Effect = require './sounds/effect'
-Engine.Music = require './sounds/music'
+Engine.Sounds.Effect = require './sounds/effect'
+Engine.Sounds.Music = require './sounds/music'
 
 Engine.Views = {}
 Engine.Views.Child = require './views/child'
 Engine.Views.Container = require './views/container'
 Engine.Views.Circle = require './views/circle'
-Engine.Views.Collidable = require './views/collidable'
-Engine.Views.GameObject = require './views/game-object'
 Engine.Views.Line = require './views/line'
-Engine.Views.Polygon = require './views/polygon'
 Engine.Views.Rectangle = require './views/rectangle'
+Engine.Views.Polygon = require './views/polygon'
 Engine.Views.Sprite = require './views/sprite'
 Engine.Views.TextBlock = require './views/text-block'
+Engine.Views.Collidable = require './views/collidable'
+Engine.Views.GameObject = require './views/game-object'
 
 Engine.Room = require './engine/room'
 Engine.Globals = require './engine/globals'

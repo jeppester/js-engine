@@ -1,4 +1,4 @@
-Sprite = require './sprite'
+Engine = require '../engine'
 
 ###
 The constructor for the Collidable class
@@ -17,11 +17,10 @@ Can check both for precise (bitmap-based) collisions and bounding box collisions
 @param {number} [direction=0] The direction of the created object. Defaults to 0
 @param {object} [additionalProperties] An object containing key-value pairs that will be set as properties for the created object. Can be used for setting advanced options such as sprite offset and opacity.
 ###
-class Collidable extends Sprite
+module.exports = class Collidable extends Engine.Views.Sprite
   constructor: (source, x, y, direction, additionalProperties) ->
-    View.Sprite.call this, source, x, y, direction, additionalProperties
-    @mask = (if @mask then @mask else engine.
-    loader.getMask(source, @getTheme()))
+    Engine.Views.Sprite.call this, source, x, y, direction, additionalProperties
+    @mask = (if @mask then @mask else engine.loader.getMask(source, @getTheme()))
     @collisionResolution = (if @collisionResolution then @collisionResolution else engine.defaultCollisionResolution)
     return
 
@@ -160,7 +159,7 @@ class Collidable extends Sprite
       avY /= @size * @heightScale
 
       # Rotate the position according to the object's direction
-      retVector = new Math.Vector(avX, avY)
+      retVector = new Engine.Geometry.Vector(avX, avY)
       retVector.rotate @direction
 
       # Save the number of colliding pixels
@@ -184,7 +183,7 @@ class Collidable extends Sprite
 
     # Get mask from loader object
     mask = @mask
-    calc = Mixin.MatrixCalculation
+    calc = Engine.Helpers.MatrixCalculation
 
     # Create a new canvas for checking for a collision
     canvas = document.createElement("canvas")
@@ -320,7 +319,7 @@ class Collidable extends Sprite
 
           # Calculate a combined position
           if ret.positions.length
-            ret.combinedPosition = new Math.Vector()
+            ret.combinedPosition = new Engine.Geometry.Vector()
             ret.combinedPosition.pixelCount = 0
             ret.positions.forEach (p) ->
               ret.combinedPosition.add p.scale(p.pixelCount)

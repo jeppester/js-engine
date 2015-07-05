@@ -1,4 +1,4 @@
-Child = require './child'
+Engine = require '../engine'
 
 ###
 Constructor for the View class.
@@ -16,7 +16,7 @@ All objects which are drawn on the game's canvas extends the View-class.
 @param {Child} child2 An other child to add to the view upon creation
 @param {Child} child3 A third ...
 ###
-module.exports = class Container extends Child
+module.exports = class Container extends Engine.Views.Child
   constructor: (children...) ->
     @children = []
     super()
@@ -44,7 +44,7 @@ module.exports = class Container extends Child
     i = 0
     while i < arguments.length
       child = arguments[i]
-      throw new Error("Argument child has to be of type: Child") if not child instanceof Child #dev
+      throw new Error("Argument child has to be of type: Child") if not child instanceof Engine.Views.Child #dev
 
       # If the child already has a parent, remove the child from that parent
       child.parent.removeChildren child if child.parent
@@ -84,7 +84,7 @@ module.exports = class Container extends Child
     i = 0
     while i < insertChildren.length
       child = insertChildren[i]
-      throw new Error("Argument child has to be of type: Child") if not child instanceof Child #dev
+      throw new Error("Argument child has to be of type: Child") if not child instanceof Engine.Views.Child #dev
 
       # If the child already has a parent, remove the child from that parent
       child.parent.removeChildren child if child.parent

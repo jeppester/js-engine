@@ -1,6 +1,4 @@
-Container = require './container'
-MixinHelper = require '../helpers/mixin'
-Animatable = require '../mixins/animatable'
+Engine = require '../engine'
 
 ###
 The constructor for Sprite objects.
@@ -36,9 +34,9 @@ composite: 'source-over',
 offset: new Math.Vector('center', 'center')
 }</code>
 ###
-class Sprite extends Container
+module.exports = class Sprite extends Engine.Views.Container
   # Mix in animatable
-  MixinHelper.mixin @, Animatable
+  Engine.Helpers.Mixin.mixin @, Engine.Mixins.Animatable
 
   constructor: (source, x, y, direction, additionalProperties) ->
     throw new Error("Missing argument: source") if source is undefined #dev
@@ -83,13 +81,13 @@ class Sprite extends Container
 
 
     # If an offset static var is used, remove it for now, and convert it later
-    offset = OFFSET_MIDDLE_CENTER
+    offset = Engine.Globals.OFFSET_MIDDLE_CENTER
     if additionalProperties and additionalProperties.offset
       offset = additionalProperties.offset
       delete additionalProperties.offset
 
     # Load additional properties
-    @import additionalProperties
+    Engine.Helpers.Mixin.import @, additionalProperties
     throw new Error("Sprite source was not successfully loaded: " + source) unless @refreshSource() #dev
 
     # Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
@@ -106,44 +104,44 @@ class Sprite extends Container
   @return {Math.Vector} The offset vector the offset global corresponds to for the instance
   ###
   parseOffsetGlobal: (offset) ->
-    ret = new Math.Vector()
+    ret = new Engine.Geometry.Vector()
 
     # calculate horizontal offset
     if [
-      OFFSET_TOP_LEFT
-      OFFSET_MIDDLE_LEFT
-      OFFSET_BOTTOM_LEFT
+      Engine.Globals.OFFSET_TOP_LEFT
+      Engine.Globals.OFFSET_MIDDLE_LEFT
+      Engine.Globals.OFFSET_BOTTOM_LEFT
     ].indexOf(offset) isnt -1
       ret.x = 0
     else if [
-      OFFSET_TOP_CENTER
-      OFFSET_MIDDLE_CENTER
-      OFFSET_BOTTOM_CENTER
+      Engine.Globals.OFFSET_TOP_CENTER
+      Engine.Globals.OFFSET_MIDDLE_CENTER
+      Engine.Globals.OFFSET_BOTTOM_CENTER
     ].indexOf(offset) isnt -1
       ret.x = @bm.width / @imageLength / 2
     else ret.x = @bm.width / @imageLength if [
-      OFFSET_TOP_RIGHT
-      OFFSET_MIDDLE_RIGHT
-      OFFSET_BOTTOM_RIGHT
+      Engine.Globals.OFFSET_TOP_RIGHT
+      Engine.Globals.OFFSET_MIDDLE_RIGHT
+      Engine.Globals.OFFSET_BOTTOM_RIGHT
     ].indexOf(offset) isnt -1
 
     # calculate vertical offset
     if [
-      OFFSET_TOP_LEFT
-      OFFSET_TOP_CENTER
-      OFFSET_TOP_RIGHT
+      Engine.Globals.OFFSET_TOP_LEFT
+      Engine.Globals.OFFSET_TOP_CENTER
+      Engine.Globals.OFFSET_TOP_RIGHT
     ].indexOf(offset) isnt -1
       ret.y = 0
     else if [
-      OFFSET_MIDDLE_LEFT
-      OFFSET_MIDDLE_CENTER
-      OFFSET_MIDDLE_RIGHT
+      Engine.Globals.OFFSET_MIDDLE_LEFT
+      Engine.Globals.OFFSET_MIDDLE_CENTER
+      Engine.Globals.OFFSET_MIDDLE_RIGHT
     ].indexOf(offset) isnt -1
       ret.y = @bm.height / 2
     else ret.y = @bm.height if [
-      OFFSET_BOTTOM_LEFT
-      OFFSET_BOTTOM_CENTER
-      OFFSET_BOTTOM_RIGHT
+      Engine.Globals.OFFSET_BOTTOM_LEFT
+      Engine.Globals.OFFSET_BOTTOM_CENTER
+      Engine.Globals.OFFSET_BOTTOM_RIGHT
     ].indexOf(offset) isnt -1
     ret
 
@@ -207,7 +205,7 @@ class Sprite extends Container
     parents = undefined
     parent = undefined
     i = undefined
-    box = new Math.Rectangle(-@offset.x, -@offset.y, @clipWidth, @clipHeight).getPolygon()
+    box = new Engine.Geometry.Rectangle(-@offset.x, -@offset.y, @clipWidth, @clipHeight).getPolygon()
     parents = @getParents()
     parents.unshift this
     i = 0

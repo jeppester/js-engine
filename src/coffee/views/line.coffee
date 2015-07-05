@@ -1,6 +1,4 @@
-Line = require '../geometry/line'
-Child = require './child'
-MixinHelper = require '../helpers/mixin'
+Engine = require '../engine'
 
 ###
 Constructor for the Line class. Uses setFromVectors to create the line's start and end points
@@ -22,12 +20,12 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {number} [lineWidth=1] The line's width if added to a view (in px)
 @param {string} [lineCap='butt'] The line's cap style if added to a view
 ###
-module.exports = class LineView extends Line
+module.exports = class Line extends Engine.Geometry.Line
   # Mix in Child
-  MixinHelper.mixin @, Child
+  Engine.Helpers.Mixin.mixin @, Engine.Views.Child
 
   constructor: (startVector, endVector, strokeStyle, lineWidth, lineCap) ->
-    Child.call this
+    Engine.Views.Child.call this
     @renderType = "line"
     if engine.enableRedrawRegions
       @LineInitWithRedrawRegions startVector, endVector, strokeStyle, lineWidth, lineCap
@@ -39,7 +37,7 @@ module.exports = class LineView extends Line
     @strokeStyle = strokeStyle or "#000"
     @lineWidth = lineWidth or 1
     @lineCap = lineCap or "butt"
-    @setFromVectors startVector or new Math.Vector(), endVector or new Math.Vector()
+    @setFromVectors startVector or new Engine.Geometry.Vector(), endVector or new Engine.Geometry.Vector()
     return
 
   LineInitWithRedrawRegions: (startVector, endVector, strokeStyle, lineWidth, lineCap) ->
@@ -160,7 +158,7 @@ module.exports = class LineView extends Line
           @onAfterChange()
         return
 
-    @setFromVectors startVector or new Math.Vector(), endVector or new Math.Vector()
+    @setFromVectors startVector or new Engine.Geometry.Vector(), endVector or new Engine.Geometry.Vector()
     return
 
 

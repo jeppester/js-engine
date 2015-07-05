@@ -1,6 +1,4 @@
-Circle = require '../geometry/circle'
-Child = require './child'
-MixinHelper = require '../helpers/mixin'
+Engine = require '../engine'
 
 ###
 Constructor for Circle class, uses the set function, to set the properties of the circle.
@@ -24,12 +22,12 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {string} [strokeStyle = "#000"] The circle's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The circle's width if added to a view (in px)
 ###
-module.exports = class CircleView extends Circle
+module.exports = class Circle extends Engine.Geometry.Circle
   # Mix in Child
-  MixinHelper.mixin @, Child
+  Engine.Helpers.Mixin.mixin @, Engine.Views.Child
 
   constructor: (x, y, radius, fillStyle, strokeStyle, lineWidth) ->
-    Child.call this
+    Engine.Views.Child.call this
 
     @renderType = "circle"
     if engine.enableRedrawRegions
@@ -108,5 +106,5 @@ module.exports = class CircleView extends Circle
     rect = undefined
     ln = undefined
     ln = Math.ceil(@lineWidth / 2)
-    rect = new Math.Rectangle(Math.floor(@x - (@radius + ln + 5)), Math.floor(@y - (@radius + ln + 5)), Math.ceil((@radius + ln + 5) * 2), Math.ceil((@radius + ln + 5) * 2))
+    rect = new Engine.Geometry.Rectangle(Math.floor(@x - (@radius + ln + 5)), Math.floor(@y - (@radius + ln + 5)), Math.ceil((@radius + ln + 5) * 2), Math.ceil((@radius + ln + 5) * 2))
     rect.add @parent.getRoomPosition()

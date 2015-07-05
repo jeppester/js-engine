@@ -83,7 +83,7 @@ module.exports = class Loader
 
   @param {string} resource The resource string of the sound that should be fetched
   @param {string} themeName The name of the theme from which the sound should be fetched. If unset, the engine's default theme will be used
-  @return {Engine.Sound.Effect} A Sound object corresponding to the resource string and theme
+  @return {Engine.Sounds.Effect} A Sound object corresponding to the resource string and theme
   ###
   getSound: (resource, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
@@ -96,7 +96,7 @@ module.exports = class Loader
 
   @param {string} resource The resource string of the track that should be fetched
   @param {string} themeName The name of the theme from which the track should be fetched. If unset, the engine's default theme will be used
-  @return {Engine.Sound.Music} A Music object corresponding to the resource string and theme
+  @return {Engine.Sounds.Music} A Music object corresponding to the resource string and theme
   ###
   getMusic: (resource, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
@@ -138,7 +138,7 @@ module.exports = class Loader
   @param {string} resource The resource string of the resource that should be fetched
   @param {string} typeString A string representing the resource type, possible values are: "image", "sfx" and "music"
   @param {string} themeName The name of the theme from which the image should be fetched. If unset, the engine's default theme will be used
-  @return {HTMLImageElement|Engine.Sound.Effect|Engine.Sound.Music} The resource corresponding to the provided resource string, resource type and theme name
+  @return {HTMLImageElement|Engine.Sounds.Effect|Engine.Sounds.Music} The resource corresponding to the provided resource string, resource type and theme name
   ###
   getResource: (resource, typeString, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
@@ -391,7 +391,7 @@ module.exports = class Loader
               console.log "Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/")
               continue
             res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, "/") + "." + format)
-            theme.sfx[path] = new Engine.Sound.Effect(res)
+            theme.sfx[path] = new Engine.Sounds.Effect(res)
             if engine.preloadSounds
               res.setAttribute "preload", "auto"
               res.addEventListener "canplaythrough", onload, false
@@ -404,7 +404,7 @@ module.exports = class Loader
               i++
             throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/")) unless format #dev
             res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, "/") + "." + format)
-            theme.music[path] = new Engine.Sound.Music(res)
+            theme.music[path] = new Engine.Sounds.Music(res)
             if engine.preloadSounds
               res.setAttribute "preload", "auto"
               res.addEventListener "canplaythrough", onload, false
@@ -451,7 +451,7 @@ module.exports = class Loader
         format = path.match(/[^\.]*$/)[0]
         throw new Error("Sound format is not supported:", format) if engine.host.supportedAudio.indexOf(format) is -1 #dev
         res = new Audio(path)
-        theme.sfx[resourceString] = new Engine.Sound.Effect(res)
+        theme.sfx[resourceString] = new Engine.Sounds.Effect(res)
         if engine.preloadSounds
           res.setAttribute "preload", "auto"
           res.addEventListener "canplaythrough", onLoaded, false
@@ -460,7 +460,7 @@ module.exports = class Loader
         format = path.match(/[^\.]*$/)[0]
         throw new Error("Sound format is not supported:", format) if engine.host.supportedAudio.indexOf(format) is -1 #dev
         res = new Audio(path)
-        theme.music[resourceString] = new Engine.Sound.Music(res)
+        theme.music[resourceString] = new Engine.Sounds.Music(res)
         if engine.preloadSounds
           res.setAttribute "preload", "auto"
           res.addEventListener "canplaythrough", onLoaded, false

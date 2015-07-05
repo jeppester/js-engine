@@ -43,7 +43,7 @@ module.exports = class Effect
   @return {number|boolean} If playback succeeds: a playback ID representing the playback, else: false
   ###
   play: (loop_) ->
-    return false if engine.soundsMuted
+    return false if Engine.Sounds.Muted
 
     for sound in @elements
       if (sound.started is false or sound.ended) and not sound.loop

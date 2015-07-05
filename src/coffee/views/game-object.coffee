@@ -1,4 +1,4 @@
-Collidable = require './collidable'
+Engine = require '../engine'
 
 ###
 The constructor for the GameObject class.
@@ -31,7 +31,7 @@ speed: new Math.Vector(0, 0)
 }
 </code>
 ###
-class GameObject extends Collidable
+module.exports = class GameObject extends Engine.Views.Collidable
   constructor: (source, x, y, direction, additionalProperties) ->
     throw new Error("Missing argument: source") if source is undefined #dev
     throw new Error("Missing argument: x") if x is undefined #dev
@@ -41,7 +41,7 @@ class GameObject extends Collidable
     # Add object to right loop
     @loop = (if @loop then @loop else engine.defaultActivityLoop)
     @loop.attachFunction this, @updatePosition
-    @speed = (if @speed then @speed else new Math.Vector(0, 0))
+    @speed = (if @speed then @speed else new Engine.Geometry.Vector(0, 0))
     @alive = true
     return
 

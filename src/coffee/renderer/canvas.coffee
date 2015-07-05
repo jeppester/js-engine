@@ -24,13 +24,13 @@ module.exports = class CanvasRenderer
       h = camera.captureRegion.height
 
       # Set camera position
-      wmT = @makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
+      wmT = Engine.Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
       if camera.captureRegion.width isnt 0 and camera.captureRegion.height isnt 0
-        wmS = @makeScale(camera.projectionRegion.width / camera.captureRegion.width, camera.projectionRegion.height / camera.captureRegion.height)
+        wmS = Engine.Helpers.MatrixCalculation.makeScale(camera.projectionRegion.width / camera.captureRegion.width, camera.projectionRegion.height / camera.captureRegion.height)
       else
-        wmS = @makeIdentity()
-      wm = @matrixMultiply(wmT, wmS)
-      wm = @matrixMultiply(wm, @makeTranslation(camera.projectionRegion.x, camera.projectionRegion.y))
+        wmS = Engine.Helpers.MatrixCalculation.makeIdentity()
+      wm = Engine.Helpers.MatrixCalculation.matrixMultiply(wmT, wmS)
+      wm = Engine.Helpers.MatrixCalculation.matrixMultiply(wm, Engine.Helpers.MatrixCalculation.makeTranslation(camera.projectionRegion.x, camera.projectionRegion.y))
 
       # Set camera projection viewport
       c.beginPath()
@@ -56,13 +56,13 @@ module.exports = class CanvasRenderer
     return
 
   renderTree: (object, wm) ->
-    localWm = @matrixMultiplyArray([
-      @calculateLocalMatrix(object)
+    localWm = Engine.Helpers.MatrixCalculation.matrixMultiplyArray([
+      Engine.Helpers.MatrixCalculation.calculateLocalMatrix(object)
       wm
     ])
     return unless object.isVisible()
     if object.renderType isnt ""
-      offset = @matrixMultiply(@makeTranslation(-object.offset.x, -object.offset.y), localWm)
+      offset = Engine.Helpers.MatrixCalculation.matrixMultiply Engine.Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y), localWm
       @context.setTransform offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]
       @context.globalAlpha = object.opacity
     switch object.renderType

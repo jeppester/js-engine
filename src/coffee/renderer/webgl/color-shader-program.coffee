@@ -1,4 +1,4 @@
-WebGLHelper = require '../../helpers/webgl'
+Engine = require '../../engine'
 
 module.exports = class WebGLColorShaderProgram
   constructor: (gl) ->

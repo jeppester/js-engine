@@ -1,4 +1,4 @@
-WebGLHelper = require '../../helpers/webgl'
+Engine = require '../../engine'
 
 module.exports = class WebGLTextureShaderProgram
   constructor: (gl) ->
@@ -191,7 +191,7 @@ module.exports = class WebGLTextureShaderProgram
 
       # Set a rectangle the same size as the image
       gl.bindTexture gl.TEXTURE_2D, t
-      WebGLHelper.setPlane gl, 0, 0, object.clipWidth, object.clipHeight
+      Engine.Helpers.WebGL.setPlane gl, 0, 0, object.clipWidth, object.clipHeight
 
     # Set matrix
     gl.uniformMatrix3fv l.u_matrix, false, wm

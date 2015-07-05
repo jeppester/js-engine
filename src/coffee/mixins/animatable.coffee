@@ -35,7 +35,7 @@ module.exports = class Animatable
     loop_ = (if options.loop isnt undefined then options.loop else ((if @loop isnt undefined then @loop else engine.defaultAnimationLoop)))
     anim.callback = (if opt.callback isnt undefined then opt.callback else ->
     )
-    anim.easing = (if opt.easing isnt undefined then opt.easing else EASING_QUAD_IN_OUT)
+    anim.easing = (if opt.easing isnt undefined then opt.easing else Engine.Globals.EASING_QUAD_IN_OUT)
     anim.duration = (if opt.duration isnt undefined then opt.duration else 1000)
     anim.onStep = (if opt.onStep isnt undefined then opt.onStep else ->
     )

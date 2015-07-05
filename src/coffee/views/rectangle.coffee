@@ -1,6 +1,4 @@
-Rectangle = require '../geometry/rectangle'
-Child = require './child'
-MixinHelper = require '../helpers/mixin'
+Engine = require '../engine'
 
 ###
 The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
@@ -26,13 +24,13 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {string} [strokeStyle = "#000"] The rectangle's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The rectangle's width if added to a view (in px)
 ###
-class RectangleView extends Rectangle
+module.exports = class Rectangle extends Engine.Geometry.Rectangle
   # Mix in Child
-  MixinHelper.mixin @, Child
+  Engine.Helpers.Mixin.mixin @, Engine.Views.Child
 
   constructor: (x, y, width, height, fillStyle, strokeStyle, lineWidth) ->
     # "Fake" extend child (to get view.child properties)
-    Child.call this
+    Engine.Views.Child.call this
     @renderType = "rectangle"
     if engine.enableRedrawRegions
       @RectangleInitWithRedrawRegions x, y, width, height, fillStyle, strokeStyle, lineWidth

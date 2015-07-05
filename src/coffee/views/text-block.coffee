@@ -1,11 +1,8 @@
-Container = require './container'
-MixinHelper = require '../helpers/mixin'
-Animatable = require '../mixins/animatable'
-Vector = require '../geometry/vector'
+Engine = require '../engine'
 
-module.exports = class TextBlock extends Container
+module.exports = class TextBlock extends Engine.Views.Container
   # Mix in Child
-  MixinHelper.mixin @, Animatable
+  Engine.Helpers.Mixin.mixin @, Engine.Mixins.Animatable
 
   ###
   The constructor for the TextBlock class.
@@ -164,7 +161,7 @@ module.exports = class TextBlock extends Container
       delete additionalProperties.offset
 
     # Load additional properties
-    MixinHelper.import @, additionalProperties
+    Engine.Helpers.Mixin.import @, additionalProperties
     @string = string
 
     # Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
@@ -181,7 +178,7 @@ module.exports = class TextBlock extends Container
   @return {Vector} The offset vector the offset global corresponds to for the instance
   ###
   parseOffsetGlobal: (offset) ->
-    ret = new Vector()
+    ret = new Engine.Geometry.Vector()
 
     # calculate horizontal offset
     if [
