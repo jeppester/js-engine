@@ -1,4 +1,4 @@
-MatrixCalculationHelper = require '../helpers/matrix-calculation'
+Engine = require '../engine'
 
 module.exports = class CanvasRenderer
   constructor: (canvas) ->

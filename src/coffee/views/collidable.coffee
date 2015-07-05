@@ -1,4 +1,4 @@
-nameSpace "View"
+Sprite = require './sprite'
 
 ###
 The constructor for the Collidable class
@@ -17,7 +17,7 @@ Can check both for precise (bitmap-based) collisions and bounding box collisions
 @param {number} [direction=0] The direction of the created object. Defaults to 0
 @param {object} [additionalProperties] An object containing key-value pairs that will be set as properties for the created object. Can be used for setting advanced options such as sprite offset and opacity.
 ###
-class View.Collidable extends View.Sprite
+class Collidable extends Sprite
   constructor: (source, x, y, direction, additionalProperties) ->
     View.Sprite.call this, source, x, y, direction, additionalProperties
     @mask = (if @mask then @mask else engine.

@@ -1,14 +1,3 @@
-# Renderers
-WebGLRenderer = require './renderer/webgl'
-CanvasRenderer = require './renderer/canvas'
-
-# Engine classes
-Loader = require './engine/loader'
-
-# Input
-Keyboard = require './input/keyboard'
-Pointer = require './input/pointer'
-
 ###
 The constructor for the Engine class.
 
@@ -71,11 +60,7 @@ The default options are:
 "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
 ###
-window.Engine = class Engine
-  @Room = require './engine/room'
-  @Math =
-    Vector: require './math/vector'
-
+module.exports = window.Engine = class Engine
   constructor: (options) ->
     # Set global engine variable
     ###
@@ -233,7 +218,7 @@ window.Engine = class Engine
     Global Engine.Loader instance which is created upon engine initialization
     @global
     ###
-    @loader = new Loader()
+    @loader = new Engine.Loader()
 
     # Load themes
     @defaultTheme = @options.themes[0]
@@ -281,7 +266,9 @@ window.Engine = class Engine
     @defaultActivityLoop = @currentRoom.loops.eachFrame
 
     # Make main camera
-    @cameras.push new Camera(new Rectangle(0, 0, @canvasResX, @canvasResY), new Rectangle(0, 0, @canvasResX, @canvasResY))
+    @cameras.push new @constructor.Camera(
+      new Engine.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
+      new Engine.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY))
 
     # Disable right click inside arena
     if @disableRightClick
@@ -289,8 +276,8 @@ window.Engine = class Engine
         false
 
     # Create objects required by the engine
-    @keyboard = new Keyboard()
-    @pointer = new Pointer()
+    @keyboard = new Engine.Input.Keyboard()
+    @pointer = new Engine.Input.Pointer()
 
     # Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
     if @pauseOnBlur
@@ -324,9 +311,9 @@ window.Engine = class Engine
 
   initRenderer: ->
     if not @disableWebGL and (@canvas.getContext("webgl") or @canvas.getContext("experimental-webgl"))
-      @renderer = new WebGLRenderer(@canvas)
+      @renderer = new Engine.Renderers.WebGLRenderer(@canvas)
     else
-      @renderer = new CanvasRenderer(@canvas)
+      @renderer = new Engine.Renderers.CanvasRenderer(@canvas)
     return
 
   ###
@@ -767,3 +754,51 @@ window.Engine = class Engine
     a.click()
     document.body.removeChild a, document.body
     return
+
+# Load classes for easy usage
+Engine.Helpers = {}
+Engine.Helpers.MatrixCalculation = require './helpers/matrix-calculation'
+Engine.Helpers.Mixin = require './helpers/mixin'
+Engine.Helpers.RoomTransition = require './helpers/room-transition'
+Engine.Helpers.WebGL = require './helpers/webgl'
+
+Engine.Mixins = {}
+Engine.Mixins.Animatable = require './mixins/animatable'
+
+Engine.Input = {}
+Engine.Input.Keyboard = require './input/keyboard'
+Engine.Input.Pointer = require './input/pointer'
+
+Engine.Geometry = {}
+Engine.Geometry.Vector = require './geometry/vector'
+Engine.Geometry.Circle = require './geometry/circle'
+Engine.Geometry.Line = require './geometry/line'
+Engine.Geometry.Polygon = require './geometry/polygon'
+Engine.Geometry.Rectangle = require './geometry/rectangle'
+
+Engine.Renderers = {}
+Engine.Renderers.WebGLRenderer = require './renderer/webgl'
+Engine.Renderers.CanvasRenderer = require './renderer/canvas'
+
+Engine.Sounds = {}
+Engine.Effect = require './sounds/effect'
+Engine.Music = require './sounds/music'
+
+Engine.Views = {}
+Engine.Views.Child = require './views/child'
+Engine.Views.Container = require './views/container'
+Engine.Views.Circle = require './views/circle'
+Engine.Views.Collidable = require './views/collidable'
+Engine.Views.GameObject = require './views/game-object'
+Engine.Views.Line = require './views/line'
+Engine.Views.Polygon = require './views/polygon'
+Engine.Views.Rectangle = require './views/rectangle'
+Engine.Views.Sprite = require './views/sprite'
+Engine.Views.TextBlock = require './views/text-block'
+
+Engine.Room = require './engine/room'
+Engine.Globals = require './engine/globals'
+Engine.ObjectCreator = require './engine/object-creator'
+Engine.CustomLoop = require './engine/custom-loop'
+Engine.Camera = require './engine/camera'
+Engine.Loader = require './engine/loader'

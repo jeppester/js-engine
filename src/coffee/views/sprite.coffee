@@ -1,4 +1,6 @@
-nameSpace "View"
+Container = require './container'
+MixinHelper = require '../helpers/mixin'
+Animatable = require '../mixins/animatable'
 
 ###
 The constructor for Sprite objects.
@@ -34,9 +36,9 @@ composite: 'source-over',
 offset: new Math.Vector('center', 'center')
 }</code>
 ###
-class View.Sprite extends View.Container
+class Sprite extends Container
   # Mix in animatable
-  Object::import.call @::, Mixin.Animatable
+  MixinHelper.mixin @, Animatable
 
   constructor: (source, x, y, direction, additionalProperties) ->
     throw new Error("Missing argument: source") if source is undefined #dev

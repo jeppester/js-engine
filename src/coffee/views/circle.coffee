@@ -1,4 +1,4 @@
-Circle = require '../math/circle'
+Circle = require '../geometry/circle'
 Child = require './child'
 MixinHelper = require '../helpers/mixin'
 

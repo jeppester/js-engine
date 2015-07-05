@@ -1,4 +1,4 @@
-nameSpace "View"
+Collidable = require './collidable'
 
 ###
 The constructor for the GameObject class.
@@ -31,7 +31,7 @@ speed: new Math.Vector(0, 0)
 }
 </code>
 ###
-class View.GameObject extends View.Collidable
+class GameObject extends Collidable
   constructor: (source, x, y, direction, additionalProperties) ->
     throw new Error("Missing argument: source") if source is undefined #dev
     throw new Error("Missing argument: x") if x is undefined #dev

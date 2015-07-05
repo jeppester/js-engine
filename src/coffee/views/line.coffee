@@ -1,4 +1,4 @@
-Line = require '../math/line'
+Line = require '../geometry/line'
 Child = require './child'
 MixinHelper = require '../helpers/mixin'
 

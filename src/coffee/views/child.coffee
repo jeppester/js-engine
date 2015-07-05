@@ -1,4 +1,4 @@
-Vector = require '../math/vector'
+Vector = require '../geometry/vector'
 
 ###
 @name View.Child

@@ -1,3 +1,5 @@
+Engine = require '../engine'
+
 ###
 Constructor for the Pointer class
 
@@ -39,12 +41,12 @@ module.exports = class Pointer
       , false
 
     # Setup mouse device
-    @mouse = new Math.Vector()
-    @mouse.window = new Math.Vector()
+    @mouse = new Engine.Geometry.Vector()
+    @mouse.window = new Engine.Geometry.Vector()
     @mouse.buttons = new Array(11)
     button = 0
     while button < @mouse.buttons.length
-      @mouse.buttons[button] = new Math.Vector()
+      @mouse.buttons[button] = new Engine.Geometry.Vector()
       @mouse.buttons[button].events = new Array(2)
       button++
     @mouse.lastMoved = 0
@@ -53,7 +55,7 @@ module.exports = class Pointer
     @touches = new Array(10)
     button = 0
     while button < @touches.length
-      @touches[button] = new Math.Vector()
+      @touches[button] = new Engine.Geometry.Vector()
       @touches[button].x = undefined
       @touches[button].y = undefined
       @touches[button].events = new Array(2)
@@ -205,9 +207,9 @@ module.exports = class Pointer
     throw new Error("Missing argument: button") if button is undefined #dev
     switch @getButtonType(button)
       when "mouse"
-        pointers = (if button is MOUSE_ANY then @mouse.buttons else @mouse.buttons[button])
+        pointers = (if button is Engine.Globals.MOUSE_ANY then @mouse.buttons else @mouse.buttons[button])
       when "touch"
-        pointers = (if button is TOUCH_ANY then @touches else @touches[button - TOUCH_1])
+        pointers = (if button is Engine.Globals.TOUCH_ANY then @touches else @touches[button - Engine.Globals.TOUCH_1])
       when "any"
         pointers = @mouse.buttons.concat(@touches)
     @checkPointer pointers, "down"
@@ -223,9 +225,9 @@ module.exports = class Pointer
     pointers = undefined
     switch @getButtonType(button)
       when "mouse"
-        pointers = (if button is MOUSE_ANY then @mouse.buttons else @mouse.buttons[button])
+        pointers = (if button is Engine.Globals.MOUSE_ANY then @mouse.buttons else @mouse.buttons[button])
       when "touch"
-        pointers = (if button is TOUCH_ANY then @touches else @touches[button - TOUCH_1])
+        pointers = (if button is Engine.Globals.TOUCH_ANY then @touches else @touches[button - Engine.Globals.TOUCH_1])
       when "any"
         pointers = @mouse.buttons.concat(@touches)
     @checkPointer pointers, "pressed"
@@ -241,9 +243,9 @@ module.exports = class Pointer
     pointers = undefined
     switch @getButtonType(button)
       when "mouse"
-        pointers = (if button is MOUSE_ANY then @mouse.buttons else @mouse.buttons[button])
+        pointers = (if button is Engine.Globals.MOUSE_ANY then @mouse.buttons else @mouse.buttons[button])
       when "touch"
-        pointers = (if button is TOUCH_ANY then @touches else @touches[button - TOUCH_1])
+        pointers = (if button is Engine.Globals.TOUCH_ANY then @touches else @touches[button - Engine.Globals.TOUCH_1])
       when "any"
         pointers = @mouse.buttons.concat(@touches)
     @checkPointer pointers, "released"
@@ -258,7 +260,7 @@ module.exports = class Pointer
   @return {Object[]|boolean} An array containing the pointers that have pressed the shape, or false if no presses inside the shape were detected
   ###
   shapeIsPressed: (button, shape, outside) ->
-    button = (if button isnt undefined then button else MOUSE_TOUCH_ANY)
+    button = (if button isnt undefined then button else Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY)
     throw new Error("Missing argument: shape") if shape is undefined #dev
     throw new Error("Argument shape has implement a \"contains\"-function") if typeof shape.contains isnt "function" #dev
     i = undefined
@@ -291,7 +293,7 @@ module.exports = class Pointer
   @return {Object[]|boolean} An array containing the pointers that have released the shape, or false if no releases inside the shape were detected
   ###
   shapeIsReleased: (button, shape, outside) ->
-    button = (if button isnt undefined then button else MOUSE_TOUCH_ANY)
+    button = (if button isnt undefined then button else Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY)
     throw new Error("Missing argument: shape") if shape is undefined #dev
     throw new Error("Argument shape has implement a \"contains\"-function") if typeof shape.contains isnt "function" #dev
 
@@ -320,7 +322,7 @@ module.exports = class Pointer
   @return {Object[]|boolean} An array containing the pointers that are currently pressing the shape, or false if no pointers inside the shape were detected
   ###
   shapeIsDown: (button, shape, outside) ->
-    button = (if button isnt undefined then button else MOUSE_TOUCH_ANY)
+    button = (if button isnt undefined then button else Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY)
     throw new Error("Missing argument: shape") if shape is undefined #dev
     throw new Error("Argument shape has implement a \"contains\"-function") if typeof shape.contains isnt "function" #dev
 
@@ -347,11 +349,11 @@ module.exports = class Pointer
   @return {string} A string representing the type of button ("mouse", "touch" or "any")
   ###
   getButtonType: (button) ->
-    if button >= MOUSE_ANY and button <= MOUSE_10
+    if button >= Engine.Globals.MOUSE_ANY and button <= Engine.Globals.MOUSE_10
       "mouse"
-    else if button >= TOUCH_ANY and button <= TOUCH_10
+    else if button >= Engine.Globals.TOUCH_ANY and button <= Engine.Globals.TOUCH_10
       "touch"
-    else if button is MOUSE_TOUCH_ANY
+    else if button is Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY
       "any"
     else #dev
       throw new Error("Argument button has to be a pointer constant (see jseGlobals.js)") #dev
@@ -387,8 +389,8 @@ module.exports = class Pointer
   Converts a coordinate which is relative to the main canvas to a position in the room (based on the room's cameras)
 
   @private
-  @param {Math.Vector} vector A vector representing a position which is relative to the main canvas
-  @return {Math.Vector} vector A vector representing the calculated position relative to the room
+  @param {Engine.Geometry.Vector} vector A vector representing a position which is relative to the main canvas
+  @return {Engine.Geometry.Vector} vector A vector representing the calculated position relative to the room
   ###
   calculateRoomPosition: (vector) ->
     ret = undefined

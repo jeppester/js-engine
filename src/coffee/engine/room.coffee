@@ -1,4 +1,4 @@
-Container = require '../view/container'
+Engine = require '../engine'
 
 ###
 Constructor for the Room class
@@ -19,7 +19,7 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 @param {function} [onEntered=function () {}] A function to run when the room is entered (set as the engine's current room)
 @param {function} [onLeft=function () {}] A function to run when the room is left
 ###
-module.exports = class Room extends Container
+module.exports = class Room extends Engine.Views.Container
   constructor: (name, onEntered, onLeft) ->
     super()
     @name = (if name then name else engine.roomList.length)

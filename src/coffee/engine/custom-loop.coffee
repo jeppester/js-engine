@@ -1,4 +1,4 @@
-nameSpace "Engine"
+Engine = require '../engine'
 
 ###
 @name Engine.CustomLoop
@@ -15,7 +15,7 @@ A loop also has it's own time that is stopped whenever the loop is not executed.
 @param {number} [framesPerExecution=1] The number of frames between each execution of the custom loop
 @param {function} [maskFunction=function(){}] A function that will be run before each execution, if the function returns true the execution proceeds as planned, if not, the execution will not be run
 ###
-class Engine.CustomLoop
+module.exports = class CustomLoop
   constructor: (framesPerExecution, maskFunction) ->
     @framesPerExecution = (if framesPerExecution is undefined then 1 else framesPerExecution)
     @maskFunction = (if maskFunction is undefined then -> true else maskFunction)

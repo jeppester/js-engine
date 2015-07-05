@@ -1,4 +1,4 @@
-Rectangle = require '../math/rectangle'
+Rectangle = require '../geometry/rectangle'
 Child = require './child'
 MixinHelper = require '../helpers/mixin'
 

@@ -1,4 +1,4 @@
-Polygon = require '../math/polygon'
+Polygon = require '../geometry/polygon'
 Child = require './child'
 MixinHelper = require '../helpers/mixin'
 

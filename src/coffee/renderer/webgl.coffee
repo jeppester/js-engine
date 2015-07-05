@@ -73,7 +73,7 @@ module.exports = class WebGLRenderer
         gl.uniform2f @currentProgram.locations.u_resolution, w, h if @currentProgram
 
       # Set camera position
-      wm = @makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
+      wm = MatrixCalculationHelper.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
 
       # Set camera projection viewport
       gl.viewport camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height
@@ -93,11 +93,11 @@ module.exports = class WebGLRenderer
 
   renderTree: (object, wm) ->
     gl = @gl
-    localWm = @matrixMultiplyArray([
-      @calculateLocalMatrix(object)
+    localWm = MatrixCalculationHelper.matrixMultiplyArray([
+      MatrixCalculationHelper.calculateLocalMatrix(object)
       wm
     ])
-    offset = @makeTranslation(-object.offset.x, -object.offset.y)
+    offset = MatrixCalculationHelper.makeTranslation(-object.offset.x, -object.offset.y)
     return unless object.isVisible()
 
     # Set object alpha (because alpha is used by ALL rendered objects)
@@ -109,18 +109,18 @@ module.exports = class WebGLRenderer
       # Texture based objects
       when "textblock", "sprite"
         @setProgram @programs.texture
-        @currentProgram.renderSprite gl, object, @matrixMultiply(offset, localWm)
+        @currentProgram.renderSprite gl, object, MatrixCalculationHelper.matrixMultiply(offset, localWm)
 
       # Geometric objects
       when "line"
         @setProgram @programs.color
-        @currentProgram.renderLine gl, object, @matrixMultiply(offset, localWm)
+        @currentProgram.renderLine gl, object, MatrixCalculationHelper.matrixMultiply(offset, localWm)
       when "rectangle"
         @setProgram @programs.color
-        @currentProgram.renderRectangle gl, object, @matrixMultiply(offset, localWm)
+        @currentProgram.renderRectangle gl, object, MatrixCalculationHelper.matrixMultiply(offset, localWm)
       when "circle"
         @setProgram @programs.color
-        @currentProgram.renderCircle gl, object, @matrixMultiply(offset, localWm)
+        @currentProgram.renderCircle gl, object, MatrixCalculationHelper.matrixMultiply(offset, localWm)
     if object.children
       len = object.children.length
       i = 0

@@ -1,8 +1,9 @@
 Container = require './container'
 MixinHelper = require '../helpers/mixin'
-Animatable = require '../mixin/animatable'
+Animatable = require '../mixins/animatable'
+Vector = require '../geometry/vector'
 
-class TextBlock extends Container
+module.exports = class TextBlock extends Container
   # Mix in Child
   MixinHelper.mixin @, Animatable
 
@@ -39,7 +40,7 @@ class TextBlock extends Container
   size: 1,
   opacity: 1,
   composite: 'source-over',
-  offset: new Math.Vector(0, 0)
+  offset: new Vector(0, 0)
   }</code>
   ###
   constructor: (string, x, y, width, additionalProperties) ->
@@ -157,13 +158,13 @@ class TextBlock extends Container
         value
 
     @lineHeight = (if additionalProperties and additionalProperties.lineHeight then additionalProperties.lineHeight else @font.match(/[0.0-9]+/) * 1.25)
-    offset = OFFSET_TOP_LEFT
+    offset = Engine.Globals.OFFSET_TOP_LEFT
     if additionalProperties and additionalProperties.offset
       offset = additionalProperties.offset
       delete additionalProperties.offset
 
     # Load additional properties
-    @import additionalProperties
+    MixinHelper.import @, additionalProperties
     @string = string
 
     # Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
@@ -174,50 +175,50 @@ class TextBlock extends Container
     return
 
   ###
-  Parses an offset global into an actual Math.Vector offset that fits the instance
+  Parses an offset global into an actual Vector offset that fits the instance
 
   @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
-  @return {Math.Vector} The offset vector the offset global corresponds to for the instance
+  @return {Vector} The offset vector the offset global corresponds to for the instance
   ###
   parseOffsetGlobal: (offset) ->
-    ret = new Math.Vector()
+    ret = new Vector()
 
     # calculate horizontal offset
     if [
-      OFFSET_TOP_LEFT
-      OFFSET_MIDDLE_LEFT
-      OFFSET_BOTTOM_LEFT
+      Engine.Globals.OFFSET_TOP_LEFT
+      Engine.Globals.OFFSET_MIDDLE_LEFT
+      Engine.Globals.OFFSET_BOTTOM_LEFT
     ].indexOf(offset) isnt -1
       ret.x = 0
     else if [
-      OFFSET_TOP_CENTER
-      OFFSET_MIDDLE_CENTER
-      OFFSET_BOTTOM_CENTER
+      Engine.Globals.OFFSET_TOP_CENTER
+      Engine.Globals.OFFSET_MIDDLE_CENTER
+      Engine.Globals.OFFSET_BOTTOM_CENTER
     ].indexOf(offset) isnt -1
       ret.x = @clipWidth / 2
     else ret.x = @clipWidth if [
-      OFFSET_TOP_RIGHT
-      OFFSET_MIDDLE_RIGHT
-      OFFSET_BOTTOM_RIGHT
+      Engine.Globals.OFFSET_TOP_RIGHT
+      Engine.Globals.OFFSET_MIDDLE_RIGHT
+      Engine.Globals.OFFSET_BOTTOM_RIGHT
     ].indexOf(offset) isnt -1
 
     # calculate vertical offset
     if [
-      OFFSET_TOP_LEFT
-      OFFSET_TOP_CENTER
-      OFFSET_TOP_RIGHT
+      Engine.Globals.OFFSET_TOP_LEFT
+      Engine.Globals.OFFSET_TOP_CENTER
+      Engine.Globals.OFFSET_TOP_RIGHT
     ].indexOf(offset) isnt -1
       ret.y = 0
     else if [
-      OFFSET_MIDDLE_LEFT
-      OFFSET_MIDDLE_CENTER
-      OFFSET_MIDDLE_RIGHT
+      Engine.Globals.OFFSET_MIDDLE_LEFT
+      Engine.Globals.OFFSET_MIDDLE_CENTER
+      Engine.Globals.OFFSET_MIDDLE_RIGHT
     ].indexOf(offset) isnt -1
       ret.y = @clipHeight / 2
     else ret.y = @clipHeight if [
-      OFFSET_BOTTOM_LEFT
-      OFFSET_BOTTOM_CENTER
-      OFFSET_BOTTOM_RIGHT
+      Engine.Globals.OFFSET_BOTTOM_LEFT
+      Engine.Globals.OFFSET_BOTTOM_CENTER
+      Engine.Globals.OFFSET_BOTTOM_RIGHT
     ].indexOf(offset) isnt -1
     ret
 
@@ -321,7 +322,6 @@ class TextBlock extends Container
     ).join("-|-")
     return
 
-
   ###
   Checks if the objects is visible. This function runs before each draw to ensure that it is necessary
   @return {boolean} Whether or not the object is visible (based on its size and opacity vars)
@@ -330,7 +330,6 @@ class TextBlock extends Container
 
     # If sprites size has been modified to zero, do nothing
     not (@size is 0 or @widthScale is 0 or @heightScale is 0 or /^\s*$/.test(@string))
-
 
   ###
   Calculates a bounding non-rotated rectangle that the text block will fill when drawn.

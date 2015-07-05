@@ -191,7 +191,7 @@ module.exports = class WebGLTextureShaderProgram
 
       # Set a rectangle the same size as the image
       gl.bindTexture gl.TEXTURE_2D, t
-      @setPlane gl, 0, 0, object.clipWidth, object.clipHeight
+      WebGLHelper.setPlane gl, 0, 0, object.clipWidth, object.clipHeight
 
     # Set matrix
     gl.uniformMatrix3fv l.u_matrix, false, wm

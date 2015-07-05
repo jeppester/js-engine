@@ -1,9 +1,9 @@
-Vector = require '../math/vector'
+Engine = require '../engine'
 
 ###
 Constructor for the Vector class. Uses set-function to set the vector from x- and y values.
 
-@name Vector
+@name Engine.Geometry.Vector
 @class A math class which is used for handling two-dimensional vectors
 @augments Mixin.Animatable
 
@@ -22,7 +22,7 @@ module.exports = class Vector
 
   @param {number} [x=0] The x-value to set for the vector
   @param {number} [y=0] The y-value to set for the vector
-  @return {Vector} The resulting Vector object (itself)
+  @return {Engine.Geometry.Vector} The resulting Vector object (itself)
   ###
   set: (x, y) ->
     @x = (if x isnt undefined then x else 0)
@@ -34,7 +34,7 @@ module.exports = class Vector
 
   @param {number} direction The direction (in radians)
   @param {number} length The length
-  @return {Vector} The resulting Vector object (itself)
+  @return {Engine.Geometry.Vector} The resulting Vector object (itself)
   ###
   setFromDirection: (direction, length) ->
     throw new Error("Argument direction should be of type: Number") if typeof direction isnt "number" #dev
@@ -46,17 +46,17 @@ module.exports = class Vector
   ###
   Copies the Vector object
 
-  @return {Vector} A copy of the Vector object (which can be modified without changing the original object)
+  @return {Engine.Geometry.Vector} A copy of the Vector object (which can be modified without changing the original object)
   ###
   copy: ->
-    new Vector(@x, @y)
+    new @constructor(@x, @y)
 
   ###
   Moves the vector by adding a value to its x-property and another value to its y-property.
 
   @param {number} x The value to add to the x-property (can be negative)
   @param {number} y The value to add to the y-property (can be negative)
-  @return {Vector} The resulting Vector object (itself)
+  @return {Engine.Geometry.Vector} The resulting Vector object (itself)
   ###
   move: (x, y) ->
     throw new Error("Argument x should be of type: Number") if typeof x isnt "number" #dev
@@ -69,7 +69,7 @@ module.exports = class Vector
   Rotates the vector around the zero-vector.
 
   @param {number} direction The number of radians to rotate the vector
-  @return {Vector} The resulting Vector object (itself)
+  @return {Engine.Geometry.Vector} The resulting Vector object (itself)
   ###
   rotate: (direction) ->
     throw new Error("Argument direction should be of type: Number") if typeof direction isnt "number" #dev
@@ -81,7 +81,7 @@ module.exports = class Vector
 
   @param {number} scaleH A factor with which to scale the Vector horizontally. If scaleH is undefined, both width and height will be scaled after this factor
   @param {number} scaleV A factor with which to scale the Vector vertically
-  @return {Vector} The resulting Vector object (itself)
+  @return {Engine.Geometry.Vector} The resulting Vector object (itself)
   ###
   scale: (scaleH, scaleV) ->
     throw new Error("Argument scaleH should be of type Number") if typeof scaleH isnt "number" #dev
@@ -94,11 +94,11 @@ module.exports = class Vector
   Adds another vector to the Vector.
   Can by used for the same purpose as move, but takes a vector as argument.
 
-  @param {Vector} vector A vector to add to the Vector
-  @return {Vector} The resulting Vector object (itself)
+  @param {Engine.Geometry.Vector} vector A vector to add to the Vector
+  @return {Engine.Geometry.Vector} The resulting Vector object (itself)
   ###
   add: (vector) ->
-    if vector instanceof Vector
+    if vector instanceof @constructor
       @x += vector.x
       @y += vector.y
     else if typeof vector is "number"
@@ -111,11 +111,11 @@ module.exports = class Vector
   ###
   Subtracts another vector from the Vector.
 
-  @param {Vector} vector A vector to subtract from the Vector
-  @return {Vector} The resulting Vector object (itself)
+  @param {Engine.Geometry.Vector} vector A vector to subtract from the Vector
+  @return {Engine.Geometry.Vector} The resulting Vector object (itself)
   ###
   subtract: (vector) ->
-    if vector instanceof Vector
+    if vector instanceof @constructor
       @x -= vector.x
       @y -= vector.y
     else if typeof vector is "number"
@@ -129,11 +129,11 @@ module.exports = class Vector
   ###
   Divides the Vector with another vector.
 
-  @param {Vector} vector A vector to divide the Vector with
-  @return {Vector} The resulting Vector object (itself)
+  @param {Engine.Geometry.Vector} vector A vector to divide the Vector with
+  @return {Engine.Geometry.Vector} The resulting Vector object (itself)
   ###
   divide: (vector) ->
-    if vector instanceof Vector
+    if vector instanceof @constructor
       @x /= vector
       @y /= vector
     else if typeof vector is "number"
@@ -146,11 +146,11 @@ module.exports = class Vector
   ###
   Multiplies the Vector with another vector.
 
-  @param {Vector} vector A vector to multiply the Vector with
-  @return {Vector} The resulting Vector object (itself)
+  @param {Engine.Geometry.Vector} vector A vector to multiply the Vector with
+  @return {Engine.Geometry.Vector} The resulting Vector object (itself)
   ###
   multiply: (vector) ->
-    throw new Error("Argument vector should be of type Vector") if not vector instanceof Vector #dev
+    throw new Error("Argument vector should be of type Vector") if not vector instanceof @constructor #dev
     @x *= vector.x
     @y *= vector.y
     this
@@ -158,21 +158,21 @@ module.exports = class Vector
   ###
   Calculates the cross product of the Vector and another vector
 
-  @param {Vector} vector The vector to use for the calculation
+  @param {Engine.Geometry.Vector} vector The vector to use for the calculation
   @return {number} The dot product
   ###
   getDot: (vector) ->
-    throw new Error("Argument vector should be of type: Vector") if not vector instanceof Vector #dev
+    throw new Error("Argument vector should be of type: Vector") if not vector instanceof @constructor #dev
     @x * vector.x + @y * vector.y
 
   ###
   Calculates the cross product of the Vector and another vector
 
-  @param {Vector} vector The vector to use for the calculation
+  @param {Engine.Geometry.Vector} vector The vector to use for the calculation
   @return {number} The cross product
   ###
   getCross: (vector) ->
-    throw new Error("Argument vector should be of type: Vector") if not vector instanceof Vector #dev
+    throw new Error("Argument vector should be of type: Vector") if not vector instanceof @constructor #dev
     @x * vector.y - @y * vector.x
 
   ###
@@ -194,23 +194,23 @@ module.exports = class Vector
   ###
   Calculates the direction to another Vector
 
-  @param {Vector} point A Vector to calculate the direction to
+  @param {Engine.Geometry.Vector} point A Vector to calculate the direction to
   @return {number} The direction to the object
   ###
   getDirectionTo: (point) ->
-    throw new Error("Only Vectors or objects inheriting Vector are supported") if not point instanceof Vector #dev
+    throw new Error("Only Vectors or objects inheriting Vector are supported") if not point instanceof @constructor #dev
     point.copy().subtract(this).getDirection()
 
   ###
   Calculates the shortest distance from the Vector object to another geometric object
 
-  @param {Vector|Math.Line|Math.Circle|Math.Rectangle|Math.Polygon} object The object to calculate the distance to
+  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object The object to calculate the distance to
   @return {number} The distance
   ###
   getDistance: (object) ->
-    return object.copy().subtract(this).getLength() if object instanceof Vector
-    return object.getDistance(this) if object instanceof Math.Line
-    return object.getDistance(this) if object instanceof Math.Circle
-    return object.getDistance(this) if object instanceof Math.Rectangle
-    return object.getDistance(this) if object instanceof Math.Polygon
+    return object.copy().subtract(this).getLength() if object instanceof @constructor
+    return object.getDistance(this) if object instanceof Engine.Geometry.Line
+    return object.getDistance(this) if object instanceof Engine.Geometry.Circle
+    return object.getDistance(this) if object instanceof Engine.Geometry.Rectangle
+    return object.getDistance(this) if object instanceof Engine.Geometry.Polygon
     throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon") #dev
