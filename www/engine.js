@@ -1538,8 +1538,6 @@ module.exports = {
    */
   ROOM_TRANSITION_NONE: function(oldRoom, newRoom, options, callback) {
     var camera, i;
-    i = void 0;
-    camera = void 0;
     i = 0;
     while (i < engine.cameras.length) {
       camera = engine.cameras[i];
@@ -1560,17 +1558,12 @@ module.exports = {
    */
   ROOM_TRANSITION_SLIDE_SLIDE: function(oldRoom, newRoom, options, callback) {
     var animOptions, camera, i, newCam, newCams;
-    i = void 0;
-    camera = void 0;
-    newCams = void 0;
-    newCam = void 0;
-    animOptions = void 0;
     newCams = [];
     oldRoom.pause();
     options = options || {};
     options.from = options.from || "right";
     animOptions = {
-      easing: options.easing || "quadInOut",
+      easing: options.easing || this.EASING_QUAD_IN_OUT,
       duration: options.duration || 2000,
       loop: engine.masterRoom.loops.eachFrame
     };
@@ -1606,17 +1599,12 @@ module.exports = {
    */
   ROOM_TRANSITION_SQUEEZE_SLIDE: function(oldRoom, newRoom, options, callback) {
     var animOptions, camera, i, newCam, newCams;
-    i = void 0;
-    camera = void 0;
-    newCams = void 0;
-    newCam = void 0;
-    animOptions = void 0;
     newCams = [];
     oldRoom.pause();
     options = options || {};
     options.from = options.from || "right";
     animOptions = {
-      easing: options.easing || "quadInOut",
+      easing: options.easing || this.EASING_QUAD_IN_OUT,
       duration: options.duration || 2000,
       loop: engine.masterRoom.loops.eachFrame
     };
@@ -1652,17 +1640,12 @@ module.exports = {
    */
   ROOM_TRANSITION_SQUEEZE_SQUEEZE: function(oldRoom, newRoom, options, callback) {
     var animOptions, camera, i, newCam, newCams;
-    i = void 0;
-    camera = void 0;
-    newCams = void 0;
-    newCam = void 0;
-    animOptions = void 0;
     newCams = [];
     oldRoom.pause();
     options = options || {};
     options.from = options.from || "right";
     animOptions = {
-      easing: options.easing || "quadInOut",
+      easing: options.easing || this.EASING_QUAD_IN_OUT,
       duration: options.duration || 2000,
       loop: engine.masterRoom.loops.eachFrame
     };
@@ -1699,17 +1682,12 @@ module.exports = {
    */
   ROOM_TRANSITION_SLIDE_SQUEEZE: function(oldRoom, newRoom, options, callback) {
     var animOptions, camera, i, newCam, newCams;
-    i = void 0;
-    camera = void 0;
-    newCams = void 0;
-    newCam = void 0;
-    animOptions = void 0;
     newCams = [];
     oldRoom.pause();
     options = options || {};
     options.from = options.from || "right";
     animOptions = {
-      easing: options.easing || "quadInOut",
+      easing: options.easing || this.EASING_QUAD_IN_OUT,
       duration: options.duration || 2000,
       loop: engine.masterRoom.loops.eachFrame
     };
@@ -1833,8 +1811,8 @@ module.exports = Loader = (function() {
     };
     this.loadOverlay = document.createElement("div");
     this.loadOverlay.setAttribute("style", "border: 0;position: absolute;top: 0;left: 0;width: 100%;height: 100%;z-index: 100;opacity: 1;");
-    this.loadOverlay.id = "loadOverlay";
-    this.loadOverlay.innerHTML = "<div id=\"loadOverlayText\">" + engine.loadText + "</div>";
+    this.loadOverlay.className = "load-overlay";
+    this.loadOverlay.innerHTML = "<div class=\"load-overlay-text\">" + engine.loadText + "</div>";
     engine.arena.appendChild(this.loadOverlay);
     return;
   }
@@ -4532,8 +4510,6 @@ module.exports = {
   },
   squeezeIn: function(camera, from, animOptions) {
     var oldHeight, oldWidth;
-    oldWidth = void 0;
-    oldHeight = void 0;
     switch (from) {
       case "left":
         oldWidth = camera.projectionRegion.width;

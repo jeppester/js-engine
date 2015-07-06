@@ -228,8 +228,6 @@ module.exports =
   @param {Engine.Room} newRoom The room that is entered
   ###
   ROOM_TRANSITION_NONE: (oldRoom, newRoom, options, callback) ->
-    i = undefined
-    camera = undefined
     i = 0
     while i < engine.cameras.length
       camera = engine.cameras[i]
@@ -247,17 +245,12 @@ module.exports =
   @param {Engine.Room} newRoom The room that is entered
   ###
   ROOM_TRANSITION_SLIDE_SLIDE: (oldRoom, newRoom, options, callback) ->
-    i = undefined
-    camera = undefined
-    newCams = undefined
-    newCam = undefined
-    animOptions = undefined
     newCams = []
     oldRoom.pause()
     options = options or {}
     options.from = options.from or "right"
     animOptions =
-      easing: options.easing or "quadInOut"
+      easing: options.easing or @EASING_QUAD_IN_OUT
       duration: options.duration or 2000
       loop: engine.masterRoom.loops.eachFrame
 
@@ -293,17 +286,12 @@ module.exports =
   @param {Engine.Room} newRoom The room that is entered
   ###
   ROOM_TRANSITION_SQUEEZE_SLIDE: (oldRoom, newRoom, options, callback) ->
-    i = undefined
-    camera = undefined
-    newCams = undefined
-    newCam = undefined
-    animOptions = undefined
     newCams = []
     oldRoom.pause()
     options = options or {}
     options.from = options.from or "right"
     animOptions =
-      easing: options.easing or "quadInOut"
+      easing: options.easing or @EASING_QUAD_IN_OUT
       duration: options.duration or 2000
       loop: engine.masterRoom.loops.eachFrame
 
@@ -339,17 +327,12 @@ module.exports =
   @param {Engine.Room} newRoom The room that is entered
   ###
   ROOM_TRANSITION_SQUEEZE_SQUEEZE: (oldRoom, newRoom, options, callback) ->
-    i = undefined
-    camera = undefined
-    newCams = undefined
-    newCam = undefined
-    animOptions = undefined
     newCams = []
     oldRoom.pause()
     options = options or {}
     options.from = options.from or "right"
     animOptions =
-      easing: options.easing or "quadInOut"
+      easing: options.easing or @EASING_QUAD_IN_OUT
       duration: options.duration or 2000
       loop: engine.masterRoom.loops.eachFrame
 
@@ -386,17 +369,12 @@ module.exports =
   @param {Engine.Room} newRoom The room that is entered
   ###
   ROOM_TRANSITION_SLIDE_SQUEEZE: (oldRoom, newRoom, options, callback) ->
-    i = undefined
-    camera = undefined
-    newCams = undefined
-    newCam = undefined
-    animOptions = undefined
     newCams = []
     oldRoom.pause()
     options = options or {}
     options.from = options.from or "right"
     animOptions =
-      easing: options.easing or "quadInOut"
+      easing: options.easing or @EASING_QUAD_IN_OUT
       duration: options.duration or 2000
       loop: engine.masterRoom.loops.eachFrame
 

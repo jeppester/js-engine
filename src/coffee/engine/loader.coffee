@@ -29,8 +29,8 @@ module.exports = class Loader
     # Make load overlay
     @loadOverlay = document.createElement("div")
     @loadOverlay.setAttribute "style", "border: 0;position: absolute;top: 0;left: 0;width: 100%;height: 100%;z-index: 100;opacity: 1;"
-    @loadOverlay.id = "loadOverlay"
-    @loadOverlay.innerHTML = "<div id=\"loadOverlayText\">" + engine.loadText + "</div>"
+    @loadOverlay.className = "load-overlay"
+    @loadOverlay.innerHTML = """<div class="load-overlay-text">#{engine.loadText}</div>"""
     engine.arena.appendChild @loadOverlay
     return
 

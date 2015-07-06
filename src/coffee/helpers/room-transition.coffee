@@ -63,8 +63,6 @@ module.exports =
         , animOptions
 
   squeezeIn: (camera, from, animOptions) ->
-    oldWidth = undefined
-    oldHeight = undefined
     switch from
       when "left"
         oldWidth = camera.projectionRegion.width
