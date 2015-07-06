@@ -42,7 +42,7 @@ module.exports = class Polygon
       x = arguments[i * 2]
       y = arguments[i * 2 + 1]
       throw new Error("All arguments should be of type: Number") if typeof x isnt "number" or typeof y isnt "number" #dev
-      @points.push new Vector(x, y)
+      @points.push new Engine.Geometry.Vector(x, y)
       i++
     this
 
@@ -70,7 +70,7 @@ module.exports = class Polygon
   move: (x, y) ->
     throw new Error("Argument x should be of type Number") if typeof x isnt "number" #dev
     throw new Error("Argument y should be of type Number") if typeof y isnt "number" #dev
-    @add new Vector(x, y)
+    @add new Engine.Geometry.Vector(x, y)
 
   ###
   Adds a vector to all points.

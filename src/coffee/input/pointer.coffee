@@ -353,7 +353,7 @@ module.exports = class Pointer
       "mouse"
     else if button >= Engine.Globals.TOUCH_ANY and button <= Engine.Globals.TOUCH_10
       "touch"
-    else if button is Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY
+    else if button is Engine.Globals.MOUSE_TOUCH_ANY
       "any"
     else #dev
       throw new Error("Argument button has to be a pointer constant (see jseGlobals.js)") #dev

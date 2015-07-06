@@ -3337,7 +3337,7 @@ module.exports = Polygon = (function() {
       if (typeof x !== "number" || typeof y !== "number") {
         throw new Error("All arguments should be of type: Number");
       }
-      this.points.push(new Vector(x, y));
+      this.points.push(new Engine.Geometry.Vector(x, y));
       i++;
     }
     return this;
@@ -3378,7 +3378,7 @@ module.exports = Polygon = (function() {
     if (typeof y !== "number") {
       throw new Error("Argument y should be of type Number");
     }
-    return this.add(new Vector(x, y));
+    return this.add(new Engine.Geometry.Vector(x, y));
   };
 
 
@@ -5255,7 +5255,7 @@ module.exports = Pointer = (function() {
       return "mouse";
     } else if (button >= Engine.Globals.TOUCH_ANY && button <= Engine.Globals.TOUCH_10) {
       return "touch";
-    } else if (button === Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY) {
+    } else if (button === Engine.Globals.MOUSE_TOUCH_ANY) {
       return "any";
     } else {
       throw new Error("Argument button has to be a pointer constant (see jseGlobals.js)");
