@@ -35,7 +35,7 @@ module.exports = class Polygon
   @return {Polygon} The resulting Polygon object (itself)
   ###
   setFromCoordinates: (x1, y1, x2, y2, x3, y3) ->
-    numPoints = floor(arguments.length / 2)
+    numPoints = Math.floor(arguments.length / 2)
     @points = []
     i = 0
     while i < numPoints
@@ -161,10 +161,10 @@ module.exports = class Polygon
     endVector = startVector.copy()
     i = 0
     while i < @points.length
-      startVector.x = min(@points[i].x, startVector.x)
-      startVector.y = min(@points[i].y, startVector.y)
-      endVector.x = max(@points[i].x, endVector.x)
-      endVector.y = max(@points[i].y, endVector.y)
+      startVector.x = Math.min(@points[i].x, startVector.x)
+      startVector.y = Math.min(@points[i].y, startVector.y)
+      endVector.x = Math.max(@points[i].x, endVector.x)
+      endVector.y = Math.max(@points[i].y, endVector.y)
       i++
     new Engine.Geometry.Rectangle().setFromVectors startVector, endVector.subtract(startVector)
 
@@ -176,19 +176,19 @@ module.exports = class Polygon
   ###
   getDistance: (object) ->
     # Initially set the distance to infinite
-    dist = MAX_INTEGER
+    dist = Number.POSITIVE_INFINITY
     lines = @getLines()
     if object instanceof Engine.Geometry.Vector
       i = 0
       while i < lines.length
-        dist = min(dist, lines[i].getDistance(object))
+        dist = Math.min(dist, lines[i].getDistance(object))
         break if dist < 0
         i++
       dist
     else if object instanceof Engine.Geometry.Line
       i = 0
       while i < lines.length
-        dist = min(dist, lines[i].getDistance(object))
+        dist = Math.min(dist, lines[i].getDistance(object))
         break if dist < 0
         i++
       dist
@@ -196,19 +196,19 @@ module.exports = class Polygon
       pVector = new Engine.Geometry.Vector(object.x, object.y)
       i = 0
       while i < lines.length
-        dist = min(dist, lines[i].getDistance(pVector))
+        dist = Math.min(dist, lines[i].getDistance(pVector))
         break if dist < 0
         i++
-      max 0, dist - object.radius
+      Math.max 0, dist - object.radius
     else if object instanceof Engine.Geometry.Rectangle
-      object.getDistance this
+      object.getDistance @
     else if object instanceof @constructor
       objLines = object.getLines()
       i = 0
       while i < lines.length
         ii = 0
         while ii < objLines.length
-          dist = min(dist, lines[i].getDistance(objLines[ii]))
+          dist = Math.min(dist, lines[i].getDistance(objLines[ii]))
           break if dist < 0
           ii++
         break if dist < 0

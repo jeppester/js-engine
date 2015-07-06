@@ -111,18 +111,17 @@ module.exports = class Circle
   ###
   getDistance: (object) ->
     if object instanceof Engine.Geometry.Vector
-      max 0, object.getDistance(new Vector(@x, @y)) - @radius
+      Math.max 0, object.getDistance(new Engine.Geometry.Vector(@x, @y)) - @radius
     else if object instanceof Engine.Geometry.Line
-      max 0, object.getDistance(new Vector(@x, @y)) - @radius
+      Math.max 0, object.getDistance(new Engine.Geometry.Vector(@x, @y)) - @radius
     else if object instanceof @constructor
-      max 0, new Vector(@x, @y).getDistance(new Vector(object.x, object.y)) - (@radius + object.radius)
+      Math.max 0, new Engine.Geometry.Vector(@x, @y).getDistance(new Engine.Geometry.Vector(object.x, object.y)) - (@radius + object.radius)
     else if object instanceof Engine.Geometry.Rectangle
       object.getDistance this
     else if object instanceof Engine.Geometry.Polygon
       object.getDistance this
     else #dev
       throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon") #dev
-    return #dev
 
   ###
   Checks whether or not the Circle contains another geometric object.

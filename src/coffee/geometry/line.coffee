@@ -182,12 +182,7 @@ module.exports = class Line
   @return {number} The distance
   ###
   getDistance: (object) ->
-    ba = undefined
-    ab = undefined
-    bc = undefined
-    ac = undefined
     if object instanceof Engine.Geometry.Vector
-
       # Get all possibly used vectors
       ba = @a.copy().subtract(@b)
       ab = @b.copy().subtract(@a)
@@ -204,7 +199,6 @@ module.exports = class Line
       else
         Math.abs ab.getCross(ac) / ab.getLength()
     else if object instanceof @constructor
-
       # If the lines intersect, return 0
       if @intersects(object)
         0
@@ -218,7 +212,6 @@ module.exports = class Line
       object.getDistance this
     else #dev
       throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon") #dev
-    return #dev
 
   ###
   Creates a rectangular polygon based on the line segment and a width
@@ -227,18 +220,6 @@ module.exports = class Line
   @param {String} lineCap The type of line capsulation, supported types are: "butt", "square", "round"
   ###
   createPolygonFromWidth: (width, lineCap) ->
-    v = undefined
-    r = undefined
-    ort = undefined
-    a = undefined
-    b = undefined
-    c = undefined
-    d = undefined
-    points = undefined
-    i = undefined
-    startAngle = undefined
-    segmentRad = undefined
-    angle = undefined
     lineCap = lineCap or "butt"
     v = @a.copy().subtract(@b)
     v.set v.y, -v.x

@@ -131,10 +131,10 @@ module.exports = class WebGLColorShaderProgram
     if object.fillStyle isnt "transparent"
 
       # Set color
-      gl.uniform1i l.u_color, @colorFromCSSString(object.fillStyle)
+      gl.uniform1i l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.fillStyle)
 
       # Set geometry (no need to set x and y as they already in the world matrix)
-      @setPlane gl, 0, 0, object.width, object.height
+      Engine.Helpers.WebGL.setPlane gl, 0, 0, object.width, object.height
 
       # Draw
       gl.drawArrays gl.TRIANGLES, 0, 6
@@ -143,10 +143,10 @@ module.exports = class WebGLColorShaderProgram
     if object.strokeStyle isnt "transparent"
 
       # Set color
-      gl.uniform1i l.u_color, @colorFromCSSString(object.strokeStyle)
+      gl.uniform1i l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.strokeStyle)
 
       # Set geometry (no need to set x and y as they already in the world matrix)
-      @setPlaneOutline gl, 0, 0, object.width, object.height, object.lineWidth
+      Engine.Helpers.WebGL.setPlaneOutline gl, 0, 0, object.width, object.height, object.lineWidth
 
       # Draw
       gl.drawArrays gl.TRIANGLES, 0, 24
@@ -175,10 +175,10 @@ module.exports = class WebGLColorShaderProgram
     if object.fillStyle isnt "transparent"
 
       # Set color
-      gl.uniform1i l.u_color, @colorFromCSSString(object.fillStyle)
+      gl.uniform1i l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.fillStyle)
 
       # Set geometry (no need to set x and y as they already in the world matrix)
-      @setCircle gl, 0, 0, segmentsCount, object.radius
+      Engine.Helpers.WebGL.setCircle gl, 0, 0, segmentsCount, object.radius
 
       # Draw
       gl.drawArrays gl.TRIANGLE_FAN, 0, segmentsCount
@@ -187,10 +187,10 @@ module.exports = class WebGLColorShaderProgram
     if object.strokeStyle isnt "transparent"
 
       # Set color
-      gl.uniform1i l.u_color, @colorFromCSSString(object.strokeStyle)
+      gl.uniform1i l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.strokeStyle)
 
       # Set geometry (no need to set x and y as they already in the world matrix)
-      @setCircleOutline gl, 0, 0, segmentsCount, object.radius, object.lineWidth
+      Engine.Helpers.WebGL.setCircleOutline gl, 0, 0, segmentsCount, object.radius, object.lineWidth
 
       # Draw
       gl.drawArrays gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2

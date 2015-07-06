@@ -2857,15 +2857,15 @@ module.exports = Circle = (function() {
 
   Circle.prototype.getDistance = function(object) {
     if (object instanceof Engine.Geometry.Vector) {
-      max(0, object.getDistance(new Vector(this.x, this.y)) - this.radius);
+      return Math.max(0, object.getDistance(new Engine.Geometry.Vector(this.x, this.y)) - this.radius);
     } else if (object instanceof Engine.Geometry.Line) {
-      max(0, object.getDistance(new Vector(this.x, this.y)) - this.radius);
+      return Math.max(0, object.getDistance(new Engine.Geometry.Vector(this.x, this.y)) - this.radius);
     } else if (object instanceof this.constructor) {
-      max(0, new Vector(this.x, this.y).getDistance(new Vector(object.x, object.y)) - (this.radius + object.radius));
+      return Math.max(0, new Engine.Geometry.Vector(this.x, this.y).getDistance(new Engine.Geometry.Vector(object.x, object.y)) - (this.radius + object.radius));
     } else if (object instanceof Engine.Geometry.Rectangle) {
-      object.getDistance(this);
+      return object.getDistance(this);
     } else if (object instanceof Engine.Geometry.Polygon) {
-      object.getDistance(this);
+      return object.getDistance(this);
     } else {
       throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon");
     }
@@ -3172,32 +3172,28 @@ module.exports = Line = (function() {
 
   Line.prototype.getDistance = function(object) {
     var ab, ac, ba, bc;
-    ba = void 0;
-    ab = void 0;
-    bc = void 0;
-    ac = void 0;
     if (object instanceof Engine.Geometry.Vector) {
       ba = this.a.copy().subtract(this.b);
       ab = this.b.copy().subtract(this.a);
       bc = object.copy().subtract(this.b);
       ac = object.copy().subtract(this.a);
       if (ab.getDot(bc) > 0) {
-        bc.getLength();
+        return bc.getLength();
       } else if (ba.getDot(ac) > 0) {
-        ac.getLength();
+        return ac.getLength();
       } else {
-        Math.abs(ab.getCross(ac) / ab.getLength());
+        return Math.abs(ab.getCross(ac) / ab.getLength());
       }
     } else if (object instanceof this.constructor) {
       if (this.intersects(object)) {
-        0;
+        return 0;
       } else {
-        Math.min(this.getDistance(object.a), this.getDistance(object.b), object.getDistance(this.a), object.getDistance(this.b));
+        return Math.min(this.getDistance(object.a), this.getDistance(object.b), object.getDistance(this.a), object.getDistance(this.b));
       }
     } else if (object instanceof Engine.Geometry.Rectangle) {
-      object.getDistance(this);
+      return object.getDistance(this);
     } else if (object instanceof Engine.Geometry.Circle) {
-      object.getDistance(this);
+      return object.getDistance(this);
     } else {
       throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon");
     }
@@ -3213,18 +3209,6 @@ module.exports = Line = (function() {
 
   Line.prototype.createPolygonFromWidth = function(width, lineCap) {
     var a, angle, b, c, d, i, ort, points, r, segmentRad, startAngle, v;
-    v = void 0;
-    r = void 0;
-    ort = void 0;
-    a = void 0;
-    b = void 0;
-    c = void 0;
-    d = void 0;
-    points = void 0;
-    i = void 0;
-    startAngle = void 0;
-    segmentRad = void 0;
-    angle = void 0;
     lineCap = lineCap || "butt";
     v = this.a.copy().subtract(this.b);
     v.set(v.y, -v.x);
@@ -3328,7 +3312,7 @@ module.exports = Polygon = (function() {
 
   Polygon.prototype.setFromCoordinates = function(x1, y1, x2, y2, x3, y3) {
     var i, numPoints, x, y;
-    numPoints = floor(arguments.length / 2);
+    numPoints = Math.floor(arguments.length / 2);
     this.points = [];
     i = 0;
     while (i < numPoints) {
@@ -3507,10 +3491,10 @@ module.exports = Polygon = (function() {
     endVector = startVector.copy();
     i = 0;
     while (i < this.points.length) {
-      startVector.x = min(this.points[i].x, startVector.x);
-      startVector.y = min(this.points[i].y, startVector.y);
-      endVector.x = max(this.points[i].x, endVector.x);
-      endVector.y = max(this.points[i].y, endVector.y);
+      startVector.x = Math.min(this.points[i].x, startVector.x);
+      startVector.y = Math.min(this.points[i].y, startVector.y);
+      endVector.x = Math.max(this.points[i].x, endVector.x);
+      endVector.y = Math.max(this.points[i].y, endVector.y);
       i++;
     }
     return new Engine.Geometry.Rectangle().setFromVectors(startVector, endVector.subtract(startVector));
@@ -3526,12 +3510,12 @@ module.exports = Polygon = (function() {
 
   Polygon.prototype.getDistance = function(object) {
     var dist, i, ii, lines, objLines, pVector;
-    dist = MAX_INTEGER;
+    dist = Number.POSITIVE_INFINITY;
     lines = this.getLines();
     if (object instanceof Engine.Geometry.Vector) {
       i = 0;
       while (i < lines.length) {
-        dist = min(dist, lines[i].getDistance(object));
+        dist = Math.min(dist, lines[i].getDistance(object));
         if (dist < 0) {
           break;
         }
@@ -3541,7 +3525,7 @@ module.exports = Polygon = (function() {
     } else if (object instanceof Engine.Geometry.Line) {
       i = 0;
       while (i < lines.length) {
-        dist = min(dist, lines[i].getDistance(object));
+        dist = Math.min(dist, lines[i].getDistance(object));
         if (dist < 0) {
           break;
         }
@@ -3552,13 +3536,13 @@ module.exports = Polygon = (function() {
       pVector = new Engine.Geometry.Vector(object.x, object.y);
       i = 0;
       while (i < lines.length) {
-        dist = min(dist, lines[i].getDistance(pVector));
+        dist = Math.min(dist, lines[i].getDistance(pVector));
         if (dist < 0) {
           break;
         }
         i++;
       }
-      max(0, dist - object.radius);
+      Math.max(0, dist - object.radius);
     } else if (object instanceof Engine.Geometry.Rectangle) {
       object.getDistance(this);
     } else if (object instanceof this.constructor) {
@@ -3567,7 +3551,7 @@ module.exports = Polygon = (function() {
       while (i < lines.length) {
         ii = 0;
         while (ii < objLines.length) {
-          dist = min(dist, lines[i].getDistance(objLines[ii]));
+          dist = Math.min(dist, lines[i].getDistance(objLines[ii]));
           if (dist < 0) {
             break;
           }
@@ -6146,13 +6130,13 @@ module.exports = WebGLColorShaderProgram = (function() {
     l = this.locations;
     gl.uniformMatrix3fv(l.u_matrix, false, wm);
     if (object.fillStyle !== "transparent") {
-      gl.uniform1i(l.u_color, this.colorFromCSSString(object.fillStyle));
-      this.setPlane(gl, 0, 0, object.width, object.height);
+      gl.uniform1i(l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.fillStyle));
+      Engine.Helpers.WebGL.setPlane(gl, 0, 0, object.width, object.height);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
     if (object.strokeStyle !== "transparent") {
-      gl.uniform1i(l.u_color, this.colorFromCSSString(object.strokeStyle));
-      this.setPlaneOutline(gl, 0, 0, object.width, object.height, object.lineWidth);
+      gl.uniform1i(l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.strokeStyle));
+      Engine.Helpers.WebGL.setPlaneOutline(gl, 0, 0, object.width, object.height, object.lineWidth);
       gl.drawArrays(gl.TRIANGLES, 0, 24);
     }
   };
@@ -6174,13 +6158,13 @@ module.exports = WebGLColorShaderProgram = (function() {
       segmentsCount = 80;
     }
     if (object.fillStyle !== "transparent") {
-      gl.uniform1i(l.u_color, this.colorFromCSSString(object.fillStyle));
-      this.setCircle(gl, 0, 0, segmentsCount, object.radius);
+      gl.uniform1i(l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.fillStyle));
+      Engine.Helpers.WebGL.setCircle(gl, 0, 0, segmentsCount, object.radius);
       gl.drawArrays(gl.TRIANGLE_FAN, 0, segmentsCount);
     }
     if (object.strokeStyle !== "transparent") {
-      gl.uniform1i(l.u_color, this.colorFromCSSString(object.strokeStyle));
-      this.setCircleOutline(gl, 0, 0, segmentsCount, object.radius, object.lineWidth);
+      gl.uniform1i(l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.strokeStyle));
+      Engine.Helpers.WebGL.setCircleOutline(gl, 0, 0, segmentsCount, object.radius, object.lineWidth);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2);
     }
   };
