@@ -6061,11 +6061,6 @@ Engine = require('../../engine');
 
 module.exports = WebGLColorShaderProgram = (function() {
   function WebGLColorShaderProgram(gl) {
-    var initBuffers, initShaders, locations, program;
-    initShaders = void 0;
-    initBuffers = void 0;
-    program = void 0;
-    locations = void 0;
     this.program = gl.createProgram();
     this.initShaders(gl);
     this.bindLocations(gl);
@@ -6078,10 +6073,6 @@ module.exports = WebGLColorShaderProgram = (function() {
 
   WebGLColorShaderProgram.prototype.initShaders = function(gl) {
     var fragmentCode, fragmentShader, vertexCode, vertexShader;
-    vertexCode = void 0;
-    fragmentCode = void 0;
-    vertexShader = void 0;
-    fragmentShader = void 0;
     vertexCode = "attribute vec2 a_position; uniform vec2 u_resolution; uniform mat3 u_matrix; void main() { vec2 position = (u_matrix * vec3(a_position, 1)).xy; vec2 zeroToOne = position / u_resolution; vec2 zeroToTwo = zeroToOne * 2.0; vec2 clipSpace = zeroToTwo - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); }";
     vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexCode);
@@ -6144,7 +6135,7 @@ module.exports = WebGLColorShaderProgram = (function() {
     }
     gl.uniform1i(l.u_color, color);
     coords = object.createPolygonFromWidth(object.lineWidth, object.lineCap).getCoordinates();
-    this.setConvexPolygon(gl, coords);
+    Engine.Helpers.WebGL.setConvexPolygon(gl, coords);
     gl.uniformMatrix3fv(l.u_matrix, false, wm);
     gl.drawArrays(gl.TRIANGLE_FAN, 0, coords.length / 2);
   };
@@ -8085,11 +8076,6 @@ module.exports = Line = (function(superClass) {
 
   Line.prototype.getRedrawRegion = function() {
     var box, i, ln, parent, parents;
-    box = void 0;
-    parents = void 0;
-    parent = void 0;
-    i = void 0;
-    ln = void 0;
     box = this.getPolygon();
     parents = this.getParents();
     parents.unshift(this);
@@ -8119,7 +8105,7 @@ module.exports = Line = (function(superClass) {
    */
 
   Line.prototype.isVisible = function() {
-    return View.Child.prototype.isVisible.call(this) && (this.a.x !== this.b.x || this.a.y !== this.b.y);
+    return Engine.Views.Child.prototype.isVisible.call(this) && (this.a.x !== this.b.x || this.a.y !== this.b.y);
   };
 
   return Line;

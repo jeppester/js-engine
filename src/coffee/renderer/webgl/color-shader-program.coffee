@@ -2,10 +2,6 @@ Engine = require '../../engine'
 
 module.exports = class WebGLColorShaderProgram
   constructor: (gl) ->
-    initShaders = undefined
-    initBuffers = undefined
-    program = undefined
-    locations = undefined
     @program = gl.createProgram()
     @initShaders gl
     @bindLocations gl
@@ -14,11 +10,6 @@ module.exports = class WebGLColorShaderProgram
     return
 
   initShaders: (gl) ->
-    vertexCode = undefined
-    fragmentCode = undefined
-    vertexShader = undefined
-    fragmentShader = undefined
-
     # Vertex shader
     vertexCode = "
       attribute vec2 a_position;
@@ -120,7 +111,7 @@ module.exports = class WebGLColorShaderProgram
 
     # Set geometry
     coords = object.createPolygonFromWidth(object.lineWidth, object.lineCap).getCoordinates()
-    @setConvexPolygon gl, coords
+    Engine.Helpers.WebGL.setConvexPolygon gl, coords
 
     # Set matrix
     gl.uniformMatrix3fv l.u_matrix, false, wm

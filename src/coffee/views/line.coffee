@@ -169,11 +169,6 @@ module.exports = class Line extends Engine.Geometry.Line
   @return {Math.Rectangle} The bounding rectangle of the redraw
   ###
   getRedrawRegion: ->
-    box = undefined
-    parents = undefined
-    parent = undefined
-    i = undefined
-    ln = undefined
     box = @getPolygon()
     parents = @getParents()
     parents.unshift this
@@ -200,4 +195,4 @@ module.exports = class Line extends Engine.Geometry.Line
   @return {Boolean} Whether or not the line is "visible" (if not, renderers will not try to draw it)
   ###
   isVisible: ->
-    View.Child::isVisible.call(this) and (@a.x isnt @b.x or @a.y isnt @b.y)
+    Engine.Views.Child::isVisible.call(@) and (@a.x isnt @b.x or @a.y isnt @b.y)
