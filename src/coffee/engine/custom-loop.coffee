@@ -75,8 +75,6 @@ module.exports = class CustomLoop
   detachFunction: (caller, func) ->
     throw new Error("Missing argument: caller") if caller is undefined #dev
     throw new Error("Missing argument: func") if func is undefined #dev
-    i = undefined
-    a = undefined
 
     # Search activities and remove function
     i = 0
@@ -106,22 +104,24 @@ module.exports = class CustomLoop
   ###
   detachFunctionsByFunction: (func) ->
     throw new Error("Missing argument: func") if func is undefined #dev
-    removeArray = undefined
-    i = undefined
     removeArray = []
 
     # Search activities and remove function
     i = @functions.length
-    removeArray.push @functions.splice(i, 1) if func is @functions[i].func while i--
+    while i--
+      if func is @functions[i].func
+        removeArray.push @functions.splice(i, 1)
 
     # Search activities queue and remove function
     i = @functionsQueue.length
-    removeArray.push @functionsQueue.splice(i, 1) if func is @functions[i].func while i--
+    while i--
+      if func is @functionsQueue[i].func
+        removeArray.push @functionsQueue.splice(i, 1)
+
     if removeArray.length
       removeArray
     else
       false
-
 
   ###
   Detaches all attached functions with a specific caller
@@ -131,17 +131,19 @@ module.exports = class CustomLoop
   ###
   detachFunctionsByCaller: (caller) ->
     throw new Error("Missing argument: caller") if caller is undefined #dev
-    removeArray = undefined
-    i = undefined
     removeArray = []
 
     # From activities
     i = @functions.length
-    removeArray.push @functions.splice(i, 1) if caller is @functions[i].object while i--
+    while i--
+      if caller is @functions[i].object
+        removeArray.push @functions.splice(i, 1)
 
     # From activities queue
     i = @functionsQueue.length
-    removeArray.push @functionsQueue.splice(i, 1) if caller is @functionsQueue[i].object while i--
+    while i--
+      if caller is @functionsQueue[i].object
+        removeArray.push @functionsQueue.splice(i, 1)
     if removeArray.length
       removeArray
     else
@@ -315,7 +317,9 @@ module.exports = class CustomLoop
   removeAnimationsOfObject: (object) ->
     i = undefined
     i = @animations.length
-    @animations.splice i, 1 if object is @animations[i].obj while i--
+    while i--
+      if object is @animations[i].obj
+        @animations.splice i, 1
     return
 
 

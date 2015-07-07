@@ -311,8 +311,10 @@ module.exports = window.Engine = class Engine
 
   initRenderer: ->
     if not @disableWebGL and (@canvas.getContext("webgl") or @canvas.getContext("experimental-webgl"))
+      console.log 'Using WebGL renderer'
       @renderer = new Engine.Renderers.WebGLRenderer(@canvas)
     else
+      console.log 'Using canvas renderer'
       @renderer = new Engine.Renderers.CanvasRenderer(@canvas)
     return
 
@@ -707,11 +709,6 @@ module.exports = window.Engine = class Engine
   param {Object} obj The object to remove
   ###
   purge: (obj) ->
-    len = undefined
-    name = undefined
-    loop_ = undefined
-    roomId = undefined
-    room = undefined
     throw new Error("Cannot purge object: " + obj) if obj is undefined #dev
     obj = @objectIndex[obj] if typeof obj is "string"
 

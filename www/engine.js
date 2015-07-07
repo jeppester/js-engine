@@ -269,8 +269,10 @@ module.exports = window.Engine = Engine = (function() {
 
   Engine.prototype.initRenderer = function() {
     if (!this.disableWebGL && (this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl"))) {
+      console.log('Using WebGL renderer');
       this.renderer = new Engine.Renderers.WebGLRenderer(this.canvas);
     } else {
+      console.log('Using canvas renderer');
       this.renderer = new Engine.Renderers.CanvasRenderer(this.canvas);
     }
   };
@@ -738,11 +740,6 @@ module.exports = window.Engine = Engine = (function() {
 
   Engine.prototype.purge = function(obj) {
     var len, loop_, name, room, roomId;
-    len = void 0;
-    name = void 0;
-    loop_ = void 0;
-    roomId = void 0;
-    room = void 0;
     if (obj === void 0) {
       throw new Error("Cannot purge object: " + obj);
     }
@@ -1011,8 +1008,6 @@ module.exports = CustomLoop = (function() {
     if (func === void 0) {
       throw new Error("Missing argument: func");
     }
-    i = void 0;
-    a = void 0;
     i = 0;
     while (i < this.functions.length) {
       a = this.functions[i];
@@ -1047,30 +1042,18 @@ module.exports = CustomLoop = (function() {
     if (func === void 0) {
       throw new Error("Missing argument: func");
     }
-    removeArray = void 0;
-    i = void 0;
     removeArray = [];
     i = this.functions.length;
-    if ((function() {
-      var results;
-      results = [];
-      while (i--) {
-        results.push(func === this.functions[i].func);
+    while (i--) {
+      if (func === this.functions[i].func) {
+        removeArray.push(this.functions.splice(i, 1));
       }
-      return results;
-    }).call(this)) {
-      removeArray.push(this.functions.splice(i, 1));
     }
     i = this.functionsQueue.length;
-    if ((function() {
-      var results;
-      results = [];
-      while (i--) {
-        results.push(func === this.functions[i].func);
+    while (i--) {
+      if (func === this.functionsQueue[i].func) {
+        removeArray.push(this.functionsQueue.splice(i, 1));
       }
-      return results;
-    }).call(this)) {
-      removeArray.push(this.functionsQueue.splice(i, 1));
     }
     if (removeArray.length) {
       return removeArray;
@@ -1092,30 +1075,18 @@ module.exports = CustomLoop = (function() {
     if (caller === void 0) {
       throw new Error("Missing argument: caller");
     }
-    removeArray = void 0;
-    i = void 0;
     removeArray = [];
     i = this.functions.length;
-    if ((function() {
-      var results;
-      results = [];
-      while (i--) {
-        results.push(caller === this.functions[i].object);
+    while (i--) {
+      if (caller === this.functions[i].object) {
+        removeArray.push(this.functions.splice(i, 1));
       }
-      return results;
-    }).call(this)) {
-      removeArray.push(this.functions.splice(i, 1));
     }
     i = this.functionsQueue.length;
-    if ((function() {
-      var results;
-      results = [];
-      while (i--) {
-        results.push(caller === this.functionsQueue[i].object);
+    while (i--) {
+      if (caller === this.functionsQueue[i].object) {
+        removeArray.push(this.functionsQueue.splice(i, 1));
       }
-      return results;
-    }).call(this)) {
-      removeArray.push(this.functionsQueue.splice(i, 1));
     }
     if (removeArray.length) {
       return removeArray;
@@ -1344,15 +1315,10 @@ module.exports = CustomLoop = (function() {
     var i;
     i = void 0;
     i = this.animations.length;
-    if ((function() {
-      var results;
-      results = [];
-      while (i--) {
-        results.push(object === this.animations[i].obj);
+    while (i--) {
+      if (object === this.animations[i].obj) {
+        this.animations.splice(i, 1);
       }
-      return results;
-    }).call(this)) {
-      this.animations.splice(i, 1);
     }
   };
 
