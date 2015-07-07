@@ -2828,14 +2828,14 @@ module.exports = Circle = (function() {
     i = void 0;
     cDist = void 0;
     if (object instanceof Engine.Geometry.Vector) {
-      object.copy().move(-this.x, -this.y).getLength() < this.radius;
+      return object.copy().move(-this.x, -this.y).getLength() < this.radius;
     } else if (object instanceof Engine.Geometry.Line) {
-      this.contains(object.a) && this.contains(object.b);
+      return this.contains(object.a) && this.contains(object.b);
     } else if (object instanceof this.constructor) {
       cDist = new Engine.Geometry.Vector(object.x, object.y).move(-this.x, -this.y).getLength();
-      cDist + object.radius < this.radius;
+      return cDist + object.radius < this.radius;
     } else if (object instanceof Engine.Geometry.Rectangle) {
-      this.contains(object.getPolygon());
+      return this.contains(object.getPolygon());
     } else if (object instanceof Engine.Geometry.Polygon) {
       i = 0;
       while (i < object.points.length) {
@@ -2844,7 +2844,7 @@ module.exports = Circle = (function() {
         }
         i++;
       }
-      true;
+      return true;
     } else {
       throw new Error("Argument object has to be of type: Vector, Line, Circle, Rectangle or Polygon");
     }
@@ -2860,13 +2860,13 @@ module.exports = Circle = (function() {
 
   Circle.prototype.intersects = function(object) {
     if (object instanceof Engine.Geometry.Line) {
-      this.contains(object) === false && object.getDistance(this) <= 0;
+      return this.contains(object) === false && object.getDistance(this) <= 0;
     } else if (object instanceof this.constructor) {
-      !this.contains(object) && !object.contains(this) && new Engine.Geometry.Vector(this.x, this.y).getDistance(new Engine.Geometry.Vector(object.x, object.y)) <= this.radius + object.radius;
+      return !this.contains(object) && !object.contains(this) && new Engine.Geometry.Vector(this.x, this.y).getDistance(new Engine.Geometry.Vector(object.x, object.y)) <= this.radius + object.radius;
     } else if (object instanceof Engine.Geometry.Rectangle) {
-      object.getPolygon().intersects(this);
+      return object.getPolygon().intersects(this);
     } else if (object instanceof Engine.Geometry.Polygon) {
-      object.intersects(this);
+      return object.intersects(this);
     } else {
       throw new Error("Argument object has to be of type: Line, Circle, Rectangle or Polygon");
     }
@@ -3083,13 +3083,13 @@ module.exports = Line = (function() {
       }
       c1 = (object.b.x - object.a.x) * (this.a.y - object.b.y) - (this.a.x - object.b.x) * (object.b.y - object.a.y);
       c2 = (object.b.x - object.a.x) * (this.b.y - object.b.y) - (this.b.x - object.b.x) * (object.b.y - object.a.y);
-      c1 * c2 < 0;
+      return c1 * c2 < 0;
     } else if (object instanceof Engine.Geometry.Circle) {
-      object.intersects(this);
+      return object.intersects(this);
     } else if (object instanceof Engine.Geometry.Rectangle) {
-      object.getPolygon().intersects(this);
+      return object.getPolygon().intersects(this);
     } else if (object instanceof Engine.Geometry.Polygon) {
-      object.intersects(this);
+      return object.intersects(this);
     } else {
       throw new Error("Argument object should be of type: Line, Rectangle, Circle or Polygon");
     }
@@ -3465,7 +3465,7 @@ module.exports = Polygon = (function() {
         }
         i++;
       }
-      dist;
+      return dist;
     } else if (object instanceof Engine.Geometry.Line) {
       i = 0;
       while (i < lines.length) {
@@ -3475,7 +3475,7 @@ module.exports = Polygon = (function() {
         }
         i++;
       }
-      dist;
+      return dist;
     } else if (object instanceof Engine.Geometry.Circle) {
       pVector = new Engine.Geometry.Vector(object.x, object.y);
       i = 0;
@@ -3486,9 +3486,9 @@ module.exports = Polygon = (function() {
         }
         i++;
       }
-      Math.max(0, dist - object.radius);
+      return Math.max(0, dist - object.radius);
     } else if (object instanceof Engine.Geometry.Rectangle) {
-      object.getDistance(this);
+      return object.getDistance(this);
     } else if (object instanceof this.constructor) {
       objLines = object.getLines();
       i = 0;
@@ -3506,7 +3506,7 @@ module.exports = Polygon = (function() {
         }
         i++;
       }
-      dist;
+      return dist;
     } else {
       throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon");
     }
@@ -3522,19 +3522,19 @@ module.exports = Polygon = (function() {
 
   Polygon.prototype.contains = function(object) {
     if (object instanceof Engine.Geometry.Vector) {
-      this.intersects(new Engine.Geometry.Line().setFromCoordinates(-123456, -98765, object.x, object.y), true) % 2;
+      return this.intersects(new Engine.Geometry.Line().setFromCoordinates(-123456, -98765, object.x, object.y), true) % 2;
     } else if (object instanceof Engine.Geometry.Line) {
-      !this.intersects(object) && this.contains(object.a);
+      return !this.intersects(object) && this.contains(object.a);
     } else if (object instanceof Engine.Geometry.Circle) {
       if (this.contains(new Engine.Geometry.Vector(object.x, object.y))) {
-        !this.intersects(object);
+        return !this.intersects(object);
       } else {
-        false;
+        return false;
       }
     } else if (object instanceof Engine.Geometry.Rectangle) {
-      this.contains(object.getPolygon());
+      return this.contains(object.getPolygon());
     } else if (object instanceof this.constructor) {
-      object.points.length > 0 && !this.intersects(object) && this.contains(object.points[0]);
+      return object.points.length > 0 && !this.intersects(object) && this.contains(object.points[0]);
     } else {
       throw new Error("Argument object has to be of type: Vector, Line, Rectangle or Polygon");
     }
@@ -7044,8 +7044,101 @@ module.exports = Collidable = (function(superClass) {
     Engine.Views.Sprite.call(this, source, x, y, direction, additionalProperties);
     this.mask = (this.mask ? this.mask : engine.loader.getMask(source, this.getTheme()));
     this.collisionResolution = (this.collisionResolution ? this.collisionResolution : engine.defaultCollisionResolution);
-    return;
   }
+
+
+  /*
+  A "metafunction" for checking if the Collidable collides with another object of the same type.
+  This function uses boundingBoxCollidesWith for narrowing down the number of objects to check, then uses maskCollidesWith for doing a precise collision check on the remaining objects.
+  
+  @param {View.Collidable|View.Collidable[]} objects Target object, or array of target objects
+  @param {boolean} getCollisionPosition If true, the function returns an object representing the position of the detected collision. Defaults to false
+  @param {boolean} getCollidingObjects If true, the function returns all colliding objects
+  @return {Object|boolean} If not getCollisionPosition or getCollidingObjects is true, a boolean representing whether or not a collision was detected. If getCollisionPosition and or getCollidingObjects is true, returns an object of the following type:
+  <code>{
+  "objects": [Array of colliding objects],
+  "positions": [Array of collision positions for each object]
+  "combinedPosition": [The combined position of the collision]
+  }</code>
+  
+  If getCollidingObjects is false, the objects-array will be empty and the positions-array will only contain one position which is the average collision position for all colliding objects.
+  If getCollisionPosition is false, the positions-array will be empty
+  If both getCollisionPosition and getCollidingObjects are true, the objects-array will contain all colliding objects, and the positions-array will contain each colliding object's collision position
+   */
+
+  Collidable.prototype.collidesWith = function(objects, getCollisionPosition, getCollidingObjects) {
+    var i, position, ret;
+    if (getCollisionPosition == null) {
+      getCollisionPosition = false;
+    }
+    if (getCollidingObjects == null) {
+      getCollidingObjects = false;
+    }
+    if (objects === void 0) {
+      throw new Error("Missing argument: objects");
+    }
+    if (!Array.prototype.isPrototypeOf(objects)) {
+      objects = [objects];
+    }
+    if (this.size === 0 || this.widthScale === 0 || this.heightScale === 0) {
+      return false;
+    }
+    objects = this.boundingBoxCollidesWith(objects, true);
+    if (objects === false) {
+      return false;
+    }
+    if (!getCollisionPosition && !getCollidingObjects) {
+      return this.maskCollidesWith(objects);
+    } else {
+      ret = {
+        objects: [],
+        positions: [],
+        combinedPosition: false
+      };
+      if (getCollidingObjects === false) {
+        position = this.maskCollidesWith(objects, true);
+        if (position) {
+          ret.positions.push(position);
+          ret.combinedPosition = position.copy();
+          ret.combinedPosition.pixelCount = 0;
+        }
+      } else {
+        if (getCollisionPosition) {
+          i = 0;
+          while (i < objects.length) {
+            position = this.maskCollidesWith(objects[i], true);
+            if (position) {
+              ret.objects.push(objects[i]);
+              ret.positions.push(position);
+            }
+            i++;
+          }
+          if (ret.positions.length) {
+            ret.combinedPosition = new Engine.Geometry.Vector();
+            ret.combinedPosition.pixelCount = 0;
+            ret.positions.forEach(function(p) {
+              ret.combinedPosition.add(p.scale(p.pixelCount));
+              ret.combinedPosition.pixelCount += p.pixelCount;
+            });
+            ret.combinedPosition.scale(1 / ret.combinedPosition.pixelCount);
+          }
+        } else {
+          i = 0;
+          while (i < objects.length) {
+            if (this.maskCollidesWith(objects[i])) {
+              ret.objects.push(objects[i]);
+            }
+            i++;
+          }
+        }
+      }
+    }
+    if (ret.positions.length + ret.objects.length !== 0) {
+      return ret;
+    } else {
+      return false;
+    }
+  };
 
 
   /*
@@ -7058,18 +7151,15 @@ module.exports = Collidable = (function(superClass) {
 
   Collidable.prototype.boundingBoxCollidesWith = function(objects, getCollidingObjects) {
     var collidingObjects, i, obj, pol1, pol2;
+    if (getCollidingObjects == null) {
+      getCollidingObjects = false;
+    }
     if (objects === void 0) {
       throw new Error("Missing argument: objects");
     }
     if (!Array.prototype.isPrototypeOf(objects)) {
       objects = [objects];
     }
-    getCollidingObjects = (getCollidingObjects !== void 0 ? getCollidingObjects : false);
-    pol1 = void 0;
-    pol2 = void 0;
-    i = void 0;
-    collidingObjects = void 0;
-    obj = void 0;
     pol1 = this.getTransformedBoundingBox();
     collidingObjects = [];
     i = 0;
@@ -7213,19 +7303,7 @@ module.exports = Collidable = (function(superClass) {
   };
 
   Collidable.prototype.createCollisionBitmap = function(objects) {
-    var c, calc, canvas, dt, i, ii, lm, mask, obj, offset, parents, wm;
-    obj = void 0;
-    canvas = void 0;
-    mask = void 0;
-    c = void 0;
-    parents = void 0;
-    i = void 0;
-    ii = void 0;
-    wm = void 0;
-    lm = void 0;
-    dt = void 0;
-    calc = void 0;
-    offset = void 0;
+    var c, calc, canvas, i, ii, lm, mask, obj, offset, parents, wm;
     mask = this.mask;
     calc = Engine.Helpers.MatrixCalculation;
     canvas = document.createElement("canvas");
@@ -7272,98 +7350,6 @@ module.exports = Collidable = (function(superClass) {
     c.fillRect(0, 0, canvas.width, canvas.height);
     c.drawImage(mask, (this.clipWidth + this.bm.spacing) * this.imageNumber, 0, this.clipWidth, this.clipHeight, 0, 0, this.clipWidth, this.clipHeight);
     return c.getImageData(0, 0, canvas.width, canvas.height);
-  };
-
-
-  /*
-  A "metafunction" for checking if the Collidable collides with another object of the same type.
-  This function uses boundingBoxCollidesWith for narrowing down the number of objects to check, then uses maskCollidesWith for doing a precise collision check on the remaining objects.
-  
-  @param {View.Collidable|View.Collidable[]} objects Target object, or array of target objects
-  @param {boolean} getCollisionPosition If true, the function returns an object representing the position of the detected collision. Defaults to false
-  @param {boolean} getCollidingObjects If true, the function returns all colliding objects
-  @return {Object|boolean} If not getCollisionPosition or getCollidingObjects is true, a boolean representing whether or not a collision was detected. If getCollisionPosition and or getCollidingObjects is true, returns an object of the following type:
-  <code>{
-  "objects": [Array of colliding objects],
-  "positions": [Array of collision positions for each object]
-  "combinedPosition": [The combined position of the collision]
-  }</code>
-  
-  If getCollidingObjects is false, the objects-array will be empty and the positions-array will only contain one position which is the average collision position for all colliding objects.
-  If getCollisionPosition is false, the positions-array will be empty
-  If both getCollisionPosition and getCollidingObjects are true, the objects-array will contain all colliding objects, and the positions-array will contain each colliding object's collision position
-   */
-
-  Collidable.prototype.collidesWith = function(objects, getCollisionPosition, getCollidingObjects) {
-    var i, position, ret;
-    if (objects === void 0) {
-      throw new Error("Missing argument: objects");
-    }
-    ret = void 0;
-    i = void 0;
-    position = void 0;
-    if (!Array.prototype.isPrototypeOf(objects)) {
-      objects = [objects];
-    }
-    getCollidingObjects = (getCollidingObjects !== void 0 ? getCollidingObjects : false);
-    if (this.size === 0 || this.widthScale === 0 || this.heightScale === 0) {
-      return false;
-    }
-    objects = this.boundingBoxCollidesWith(objects, true);
-    if (objects === false) {
-      return false;
-    }
-    if (!getCollisionPosition && !getCollidingObjects) {
-      return this.maskCollidesWith(objects);
-    } else {
-      ret = {
-        objects: [],
-        positions: [],
-        combinedPosition: false
-      };
-      if (getCollidingObjects === false) {
-        position = this.maskCollidesWith(objects, true);
-        if (position) {
-          ret.positions.push(position);
-          ret.combinedPosition = position.copy();
-          ret.combinedPosition.pixelCount = 0;
-        }
-      } else {
-        if (getCollisionPosition) {
-          i = 0;
-          while (i < objects.length) {
-            position = this.maskCollidesWith(objects[i], true);
-            if (position) {
-              ret.objects.push(objects[i]);
-              ret.positions.push(position);
-            }
-            i++;
-          }
-          if (ret.positions.length) {
-            ret.combinedPosition = new Engine.Geometry.Vector();
-            ret.combinedPosition.pixelCount = 0;
-            ret.positions.forEach(function(p) {
-              ret.combinedPosition.add(p.scale(p.pixelCount));
-              ret.combinedPosition.pixelCount += p.pixelCount;
-            });
-            ret.combinedPosition.scale(1 / ret.combinedPosition.pixelCount);
-          }
-        } else {
-          i = 0;
-          while (i < objects.length) {
-            if (this.maskCollidesWith(objects[i])) {
-              ret.objects.push(objects[i]);
-            }
-            i++;
-          }
-        }
-      }
-    }
-    if (ret.positions.length + ret.objects.length !== 0) {
-      return ret;
-    } else {
-      return false;
-    }
   };
 
   return Collidable;

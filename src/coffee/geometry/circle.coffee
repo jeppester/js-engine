@@ -157,7 +157,6 @@ module.exports = class Circle
       true
     else #dev
       throw new Error("Argument object has to be of type: Vector, Line, Circle, Rectangle or Polygon") #dev
-    return #dev
 
   ###
   Checks whether or not the Circle intersects with another geometric object.
@@ -176,4 +175,3 @@ module.exports = class Circle
       object.intersects this
     else #dev
       throw new Error("Argument object has to be of type: Line, Circle, Rectangle or Polygon") #dev
-    return #dev

@@ -216,7 +216,6 @@ module.exports = class Polygon
       dist
     else #dev
       throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon") #dev
-    return
 
   ###
   Checks whether or not the Polygon contains another geometric object.
@@ -244,7 +243,6 @@ module.exports = class Polygon
       object.points.length > 0 and not @intersects(object) and @contains(object.points[0])
     else #dev
       throw new Error("Argument object has to be of type: Vector, Line, Rectangle or Polygon") #dev
-    return
 
   ###
   Checks whether or not the Polygon intersects with another geometric object.
@@ -256,6 +254,7 @@ module.exports = class Polygon
   intersects: (object, countIntersections) ->
     countIntersections = (if countIntersections isnt undefined then countIntersections else false)
     intersectionCount = 0 if countIntersections
+
     if object instanceof Engine.Geometry.Line
       lines = @getLines()
       i = 0
@@ -267,8 +266,8 @@ module.exports = class Polygon
           else
             return true
         i++
-    else if object instanceof Engine.Geometry.Circle
 
+    else if object instanceof Engine.Geometry.Circle
       # Check if each line intersects with the circle
       lines = @getLines()
       i = 0
@@ -279,8 +278,10 @@ module.exports = class Polygon
           else
             return true
         i++
+
     else if object instanceof Engine.Geometry.Rectangle
       return @intersects(object.getPolygon())
+
     else if object instanceof @constructor
       lines = @getLines()
       oLines = object.getLines()

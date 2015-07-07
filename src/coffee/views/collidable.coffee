@@ -22,7 +22,91 @@ module.exports = class Collidable extends Engine.Views.Sprite
     Engine.Views.Sprite.call this, source, x, y, direction, additionalProperties
     @mask = (if @mask then @mask else engine.loader.getMask(source, @getTheme()))
     @collisionResolution = (if @collisionResolution then @collisionResolution else engine.defaultCollisionResolution)
-    return
+
+  ###
+  A "metafunction" for checking if the Collidable collides with another object of the same type.
+  This function uses boundingBoxCollidesWith for narrowing down the number of objects to check, then uses maskCollidesWith for doing a precise collision check on the remaining objects.
+
+  @param {View.Collidable|View.Collidable[]} objects Target object, or array of target objects
+  @param {boolean} getCollisionPosition If true, the function returns an object representing the position of the detected collision. Defaults to false
+  @param {boolean} getCollidingObjects If true, the function returns all colliding objects
+  @return {Object|boolean} If not getCollisionPosition or getCollidingObjects is true, a boolean representing whether or not a collision was detected. If getCollisionPosition and or getCollidingObjects is true, returns an object of the following type:
+  <code>{
+  "objects": [Array of colliding objects],
+  "positions": [Array of collision positions for each object]
+  "combinedPosition": [The combined position of the collision]
+  }</code>
+
+  If getCollidingObjects is false, the objects-array will be empty and the positions-array will only contain one position which is the average collision position for all colliding objects.
+  If getCollisionPosition is false, the positions-array will be empty
+  If both getCollisionPosition and getCollidingObjects are true, the objects-array will contain all colliding objects, and the positions-array will contain each colliding object's collision position
+  ###
+  collidesWith: (objects, getCollisionPosition = false, getCollidingObjects = false) ->
+    throw new Error("Missing argument: objects") if objects is undefined #dev
+
+    objects = [objects] unless Array::isPrototypeOf(objects)
+
+    # Don't do collision checks for objects with no size
+    return false if @size is 0 or @widthScale is 0 or @heightScale is 0
+
+    # First, do a bounding box based collision check
+    objects = @boundingBoxCollidesWith objects, true
+    return false if objects is false
+
+
+    # If a bounding box collision is detected, do a precise collision check with maskCollidesWith
+    # If getCollisionPosition and getCollidingObjects are both false, just return a boolean
+    if not getCollisionPosition and not getCollidingObjects
+      return @maskCollidesWith(objects)
+    else
+
+      # Create an object to return
+      ret =
+        objects: []
+        positions: []
+        combinedPosition: false
+
+
+      # If getCollidingObjects is false, only getCollisionPosition is true. Therefore return an average position of all checked objects
+      if getCollidingObjects is false
+        position = @maskCollidesWith(objects, true)
+        if position
+          ret.positions.push position
+          ret.combinedPosition = position.copy()
+          ret.combinedPosition.pixelCount = 0
+      else
+
+        # If both getCollidingObjects and getCollisionPosition is true, both return an array of objects and positions (this is slower)
+        if getCollisionPosition
+          i = 0
+          while i < objects.length
+            position = @maskCollidesWith(objects[i], true)
+            if position
+              ret.objects.push objects[i]
+              ret.positions.push position
+            i++
+
+          # Calculate a combined position
+          if ret.positions.length
+            ret.combinedPosition = new Engine.Geometry.Vector()
+            ret.combinedPosition.pixelCount = 0
+            ret.positions.forEach (p) ->
+              ret.combinedPosition.add p.scale(p.pixelCount)
+              ret.combinedPosition.pixelCount += p.pixelCount
+              return
+
+            ret.combinedPosition.scale 1 / ret.combinedPosition.pixelCount
+
+        # If only getCollidingObjects is true, return an array of colliding objects
+        else
+          i = 0
+          while i < objects.length
+            ret.objects.push objects[i] if @maskCollidesWith(objects[i])
+            i++
+    if ret.positions.length + ret.objects.length isnt 0
+      ret
+    else
+      false
 
   ###
   Checks for a collision with other objects' rotated BBoxes. The word polygon is used because the check is actually done by using the Polygon object.
@@ -31,15 +115,10 @@ module.exports = class Collidable extends Engine.Views.Sprite
   @param {boolean} getCollidingObjects Whether or not to return an array of colliding objects (is slower because the check cannot stop when a single collission has been detected)
   @return {Object[]|boolean} If getCollidingObjects is set to true, an array of colliding object, else a boolean representing whether or not a collission was detected.
   ###
-  boundingBoxCollidesWith: (objects, getCollidingObjects) ->
+  boundingBoxCollidesWith: (objects, getCollidingObjects = false) ->
     throw new Error("Missing argument: objects") if objects is undefined #dev
     objects = [objects] unless Array::isPrototypeOf(objects)
-    getCollidingObjects = (if getCollidingObjects isnt undefined then getCollidingObjects else false)
-    pol1 = undefined
-    pol2 = undefined
-    i = undefined
-    collidingObjects = undefined
-    obj = undefined
+
     pol1 = @getTransformedBoundingBox()
     collidingObjects = []
     i = 0
@@ -168,19 +247,6 @@ module.exports = class Collidable extends Engine.Views.Sprite
     false
 
   createCollisionBitmap: (objects) ->
-    obj = undefined
-    canvas = undefined
-    mask = undefined
-    c = undefined
-    parents = undefined
-    i = undefined
-    ii = undefined
-    wm = undefined
-    lm = undefined
-    dt = undefined
-    calc = undefined
-    offset = undefined
-
     # Get mask from loader object
     mask = @mask
     calc = Engine.Helpers.MatrixCalculation
@@ -252,89 +318,3 @@ module.exports = class Collidable extends Engine.Views.Sprite
 
     # Return collision image data
     c.getImageData 0, 0, canvas.width, canvas.height
-
-
-  ###
-  A "metafunction" for checking if the Collidable collides with another object of the same type.
-  This function uses boundingBoxCollidesWith for narrowing down the number of objects to check, then uses maskCollidesWith for doing a precise collision check on the remaining objects.
-
-  @param {View.Collidable|View.Collidable[]} objects Target object, or array of target objects
-  @param {boolean} getCollisionPosition If true, the function returns an object representing the position of the detected collision. Defaults to false
-  @param {boolean} getCollidingObjects If true, the function returns all colliding objects
-  @return {Object|boolean} If not getCollisionPosition or getCollidingObjects is true, a boolean representing whether or not a collision was detected. If getCollisionPosition and or getCollidingObjects is true, returns an object of the following type:
-  <code>{
-  "objects": [Array of colliding objects],
-  "positions": [Array of collision positions for each object]
-  "combinedPosition": [The combined position of the collision]
-  }</code>
-
-  If getCollidingObjects is false, the objects-array will be empty and the positions-array will only contain one position which is the average collision position for all colliding objects.
-  If getCollisionPosition is false, the positions-array will be empty
-  If both getCollisionPosition and getCollidingObjects are true, the objects-array will contain all colliding objects, and the positions-array will contain each colliding object's collision position
-  ###
-  collidesWith: (objects, getCollisionPosition, getCollidingObjects) ->
-    throw new Error("Missing argument: objects") if objects is undefined #dev
-    ret = undefined
-    i = undefined
-    position = undefined
-    objects = [objects] unless Array::isPrototypeOf(objects)
-    getCollidingObjects = (if getCollidingObjects isnt undefined then getCollidingObjects else false)
-    return false if @size is 0 or @widthScale is 0 or @heightScale is 0
-
-    # First, do a bounding box based collision check
-    objects = @boundingBoxCollidesWith(objects, true)
-    return false if objects is false
-
-    # If a bounding box collision is detected, do a precise collision check with maskCollidesWith
-    # If getCollisionPosition and getCollidingObjects are both false, just return a boolean
-    if not getCollisionPosition and not getCollidingObjects
-      return @maskCollidesWith(objects)
-    else
-
-      # Create an object to return
-      ret =
-        objects: []
-        positions: []
-        combinedPosition: false
-
-
-      # If getCollidingObjects is false, only getCollisionPosition is true. Therefore return an average position of all checked objects
-      if getCollidingObjects is false
-        position = @maskCollidesWith(objects, true)
-        if position
-          ret.positions.push position
-          ret.combinedPosition = position.copy()
-          ret.combinedPosition.pixelCount = 0
-      else
-
-        # If both getCollidingObjects and getCollisionPosition is true, both return an array of objects and positions (this is slower)
-        if getCollisionPosition
-          i = 0
-          while i < objects.length
-            position = @maskCollidesWith(objects[i], true)
-            if position
-              ret.objects.push objects[i]
-              ret.positions.push position
-            i++
-
-          # Calculate a combined position
-          if ret.positions.length
-            ret.combinedPosition = new Engine.Geometry.Vector()
-            ret.combinedPosition.pixelCount = 0
-            ret.positions.forEach (p) ->
-              ret.combinedPosition.add p.scale(p.pixelCount)
-              ret.combinedPosition.pixelCount += p.pixelCount
-              return
-
-            ret.combinedPosition.scale 1 / ret.combinedPosition.pixelCount
-
-        # If only getCollidingObjects is true, return an array of colliding objects
-        else
-          i = 0
-          while i < objects.length
-            ret.objects.push objects[i] if @maskCollidesWith(objects[i])
-            i++
-    if ret.positions.length + ret.objects.length isnt 0
-      ret
-    else
-      false

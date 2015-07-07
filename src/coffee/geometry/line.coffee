@@ -165,7 +165,6 @@ module.exports = class Line
       object.intersects this
     else #dev
       throw new Error("Argument object should be of type: Line, Rectangle, Circle or Polygon") #dev
-    return #dev
 
   ###
   Calculates the length of the line.

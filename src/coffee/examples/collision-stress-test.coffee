@@ -3,6 +3,7 @@ class CollisionStressTest
     # Make a global reference to the game object
     engine.loader.hideOverlay => @onLoaded()
 
+  onLoaded: ->
     @objectView = new Engine.Views.Container()
     @hudView = new Engine.Views.Container()
     engine.currentRoom.addChildren @objectView, @hudView
@@ -12,16 +13,12 @@ class CollisionStressTest
     @collisionDisplay = new Engine.Views.TextBlock 'Collides: No', 10, 50, 100, {color: '#FFF'}
     @collider = new Engine.Views.Collidable 'Character', 300, 200
 
-    window.collider = @collider
-
     @hudView.addChildren @collider, @fpsCounter, @objectCounter, @collisionDisplay
 
     engine.currentRoom.addLoop 'each20Frames', new Engine.CustomLoop(20)
     engine.currentRoom.loops.each20Frames.attachFunction @, @updateFPS
     engine.currentRoom.loops.eachFrame.attachFunction @, @controls
     engine.currentRoom.loops.eachFrame.attachFunction @, @checkCollision
-
-  onLoaded: ->
     @addObjects 200
 
   checkCollision: ->

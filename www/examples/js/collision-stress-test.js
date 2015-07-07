@@ -8,6 +8,9 @@ CollisionStressTest = (function() {
         return _this.onLoaded();
       };
     })(this));
+  }
+
+  CollisionStressTest.prototype.onLoaded = function() {
     this.objectView = new Engine.Views.Container();
     this.hudView = new Engine.Views.Container();
     engine.currentRoom.addChildren(this.objectView, this.hudView);
@@ -21,15 +24,11 @@ CollisionStressTest = (function() {
       color: '#FFF'
     });
     this.collider = new Engine.Views.Collidable('Character', 300, 200);
-    window.collider = this.collider;
     this.hudView.addChildren(this.collider, this.fpsCounter, this.objectCounter, this.collisionDisplay);
     engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
     engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
     engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
     engine.currentRoom.loops.eachFrame.attachFunction(this, this.checkCollision);
-  }
-
-  CollisionStressTest.prototype.onLoaded = function() {
     return this.addObjects(200);
   };
 
