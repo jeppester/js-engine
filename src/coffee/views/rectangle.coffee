@@ -28,7 +28,7 @@ module.exports = class Rectangle extends Engine.Geometry.Rectangle
   # Mix in Child
   Engine.Helpers.Mixin.mixin @, Engine.Views.Child
 
-  constructor: (x, y, width, height, fillStyle, strokeStyle, lineWidth) ->
+  constructor: (x, y, width = 0, height = 0, fillStyle = "#000", strokeStyle = "#000", lineWidth = 0) ->
     # "Fake" extend child (to get view.child properties)
     Engine.Views.Child.call this
     @renderType = "rectangle"
@@ -41,14 +41,10 @@ module.exports = class Rectangle extends Engine.Geometry.Rectangle
   ###
   @lends View.Rectangle.prototype
   ###
-  RectangleInitWithoutRedrawRegions: (x, y, width, height, fillStyle, strokeStyle, lineWidth) ->
-    hidden = undefined
-    @width = width or 0
-    @height = height or 0
-    @fillStyle = fillStyle or "#000"
-    @strokeStyle = strokeStyle or "#000"
-    hidden = lineWidth: lineWidth or 1
-    Object.defineProperty this, "lineWidth",
+  RectangleInitWithoutRedrawRegions: (@x, @y, @width, @height, @fillStyle, @strokeStyle, lineWidth)->
+    hidden =
+      lineWidth: lineWidth
+    Object.defineProperty @, "lineWidth",
       get: ->
         hidden.lineWidth
 
@@ -57,19 +53,15 @@ module.exports = class Rectangle extends Engine.Geometry.Rectangle
           hidden.lineWidth = value
           @offset = @offsetGlobal if @offsetGlobal
         return
-
-    @set x, y, width, height
     return
 
   RectangleInitWithRedrawRegions: (x, y, width, height, fillStyle, strokeStyle, lineWidth) ->
-    hidden = undefined
     hidden =
-      width: width or 0
-      height: height or 0
-      fillStyle: fillStyle or "#000"
-      strokeStyle: strokeStyle or "#000"
-      lineWidth: lineWidth or 1
-
+      width: width
+      height: height
+      fillStyle: fillStyle
+      strokeStyle: strokeStyle
+      lineWidth: lineWidth
 
     # Put getters and setters on points values
     Object.defineProperty this, "width",

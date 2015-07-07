@@ -1,11 +1,8 @@
 Engine = require '../engine'
 
 module.exports = class CanvasRenderer
-  constructor: (canvas) ->
-    gl = undefined
-    options = undefined
-    @canvas = canvas
-    @context = canvas.getContext("2d")
+  constructor: (@canvas) ->
+    @context = @canvas.getContext("2d")
     return
 
   render: (cameras) ->
@@ -110,10 +107,11 @@ module.exports = class CanvasRenderer
     c.fillStyle = object.fillStyle
     c.beginPath()
     c.arc 0, 0, object.radius, 0, Math.PI * 2, true
-    c.lineWidth = object.lineWidth
     c.globalAlpha = object.opacity
     c.fill()
-    c.stroke()
+    if object.lineWidth
+      c.lineWidth = object.lineWidth
+      c.stroke()
     return
 
   ###
@@ -138,10 +136,10 @@ module.exports = class CanvasRenderer
     if object.closed
       c.closePath()
       c.fill()
-      c.stroke()
+      c.stroke() if object.lineWidth
     else
       c.fill()
-      c.stroke()
+      c.stroke() if object.lineWidth
       c.closePath()
     return
 
@@ -178,7 +176,8 @@ module.exports = class CanvasRenderer
     c.lineTo object.width, object.height
     c.lineTo 0, object.height
     c.closePath()
-    c.lineWidth = object.lineWidth
     c.fill()
-    c.stroke()
+    if object.lineWidth
+      c.lineWidth = object.lineWidth
+      c.stroke()
     return

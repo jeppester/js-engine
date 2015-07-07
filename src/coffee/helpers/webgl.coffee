@@ -1,8 +1,5 @@
 module.exports = WebGLHelper =
   colorFromCSSString: (string) ->
-    a = undefined
-    b = undefined
-    c = undefined
     if string.length is 4
       a = string.substr(1, 1)
       b = string.substr(2, 1)
@@ -18,18 +15,12 @@ module.exports = WebGLHelper =
     y1 = y
     y2 = y + height
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
-      x1
-      y1
-      x2
-      y1
-      x1
-      y2
-      x1
-      y2
-      x2
-      y1
-      x2
-      y2
+      x1, y1
+      x2, y1
+      x1, y2
+      x1, y2
+      x2, y1
+      x2, y2
     ]), gl.STATIC_DRAW
     return
 

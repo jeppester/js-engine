@@ -26,7 +26,7 @@ module.exports = class Circle extends Engine.Geometry.Circle
   # Mix in Child
   Engine.Helpers.Mixin.mixin @, Engine.Views.Child
 
-  constructor: (x, y, radius, fillStyle, strokeStyle, lineWidth) ->
+  constructor: (x, y, radius, fillStyle = "#000", strokeStyle = "#000", lineWidth = 0)->
     Engine.Views.Child.call this
 
     @renderType = "circle"
@@ -36,21 +36,16 @@ module.exports = class Circle extends Engine.Geometry.Circle
       @CircleInitWithoutRedrawRegions x, y, radius, fillStyle, strokeStyle, lineWidth
     return
 
-  CircleInitWithoutRedrawRegions: (x, y, radius, fillStyle, strokeStyle, lineWidth) ->
-    @radius = radius
-    @fillStyle = fillStyle or "#000"
-    @strokeStyle = strokeStyle or "#000"
-    @lineWidth = lineWidth or 1
+  CircleInitWithoutRedrawRegions: (x, y, radius, @fillStyle, @strokeStyle, @lineWidth)->
     @set x, y, radius
     return
 
-  CircleInitWithRedrawRegions: (x, y, radius, fillStyle, strokeStyle, lineWidth) ->
-    hidden = undefined
+  CircleInitWithRedrawRegions: (x, y, radius, fillStyle, strokeStyle, lineWidth)->
     hidden =
       radius: radius
-      fillStyle: fillStyle or "#000"
-      strokeStyle: strokeStyle or "#000"
-      lineWidth: lineWidth or 1
+      fillStyle: fillStyle
+      strokeStyle: strokeStyle
+      lineWidth: lineWidth
 
     # Put getters and setters on points values
     Object.defineProperty this, "radius",

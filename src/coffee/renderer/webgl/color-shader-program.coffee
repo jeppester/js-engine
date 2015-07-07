@@ -71,7 +71,6 @@ module.exports = class WebGLColorShaderProgram
     return
 
   initBuffers: (gl) ->
-
     # Vertex buffer
     @vertexBuffer = gl.createBuffer()
     return
@@ -121,7 +120,6 @@ module.exports = class WebGLColorShaderProgram
     return
 
   renderRectangle: (gl, object, wm) ->
-    l = undefined
     l = @locations
 
     # Set matrix (it is the same for both fill and stroke)
@@ -129,9 +127,8 @@ module.exports = class WebGLColorShaderProgram
 
     # Draw fill
     if object.fillStyle isnt "transparent"
-
       # Set color
-      gl.uniform1i l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.fillStyle)
+      gl.uniform1i l.u_color, Engine.Helpers.WebGL.colorFromCSSString object.fillStyle
 
       # Set geometry (no need to set x and y as they already in the world matrix)
       Engine.Helpers.WebGL.setPlane gl, 0, 0, object.width, object.height
@@ -141,11 +138,10 @@ module.exports = class WebGLColorShaderProgram
 
     # Draw stroke (if not transparent)
     if object.strokeStyle isnt "transparent"
-
       # Set color
       gl.uniform1i l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.strokeStyle)
 
-      # Set geometry (no need to set x and y as they already in the world matrix)
+      # Set geometry (no need to set x and y as they are already included in the world matrix)
       Engine.Helpers.WebGL.setPlaneOutline gl, 0, 0, object.width, object.height, object.lineWidth
 
       # Draw

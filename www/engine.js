@@ -2587,15 +2587,14 @@ module.exports = Room = (function(superClass) {
    */
 
   Room.prototype.update = function() {
-    var i;
+    var l, name, ref;
     if (this.paused) {
       return;
     }
-    i = void 0;
-    for (i in this.loops) {
-      if (this.loops.hasOwnProperty(i)) {
-        this.loops[i].execute();
-      }
+    ref = this.loops;
+    for (name in ref) {
+      l = ref[name];
+      l.execute();
     }
   };
 
@@ -4517,9 +4516,6 @@ var WebGLHelper;
 module.exports = WebGLHelper = {
   colorFromCSSString: function(string) {
     var a, b, c;
-    a = void 0;
-    b = void 0;
-    c = void 0;
     if (string.length === 4) {
       a = string.substr(1, 1);
       b = string.substr(2, 1);
@@ -5644,11 +5640,8 @@ Engine = require('../engine');
 
 module.exports = CanvasRenderer = (function() {
   function CanvasRenderer(canvas) {
-    var gl, options;
-    gl = void 0;
-    options = void 0;
     this.canvas = canvas;
-    this.context = canvas.getContext("2d");
+    this.context = this.canvas.getContext("2d");
     return;
   }
 
@@ -5760,10 +5753,12 @@ module.exports = CanvasRenderer = (function() {
     c.fillStyle = object.fillStyle;
     c.beginPath();
     c.arc(0, 0, object.radius, 0, Math.PI * 2, true);
-    c.lineWidth = object.lineWidth;
     c.globalAlpha = object.opacity;
     c.fill();
-    c.stroke();
+    if (object.lineWidth) {
+      c.lineWidth = object.lineWidth;
+      c.stroke();
+    }
   };
 
 
@@ -5794,10 +5789,14 @@ module.exports = CanvasRenderer = (function() {
     if (object.closed) {
       c.closePath();
       c.fill();
-      c.stroke();
+      if (object.lineWidth) {
+        c.stroke();
+      }
     } else {
       c.fill();
-      c.stroke();
+      if (object.lineWidth) {
+        c.stroke();
+      }
       c.closePath();
     }
   };
@@ -5841,9 +5840,11 @@ module.exports = CanvasRenderer = (function() {
     c.lineTo(object.width, object.height);
     c.lineTo(0, object.height);
     c.closePath();
-    c.lineWidth = object.lineWidth;
     c.fill();
-    c.stroke();
+    if (object.lineWidth) {
+      c.lineWidth = object.lineWidth;
+      c.stroke();
+    }
   };
 
   return CanvasRenderer;
@@ -5878,7 +5879,7 @@ module.exports = WebGLRenderer = (function() {
       premultipliedAlpha: false,
       alpha: false
     };
-    this.gl = canvas.getContext("webgl", options) || canvas.getContext("experimental-webgl", options);
+    this.gl = this.canvas.getContext("webgl", options) || this.canvas.getContext("experimental-webgl", options);
     gl = this.gl;
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -6068,7 +6069,6 @@ module.exports = WebGLColorShaderProgram = (function() {
 
   WebGLColorShaderProgram.prototype.renderRectangle = function(gl, object, wm) {
     var l;
-    l = void 0;
     l = this.locations;
     gl.uniformMatrix3fv(l.u_matrix, false, wm);
     if (object.fillStyle !== "transparent") {
@@ -6914,6 +6914,15 @@ module.exports = Circle = (function(superClass) {
   Engine.Helpers.Mixin.mixin(Circle, Engine.Views.Child);
 
   function Circle(x, y, radius, fillStyle, strokeStyle, lineWidth) {
+    if (fillStyle == null) {
+      fillStyle = "#000";
+    }
+    if (strokeStyle == null) {
+      strokeStyle = "#000";
+    }
+    if (lineWidth == null) {
+      lineWidth = 0;
+    }
     Engine.Views.Child.call(this);
     this.renderType = "circle";
     if (engine.enableRedrawRegions) {
@@ -6924,22 +6933,20 @@ module.exports = Circle = (function(superClass) {
     return;
   }
 
-  Circle.prototype.CircleInitWithoutRedrawRegions = function(x, y, radius, fillStyle, strokeStyle, lineWidth) {
-    this.radius = radius;
-    this.fillStyle = fillStyle || "#000";
-    this.strokeStyle = strokeStyle || "#000";
-    this.lineWidth = lineWidth || 1;
+  Circle.prototype.CircleInitWithoutRedrawRegions = function(x, y, radius, fillStyle1, strokeStyle1, lineWidth1) {
+    this.fillStyle = fillStyle1;
+    this.strokeStyle = strokeStyle1;
+    this.lineWidth = lineWidth1;
     this.set(x, y, radius);
   };
 
   Circle.prototype.CircleInitWithRedrawRegions = function(x, y, radius, fillStyle, strokeStyle, lineWidth) {
     var hidden;
-    hidden = void 0;
     hidden = {
       radius: radius,
-      fillStyle: fillStyle || "#000",
-      strokeStyle: strokeStyle || "#000",
-      lineWidth: lineWidth || 1
+      fillStyle: fillStyle,
+      strokeStyle: strokeStyle,
+      lineWidth: lineWidth
     };
     Object.defineProperty(this, "radius", {
       get: function() {
@@ -8046,12 +8053,12 @@ module.exports = Polygon = (function(superClass) {
   Engine.Helpers.Mixin.mixin(Polygon, Engine.Views.Child);
 
   function Polygon(points, fillStyle, strokeStyle, lineWidth) {
+    this.fillStyle = fillStyle != null ? fillStyle : '#000';
+    this.strokeStyle = strokeStyle != null ? strokeStyle : "#000";
+    this.lineWidth = lineWidth != null ? lineWidth : 0;
     Engine.Views.Child.call(this);
     this.renderType = "polygon";
     this.setFromPoints(points);
-    this.fillStyle = fillStyle || "#000";
-    this.strokeStyle = strokeStyle || "#000";
-    this.lineWidth = lineWidth || 1;
     this.opacity = 1;
     this.closed = 1;
     this.lineDash = [];
@@ -8123,6 +8130,21 @@ module.exports = Rectangle = (function(superClass) {
   Engine.Helpers.Mixin.mixin(Rectangle, Engine.Views.Child);
 
   function Rectangle(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
+    if (width == null) {
+      width = 0;
+    }
+    if (height == null) {
+      height = 0;
+    }
+    if (fillStyle == null) {
+      fillStyle = "#000";
+    }
+    if (strokeStyle == null) {
+      strokeStyle = "#000";
+    }
+    if (lineWidth == null) {
+      lineWidth = 0;
+    }
     Engine.Views.Child.call(this);
     this.renderType = "rectangle";
     if (engine.enableRedrawRegions) {
@@ -8138,15 +8160,16 @@ module.exports = Rectangle = (function(superClass) {
   @lends View.Rectangle.prototype
    */
 
-  Rectangle.prototype.RectangleInitWithoutRedrawRegions = function(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
+  Rectangle.prototype.RectangleInitWithoutRedrawRegions = function(x1, y1, width1, height1, fillStyle1, strokeStyle1, lineWidth) {
     var hidden;
-    hidden = void 0;
-    this.width = width || 0;
-    this.height = height || 0;
-    this.fillStyle = fillStyle || "#000";
-    this.strokeStyle = strokeStyle || "#000";
+    this.x = x1;
+    this.y = y1;
+    this.width = width1;
+    this.height = height1;
+    this.fillStyle = fillStyle1;
+    this.strokeStyle = strokeStyle1;
     hidden = {
-      lineWidth: lineWidth || 1
+      lineWidth: lineWidth
     };
     Object.defineProperty(this, "lineWidth", {
       get: function() {
@@ -8161,18 +8184,16 @@ module.exports = Rectangle = (function(superClass) {
         }
       }
     });
-    this.set(x, y, width, height);
   };
 
   Rectangle.prototype.RectangleInitWithRedrawRegions = function(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
     var hidden;
-    hidden = void 0;
     hidden = {
-      width: width || 0,
-      height: height || 0,
-      fillStyle: fillStyle || "#000",
-      strokeStyle: strokeStyle || "#000",
-      lineWidth: lineWidth || 1
+      width: width,
+      height: height,
+      fillStyle: fillStyle,
+      strokeStyle: strokeStyle,
+      lineWidth: lineWidth
     };
     Object.defineProperty(this, "width", {
       get: function() {

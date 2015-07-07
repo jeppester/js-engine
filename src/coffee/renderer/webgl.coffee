@@ -3,9 +3,7 @@ TextureShaderProgram = require './webgl/texture-shader-program'
 ColorShaderProgram = require './webgl/color-shader-program'
 
 module.exports = class WebGLRenderer
-  constructor: (canvas) ->
-    @canvas = canvas
-
+  constructor: (@canvas) ->
     # Cache variables
     @cache =
       currentAlpha: undefined
@@ -21,7 +19,7 @@ module.exports = class WebGLRenderer
       premultipliedAlpha: false
       alpha: false
 
-    @gl = canvas.getContext("webgl", options) or canvas.getContext("experimental-webgl", options)
+    @gl = @canvas.getContext("webgl", options) or @canvas.getContext("experimental-webgl", options)
     gl = @gl
 
     # Optimize options
@@ -84,7 +82,6 @@ module.exports = class WebGLRenderer
       roomsLength = rooms.length
       ii = 0
       while ii < roomsLength
-
         # Draw rooms
         @renderTree rooms[ii], wm
         ii++

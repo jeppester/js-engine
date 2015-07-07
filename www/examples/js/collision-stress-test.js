@@ -14,13 +14,13 @@ CollisionStressTest = (function() {
     this.objectView = new Engine.Views.Container();
     this.hudView = new Engine.Views.Container();
     engine.currentRoom.addChildren(this.objectView, this.hudView);
-    this.fpsCounter = new Engine.Views.TextBlock('FPS: 0', 10, 10, 100, {
+    this.fpsCounter = new Engine.Views.TextBlock('FPS: 0', 10, 10, 150, {
       color: '#FFF'
     });
-    this.objectCounter = new Engine.Views.TextBlock('Objects: 0', 10, 30, 100, {
+    this.objectCounter = new Engine.Views.TextBlock('Objects: 0', 10, 30, 150, {
       color: '#FFF'
     });
-    this.collisionDisplay = new Engine.Views.TextBlock('Collides: No', 10, 50, 100, {
+    this.collisionDisplay = new Engine.Views.TextBlock('Collides: No', 10, 50, 150, {
       color: '#FFF'
     });
     this.collider = new Engine.Views.Collidable('Character', 300, 200);

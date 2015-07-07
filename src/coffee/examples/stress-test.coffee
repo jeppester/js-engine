@@ -6,8 +6,8 @@ class StressTest
     @hudView = new Engine.Views.Container()
     engine.currentRoom.addChildren @objectView, @hudView
 
-    @fpsCounter = new Engine.Views.TextBlock 'FPS: 0', 10, 10, 100, {color: '#FFF'}
-    @objectCounter = new Engine.Views.TextBlock 'Objects: 0', 10, 30, 100, {color: '#FFF'}
+    @fpsCounter = new Engine.Views.TextBlock 'FPS: 0', 10, 10, 150, {color: '#FFF'}
+    @objectCounter = new Engine.Views.TextBlock 'Objects: 0', 10, 30, 150, {color: '#FFF'}
     @hudView.addChildren @fpsCounter, @objectCounter
 
     engine.currentRoom.addLoop 'each20Frames', new Engine.CustomLoop(20)

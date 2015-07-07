@@ -22,14 +22,11 @@ module.exports = class Polygon extends Engine.Geometry.Polygon
   # Mix in Child
   Engine.Helpers.Mixin.mixin @, Engine.Views.Child
 
-  constructor: (points, fillStyle, strokeStyle, lineWidth) ->
+  constructor: (points, @fillStyle = '#000', @strokeStyle = "#000", @lineWidth = 0) ->
     # "Fake" extend child (to get view.child properties)
     Engine.Views.Child.call @
     @renderType = "polygon"
     @setFromPoints points
-    @fillStyle = fillStyle or "#000"
-    @strokeStyle = strokeStyle or "#000"
-    @lineWidth = lineWidth or 1
     @opacity = 1
     @closed = 1
     @lineDash = []

@@ -47,7 +47,7 @@ new Engine
 	# Set themes to load
 	themes: ['Example']
 
-	#disableWebGL: true,
+	disableWebGL: true,
 
 	# Set resolution of the game
 	canvasResX: 600

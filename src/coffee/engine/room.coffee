@@ -20,7 +20,7 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 @param {function} [onLeft=function () {}] A function to run when the room is left
 ###
 module.exports = class Room extends Engine.Views.Container
-  constructor: (name, onEntered, onLeft) ->
+  constructor: (name, onEntered, onLeft)->
     super()
     @name = (if name then name else engine.roomList.length)
     @onEntered = (if onEntered isnt undefined then onEntered else ->)
@@ -52,9 +52,8 @@ module.exports = class Room extends Engine.Views.Container
   ###
   update: ->
     return if @paused
-    i = undefined
-    for i of @loops
-      @loops[i].execute() if @loops.hasOwnProperty(i)
+    for name, l of @loops
+      l.execute()
     return
 
   ###
@@ -64,7 +63,7 @@ module.exports = class Room extends Engine.Views.Container
   @param {string} name The name the use for the custom loop in the room. When added the loop can be accessed with: [The room].loops[name]
   @param {Engine.CustomLoop} loop The loop to add
   ###
-  addLoop: (name, loop_) ->
+  addLoop: (name, loop_)->
     throw new Error("Missing argument: loop") if loop_ is undefined #dev
     throw new Error("Missing argument: name") if name is undefined #dev
     throw new Error("Name is taken: " + name) if @loops[name] isnt undefined #dev
