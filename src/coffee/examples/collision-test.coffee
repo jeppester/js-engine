@@ -32,8 +32,8 @@ class CollisionObject extends Engine.Views.GameObject
     @speed.y += engine.convertSpeed 100 if engine.keyboard.isDown @downKey
 
   collisionCheck: ->
-    if collision = @collidesWith window.balls, true, true
-      for ball, i in col.objects
+    if collision = @collidesWith window.rocks, true, true
+      for rock, i in collision.objects
         colPos = collision.positions[i]
 
         # Move to contact position
@@ -41,13 +41,13 @@ class CollisionObject extends Engine.Views.GameObject
           @x += Math.cos colPos.getDirection() - Math.PI
           @y += Math.sin colPos.getDirection() - Math.PI
 
-          ball.x += Math.cos colPos.getDirection()
-          ball.y += Math.sin colPos.getDirection()
+          rock.x += Math.cos colPos.getDirection()
+          rock.y += Math.sin colPos.getDirection()
 
-          break if @collidesWith ball, true
+          break unless @collidesWith(rock, true)
 
-        speed = ball.speed.getLength()
-        ball.speed.setFromDirection colPos.getDirection(), speed
+        speed = rock.speed.getLength()
+        rock.speed.setFromDirection colPos.getDirection(), speed
         @speed.setFromDirection colPos.getDirection() - Math.PI, speed
 
     # Bounce against borders
@@ -74,8 +74,8 @@ class CollisionTest
     engine.currentRoom.addLoop 'collisionChecking', new Engine.CustomLoop(5)
 
     # Make two collision objects
-    window.balls = []
-    this.addBalls 15
+    window.rocks = []
+    this.addRocks 15
 
     player = new CollisionObject(
       "Character"
@@ -94,16 +94,16 @@ class CollisionTest
     # Hide loader overlay
     engine.loader.hideOverlay()
 
-  addBalls: (number = 1)->
+  addRocks: (number = 1)->
     for i in [0...number]
-      ball = new CollisionObject(
+      rock = new CollisionObject(
         "Rock"
         20 + Math.random() * 560 # x-position
         20 + Math.random() * 360 # y-position
       )
-      ball.speed.setFromDirection Math.PI * 2 * Math.random(), 150
-      window.balls.push ball
-      engine.currentRoom.addChildren ball
+      rock.speed.setFromDirection Math.PI * 2 * Math.random(), 150
+      window.rocks.push rock
+      engine.currentRoom.addChildren rock
 
 # Start engine
 new Engine

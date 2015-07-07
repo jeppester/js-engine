@@ -30,23 +30,23 @@ CollisionObject = (function(superClass) {
   };
 
   CollisionObject.prototype.collisionCheck = function() {
-    var ball, colPos, collision, i, j, len, ref, speed;
-    if (collision = this.collidesWith(window.balls, true, true)) {
-      ref = col.objects;
+    var colPos, collision, i, j, len, ref, rock, speed;
+    if (collision = this.collidesWith(window.rocks, true, true)) {
+      ref = collision.objects;
       for (i = j = 0, len = ref.length; j < len; i = ++j) {
-        ball = ref[i];
+        rock = ref[i];
         colPos = collision.positions[i];
         while (true) {
           this.x += Math.cos(colPos.getDirection() - Math.PI);
           this.y += Math.sin(colPos.getDirection() - Math.PI);
-          ball.x += Math.cos(colPos.getDirection());
-          ball.y += Math.sin(colPos.getDirection());
-          if (this.collidesWith(ball, true)) {
+          rock.x += Math.cos(colPos.getDirection());
+          rock.y += Math.sin(colPos.getDirection());
+          if (!this.collidesWith(rock, true)) {
             break;
           }
         }
-        speed = ball.speed.getLength();
-        ball.speed.setFromDirection(colPos.getDirection(), speed);
+        speed = rock.speed.getLength();
+        rock.speed.setFromDirection(colPos.getDirection(), speed);
         this.speed.setFromDirection(colPos.getDirection() - Math.PI, speed);
       }
     }
@@ -76,8 +76,8 @@ CollisionTest = (function() {
   function CollisionTest() {
     var player;
     engine.currentRoom.addLoop('collisionChecking', new Engine.CustomLoop(5));
-    window.balls = [];
-    this.addBalls(15);
+    window.rocks = [];
+    this.addRocks(15);
     player = new CollisionObject("Character", 200, 100, {
       upKey: Engine.Globals.KEY_UP,
       downKey: Engine.Globals.KEY_DOWN,
@@ -88,17 +88,17 @@ CollisionTest = (function() {
     engine.loader.hideOverlay();
   }
 
-  CollisionTest.prototype.addBalls = function(number) {
-    var ball, i, j, ref, results;
+  CollisionTest.prototype.addRocks = function(number) {
+    var i, j, ref, results, rock;
     if (number == null) {
       number = 1;
     }
     results = [];
     for (i = j = 0, ref = number; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-      ball = new CollisionObject("Rock", 20 + Math.random() * 560, 20 + Math.random() * 360);
-      ball.speed.setFromDirection(Math.PI * 2 * Math.random(), 150);
-      window.balls.push(ball);
-      results.push(engine.currentRoom.addChildren(ball));
+      rock = new CollisionObject("Rock", 20 + Math.random() * 560, 20 + Math.random() * 360);
+      rock.speed.setFromDirection(Math.PI * 2 * Math.random(), 150);
+      window.rocks.push(rock);
+      results.push(engine.currentRoom.addChildren(rock));
     }
     return results;
   };
