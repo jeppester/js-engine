@@ -60,7 +60,7 @@ class CollisionStressTest
       @removeObjects()
 
     # When clicking somewhere, move the collision object to that position
-    pointers = engine.pointer.isDown Engine.Globals.MOUSE_TOUCH_ANY
+    pointers = engine.pointer.isPressed(Engine.Globals.MOUSE_TOUCH_ANY) || engine.pointer.isDown(Engine.Globals.MOUSE_TOUCH_ANY)
     if pointers
       @collider.x = pointers[0].x
       @collider.y = pointers[0].y

@@ -81,7 +81,7 @@ CollisionStressTest = (function() {
     if (engine.keyboard.isDown(Engine.Globals.KEY_DOWN)) {
       this.removeObjects();
     }
-    pointers = engine.pointer.isDown(Engine.Globals.MOUSE_TOUCH_ANY);
+    pointers = engine.pointer.isPressed(Engine.Globals.MOUSE_TOUCH_ANY) || engine.pointer.isDown(Engine.Globals.MOUSE_TOUCH_ANY);
     if (pointers) {
       this.collider.x = pointers[0].x;
       return this.collider.y = pointers[0].y;
