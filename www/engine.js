@@ -7184,10 +7184,6 @@ module.exports = Collidable = (function(superClass) {
 
   Collidable.prototype.getTransformedBoundingBox = function() {
     var box, i, parent, parents;
-    box = void 0;
-    parents = void 0;
-    parent = void 0;
-    i = void 0;
     box = this.mask.bBox.copy().move(-this.offset.x, -this.offset.y);
     parents = this.getParents();
     parents.unshift(this);
@@ -7223,20 +7219,10 @@ module.exports = Collidable = (function(superClass) {
    */
 
   Collidable.prototype.maskCollidesWith = function(objects, getCollisionPosition) {
-    var avX, avY, bitmap, i, length, pixel, pxArr, retVector, x, y;
+    var avX, avY, bitmap, length, pixel, pxArr, retVector, x, y;
     if (objects === void 0) {
       throw new Error("Missing argument: objects");
     }
-    bitmap = void 0;
-    i = void 0;
-    length = void 0;
-    pixel = void 0;
-    pxArr = void 0;
-    x = void 0;
-    y = void 0;
-    avX = void 0;
-    avY = void 0;
-    retVector = void 0;
     if (!Array.prototype.isPrototypeOf(objects)) {
       objects = [objects];
     }
@@ -7309,6 +7295,7 @@ module.exports = Collidable = (function(superClass) {
     canvas = document.createElement("canvas");
     canvas.width = Math.ceil(this.clipWidth);
     canvas.height = Math.ceil(this.clipHeight);
+    canvas.id = 'colCanvas';
     c = canvas.getContext("2d");
     c.fillStyle = "#FFF";
     c.fillRect(0, 0, canvas.width, canvas.height);

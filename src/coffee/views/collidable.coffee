@@ -140,10 +140,6 @@ module.exports = class Collidable extends Engine.Views.Sprite
       false
 
   getTransformedBoundingBox: ->
-    box = undefined
-    parents = undefined
-    parent = undefined
-    i = undefined
     box = @mask.bBox.copy().move(-@offset.x, -@offset.y)
     parents = @getParents()
     parents.unshift this
@@ -155,7 +151,6 @@ module.exports = class Collidable extends Engine.Views.Sprite
       box.move parent.x, parent.y if parent.x isnt 0 or parent.y isnt 0
       i++
     box
-
 
   ###
   Checks for a mask based collisions with other Collidable objects.
@@ -171,16 +166,6 @@ module.exports = class Collidable extends Engine.Views.Sprite
   ###
   maskCollidesWith: (objects, getCollisionPosition) ->
     throw new Error("Missing argument: objects") if objects is undefined #dev
-    bitmap = undefined
-    i = undefined
-    length = undefined
-    pixel = undefined
-    pxArr = undefined
-    x = undefined
-    y = undefined
-    avX = undefined
-    avY = undefined
-    retVector = undefined
     objects = [objects] unless Array::isPrototypeOf(objects)
     getCollisionPosition = (if getCollisionPosition isnt undefined then getCollisionPosition else false)
     bitmap = @createCollisionBitmap(objects)
@@ -257,12 +242,12 @@ module.exports = class Collidable extends Engine.Views.Sprite
     canvas.height = Math.ceil(@clipHeight)
 
     # Add canvas for debugging
-    #canvas.id = 'colCanvas';
-    #		if (document.getElementById('colCanvas')) {
-    #			document.body.removeChild(document.getElementById('colCanvas'));
-    #		}
-    #		document.body.appendChild(canvas);/*
-    c = canvas.getContext("2d")
+    canvas.id = 'colCanvas'
+    # if document.getElementById 'colCanvas'
+    #   document.body.removeChild document.getElementById('colCanvas')
+    # document.body.appendChild canvas
+
+    c = canvas.getContext "2d"
     c.fillStyle = "#FFF"
     c.fillRect 0, 0, canvas.width, canvas.height
     parents = @getParents()

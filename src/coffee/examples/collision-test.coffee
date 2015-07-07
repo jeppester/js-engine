@@ -75,7 +75,7 @@ class CollisionTest
 
     # Make two collision objects
     window.rocks = []
-    this.addRocks 15
+    @addRocks 15
 
     player = new CollisionObject(
       "Character"
