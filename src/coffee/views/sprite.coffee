@@ -1,19 +1,12 @@
-module.exports = -> c.apply @, arguments
-
 Helpers =
   Mixin: require '../helpers/mixin'
 
 Mixins =
   Animatable: require '../mixins/animatable'
 
-Geometry =
-  Vector: require '../geometry/vector'
-  Rectangle: require '../geometry/rectangle'
-
 Views =
   Container: require './container'
 
-Globals = require '../engine/globals'
 
 ###
 The constructor for Sprite objects.
@@ -49,7 +42,7 @@ composite: 'source-over',
 offset: new Math.Vector('center', 'center')
 }</code>
 ###
-c = class Sprite extends Views.Container
+module.exports = class Sprite extends Views.Container
   # Mix in animatable
   Helpers.Mixin.mixin @, Mixins.Animatable
 
@@ -237,6 +230,8 @@ c = class Sprite extends Views.Container
     box.height = Math.ceil(box.height + 1)
     box
 
-module.exports:: = c::
+Geometry =
+  Vector: require '../geometry/vector'
+  Rectangle: require '../geometry/rectangle'
 
-module.exports[name] = value for name, value of c
+Globals = require '../engine/globals'

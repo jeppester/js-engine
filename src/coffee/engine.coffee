@@ -1,5 +1,3 @@
-module.exports = -> c.apply @, arguments
-
 ###
 The constructor for the Engine class.
 
@@ -62,7 +60,7 @@ The default options are:
 "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
 ###
-c = window.Engine = class Engine
+module.exports = window.JSEngine = class Engine
   # Load classes for easy usage
   @Helpers:
     MatrixCalculation: require './helpers/matrix-calculation'
@@ -70,19 +68,19 @@ c = window.Engine = class Engine
     RoomTransition: require './helpers/room-transition'
     WebGL: require './helpers/webgl'
 
+  @Geometry:
+    Vector: require './geometry/vector'
+    Circle: require './geometry/circle'
+    Line: require './geometry/line'
+    Rectangle: require './geometry/rectangle'
+    Polygon: require './geometry/polygon'
+
   @Mixins:
     Animatable: require './mixins/animatable'
 
   @Input:
     Keyboard: require './input/keyboard'
     Pointer: require './input/pointer'
-
-  @Geometry:
-    Vector: require './geometry/vector'
-    Circle: require './geometry/circle'
-    Line: require './geometry/line'
-    Polygon: require './geometry/polygon'
-    Rectangle: require './geometry/rectangle'
 
   @Renderers:
     WebGLRenderer: require './renderer/webgl'
@@ -780,7 +778,3 @@ c = window.Engine = class Engine
     a.click()
     document.body.removeChild a, document.body
     return
-
-module.exports:: = c::
-
-module.exports[name] = value for name, value of c

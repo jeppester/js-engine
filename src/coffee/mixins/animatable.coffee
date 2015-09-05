@@ -1,6 +1,4 @@
-module.exports = -> c.apply @, arguments
-
-c = class Animatable
+module.exports = class Animatable
   ###
   Used for animating numeric properties of the owner of the function.
   Available easing functions are:
@@ -37,7 +35,7 @@ c = class Animatable
     loop_ = (if options.loop isnt undefined then options.loop else ((if @loop isnt undefined then @loop else engine.defaultAnimationLoop)))
     anim.callback = (if opt.callback isnt undefined then opt.callback else ->
     )
-    anim.easing = (if opt.easing isnt undefined then opt.easing else Engine.Globals.EASING_QUAD_IN_OUT)
+    anim.easing = (if opt.easing isnt undefined then opt.easing else Globals.EASING_QUAD_IN_OUT)
     anim.duration = (if opt.duration isnt undefined then opt.duration else 1000)
     anim.onStep = (if opt.onStep isnt undefined then opt.onStep else ->
     )
@@ -153,6 +151,4 @@ c = class Animatable
     room.loops[loopName].schedule this, func, delay
     return
 
-module.exports:: = c::
-
-module.exports[name] = value for name, value of c
+Globals = require '../engine/globals'

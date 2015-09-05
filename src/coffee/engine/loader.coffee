@@ -1,12 +1,3 @@
-module.exports = -> c.apply @, arguments
-
-Sounds =
-  Music: require '../sounds/music'
-  Effect: require '../sounds/effect'
-
-Geometry =
-  Rectangle: require '../geometry/rectangle'
-
 ###
 Constructor for the Loader class.
 This function will also create a load overlay which will not disappear until the hideOverlay is called.
@@ -17,7 +8,7 @@ Therefore, remember to call hideOverlay, when your game is ready to be shown.
 On engine startup a Loader object is instantiated to the global variable "loader".
 This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
 ###
-c = class Loader
+module.exports = class Loader
   constructor: ->
     @images = {}
     @loaded = classes: []
@@ -523,6 +514,9 @@ c = class Loader
       return true
     false
 
-module.exports:: = c::
+Sounds =
+  Music: require '../sounds/music'
+  Effect: require '../sounds/effect'
 
-module.exports[name] = value for name, value of c
+Geometry =
+  Rectangle: require '../geometry/rectangle'

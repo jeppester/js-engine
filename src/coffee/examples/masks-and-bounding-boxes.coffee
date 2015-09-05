@@ -38,7 +38,7 @@ class MasksAndBBoxes
     engine.currentRoom.loops.eachFrame.attachFunction object, object.checkCollision
     engine.currentRoom.addChildren object, object2, text
 
-new Engine
+new JSEngine
 	# Set main class
 	gameClass: MasksAndBBoxes
 

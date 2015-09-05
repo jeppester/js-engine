@@ -12,19 +12,19 @@ MovableCharacter = (function(_super) {
   }
 
   MovableCharacter.prototype.step = function() {
-    if (engine.keyboard.isDown(Engine.Globals.KEY_LEFT)) {
+    if (engine.keyboard.isDown(JSEngine.Globals.KEY_LEFT)) {
       this.x -= engine.convertSpeed(200);
     }
-    if (engine.keyboard.isDown(Engine.Globals.KEY_RIGHT)) {
+    if (engine.keyboard.isDown(JSEngine.Globals.KEY_RIGHT)) {
       this.x += engine.convertSpeed(200);
     }
-    if (engine.keyboard.isDown(Engine.Globals.KEY_UP)) {
+    if (engine.keyboard.isDown(JSEngine.Globals.KEY_UP)) {
       this.y -= engine.convertSpeed(200);
     }
-    if (engine.keyboard.isDown(Engine.Globals.KEY_DOWN)) {
+    if (engine.keyboard.isDown(JSEngine.Globals.KEY_DOWN)) {
       this.y += engine.convertSpeed(200);
     }
-    if (engine.keyboard.isPressed(Engine.Globals.KEY_SPACE)) {
+    if (engine.keyboard.isPressed(JSEngine.Globals.KEY_SPACE)) {
       return this.animate({
         direction: this.direction + Math.PI * 2
       }, {
@@ -35,9 +35,9 @@ MovableCharacter = (function(_super) {
 
   return MovableCharacter;
 
-})(Engine.Views.Sprite);
+})(JSEngine.Views.Sprite);
 
-Engine.ObjectCreator.prototype.MovableCharacter = function(x, y) {
+JSEngine.ObjectCreator.prototype.MovableCharacter = function(x, y) {
   var object;
   object = new MovableCharacter(x, y);
   return this.container.addChildren(object);
@@ -50,15 +50,15 @@ Main = (function() {
 
   Main.prototype.onLoaded = function() {
     var movable, sprite, text;
-    this.bgView = new Engine.Views.Container;
-    this.fgView = new Engine.Views.Container;
+    this.bgView = new JSEngine.Views.Container;
+    this.fgView = new JSEngine.Views.Container;
     engine.currentRoom.addChildren(this.bgView, this.fgView);
-    text = new Engine.Views.TextBlock('Hello world!', 50, 50, 200, {
+    text = new JSEngine.Views.TextBlock('Hello world!', 50, 50, 200, {
       font: 'bold 24px Verdana',
       color: '#FFF'
     });
     this.bgView.addChildren(text);
-    sprite = new Engine.Views.Sprite('Rock', 70, 200, 0);
+    sprite = new JSEngine.Views.Sprite('Rock', 70, 200, 0);
     this.fgView.addChildren(sprite);
     sprite.animate({
       dir: Math.PI * 4
@@ -73,7 +73,7 @@ Main = (function() {
 
 })();
 
-new Engine({
+new JSEngine({
   gameClass: Main,
   themes: ['Example'],
   backgroundColor: "#000",

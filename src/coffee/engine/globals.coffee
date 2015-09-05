@@ -1,7 +1,3 @@
-Camera = require './camera'
-Helpers =
-  RoomTransition: require '../helpers/room-transition'
-
 ###
 jseGlobals.js:
 This file contains global JsEngine variables.
@@ -455,3 +451,8 @@ module.exports =
   EASING_SINUS_IN_OUT: (t, b, c, d) ->
     t /= d
     b + c * (1 + Math.cos(Math.PI * (1 + t))) / 2
+
+Camera = require './camera'
+
+Helpers =
+  RoomTransition: require '../helpers/room-transition'

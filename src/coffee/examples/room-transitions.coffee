@@ -40,7 +40,7 @@ class RoomTransitions
       else
         engine.goToRoom 'room1', Engine.Globals.ROOM_TRANSITION_SQUEEZE_SLIDE, {duration: 1000, from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]}
 
-new Engine
+new JSEngine
 	# Set main class to load
 	gameClass: RoomTransitions
 

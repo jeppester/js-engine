@@ -52,7 +52,7 @@ class GeometricObjectCollision
     @text4.string = "Distance to circle: #{Math.round @circle.getDistance(@circle2)}#{if @circle.intersects @circle2 then ' (intersects)' else ''}"
     @text5.string = "Distance to rectangle: #{Math.round @circle.getDistance(@rectangle)}#{if @circle.intersects @rectangle then ' (intersects)' else ''}"
 
-new Engine
+new JSEngine
   # Set game-class path (Look at this file to start programming your game)
   gameClass: GeometricObjectCollision
 

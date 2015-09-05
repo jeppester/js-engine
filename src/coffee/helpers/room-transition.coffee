@@ -1,4 +1,4 @@
-module.exports =
+module.exports = RoomTransitionHelper =
   slideOut: (camera, from, animOptions) ->
     switch from
       when "left"

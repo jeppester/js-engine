@@ -1,12 +1,4 @@
-module.exports = -> c.apply @, arguments
-
-Geometry =
-  Circle: require './circle'
-  Line: require './line'
-  Rectangle: require './rectangle'
-  Vector: require './vector'
-
-c = class Polygon
+module.exports = class Polygon
   ###
   The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
 
@@ -312,6 +304,9 @@ c = class Polygon
     else
       false
 
-module.exports:: = c::
-
-module.exports[name] = value for name, value of c
+console.trace()
+Geometry =
+  Circle: require './circle'
+  Line: require './line'
+  Rectangle: require './rectangle'
+  Vector: require './vector'

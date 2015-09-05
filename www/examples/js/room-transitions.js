@@ -61,7 +61,7 @@ RoomTransitions = (function() {
 
 })();
 
-new Engine({
+new JSEngine({
   gameClass: RoomTransitions,
   themes: ['Example'],
   disableWebGL: true,

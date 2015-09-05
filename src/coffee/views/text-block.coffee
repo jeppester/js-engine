@@ -1,20 +1,13 @@
-module.exports = -> c.apply @, arguments
-
 Helpers =
   Mixin: require '../helpers/mixin'
 
 Mixins =
   Animatable: require '../mixins/animatable'
 
-Geometry =
-  Vector: require '../geometry/vector'
-
 Views =
   Container: require './container'
 
-Globals = require '../engine/globals'
-
-c = class TextBlock extends Views.Container
+module.exports = class TextBlock extends Views.Container
   # Mix in Child
   Helpers.Mixin.mixin @, Mixins.Animatable
 
@@ -361,6 +354,7 @@ c = class TextBlock extends Views.Container
     ret.height = Math.ceil(ret.height + 2)
     ret
 
-module.exports:: = c::
+Geometry =
+  Vector: require '../geometry/vector'
 
-module.exports[name] = value for name, value of c
+Globals = require '../engine/globals'

@@ -1,8 +1,4 @@
-module.exports = -> c.apply @, arguments
-
-Engine = require '../engine'
-
-c = class CanvasRenderer
+module.exports = class CanvasRenderer
   constructor: (@canvas) ->
     @context = @canvas.getContext("2d")
     return
@@ -23,13 +19,13 @@ c = class CanvasRenderer
       h = camera.captureRegion.height
 
       # Set camera position
-      wmT = Engine.Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
+      wmT = Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
       if camera.captureRegion.width isnt 0 and camera.captureRegion.height isnt 0
-        wmS = Engine.Helpers.MatrixCalculation.makeScale(camera.projectionRegion.width / camera.captureRegion.width, camera.projectionRegion.height / camera.captureRegion.height)
+        wmS = Helpers.MatrixCalculation.makeScale(camera.projectionRegion.width / camera.captureRegion.width, camera.projectionRegion.height / camera.captureRegion.height)
       else
-        wmS = Engine.Helpers.MatrixCalculation.makeIdentity()
-      wm = Engine.Helpers.MatrixCalculation.matrixMultiply(wmT, wmS)
-      wm = Engine.Helpers.MatrixCalculation.matrixMultiply(wm, Engine.Helpers.MatrixCalculation.makeTranslation(camera.projectionRegion.x, camera.projectionRegion.y))
+        wmS = Helpers.MatrixCalculation.makeIdentity()
+      wm = Helpers.MatrixCalculation.matrixMultiply(wmT, wmS)
+      wm = Helpers.MatrixCalculation.matrixMultiply(wm, Helpers.MatrixCalculation.makeTranslation(camera.projectionRegion.x, camera.projectionRegion.y))
 
       # Set camera projection viewport
       c.beginPath()
@@ -55,13 +51,13 @@ c = class CanvasRenderer
     return
 
   renderTree: (object, wm) ->
-    localWm = Engine.Helpers.MatrixCalculation.matrixMultiplyArray([
-      Engine.Helpers.MatrixCalculation.calculateLocalMatrix(object)
+    localWm = Helpers.MatrixCalculation.matrixMultiplyArray([
+      Helpers.MatrixCalculation.calculateLocalMatrix(object)
       wm
     ])
     return unless object.isVisible()
     if object.renderType isnt ""
-      offset = Engine.Helpers.MatrixCalculation.matrixMultiply Engine.Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y), localWm
+      offset = Helpers.MatrixCalculation.matrixMultiply Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y), localWm
       @context.setTransform offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]
       @context.globalAlpha = object.opacity
     switch object.renderType
@@ -184,6 +180,5 @@ c = class CanvasRenderer
       c.stroke()
     return
 
-module.exports:: = c::
-
-module.exports[name] = value for name, value of c
+Helpers =
+  MatrixCalculation: require '../helpers/matrix-calculation'

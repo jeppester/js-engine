@@ -1,5 +1,3 @@
-module.exports = -> c.apply @, arguments
-
 ###
 @name Engine.CustomLoop
 @class A loop class.
@@ -15,7 +13,7 @@ A loop also has it's own time that is stopped whenever the loop is not executed.
 @param {number} [framesPerExecution=1] The number of frames between each execution of the custom loop
 @param {function} [maskFunction=function(){}] A function that will be run before each execution, if the function returns true the execution proceeds as planned, if not, the execution will not be run
 ###
-c = class CustomLoop
+module.exports = class CustomLoop
   constructor: (framesPerExecution, maskFunction) ->
     @framesPerExecution = (if framesPerExecution is undefined then 1 else framesPerExecution)
     @maskFunction = (if maskFunction is undefined then -> true else maskFunction)
@@ -406,7 +404,3 @@ c = class CustomLoop
     @addExecutionsQueue()
     @execTime = (new Date().getTime()) - timer
     return
-
-module.exports:: = c::
-
-module.exports[name] = value for name, value of c

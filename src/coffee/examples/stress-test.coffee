@@ -62,7 +62,7 @@ class StressTest
     # Remove objects when arrow down key is down
     @removeObjects() if engine.keyboard.isDown Engine.Globals.KEY_DOWN
 
-new Engine
+new JSEngine
 	# Set game-class path (Look at this file to start programming your game)
 	gameClass: StressTest
 

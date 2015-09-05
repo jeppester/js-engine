@@ -1,10 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Engine, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
 
 /*
 The constructor for the Engine class.
@@ -68,13 +62,22 @@ The default options are:
 "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
  */
+var Engine;
 
-c = window.Engine = Engine = (function() {
+module.exports = window.JSEngine = Engine = (function() {
   Engine.Helpers = {
     MatrixCalculation: require('./helpers/matrix-calculation'),
     Mixin: require('./helpers/mixin'),
     RoomTransition: require('./helpers/room-transition'),
     WebGL: require('./helpers/webgl')
+  };
+
+  Engine.Geometry = {
+    Vector: require('./geometry/vector'),
+    Circle: require('./geometry/circle'),
+    Line: require('./geometry/line'),
+    Rectangle: require('./geometry/rectangle'),
+    Polygon: require('./geometry/polygon')
   };
 
   Engine.Mixins = {
@@ -84,14 +87,6 @@ c = window.Engine = Engine = (function() {
   Engine.Input = {
     Keyboard: require('./input/keyboard'),
     Pointer: require('./input/pointer')
-  };
-
-  Engine.Geometry = {
-    Vector: require('./geometry/vector'),
-    Circle: require('./geometry/circle'),
-    Line: require('./geometry/line'),
-    Polygon: require('./geometry/polygon'),
-    Rectangle: require('./geometry/rectangle')
   };
 
   Engine.Renderers = {
@@ -839,26 +834,9 @@ c = window.Engine = Engine = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
-
 
 
 },{"./engine/camera":2,"./engine/custom-loop":3,"./engine/globals":4,"./engine/loader":5,"./engine/object-creator":6,"./engine/room":7,"./geometry/circle":8,"./geometry/line":9,"./geometry/polygon":10,"./geometry/rectangle":11,"./geometry/vector":12,"./helpers/matrix-calculation":13,"./helpers/mixin":14,"./helpers/room-transition":15,"./helpers/webgl":16,"./input/keyboard":17,"./input/pointer":18,"./mixins/animatable":19,"./renderer/canvas":20,"./renderer/webgl":21,"./sounds/effect":24,"./sounds/music":25,"./views/child":26,"./views/circle":27,"./views/collidable":28,"./views/container":29,"./views/game-object":30,"./views/line":31,"./views/polygon":32,"./views/rectangle":33,"./views/sprite":34,"./views/text-block":35}],2:[function(require,module,exports){
-var Camera, Geometry, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
-Geometry = {
-  Rectangle: require('../geometry/rectangle')
-};
-
 
 /*
 Constructor for Camera class
@@ -876,8 +854,9 @@ The projection region decides where the captured region will be drawn on the mai
 @param {Math.Rectangle} projectionRegion A rectangle which defines the region on the main canvas where the captured region should be drawn
 @param {Engine.Room} room The room to capture from
  */
+var Camera, Geometry;
 
-c = Camera = (function() {
+module.exports = Camera = (function() {
   function Camera(captureRegion, projectionRegion, room) {
     if (!captureRegion instanceof Geometry.Rectangle) {
       throw new Error("Argument captureRegion should be of type: Rectangle");
@@ -895,22 +874,13 @@ c = Camera = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Geometry = {
+  Rectangle: require('../geometry/rectangle')
+};
 
 
 
 },{"../geometry/rectangle":11}],3:[function(require,module,exports){
-var CustomLoop, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
 
 /*
 @name Engine.CustomLoop
@@ -927,8 +897,9 @@ A loop also has it's own time that is stopped whenever the loop is not executed.
 @param {number} [framesPerExecution=1] The number of frames between each execution of the custom loop
 @param {function} [maskFunction=function(){}] A function that will be run before each execution, if the function returns true the execution proceeds as planned, if not, the execution will not be run
  */
+var CustomLoop;
 
-c = CustomLoop = (function() {
+module.exports = CustomLoop = (function() {
   function CustomLoop(framesPerExecution, maskFunction) {
     this.framesPerExecution = (framesPerExecution === void 0 ? 1 : framesPerExecution);
     this.maskFunction = (maskFunction === void 0 ? function() {
@@ -1406,30 +1377,16 @@ c = CustomLoop = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
-
 
 
 },{}],4:[function(require,module,exports){
-var Camera, Helpers;
-
-Camera = require('./camera');
-
-Helpers = {
-  RoomTransition: require('../helpers/room-transition')
-};
-
 
 /*
 jseGlobals.js:
 This file contains global JsEngine variables.
 The purpose of the global variables is to be used as readable alternatives to magic numbers or strings.
  */
+var Camera, Helpers;
 
 module.exports = {
   KEY_LEFT: 37,
@@ -1738,24 +1695,15 @@ module.exports = {
   }
 };
 
+Camera = require('./camera');
+
+Helpers = {
+  RoomTransition: require('../helpers/room-transition')
+};
+
 
 
 },{"../helpers/room-transition":15,"./camera":2}],5:[function(require,module,exports){
-var Geometry, Loader, Sounds, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
-Sounds = {
-  Music: require('../sounds/music'),
-  Effect: require('../sounds/effect')
-};
-
-Geometry = {
-  Rectangle: require('../geometry/rectangle')
-};
-
 
 /*
 Constructor for the Loader class.
@@ -1767,8 +1715,9 @@ Therefore, remember to call hideOverlay, when your game is ready to be shown.
 On engine startup a Loader object is instantiated to the global variable "loader".
 This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
  */
+var Geometry, Loader, Sounds;
 
-c = Loader = (function() {
+module.exports = Loader = (function() {
   function Loader() {
     this.images = {};
     this.loaded = {
@@ -2412,36 +2361,22 @@ c = Loader = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
+Sounds = {
+  Music: require('../sounds/music'),
+  Effect: require('../sounds/effect')
+};
 
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Geometry = {
+  Rectangle: require('../geometry/rectangle')
+};
 
 
 
 },{"../geometry/rectangle":11,"../sounds/effect":24,"../sounds/music":25}],6:[function(require,module,exports){
-var ObjectCreator, Views, c, name, value,
+var ObjectCreator, Views,
   __slice = [].slice;
 
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
-Views = {
-  Circle: require('../views/circle'),
-  Collidable: require('../views/collidable'),
-  Container: require('../views/container'),
-  GameObject: require('../views/game-object'),
-  Line: require('../views/line'),
-  Polygon: require('../views/polygon'),
-  Rectangle: require('../views/rectangle'),
-  Sprite: require('../views/sprite'),
-  TextBlock: require('../views/text-block')
-};
-
-c = ObjectCreator = (function() {
+module.exports = ObjectCreator = (function() {
   function ObjectCreator(container) {
     this.container = container;
   }
@@ -2516,25 +2451,24 @@ c = ObjectCreator = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Views = {
+  Circle: require('../views/circle'),
+  Collidable: require('../views/collidable'),
+  Container: require('../views/container'),
+  GameObject: require('../views/game-object'),
+  Line: require('../views/line'),
+  Polygon: require('../views/polygon'),
+  Rectangle: require('../views/rectangle'),
+  Sprite: require('../views/sprite'),
+  TextBlock: require('../views/text-block')
+};
 
 
 
 },{"../views/circle":27,"../views/collidable":28,"../views/container":29,"../views/game-object":30,"../views/line":31,"../views/polygon":32,"../views/rectangle":33,"../views/sprite":34,"../views/text-block":35}],7:[function(require,module,exports){
-var CustomLoop, Room, Views, c, ctor,
+var CustomLoop, Room, Views,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-module.exports = function() {
-  return module.exports.__super__.constructor.apply(this, arguments);
-};
-
-CustomLoop = require('./custom-loop');
 
 Views = {
   Container: require('../views/container')
@@ -2561,7 +2495,7 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 @param {function} [onLeft=function () {}] A function to run when the room is left
  */
 
-c = Room = (function(_super) {
+module.exports = Room = (function(_super) {
   __extends(Room, _super);
 
   function Room(name, onEntered, onLeft) {
@@ -2663,24 +2597,12 @@ c = Room = (function(_super) {
 
 })(Views.Container);
 
-ctor = function() {
-  return this.constructor = module.exports;
-};
-
-ctor.prototype = c.prototype;
-
-module.exports.prototype = new ctor();
-
-module.exports.__super__ = c.prototype;
+CustomLoop = require('./custom-loop');
 
 
 
 },{"../views/container":29,"./custom-loop":3}],8:[function(require,module,exports){
-var Circle, Geometry, Helpers, Mixins, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
+var Circle, Geometry, Helpers, Mixins;
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -2688,13 +2610,6 @@ Helpers = {
 
 Mixins = {
   Animatable: require('../mixins/animatable')
-};
-
-Geometry = {
-  Line: require('./line'),
-  Polygon: require('./polygon'),
-  Rectangle: require('./rectangle'),
-  Vector: require('./vector')
 };
 
 
@@ -2714,7 +2629,7 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {number} radius The radius for the circle
  */
 
-c = Circle = (function() {
+module.exports = Circle = (function() {
   Helpers.Mixin.mixin(Circle, Mixins.Animatable);
 
   function Circle(x, y, radius) {
@@ -2920,29 +2835,16 @@ c = Circle = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Geometry = {
+  Line: require('./line'),
+  Rectangle: require('./rectangle'),
+  Polygon: require('./polygon'),
+  Vector: require('./vector')
+};
 
 
 
 },{"../helpers/mixin":14,"../mixins/animatable":19,"./line":9,"./polygon":10,"./rectangle":11,"./vector":12}],9:[function(require,module,exports){
-var Geometry, Line, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
-Geometry = {
-  Circle: require('./circle'),
-  Polygon: require('./polygon'),
-  Rectangle: require('./rectangle'),
-  Vector: require('./vector')
-};
-
 
 /*
 Constructor for the Line class. Uses setFromVectors to create the line's start and end points
@@ -2957,8 +2859,9 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {Geometry.Vector} startVector A Vector representing the start point of the line
 @param {Geometry.Vector} endVector A Vector representing the end point of the line
  */
+var Geometry, Line;
 
-c = Line = (function() {
+module.exports = Line = (function() {
   function Line(startVector, endVector) {
     startVector = (startVector !== void 0 ? startVector : new Geometry.Vector());
     endVector = (endVector !== void 0 ? endVector : new Geometry.Vector());
@@ -3212,7 +3115,7 @@ c = Line = (function() {
    */
 
   Line.prototype.createPolygonFromWidth = function(width, lineCap) {
-    var a, angle, b, d, i, ort, points, r, segmentRad, startAngle, v;
+    var a, angle, b, c, d, i, ort, points, r, segmentRad, startAngle, v;
     lineCap = lineCap || "butt";
     v = this.a.copy().subtract(this.b);
     v.set(v.y, -v.x);
@@ -3266,30 +3169,19 @@ c = Line = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Geometry = {
+  Circle: require('./circle'),
+  Rectangle: require('./rectangle'),
+  Polygon: require('./polygon'),
+  Vector: require('./vector')
+};
 
 
 
 },{"./circle":8,"./polygon":10,"./rectangle":11,"./vector":12}],10:[function(require,module,exports){
-var Geometry, Polygon, c, name, value;
+var Geometry, Polygon;
 
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
-Geometry = {
-  Circle: require('./circle'),
-  Line: require('./line'),
-  Rectangle: require('./rectangle'),
-  Vector: require('./vector')
-};
-
-c = Polygon = (function() {
+module.exports = Polygon = (function() {
 
   /*
   The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
@@ -3694,23 +3586,21 @@ c = Polygon = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
+console.trace();
 
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Geometry = {
+  Circle: require('./circle'),
+  Line: require('./line'),
+  Rectangle: require('./rectangle'),
+  Vector: require('./vector')
+};
 
 
 
 },{"./circle":8,"./line":9,"./rectangle":11,"./vector":12}],11:[function(require,module,exports){
-var Geometry, Helpers, Mixins, Rectangle, c, name, value,
+var Geometry, Helpers, Mixins, Rectangle,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -3721,9 +3611,6 @@ Mixins = {
 };
 
 Geometry = {
-  Circle: require('./circle'),
-  Line: require('./line'),
-  Polygon: require('./polygon'),
   Vector: require('./vector')
 };
 
@@ -3746,7 +3633,7 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} height The height of the rectangle
  */
 
-c = Rectangle = (function(_super) {
+module.exports = Rectangle = (function(_super) {
   __extends(Rectangle, _super);
 
   Helpers.Mixin.mixin(Rectangle, Mixins.Animatable);
@@ -4020,21 +3907,16 @@ c = Rectangle = (function(_super) {
 
 })(Geometry.Vector);
 
-module.exports.prototype = c.prototype;
+Geometry.Circle = require('./circle');
 
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Geometry.Line = require('./line');
+
+Geometry.Polygon = require('./polygon');
 
 
 
 },{"../helpers/mixin":14,"../mixins/animatable":19,"./circle":8,"./line":9,"./polygon":10,"./vector":12}],12:[function(require,module,exports){
-var Geometry, Helpers, Mixins, Vector, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
+var Geometry, Helpers, Mixins, Vector;
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -4042,13 +3924,6 @@ Helpers = {
 
 Mixins = {
   Animatable: require('../mixins/animatable')
-};
-
-Geometry = {
-  Circle: require('./circle'),
-  Line: require('./line'),
-  Polygon: require('./polygon'),
-  Rectangle: require('./rectangle')
 };
 
 
@@ -4065,7 +3940,7 @@ Constructor for the Vector class. Uses set-function to set the vector from x- an
 @param {number} [y=0] The y-value to set for the vector
  */
 
-c = Vector = (function() {
+module.exports = Vector = (function() {
   Helpers.Mixin.mixin(Vector, Mixins.Animatable);
 
   function Vector(x, y) {
@@ -4355,12 +4230,12 @@ c = Vector = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Geometry = {
+  Circle: require('./circle'),
+  Line: require('./line'),
+  Rectangle: require('./rectangle'),
+  Polygon: require('./polygon')
+};
 
 
 
@@ -4540,7 +4415,9 @@ module.exports = MixinHelper = {
 
 
 },{}],15:[function(require,module,exports){
-module.exports = {
+var RoomTransitionHelper;
+
+module.exports = RoomTransitionHelper = {
   slideOut: function(camera, from, animOptions) {
     switch (from) {
       case "left":
@@ -4716,12 +4593,6 @@ module.exports = WebGLHelper = {
 
 
 },{}],17:[function(require,module,exports){
-var Keyboard, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
 
 /*
 Constructor for the Keyboard class
@@ -4729,8 +4600,9 @@ Constructor for the Keyboard class
 @name Input.Keyboard
 @class A class that eases checking of the current state of all keys.
  */
+var Keyboard;
 
-c = Keyboard = (function() {
+module.exports = Keyboard = (function() {
   function Keyboard() {
     var key;
     key = void 0;
@@ -4861,24 +4733,9 @@ c = Keyboard = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
-
 
 
 },{}],18:[function(require,module,exports){
-var Engine, Pointer, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
-Engine = require('../engine');
-
 
 /*
 Constructor for the Pointer class
@@ -4886,8 +4743,9 @@ Constructor for the Pointer class
 @name Input.Pointer
 @class A class that eases the use of mouse and touch, by providing functions for checking the current state of both.
  */
+var Geometry, Globals, Pointer;
 
-c = Pointer = (function() {
+module.exports = Pointer = (function() {
   function Pointer() {
     var button;
     if (engine.host.hasTouch) {
@@ -4924,12 +4782,12 @@ c = Pointer = (function() {
         };
       })(this), false);
     }
-    this.mouse = new Engine.Geometry.Vector();
-    this.mouse.window = new Engine.Geometry.Vector();
+    this.mouse = new Geometry.Vector();
+    this.mouse.window = new Geometry.Vector();
     this.mouse.buttons = new Array(11);
     button = 0;
     while (button < this.mouse.buttons.length) {
-      this.mouse.buttons[button] = new Engine.Geometry.Vector();
+      this.mouse.buttons[button] = new Geometry.Vector();
       this.mouse.buttons[button].events = new Array(2);
       button++;
     }
@@ -4937,7 +4795,7 @@ c = Pointer = (function() {
     this.touches = new Array(10);
     button = 0;
     while (button < this.touches.length) {
-      this.touches[button] = new Engine.Geometry.Vector();
+      this.touches[button] = new Geometry.Vector();
       this.touches[button].x = void 0;
       this.touches[button].y = void 0;
       this.touches[button].events = new Array(2);
@@ -5125,10 +4983,10 @@ c = Pointer = (function() {
     }
     switch (this.getButtonType(button)) {
       case "mouse":
-        pointers = (button === Engine.Globals.MOUSE_ANY ? this.mouse.buttons : this.mouse.buttons[button]);
+        pointers = (button === Globals.MOUSE_ANY ? this.mouse.buttons : this.mouse.buttons[button]);
         break;
       case "touch":
-        pointers = (button === Engine.Globals.TOUCH_ANY ? this.touches : this.touches[button - Engine.Globals.TOUCH_1]);
+        pointers = (button === Globals.TOUCH_ANY ? this.touches : this.touches[button - Globals.TOUCH_1]);
         break;
       case "any":
         pointers = this.mouse.buttons.concat(this.touches);
@@ -5151,10 +5009,10 @@ c = Pointer = (function() {
     }
     switch (this.getButtonType(button)) {
       case "mouse":
-        pointers = (button === Engine.Globals.MOUSE_ANY ? this.mouse.buttons : this.mouse.buttons[button]);
+        pointers = (button === Globals.MOUSE_ANY ? this.mouse.buttons : this.mouse.buttons[button]);
         break;
       case "touch":
-        pointers = (button === Engine.Globals.TOUCH_ANY ? this.touches : this.touches[button - Engine.Globals.TOUCH_1]);
+        pointers = (button === Globals.TOUCH_ANY ? this.touches : this.touches[button - Globals.TOUCH_1]);
         break;
       case "any":
         pointers = this.mouse.buttons.concat(this.touches);
@@ -5178,10 +5036,10 @@ c = Pointer = (function() {
     pointers = void 0;
     switch (this.getButtonType(button)) {
       case "mouse":
-        pointers = (button === Engine.Globals.MOUSE_ANY ? this.mouse.buttons : this.mouse.buttons[button]);
+        pointers = (button === Globals.MOUSE_ANY ? this.mouse.buttons : this.mouse.buttons[button]);
         break;
       case "touch":
-        pointers = (button === Engine.Globals.TOUCH_ANY ? this.touches : this.touches[button - Engine.Globals.TOUCH_1]);
+        pointers = (button === Globals.TOUCH_ANY ? this.touches : this.touches[button - Globals.TOUCH_1]);
         break;
       case "any":
         pointers = this.mouse.buttons.concat(this.touches);
@@ -5202,7 +5060,7 @@ c = Pointer = (function() {
 
   Pointer.prototype.shapeIsPressed = function(button, shape, outside) {
     var pointer, pointers, ret, _i, _len;
-    button = (button !== void 0 ? button : Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY);
+    button = (button !== void 0 ? button : Globals.MOUSE_TOUCH_ANY);
     if (shape === void 0) {
       throw new Error("Missing argument: shape");
     }
@@ -5240,7 +5098,7 @@ c = Pointer = (function() {
 
   Pointer.prototype.shapeIsReleased = function(button, shape, outside) {
     var pointer, pointers, ret, _i, _len;
-    button = (button !== void 0 ? button : Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY);
+    button = (button !== void 0 ? button : Globals.MOUSE_TOUCH_ANY);
     if (shape === void 0) {
       throw new Error("Missing argument: shape");
     }
@@ -5278,7 +5136,7 @@ c = Pointer = (function() {
 
   Pointer.prototype.shapeIsDown = function(button, shape, outside) {
     var pointer, pointers, ret, _i, _len;
-    button = (button !== void 0 ? button : Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY);
+    button = (button !== void 0 ? button : Globals.MOUSE_TOUCH_ANY);
     if (shape === void 0) {
       throw new Error("Missing argument: shape");
     }
@@ -5313,11 +5171,11 @@ c = Pointer = (function() {
    */
 
   Pointer.prototype.getButtonType = function(button) {
-    if (button >= Engine.Globals.MOUSE_ANY && button <= Engine.Globals.MOUSE_10) {
+    if (button >= Globals.MOUSE_ANY && button <= Globals.MOUSE_10) {
       return "mouse";
-    } else if (button >= Engine.Globals.TOUCH_ANY && button <= Engine.Globals.TOUCH_10) {
+    } else if (button >= Globals.TOUCH_ANY && button <= Globals.TOUCH_10) {
       return "touch";
-    } else if (button === Engine.Globals.MOUSE_TOUCH_ANY) {
+    } else if (button === Globals.MOUSE_TOUCH_ANY) {
       return "any";
     } else {
       throw new Error("Argument button has to be a pointer constant (see jseGlobals.js)");
@@ -5380,8 +5238,8 @@ c = Pointer = (function() {
   Converts a coordinate which is relative to the main canvas to a position in the room (based on the room's cameras)
   
   @private
-  @param {Engine.Geometry.Vector} vector A vector representing a position which is relative to the main canvas
-  @return {Engine.Geometry.Vector} vector A vector representing the calculated position relative to the room
+  @param {Geometry.Vector} vector A vector representing a position which is relative to the main canvas
+  @return {Geometry.Vector} vector A vector representing the calculated position relative to the room
    */
 
   Pointer.prototype.calculateRoomPosition = function(vector) {
@@ -5535,23 +5393,18 @@ c = Pointer = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
-
-
-
-},{"../engine":1}],19:[function(require,module,exports){
-var Animatable, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
+Geometry = {
+  Vector: require('../geometry/vector')
 };
 
-c = Animatable = (function() {
+Globals = require('../engine/globals');
+
+
+
+},{"../engine/globals":4,"../geometry/vector":12}],19:[function(require,module,exports){
+var Animatable, Globals;
+
+module.exports = Animatable = (function() {
   function Animatable() {}
 
 
@@ -5582,7 +5435,7 @@ c = Animatable = (function() {
    */
 
   Animatable.prototype.animate = function(properties, options) {
-    var anim, i, loop_, map, opt;
+    var anim, c, i, loop_, map, opt;
     if (properties === void 0) {
       throw new Error("Missing argument: properties");
     }
@@ -5595,7 +5448,7 @@ c = Animatable = (function() {
     anim.obj = this;
     loop_ = (options.loop !== void 0 ? options.loop : (this.loop !== void 0 ? this.loop : engine.defaultAnimationLoop));
     anim.callback = (opt.callback !== void 0 ? opt.callback : function() {});
-    anim.easing = (opt.easing !== void 0 ? opt.easing : Engine.Globals.EASING_QUAD_IN_OUT);
+    anim.easing = (opt.easing !== void 0 ? opt.easing : Globals.EASING_QUAD_IN_OUT);
     anim.duration = (opt.duration !== void 0 ? opt.duration : 1000);
     anim.onStep = (opt.onStep !== void 0 ? opt.onStep : function() {});
     anim.prop = {};
@@ -5752,25 +5605,14 @@ c = Animatable = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Globals = require('../engine/globals');
 
 
 
-},{}],20:[function(require,module,exports){
-var CanvasRenderer, Engine, c, name, value;
+},{"../engine/globals":4}],20:[function(require,module,exports){
+var CanvasRenderer, Helpers;
 
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
-Engine = require('../engine');
-
-c = CanvasRenderer = (function() {
+module.exports = CanvasRenderer = (function() {
   function CanvasRenderer(canvas) {
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
@@ -5778,7 +5620,7 @@ c = CanvasRenderer = (function() {
   }
 
   CanvasRenderer.prototype.render = function(cameras) {
-    var camera, camerasLength, h, i, ii, rooms, roomsLength, w, wm, wmS, wmT;
+    var c, camera, camerasLength, h, i, ii, rooms, roomsLength, w, wm, wmS, wmT;
     camerasLength = cameras.length;
     c = this.context;
     c.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -5788,14 +5630,14 @@ c = CanvasRenderer = (function() {
       c.save();
       w = camera.captureRegion.width;
       h = camera.captureRegion.height;
-      wmT = Engine.Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
+      wmT = Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
       if (camera.captureRegion.width !== 0 && camera.captureRegion.height !== 0) {
-        wmS = Engine.Helpers.MatrixCalculation.makeScale(camera.projectionRegion.width / camera.captureRegion.width, camera.projectionRegion.height / camera.captureRegion.height);
+        wmS = Helpers.MatrixCalculation.makeScale(camera.projectionRegion.width / camera.captureRegion.width, camera.projectionRegion.height / camera.captureRegion.height);
       } else {
-        wmS = Engine.Helpers.MatrixCalculation.makeIdentity();
+        wmS = Helpers.MatrixCalculation.makeIdentity();
       }
-      wm = Engine.Helpers.MatrixCalculation.matrixMultiply(wmT, wmS);
-      wm = Engine.Helpers.MatrixCalculation.matrixMultiply(wm, Engine.Helpers.MatrixCalculation.makeTranslation(camera.projectionRegion.x, camera.projectionRegion.y));
+      wm = Helpers.MatrixCalculation.matrixMultiply(wmT, wmS);
+      wm = Helpers.MatrixCalculation.matrixMultiply(wm, Helpers.MatrixCalculation.makeTranslation(camera.projectionRegion.x, camera.projectionRegion.y));
       c.beginPath();
       c.moveTo(camera.projectionRegion.x, camera.projectionRegion.y);
       c.lineTo(camera.projectionRegion.x + camera.projectionRegion.width, camera.projectionRegion.y);
@@ -5817,12 +5659,12 @@ c = CanvasRenderer = (function() {
 
   CanvasRenderer.prototype.renderTree = function(object, wm) {
     var i, len, localWm, offset;
-    localWm = Engine.Helpers.MatrixCalculation.matrixMultiplyArray([Engine.Helpers.MatrixCalculation.calculateLocalMatrix(object), wm]);
+    localWm = Helpers.MatrixCalculation.matrixMultiplyArray([Helpers.MatrixCalculation.calculateLocalMatrix(object), wm]);
     if (!object.isVisible()) {
       return;
     }
     if (object.renderType !== "") {
-      offset = Engine.Helpers.MatrixCalculation.matrixMultiply(Engine.Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y), localWm);
+      offset = Helpers.MatrixCalculation.matrixMultiply(Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y), localWm);
       this.context.setTransform(offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]);
       this.context.globalAlpha = object.opacity;
     }
@@ -5879,6 +5721,7 @@ c = CanvasRenderer = (function() {
    */
 
   CanvasRenderer.prototype.renderCircle = function(object) {
+    var c;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.fillStyle = object.fillStyle;
@@ -5901,7 +5744,7 @@ c = CanvasRenderer = (function() {
    */
 
   CanvasRenderer.prototype.renderPolygon = function(object) {
-    var i, len;
+    var c, i, len;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.fillStyle = object.fillStyle;
@@ -5940,6 +5783,7 @@ c = CanvasRenderer = (function() {
    */
 
   CanvasRenderer.prototype.renderLine = function(object) {
+    var c;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.globalAlpha = object.opacity;
@@ -5960,6 +5804,7 @@ c = CanvasRenderer = (function() {
    */
 
   CanvasRenderer.prototype.renderRectangle = function(object) {
+    var c;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.fillStyle = object.fillStyle;
@@ -5980,29 +5825,16 @@ c = CanvasRenderer = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
-
-
-
-},{"../engine":1}],21:[function(require,module,exports){
-var ColorShaderProgram, Engine, TextureShaderProgram, WebGLRenderer, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
+Helpers = {
+  MatrixCalculation: require('../helpers/matrix-calculation')
 };
 
-Engine = require('../engine');
 
-TextureShaderProgram = require('./webgl/texture-shader-program');
 
-ColorShaderProgram = require('./webgl/color-shader-program');
+},{"../helpers/matrix-calculation":13}],21:[function(require,module,exports){
+var ColorShaderProgram, Helpers, TextureShaderProgram, WebGLRenderer;
 
-c = WebGLRenderer = (function() {
+module.exports = WebGLRenderer = (function() {
   function WebGLRenderer(canvas) {
     var gl, options;
     this.canvas = canvas;
@@ -6060,13 +5892,12 @@ c = WebGLRenderer = (function() {
           gl.uniform2f(this.currentProgram.locations.u_resolution, w, h);
         }
       }
-      wm = Engine.Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
+      wm = Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
       gl.viewport(camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height);
       rooms = [engine.masterRoom, camera.room];
       roomsLength = rooms.length;
       ii = 0;
       while (ii < roomsLength) {
-        console.log(rooms[ii]);
         this.renderTree(rooms[ii], wm);
         ii++;
       }
@@ -6077,8 +5908,8 @@ c = WebGLRenderer = (function() {
   WebGLRenderer.prototype.renderTree = function(object, wm) {
     var gl, i, len, localWm, offset;
     gl = this.gl;
-    localWm = Engine.Helpers.MatrixCalculation.matrixMultiplyArray([Engine.Helpers.MatrixCalculation.calculateLocalMatrix(object), wm]);
-    offset = Engine.Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y);
+    localWm = Helpers.MatrixCalculation.matrixMultiplyArray([Helpers.MatrixCalculation.calculateLocalMatrix(object), wm]);
+    offset = Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y);
     if (!object.isVisible()) {
       return;
     }
@@ -6092,19 +5923,19 @@ c = WebGLRenderer = (function() {
       case "textblock":
       case "sprite":
         this.setProgram(this.programs.texture);
-        this.currentProgram.renderSprite(gl, object, Engine.Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        this.currentProgram.renderSprite(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
         break;
       case "line":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderLine(gl, object, Engine.Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        this.currentProgram.renderLine(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
         break;
       case "rectangle":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderRectangle(gl, object, Engine.Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        this.currentProgram.renderRectangle(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
         break;
       case "circle":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderCircle(gl, object, Engine.Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        this.currentProgram.renderCircle(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
     }
     if (object.children) {
       len = object.children.length;
@@ -6120,25 +5951,20 @@ c = WebGLRenderer = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
+TextureShaderProgram = require('./webgl/texture-shader-program');
 
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+ColorShaderProgram = require('./webgl/color-shader-program');
 
-
-
-},{"../engine":1,"./webgl/color-shader-program":22,"./webgl/texture-shader-program":23}],22:[function(require,module,exports){
-var Engine, WebGLColorShaderProgram, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
+Helpers = {
+  MatrixCalculation: require('../helpers/matrix-calculation')
 };
 
-Engine = require('../../engine');
 
-c = WebGLColorShaderProgram = (function() {
+
+},{"../helpers/matrix-calculation":13,"./webgl/color-shader-program":22,"./webgl/texture-shader-program":23}],22:[function(require,module,exports){
+var Helpers, WebGLColorShaderProgram;
+
+module.exports = WebGLColorShaderProgram = (function() {
   function WebGLColorShaderProgram(gl) {
     this.program = gl.createProgram();
     this.initShaders(gl);
@@ -6192,7 +6018,7 @@ c = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderLine = function(gl, object, wm) {
-    var a, b, color, coords, l, len;
+    var a, b, c, color, coords, l, len;
     l = void 0;
     len = void 0;
     coords = void 0;
@@ -6214,7 +6040,7 @@ c = WebGLColorShaderProgram = (function() {
     }
     gl.uniform1i(l.u_color, color);
     coords = object.createPolygonFromWidth(object.lineWidth, object.lineCap).getCoordinates();
-    Engine.Helpers.WebGL.setConvexPolygon(gl, coords);
+    Helpers.WebGL.setConvexPolygon(gl, coords);
     gl.uniformMatrix3fv(l.u_matrix, false, wm);
     gl.drawArrays(gl.TRIANGLE_FAN, 0, coords.length / 2);
   };
@@ -6224,13 +6050,13 @@ c = WebGLColorShaderProgram = (function() {
     l = this.locations;
     gl.uniformMatrix3fv(l.u_matrix, false, wm);
     if (object.fillStyle !== "transparent") {
-      gl.uniform1i(l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.fillStyle));
-      Engine.Helpers.WebGL.setPlane(gl, 0, 0, object.width, object.height);
+      gl.uniform1i(l.u_color, Helpers.WebGL.colorFromCSSString(object.fillStyle));
+      Helpers.WebGL.setPlane(gl, 0, 0, object.width, object.height);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
     if (object.strokeStyle !== "transparent") {
-      gl.uniform1i(l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.strokeStyle));
-      Engine.Helpers.WebGL.setPlaneOutline(gl, 0, 0, object.width, object.height, object.lineWidth);
+      gl.uniform1i(l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle));
+      Helpers.WebGL.setPlaneOutline(gl, 0, 0, object.width, object.height, object.lineWidth);
       gl.drawArrays(gl.TRIANGLES, 0, 24);
     }
   };
@@ -6252,13 +6078,13 @@ c = WebGLColorShaderProgram = (function() {
       segmentsCount = 80;
     }
     if (object.fillStyle !== "transparent") {
-      gl.uniform1i(l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.fillStyle));
-      Engine.Helpers.WebGL.setCircle(gl, 0, 0, segmentsCount, object.radius);
+      gl.uniform1i(l.u_color, Helpers.WebGL.colorFromCSSString(object.fillStyle));
+      Helpers.WebGL.setCircle(gl, 0, 0, segmentsCount, object.radius);
       gl.drawArrays(gl.TRIANGLE_FAN, 0, segmentsCount);
     }
     if (object.strokeStyle !== "transparent") {
-      gl.uniform1i(l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.strokeStyle));
-      Engine.Helpers.WebGL.setCircleOutline(gl, 0, 0, segmentsCount, object.radius, object.lineWidth);
+      gl.uniform1i(l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle));
+      Helpers.WebGL.setCircleOutline(gl, 0, 0, segmentsCount, object.radius, object.lineWidth);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2);
     }
   };
@@ -6267,25 +6093,16 @@ c = WebGLColorShaderProgram = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
-
-
-
-},{"../../engine":1}],23:[function(require,module,exports){
-var Engine, WebGLTextureShaderProgram, c;
-
-module.exports = function() {
-  return c.apply(this, arguments);
+Helpers = {
+  WebGL: require('../../helpers/webgl')
 };
 
-Engine = require('../../engine');
 
-c = WebGLTextureShaderProgram = (function() {
+
+},{"../../helpers/webgl":16}],23:[function(require,module,exports){
+var Helpers, WebGLTextureShaderProgram;
+
+module.exports = WebGLTextureShaderProgram = (function() {
   function WebGLTextureShaderProgram(gl) {
     this.cache = {
       regularTextCoordBuffer: false,
@@ -6397,7 +6214,7 @@ c = WebGLTextureShaderProgram = (function() {
         this.setAnimatedTextCoordBuffer(gl, object);
       }
       gl.bindTexture(gl.TEXTURE_2D, t);
-      Engine.Helpers.WebGL.setPlane(gl, 0, 0, object.clipWidth, object.clipHeight);
+      Helpers.WebGL.setPlane(gl, 0, 0, object.clipWidth, object.clipHeight);
     }
     gl.uniformMatrix3fv(l.u_matrix, false, wm);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -6430,17 +6247,13 @@ c = WebGLTextureShaderProgram = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-
-
-},{"../../engine":1}],24:[function(require,module,exports){
-var Effect, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
+Helpers = {
+  WebGL: require('../../helpers/webgl')
 };
 
+
+
+},{"../../helpers/webgl":16}],24:[function(require,module,exports){
 
 /*
 Constructor for the sound class
@@ -6452,8 +6265,9 @@ Constructor for the sound class
 
 @param {HTMLAudioElement} audioElement The Audio element to use as source for the sound object
  */
+var Effect;
 
-c = Effect = (function() {
+module.exports = Effect = (function() {
   function Effect(audioElement) {
     if (audioElement === void 0) {
       throw new Error("Missing argument: audioElement");
@@ -6594,22 +6408,9 @@ c = Effect = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
-
 
 
 },{}],25:[function(require,module,exports){
-var Music, c, name, value;
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
 
 /*
 Constructor for the Music class
@@ -6622,8 +6423,9 @@ Constructor for the Music class
 
 @param {HTMLAudioElement} audioElement The Audio element to use as source for the music object
  */
+var Music;
 
-c = Music = (function() {
+module.exports = Music = (function() {
   function Music(audioElement) {
     if (audioElement === void 0) {
       throw new Error("Missing argument: audioElement");
@@ -6698,23 +6500,10 @@ c = Music = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
-
 
 
 },{}],26:[function(require,module,exports){
-var Child, Geometry, Room, c, ctor;
-
-module.exports = function() {
-  return module.exports.__super__.constructor.apply(this, arguments);
-};
-
-Room = require('../engine/room');
+var Child, Geometry, Room;
 
 Geometry = {
   Vector: require('../geometry/vector')
@@ -6726,7 +6515,7 @@ Geometry = {
 @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
  */
 
-c = Child = (function() {
+module.exports = Child = (function() {
   function Child() {
     this.renderType = "";
     this.initWithoutRedrawRegions();
@@ -7061,34 +6850,21 @@ c = Child = (function() {
 
 })();
 
-ctor = function() {
-  return this.constructor = module.exports;
-};
-
-ctor.prototype = c.prototype;
-
-module.exports.prototype = new ctor;
-
-module.exports.__super__ = c.prototype;
+Room = require('../engine/room');
 
 
 
 },{"../engine/room":7,"../geometry/vector":12}],27:[function(require,module,exports){
-var Circle, Geometry, Helpers, Views, c, name, value,
+var Circle, Geometry, Helpers, Views,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
 };
 
 Geometry = {
-  Circle: require('../geometry/circle'),
-  Rectangle: require('../geometry/rectangle')
+  Circle: require('../geometry/circle')
 };
 
 Views = {
@@ -7119,7 +6895,7 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {number} [lineWidth = 1] The circle's width if added to a view (in px)
  */
 
-c = Circle = (function(_super) {
+module.exports = Circle = (function(_super) {
   __extends(Circle, _super);
 
   Helpers.Mixin.mixin(Circle, Views.Child);
@@ -7227,34 +7003,17 @@ c = Circle = (function(_super) {
 
 })(Geometry.Circle);
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Geometry.Rectangle = require('../geometry/rectangle');
 
 
 
 },{"../geometry/circle":8,"../geometry/rectangle":11,"../helpers/mixin":14,"./child":26}],28:[function(require,module,exports){
-var Collidable, Geometry, Helpers, Views, c, name, value,
+var Collidable, Geometry, Helpers, Views,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
 Views = {
   Sprite: require('./sprite')
-};
-
-Helpers = {
-  MatrixCalculation: require('../helpers/matrix-calculation')
-};
-
-Geometry = {
-  Vector: require('../geometry/vector')
 };
 
 
@@ -7276,7 +7035,7 @@ Can check both for precise (bitmap-based) collisions and bounding box collisions
 @param {object} [additionalProperties] An object containing key-value pairs that will be set as properties for the created object. Can be used for setting advanced options such as sprite offset and opacity.
  */
 
-c = Collidable = (function(_super) {
+module.exports = Collidable = (function(_super) {
   __extends(Collidable, _super);
 
   function Collidable(source, x, y, direction, additionalProperties) {
@@ -7528,7 +7287,7 @@ c = Collidable = (function(_super) {
   };
 
   Collidable.prototype.createCollisionBitmap = function(objects) {
-    var calc, canvas, i, ii, lm, mask, obj, offset, parents, wm;
+    var c, calc, canvas, i, ii, lm, mask, obj, offset, parents, wm;
     mask = this.mask;
     calc = Helpers.MatrixCalculation;
     canvas = document.createElement("canvas");
@@ -7582,26 +7341,21 @@ c = Collidable = (function(_super) {
 
 })(Views.Sprite);
 
-module.exports.prototype = c.prototype;
+Helpers = {
+  MatrixCalculation: require('../helpers/matrix-calculation')
+};
 
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Geometry = {
+  Vector: require('../geometry/vector')
+};
 
 
 
 },{"../geometry/vector":12,"../helpers/matrix-calculation":13,"./sprite":34}],29:[function(require,module,exports){
-var Container, ObjectCreator, Views, c, ctor,
+var Container, ObjectCreator, Views,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __slice = [].slice;
-
-module.exports = function() {
-  return module.exports.__super__.constructor.apply(this, arguments);
-};
-
-ObjectCreator = require('../engine/object-creator');
 
 Views = {
   Child: require('./child')
@@ -7625,13 +7379,12 @@ All objects which are drawn on the game's canvas extends the View-class.
 @param {Child} child3 A third ...
  */
 
-c = Container = (function(_super) {
+module.exports = Container = (function(_super) {
   __extends(Container, _super);
 
   function Container() {
     var children;
     children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    Container.prototype.prototype = Views.Child.prototype;
     Container.__super__.constructor.call(this);
     this.children = [];
     this.addChildren.apply(this, children);
@@ -7961,33 +7714,17 @@ c = Container = (function(_super) {
 
 })(Views.Child);
 
-ctor = function() {
-  return this.constructor = module.exports;
-};
-
-ctor.prototype = c.prototype;
-
-module.exports.prototype = new ctor;
-
-module.exports.__super__ = c.prototype;
+ObjectCreator = require('../engine/object-creator');
 
 
 
 },{"../engine/object-creator":6,"./child":26}],30:[function(require,module,exports){
-var GameObject, Geometry, Views, c, name, value,
+var GameObject, Geometry, Views,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-module.exports = function() {
-  return c.apply(this, arguments);
-};
-
 Views = {
   Collidable: require('./collidable')
-};
-
-Geometry = {
-  Vector: require('../geometry/vector')
 };
 
 
@@ -8023,7 +7760,7 @@ speed: new Math.Vector(0, 0)
 </code>
  */
 
-c = GameObject = (function(_super) {
+module.exports = GameObject = (function(_super) {
   __extends(GameObject, _super);
 
   function GameObject(source, x, y, direction, additionalProperties) {
@@ -8062,30 +7799,22 @@ c = GameObject = (function(_super) {
 
 })(Views.Collidable);
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Geometry = {
+  Vector: require('../geometry/vector')
+};
 
 
 
 },{"../geometry/vector":12,"./collidable":28}],31:[function(require,module,exports){
-var Geometry, Helpers, Line, Views, c, name, value,
+var Geometry, Helpers, Line, Views,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
 };
 
 Geometry = {
-  Vector: require('../geometry/vector'),
   Line: require('../geometry/line')
 };
 
@@ -8115,7 +7844,7 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {string} [lineCap='butt'] The line's cap style if added to a view
  */
 
-c = Line = (function(_super) {
+module.exports = Line = (function(_super) {
   __extends(Line, _super);
 
   Helpers.Mixin.mixin(Line, Views.Child);
@@ -8307,23 +8036,14 @@ c = Line = (function(_super) {
 
 })(Geometry.Line);
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Geometry.Vector = require('../geometry/vector');
 
 
 
 },{"../geometry/line":9,"../geometry/vector":12,"../helpers/mixin":14,"./child":26}],32:[function(require,module,exports){
-var Geometry, Helpers, Polygon, Views, c, name, value,
+var Geometry, Helpers, Polygon, Views,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -8357,7 +8077,7 @@ The constructor for the Polygon class. Uses the setFromPoints-function to set th
 @param {number} [lineWidth = 1] The polygon's width if added to a view (in px)
  */
 
-c = Polygon = (function(_super) {
+module.exports = Polygon = (function(_super) {
   __extends(Polygon, _super);
 
   Helpers.Mixin.mixin(Polygon, Views.Child);
@@ -8399,23 +8119,14 @@ c = Polygon = (function(_super) {
 
 })(Geometry.Polygon);
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
-
 
 
 },{"../geometry/polygon":10,"../helpers/mixin":14,"./child":26}],33:[function(require,module,exports){
-var Geometry, Helpers, Rectangle, Views, c, name, value,
+var Geometry, Helpers, Rectangle, Views,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-module.exports = function() {
-  return c.apply(this, arguments);
-};
+console.log(1);
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -8455,7 +8166,7 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} [lineWidth = 1] The rectangle's width if added to a view (in px)
  */
 
-c = Rectangle = (function(_super) {
+module.exports = Rectangle = (function(_super) {
   __extends(Rectangle, _super);
 
   Helpers.Mixin.mixin(Rectangle, Views.Child);
@@ -8640,23 +8351,14 @@ c = Rectangle = (function(_super) {
 
 })(Geometry.Rectangle);
 
-module.exports.prototype = c.prototype;
-
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+console.log(2);
 
 
 
 },{"../geometry/rectangle":11,"../helpers/mixin":14,"./child":26}],34:[function(require,module,exports){
-var Geometry, Globals, Helpers, Mixins, Sprite, Views, c, name, value,
+var Geometry, Globals, Helpers, Mixins, Sprite, Views,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -8666,16 +8368,9 @@ Mixins = {
   Animatable: require('../mixins/animatable')
 };
 
-Geometry = {
-  Vector: require('../geometry/vector'),
-  Rectangle: require('../geometry/rectangle')
-};
-
 Views = {
   Container: require('./container')
 };
-
-Globals = require('../engine/globals');
 
 
 /*
@@ -8713,7 +8408,7 @@ offset: new Math.Vector('center', 'center')
 }</code>
  */
 
-c = Sprite = (function(_super) {
+module.exports = Sprite = (function(_super) {
   __extends(Sprite, _super);
 
   Helpers.Mixin.mixin(Sprite, Mixins.Animatable);
@@ -8916,23 +8611,19 @@ c = Sprite = (function(_super) {
 
 })(Views.Container);
 
-module.exports.prototype = c.prototype;
+Geometry = {
+  Vector: require('../geometry/vector'),
+  Rectangle: require('../geometry/rectangle')
+};
 
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Globals = require('../engine/globals');
 
 
 
 },{"../engine/globals":4,"../geometry/rectangle":11,"../geometry/vector":12,"../helpers/mixin":14,"../mixins/animatable":19,"./container":29}],35:[function(require,module,exports){
-var Geometry, Globals, Helpers, Mixins, TextBlock, Views, c, name, value,
+var Geometry, Globals, Helpers, Mixins, TextBlock, Views,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-module.exports = function() {
-  return c.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -8942,17 +8633,11 @@ Mixins = {
   Animatable: require('../mixins/animatable')
 };
 
-Geometry = {
-  Vector: require('../geometry/vector')
-};
-
 Views = {
   Container: require('./container')
 };
 
-Globals = require('../engine/globals');
-
-c = TextBlock = (function(_super) {
+module.exports = TextBlock = (function(_super) {
   __extends(TextBlock, _super);
 
   Helpers.Mixin.mixin(TextBlock, Mixins.Animatable);
@@ -9312,12 +8997,11 @@ c = TextBlock = (function(_super) {
 
 })(Views.Container);
 
-module.exports.prototype = c.prototype;
+Geometry = {
+  Vector: require('../geometry/vector')
+};
 
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
+Globals = require('../engine/globals');
 
 
 

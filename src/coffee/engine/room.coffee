@@ -1,7 +1,3 @@
-module.exports = -> module.exports.__super__.constructor.apply @, arguments
-
-CustomLoop = require './custom-loop'
-
 Views =
   Container: require '../views/container'
 
@@ -24,7 +20,7 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 @param {function} [onEntered=function () {}] A function to run when the room is entered (set as the engine's current room)
 @param {function} [onLeft=function () {}] A function to run when the room is left
 ###
-c = class Room extends Views.Container
+module.exports = class Room extends Views.Container
   constructor: (name, onEntered, onLeft)->
     super()
     @name = (if name then name else engine.roomList.length)
@@ -92,7 +88,4 @@ c = class Room extends Views.Container
   ###
   remove: undefined
 
-ctor = -> @constructor = module.exports
-ctor.prototype = c::
-module.exports:: = new ctor()
-module.exports.__super__ = c::
+CustomLoop = require './custom-loop'

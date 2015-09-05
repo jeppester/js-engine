@@ -1,10 +1,5 @@
-module.exports = -> c.apply @, arguments
-
 Views =
   Collidable: require './collidable'
-
-Geometry =
-  Vector: require '../geometry/vector'
 
 ###
 The constructor for the GameObject class.
@@ -37,7 +32,7 @@ speed: new Math.Vector(0, 0)
 }
 </code>
 ###
-c = class GameObject extends Views.Collidable
+module.exports = class GameObject extends Views.Collidable
   constructor: (source, x, y, direction, additionalProperties) ->
     throw new Error("Missing argument: source") if source is undefined #dev
     throw new Error("Missing argument: x") if x is undefined #dev
@@ -63,6 +58,5 @@ c = class GameObject extends Views.Collidable
       @y += engine.convertSpeed(@speed.y)
     return
 
-module.exports:: = c::
-
-module.exports[name] = value for name, value of c
+Geometry =
+  Vector: require '../geometry/vector'

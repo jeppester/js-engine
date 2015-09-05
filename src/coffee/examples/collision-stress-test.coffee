@@ -4,18 +4,18 @@ class CollisionStressTest
     engine.loader.hideOverlay => @onLoaded()
 
   onLoaded: ->
-    @objectView = new Engine.Views.Container()
-    @hudView = new Engine.Views.Container()
+    @objectView = new JSEngine.Views.Container()
+    @hudView = new JSEngine.Views.Container()
     engine.currentRoom.addChildren @objectView, @hudView
 
-    @fpsCounter = new Engine.Views.TextBlock 'FPS: 0', 10, 10, 150, {color: '#FFF'}
-    @objectCounter = new Engine.Views.TextBlock 'Objects: 0', 10, 30, 150, {color: '#FFF'}
-    @collisionDisplay = new Engine.Views.TextBlock 'Collides: No', 10, 50, 150, {color: '#FFF'}
-    @collider = new Engine.Views.Collidable 'Character', 300, 200
+    @fpsCounter = new JSEngine.Views.TextBlock 'FPS: 0', 10, 10, 150, {color: '#FFF'}
+    @objectCounter = new JSEngine.Views.TextBlock 'Objects: 0', 10, 30, 150, {color: '#FFF'}
+    @collisionDisplay = new JSEngine.Views.TextBlock 'Collides: No', 10, 50, 150, {color: '#FFF'}
+    @collider = new JSEngine.Views.Collidable 'Character', 300, 200
 
     @hudView.addChildren @collider, @fpsCounter, @objectCounter, @collisionDisplay
 
-    engine.currentRoom.addLoop 'each20Frames', new Engine.CustomLoop(20)
+    engine.currentRoom.addLoop 'each20Frames', new JSEngine.CustomLoop(20)
     engine.currentRoom.loops.each20Frames.attachFunction @, @updateFPS
     engine.currentRoom.loops.eachFrame.attachFunction @, @controls
     engine.currentRoom.loops.eachFrame.attachFunction @, @checkCollision
@@ -33,7 +33,7 @@ class CollisionStressTest
 
   addObjects: (count = 10)->
     for i in [0...count]
-      sprite = new Engine.Views.GameObject(
+      sprite = new JSEngine.Views.GameObject(
         'Rock'
         Math.random() * 600
         Math.random() * 400
@@ -49,20 +49,20 @@ class CollisionStressTest
 
   controls: ->
     # Add objects when arrow up key is down
-    if engine.keyboard.isDown Engine.Globals.KEY_UP
+    if engine.keyboard.isDown JSEngine.Globals.KEY_UP
       @addObjects()
 
     # Remove objects when arrow down key is down
-    if engine.keyboard.isDown Engine.Globals.KEY_DOWN
+    if engine.keyboard.isDown JSEngine.Globals.KEY_DOWN
       @removeObjects()
 
     # When clicking somewhere, move the collision object to that position
-    pointers = engine.pointer.isPressed(Engine.Globals.MOUSE_TOUCH_ANY) || engine.pointer.isDown(Engine.Globals.MOUSE_TOUCH_ANY)
+    pointers = engine.pointer.isPressed(JSEngine.Globals.MOUSE_TOUCH_ANY) || engine.pointer.isDown(JSEngine.Globals.MOUSE_TOUCH_ANY)
     if pointers
       @collider.x = pointers[0].x
       @collider.y = pointers[0].y
 
-new Engine
+new JSEngine
   # Set game-class path (Look at this file to start programming your game)
   gameClass: CollisionStressTest
 

@@ -1,10 +1,4 @@
-module.exports = -> c.apply @, arguments
-
-Engine = require '../engine'
-TextureShaderProgram = require './webgl/texture-shader-program'
-ColorShaderProgram = require './webgl/color-shader-program'
-
-c = class WebGLRenderer
+module.exports = class WebGLRenderer
   constructor: (@canvas) ->
     # Cache variables
     @cache =
@@ -73,7 +67,7 @@ c = class WebGLRenderer
         gl.uniform2f @currentProgram.locations.u_resolution, w, h if @currentProgram
 
       # Set camera position
-      wm = Engine.Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
+      wm = Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
 
       # Set camera projection viewport
       gl.viewport camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height
@@ -85,7 +79,6 @@ c = class WebGLRenderer
       ii = 0
       while ii < roomsLength
         # Draw rooms
-        console.log rooms[ii]
         @renderTree rooms[ii], wm
         ii++
       i++
@@ -93,11 +86,11 @@ c = class WebGLRenderer
 
   renderTree: (object, wm) ->
     gl = @gl
-    localWm = Engine.Helpers.MatrixCalculation.matrixMultiplyArray([
-      Engine.Helpers.MatrixCalculation.calculateLocalMatrix(object)
+    localWm = Helpers.MatrixCalculation.matrixMultiplyArray([
+      Helpers.MatrixCalculation.calculateLocalMatrix(object)
       wm
     ])
-    offset = Engine.Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y)
+    offset = Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y)
     return unless object.isVisible()
 
     # Set object alpha (because alpha is used by ALL rendered objects)
@@ -109,18 +102,18 @@ c = class WebGLRenderer
       # Texture based objects
       when "textblock", "sprite"
         @setProgram @programs.texture
-        @currentProgram.renderSprite gl, object, Engine.Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+        @currentProgram.renderSprite gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
 
       # Geometric objects
       when "line"
         @setProgram @programs.color
-        @currentProgram.renderLine gl, object, Engine.Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+        @currentProgram.renderLine gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
       when "rectangle"
         @setProgram @programs.color
-        @currentProgram.renderRectangle gl, object, Engine.Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+        @currentProgram.renderRectangle gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
       when "circle"
         @setProgram @programs.color
-        @currentProgram.renderCircle gl, object, Engine.Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+        @currentProgram.renderCircle gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
     if object.children
       len = object.children.length
       i = 0
@@ -129,5 +122,8 @@ c = class WebGLRenderer
         i++
     return
 
-module.exports:: = c::
-module.exports[name] = value for name, value of c
+TextureShaderProgram = require './webgl/texture-shader-program'
+ColorShaderProgram = require './webgl/color-shader-program'
+
+Helpers =
+  MatrixCalculation: require '../helpers/matrix-calculation'

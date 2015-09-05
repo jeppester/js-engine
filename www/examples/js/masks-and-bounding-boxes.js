@@ -38,7 +38,7 @@ MasksAndBBoxes = (function() {
 
 })();
 
-new Engine({
+new JSEngine({
   gameClass: MasksAndBBoxes,
   themes: ['Example'],
   drawBoundingBoxes: true,

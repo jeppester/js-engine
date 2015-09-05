@@ -1,5 +1,4 @@
-module.exports = -> c.apply @, arguments
-
+# Mixins and parent class at top
 Helpers =
   Mixin: require '../helpers/mixin'
 
@@ -7,9 +6,6 @@ Mixins =
   Animatable: require '../mixins/animatable'
 
 Geometry =
-  Circle: require './circle'
-  Line: require './line'
-  Polygon: require './polygon'
   Vector: require './vector'
 
 ###
@@ -29,7 +25,7 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} width The width of the rectangle
 @param {number} height The height of the rectangle
 ###
-c = class Rectangle extends Geometry.Vector
+module.exports = class Rectangle extends Geometry.Vector
   # Mix in animatable
   Helpers.Mixin.mixin @, Mixins.Animatable
 
@@ -237,6 +233,7 @@ c = class Rectangle extends Geometry.Vector
   intersects: (object) ->
     @getPolygon().intersects object
 
-module.exports:: = c::
-
-module.exports[name] = value for name, value of c
+# Classes used in class functions at bottom
+Geometry.Circle = require './circle'
+Geometry.Line = require './line'
+Geometry.Polygon = require './polygon'

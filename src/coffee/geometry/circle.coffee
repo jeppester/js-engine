@@ -1,16 +1,8 @@
-module.exports = -> c.apply @, arguments
-
 Helpers =
   Mixin: require '../helpers/mixin'
 
 Mixins =
   Animatable: require '../mixins/animatable'
-
-Geometry =
-  Line: require './line'
-  Polygon: require './polygon'
-  Rectangle: require './rectangle'
-  Vector: require './vector'
 
 ###
 Constructor for Circle class, uses the set function, to set the properties of the circle.
@@ -27,7 +19,7 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {number} y The y-coordinate for the center of the circle
 @param {number} radius The radius for the circle
 ###
-c = class Circle
+module.exports = class Circle
   # Mix in animatable
   Helpers.Mixin.mixin @, Mixins.Animatable
 
@@ -190,6 +182,8 @@ c = class Circle
     else #dev
       throw new Error("Argument object has to be of type: Line, Circle, Rectangle or Polygon") #dev
 
-module.exports:: = c::
-
-module.exports[name] = value for name, value of c
+Geometry =
+  Line: require './line'
+  Rectangle: require './rectangle'
+  Polygon: require './polygon'
+  Vector: require './vector'

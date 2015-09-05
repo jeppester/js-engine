@@ -1,11 +1,3 @@
-module.exports = -> c.apply @, arguments
-
-Geometry =
-  Circle: require './circle'
-  Polygon: require './polygon'
-  Rectangle: require './rectangle'
-  Vector: require './vector'
-
 ###
 Constructor for the Line class. Uses setFromVectors to create the line's start and end points
 
@@ -19,7 +11,7 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {Geometry.Vector} startVector A Vector representing the start point of the line
 @param {Geometry.Vector} endVector A Vector representing the end point of the line
 ###
-c = class Line
+module.exports = class Line
   constructor: (startVector, endVector) ->
     startVector = (if startVector isnt undefined then startVector else new Geometry.Vector())
     endVector = (if endVector isnt undefined then endVector else new Geometry.Vector())
@@ -276,6 +268,8 @@ c = class Line
       @b.copy()
     ])
 
-module.exports:: = c::
-
-module.exports[name] = value for name, value of c
+Geometry =
+  Circle: require './circle'
+  Rectangle: require './rectangle'
+  Polygon: require './polygon'
+  Vector: require './vector'

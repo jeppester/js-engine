@@ -1,8 +1,4 @@
-module.exports = -> c.apply @, arguments
-
-Engine = require '../../engine'
-
-c = class WebGLColorShaderProgram
+module.exports = class WebGLColorShaderProgram
   constructor: (gl) ->
     @program = gl.createProgram()
     @initShaders gl
@@ -112,7 +108,7 @@ c = class WebGLColorShaderProgram
 
     # Set geometry
     coords = object.createPolygonFromWidth(object.lineWidth, object.lineCap).getCoordinates()
-    Engine.Helpers.WebGL.setConvexPolygon gl, coords
+    Helpers.WebGL.setConvexPolygon gl, coords
 
     # Set matrix
     gl.uniformMatrix3fv l.u_matrix, false, wm
@@ -130,10 +126,10 @@ c = class WebGLColorShaderProgram
     # Draw fill
     if object.fillStyle isnt "transparent"
       # Set color
-      gl.uniform1i l.u_color, Engine.Helpers.WebGL.colorFromCSSString object.fillStyle
+      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString object.fillStyle
 
       # Set geometry (no need to set x and y as they already in the world matrix)
-      Engine.Helpers.WebGL.setPlane gl, 0, 0, object.width, object.height
+      Helpers.WebGL.setPlane gl, 0, 0, object.width, object.height
 
       # Draw
       gl.drawArrays gl.TRIANGLES, 0, 6
@@ -141,10 +137,10 @@ c = class WebGLColorShaderProgram
     # Draw stroke (if not transparent)
     if object.strokeStyle isnt "transparent"
       # Set color
-      gl.uniform1i l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.strokeStyle)
+      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
 
       # Set geometry (no need to set x and y as they are already included in the world matrix)
-      Engine.Helpers.WebGL.setPlaneOutline gl, 0, 0, object.width, object.height, object.lineWidth
+      Helpers.WebGL.setPlaneOutline gl, 0, 0, object.width, object.height, object.lineWidth
 
       # Draw
       gl.drawArrays gl.TRIANGLES, 0, 24
@@ -173,10 +169,10 @@ c = class WebGLColorShaderProgram
     if object.fillStyle isnt "transparent"
 
       # Set color
-      gl.uniform1i l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.fillStyle)
+      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.fillStyle)
 
       # Set geometry (no need to set x and y as they already in the world matrix)
-      Engine.Helpers.WebGL.setCircle gl, 0, 0, segmentsCount, object.radius
+      Helpers.WebGL.setCircle gl, 0, 0, segmentsCount, object.radius
 
       # Draw
       gl.drawArrays gl.TRIANGLE_FAN, 0, segmentsCount
@@ -185,15 +181,14 @@ c = class WebGLColorShaderProgram
     if object.strokeStyle isnt "transparent"
 
       # Set color
-      gl.uniform1i l.u_color, Engine.Helpers.WebGL.colorFromCSSString(object.strokeStyle)
+      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
 
       # Set geometry (no need to set x and y as they already in the world matrix)
-      Engine.Helpers.WebGL.setCircleOutline gl, 0, 0, segmentsCount, object.radius, object.lineWidth
+      Helpers.WebGL.setCircleOutline gl, 0, 0, segmentsCount, object.radius, object.lineWidth
 
       # Draw
       gl.drawArrays gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2
     return
 
-module.exports:: = c::
-
-module.exports[name] = value for name, value of c
+Helpers =
+  WebGL: require '../../helpers/webgl'

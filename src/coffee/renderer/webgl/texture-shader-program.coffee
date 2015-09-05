@@ -1,8 +1,4 @@
-module.exports = -> c.apply @, arguments
-
-Engine = require '../../engine'
-
-c = class WebGLTextureShaderProgram
+module.exports = class WebGLTextureShaderProgram
   constructor: (gl) ->
     # Init program
     @cache =
@@ -179,7 +175,7 @@ c = class WebGLTextureShaderProgram
 
       # Set a rectangle the same size as the image
       gl.bindTexture gl.TEXTURE_2D, t
-      Engine.Helpers.WebGL.setPlane gl, 0, 0, object.clipWidth, object.clipHeight
+      Helpers.WebGL.setPlane gl, 0, 0, object.clipWidth, object.clipHeight
 
     # Set matrix
     gl.uniformMatrix3fv l.u_matrix, false, wm
@@ -216,4 +212,5 @@ c = class WebGLTextureShaderProgram
     @cache.textures[image.src] = texture
     texture
 
-module.exports:: = c::
+Helpers =
+  WebGL: require '../../helpers/webgl'

@@ -91,7 +91,7 @@ StressTest = (function() {
 
 })();
 
-new Engine({
+new JSEngine({
   gameClass: StressTest,
   themes: ['Example'],
   backgroundColor: "#000",

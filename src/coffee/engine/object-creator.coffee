@@ -1,17 +1,4 @@
-module.exports = -> c.apply @, arguments
-
-Views =
-  Circle: require '../views/circle'
-  Collidable: require '../views/collidable'
-  Container: require '../views/container'
-  GameObject: require '../views/game-object'
-  Line: require '../views/line'
-  Polygon: require '../views/polygon'
-  Rectangle: require '../views/rectangle'
-  Sprite: require '../views/sprite'
-  TextBlock: require '../views/text-block'
-
-c = class ObjectCreator
+module.exports = class ObjectCreator
   constructor: (container)->
     @container = container
 
@@ -65,6 +52,13 @@ c = class ObjectCreator
     @container.addChildren o
     o
 
-module.exports:: = c::
-
-module.exports[name] = value for name, value of c
+Views =
+  Circle: require '../views/circle'
+  Collidable: require '../views/collidable'
+  Container: require '../views/container'
+  GameObject: require '../views/game-object'
+  Line: require '../views/line'
+  Polygon: require '../views/polygon'
+  Rectangle: require '../views/rectangle'
+  Sprite: require '../views/sprite'
+  TextBlock: require '../views/text-block'
