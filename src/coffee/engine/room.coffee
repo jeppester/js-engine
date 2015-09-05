@@ -1,4 +1,4 @@
-module.exports = -> c.apply @, arguments
+module.exports = -> module.exports.__super__.constructor.apply @, arguments
 
 CustomLoop = require './custom-loop'
 
@@ -92,6 +92,7 @@ c = class Room extends Views.Container
   ###
   remove: undefined
 
-module.exports:: = c::
-
-
+ctor = -> @constructor = module.exports
+ctor.prototype = c::
+module.exports:: = new ctor()
+module.exports.__super__ = c::

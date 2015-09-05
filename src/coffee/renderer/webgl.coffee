@@ -85,6 +85,7 @@ c = class WebGLRenderer
       ii = 0
       while ii < roomsLength
         # Draw rooms
+        console.log rooms[ii]
         @renderTree rooms[ii], wm
         ii++
       i++
@@ -129,5 +130,4 @@ c = class WebGLRenderer
     return
 
 module.exports:: = c::
-
 module.exports[name] = value for name, value of c

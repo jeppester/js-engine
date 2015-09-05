@@ -1,4 +1,4 @@
-module.exports = -> c.apply @, arguments
+module.exports = -> module.exports.__super__.constructor.apply @, arguments
 
 ObjectCreator = require '../engine/object-creator'
 
@@ -285,6 +285,7 @@ c = class Container extends Views.Child
   drawCanvas: undefined
   getRedrawRegion: undefined
 
-module.exports:: = c::
-
-
+ctor = -> @constructor = module.exports
+ctor.prototype = c::
+module.exports:: = new ctor
+module.exports.__super__ = c::

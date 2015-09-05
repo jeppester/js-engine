@@ -1,4 +1,4 @@
-module.exports = -> c.apply @, arguments
+module.exports = -> module.exports.__super__.constructor.apply @, arguments
 
 Room = require '../engine/room'
 
@@ -285,4 +285,7 @@ c = class Child
     # If sprites size has been modified to zero, do nothing
     not (@size is 0 or @widthScale is 0 or @heightScale is 0)
 
-module.exports:: = c::
+ctor = -> @constructor = module.exports
+ctor.prototype = c::
+module.exports:: = new ctor
+module.exports.__super__ = c::

@@ -2526,12 +2526,12 @@ for (name in c) {
 
 
 },{"../views/circle":27,"../views/collidable":28,"../views/container":29,"../views/game-object":30,"../views/line":31,"../views/polygon":32,"../views/rectangle":33,"../views/sprite":34,"../views/text-block":35}],7:[function(require,module,exports){
-var CustomLoop, Room, Views, c,
+var CustomLoop, Room, Views, c, ctor,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = function() {
-  return c.apply(this, arguments);
+  return module.exports.__super__.constructor.apply(this, arguments);
 };
 
 CustomLoop = require('./custom-loop');
@@ -2663,7 +2663,15 @@ c = Room = (function(_super) {
 
 })(Views.Container);
 
-module.exports.prototype = c.prototype;
+ctor = function() {
+  return this.constructor = module.exports;
+};
+
+ctor.prototype = c.prototype;
+
+module.exports.prototype = new ctor();
+
+module.exports.__super__ = c.prototype;
 
 
 
@@ -6058,6 +6066,7 @@ c = WebGLRenderer = (function() {
       roomsLength = rooms.length;
       ii = 0;
       while (ii < roomsLength) {
+        console.log(rooms[ii]);
         this.renderTree(rooms[ii], wm);
         ii++;
       }
@@ -6699,10 +6708,10 @@ for (name in c) {
 
 
 },{}],26:[function(require,module,exports){
-var Child, Geometry, Room, c;
+var Child, Geometry, Room, c, ctor;
 
 module.exports = function() {
-  return c.apply(this, arguments);
+  return module.exports.__super__.constructor.apply(this, arguments);
 };
 
 Room = require('../engine/room');
@@ -7052,7 +7061,15 @@ c = Child = (function() {
 
 })();
 
-module.exports.prototype = c.prototype;
+ctor = function() {
+  return this.constructor = module.exports;
+};
+
+ctor.prototype = c.prototype;
+
+module.exports.prototype = new ctor;
+
+module.exports.__super__ = c.prototype;
 
 
 
@@ -7575,13 +7592,13 @@ for (name in c) {
 
 
 },{"../geometry/vector":12,"../helpers/matrix-calculation":13,"./sprite":34}],29:[function(require,module,exports){
-var Container, ObjectCreator, Views, c,
+var Container, ObjectCreator, Views, c, ctor,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __slice = [].slice;
 
 module.exports = function() {
-  return c.apply(this, arguments);
+  return module.exports.__super__.constructor.apply(this, arguments);
 };
 
 ObjectCreator = require('../engine/object-creator');
@@ -7944,7 +7961,15 @@ c = Container = (function(_super) {
 
 })(Views.Child);
 
-module.exports.prototype = c.prototype;
+ctor = function() {
+  return this.constructor = module.exports;
+};
+
+ctor.prototype = c.prototype;
+
+module.exports.prototype = new ctor;
+
+module.exports.__super__ = c.prototype;
 
 
 
