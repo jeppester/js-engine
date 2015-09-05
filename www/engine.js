@@ -69,7 +69,7 @@ The default options are:
 }</code>
  */
 
-c = window.JSEngine = Engine = (function() {
+c = window.Engine = Engine = (function() {
   Engine.Helpers = {
     MatrixCalculation: require('./helpers/matrix-calculation'),
     Mixin: require('./helpers/mixin'),
@@ -249,10 +249,10 @@ c = window.JSEngine = Engine = (function() {
     }
 
     /*
-    Global Engine.Loader instance which is created upon engine initialization
+    Global Loader instance which is created upon engine initialization
     @global
      */
-    this.loader = new Engine.Loader();
+    this.loader = new module.exports.prototype.constructor.Loader();
     this.defaultTheme = this.options.themes[0];
     this.loader.onthemesloaded = function() {
       engine.initialize();
@@ -284,14 +284,14 @@ c = window.JSEngine = Engine = (function() {
     this.currentRoom = new this.constructor.Room("main");
     this.defaultAnimationLoop = this.currentRoom.loops.eachFrame;
     this.defaultActivityLoop = this.currentRoom.loops.eachFrame;
-    this.cameras.push(new this.constructor.Camera(new Engine.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY), new Engine.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY)));
+    this.cameras.push(new this.constructor.Camera(new module.exports.prototype.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY), new module.exports.prototype.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY)));
     if (this.disableRightClick) {
       this.arena.oncontextmenu = function() {
         return false;
       };
     }
-    this.keyboard = new Engine.Input.Keyboard();
-    this.pointer = new Engine.Input.Pointer();
+    this.keyboard = new module.exports.prototype.constructor.Input.Keyboard();
+    this.pointer = new module.exports.prototype.constructor.Input.Pointer();
     if (this.pauseOnBlur) {
       window.addEventListener("blur", function() {
         engine.stopMainLoop();
@@ -327,10 +327,10 @@ c = window.JSEngine = Engine = (function() {
   Engine.prototype.initRenderer = function() {
     if (!this.disableWebGL && (this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl"))) {
       console.log('Using WebGL renderer');
-      this.renderer = new Engine.Renderers.WebGLRenderer(this.canvas);
+      this.renderer = new module.exports.prototype.constructor.Renderers.WebGLRenderer(this.canvas);
     } else {
       console.log('Using canvas renderer');
-      this.renderer = new Engine.Renderers.CanvasRenderer(this.canvas);
+      this.renderer = new module.exports.prototype.constructor.Renderers.CanvasRenderer(this.canvas);
     }
   };
 
@@ -411,19 +411,19 @@ c = window.JSEngine = Engine = (function() {
     if (speed instanceof this.constructor.Geometry.Vector) {
       return new this.constructor.Vector(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
     }
-    from = (from !== void 0 ? from : Engine.Globals.SPEED_PIXELS_PER_SECOND);
-    to = (to !== void 0 ? to : Engine.Globals.SPEED_PIXELS_PER_FRAME);
+    from = (from !== void 0 ? from : module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND);
+    to = (to !== void 0 ? to : module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_FRAME);
     switch (from) {
-      case Engine.Globals.SPEED_PIXELS_PER_SECOND:
+      case module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND:
         speed = speed * this.gameTimeIncrease / 1000;
         break;
-      case Engine.Globals.SPEED_PIXELS_PER_FRAME:
+      case module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_FRAME:
         speed;
     }
     switch (to) {
-      case Engine.Globals.SPEED_PIXELS_PER_SECOND:
+      case module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND:
         return speed = speed / this.gameTimeIncrease * 1000;
-      case Engine.Globals.SPEED_PIXELS_PER_FRAME:
+      case module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_FRAME:
         return speed;
     }
   };
@@ -856,18 +856,18 @@ module.exports = function() {
 /*
 Constructor for Camera class
 
-@name Engine.Camera
+@name Camera
 @class A camera represents a part of the arena which is "projected" on to the engines main canvas.
 the camera contains both a capture region and a projection region, the capture region decides which part of the arena to "capture".
 The projection region decides where the captured region will be drawn on the main canvas.
 
 @property {Math.Rectangle} captureRegion A rectangle which defines the region of the current room to capture
 @property {Math.Rectangle} projectionRegion A rectangle which defines the region on the main canvas where the captured region should be drawn
-@property {Engine.Room} room The room to capture from
+@property {Room} room The room to capture from
 
 @param {Math.Rectangle} captureRegion A rectangle which defines the region of the current room to capture
 @param {Math.Rectangle} projectionRegion A rectangle which defines the region on the main canvas where the captured region should be drawn
-@param {Engine.Room} room The room to capture from
+@param {Room} room The room to capture from
  */
 
 c = Camera = (function() {
@@ -907,10 +907,10 @@ module.exports = function() {
 
 
 /*
-@name Engine.CustomLoop
+@name CustomLoop
 @class A loop class.
 Contains a list of functions to run each time the loop executes.
-For the loop to be executed, it will have to be added to the current room via the Engine.currentRoom.addLoop.
+For the loop to be executed, it will have to be added to the current room via the engine.currentRoom.addLoop.
 A loop also has it's own time that is stopped whenever the loop is not executed. This makes it possible to schedule a function execution that will be "postponed" if the loop gets paused.
 
 @property {number} framesPerExecution The number of frames between each execution of the custom loop
@@ -1314,12 +1314,9 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.updateAnimations = function() {
-    var a, animId, propId, t;
-    animId = void 0;
-    a = void 0;
-    propId = void 0;
-    t = void 0;
+    var a, animId, propId, t, _results;
     animId = this.animations.length - 1;
+    _results = [];
     while (animId > -1) {
       a = this.animations[animId];
       if (a === void 0) {
@@ -1333,11 +1330,7 @@ c = CustomLoop = (function() {
             a.obj[propId] = a.prop[propId].end;
           }
         }
-        if (typeof a.callback === "string") {
-          eval(a.callback);
-        } else {
-          a.callback.call(a.obj);
-        }
+        a.callback.call(a.obj);
       } else {
         for (propId in a.prop) {
           if (a.prop.hasOwnProperty(propId)) {
@@ -1346,8 +1339,9 @@ c = CustomLoop = (function() {
         }
       }
       a.onStep && a.onStep();
-      animId--;
+      _results.push(animId--);
     }
+    return _results;
   };
 
 
@@ -1358,9 +1352,6 @@ c = CustomLoop = (function() {
 
   CustomLoop.prototype.execute = function() {
     var exec, i, timer;
-    timer = void 0;
-    i = void 0;
-    exec = void 0;
     timer = new Date().getTime();
     if (!this.maskFunction() || engine.frames % this.framesPerExecution) {
       return;
@@ -3780,7 +3771,7 @@ Mixins = {
 /*
 Constructor for the Vector class. Uses set-function to set the vector from x- and y values.
 
-@name Engine.Geometry.Vector
+@name Vector
 @class A math class which is used for handling two-dimensional vectors
 @augments Mixin.Animatable
 
@@ -6479,7 +6470,7 @@ c = Effect = (function() {
 
   Effect.prototype.play = function(loop_) {
     var sound, _i, _len, _ref;
-    if (Engine.Sounds.Muted) {
+    if (engine.Sounds.Muted) {
       return false;
     }
     _ref = this.elements;
@@ -7950,7 +7941,7 @@ The constructor for the GameObject class.
 - Has collision checking
 @augments View.Collidable
 
-@property {Engine.CustomLoop} loop The loop to which movement of the object has been assigned
+@property {CustomLoop} loop The loop to which movement of the object has been assigned
 @property {boolean} alive Whether or not the object is alive. If the object is not alive, it will not move
 @property {Math.Vector} speed The two-directional velocity of the object in px/second
 

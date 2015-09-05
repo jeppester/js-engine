@@ -70,19 +70,19 @@ CollisionObject = (function(_super) {
 
   return CollisionObject;
 
-})(JSEngine.Views.GameObject);
+})(Engine.Views.GameObject);
 
 CollisionTest = (function() {
   function CollisionTest() {
     var player;
-    engine.currentRoom.addLoop('collisionChecking', new JSEngine.CustomLoop(5));
+    engine.currentRoom.addLoop('collisionChecking', new Engine.CustomLoop(5));
     window.rocks = [];
     this.addRocks(15);
     player = new CollisionObject("Character", 200, 100, {
-      upKey: JSEngine.Globals.KEY_UP,
-      downKey: JSEngine.Globals.KEY_DOWN,
-      leftKey: JSEngine.Globals.KEY_LEFT,
-      rightKey: JSEngine.Globals.KEY_RIGHT
+      upKey: Engine.Globals.KEY_UP,
+      downKey: Engine.Globals.KEY_DOWN,
+      leftKey: Engine.Globals.KEY_LEFT,
+      rightKey: Engine.Globals.KEY_RIGHT
     });
     engine.currentRoom.addChildren(player);
     engine.loader.hideOverlay();
@@ -107,7 +107,7 @@ CollisionTest = (function() {
 
 })();
 
-new JSEngine({
+new Engine({
   gameClass: CollisionTest,
   themes: ['Example'],
   backgroundColor: "#222",

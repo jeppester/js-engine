@@ -6,7 +6,7 @@ class MasksAndBBoxes
     # Hide loader overlay
     engine.loader.hideOverlay()
 
-    object = new JSEngine.Views.GameObject(
+    object = new Engine.Views.GameObject(
       'Character' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       50 # x-position
       50 # y-position
@@ -21,7 +21,7 @@ class MasksAndBBoxes
       )
     object.animation()
 
-    object2 = new JSEngine.Views.GameObject(
+    object2 = new Engine.Views.GameObject(
       'Rock' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       16 # x-position
       50 # y-position
@@ -33,12 +33,12 @@ class MasksAndBBoxes
       else
         text.string = ''
 
-    text = new JSEngine.Views.TextBlock '', 6, 4, 80, {color: '#FFF'}
+    text = new Engine.Views.TextBlock '', 6, 4, 80, {color: '#FFF'}
 
     engine.currentRoom.loops.eachFrame.attachFunction object, object.checkCollision
     engine.currentRoom.addChildren object, object2, text
 
-new JSEngine
+new Engine
 	# Set main class
 	gameClass: MasksAndBBoxes
 

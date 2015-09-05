@@ -1,5 +1,5 @@
 # Create movable character by extending Sprite
-class MovableCharacter extends JSEngine.Views.Sprite
+class MovableCharacter extends Engine.Views.Sprite
   constructor: (x, y)->
     super 'Character', x, y, 0
 
@@ -10,23 +10,23 @@ class MovableCharacter extends JSEngine.Views.Sprite
   step: ->
     # Check that the arrow keys are down, if so, move the object by increasing or decreasing it's x and y properties
     # Left
-    if engine.keyboard.isDown JSEngine.Globals.KEY_LEFT
+    if engine.keyboard.isDown Engine.Globals.KEY_LEFT
       @x -= engine.convertSpeed 200
 
     # Right
-    if engine.keyboard.isDown JSEngine.Globals.KEY_RIGHT
+    if engine.keyboard.isDown Engine.Globals.KEY_RIGHT
       @x += engine.convertSpeed 200
 
     # Up
-    if engine.keyboard.isDown JSEngine.Globals.KEY_UP
+    if engine.keyboard.isDown Engine.Globals.KEY_UP
       @y -= engine.convertSpeed 200
 
     # Down
-    if engine.keyboard.isDown JSEngine.Globals.KEY_DOWN
+    if engine.keyboard.isDown Engine.Globals.KEY_DOWN
       @y += engine.convertSpeed 200
 
     # Space
-    if engine.keyboard.isPressed JSEngine.Globals.KEY_SPACE
+    if engine.keyboard.isPressed Engine.Globals.KEY_SPACE
       # Turn the character around
       @animate(
         { direction: @direction + Math.PI * 2 }
@@ -34,7 +34,7 @@ class MovableCharacter extends JSEngine.Views.Sprite
       )
 
 # Add MovableCharactor to the ObjectCreator to make it easier to create a movable character
-JSEngine.ObjectCreator.prototype.MovableCharacter = (x, y)->
+Engine.ObjectCreator.prototype.MovableCharacter = (x, y)->
   object = new MovableCharacter x, y
   @container.addChildren object
 
@@ -45,13 +45,13 @@ class Main
 
   onLoaded: ->
     # Create two views and add them to the room
-    @bgView = new JSEngine.Views.Container
-    @fgView = new JSEngine.Views.Container
+    @bgView = new Engine.Views.Container
+    @fgView = new Engine.Views.Container
     engine.currentRoom.addChildren @bgView, @fgView
 
     # TEXT EXAMPLE
     # Make a hello world text
-    text = new JSEngine.Views.TextBlock(
+    text = new Engine.Views.TextBlock(
       'Hello world!' # TextBlock
       50 # x-position
       50 # y-position
@@ -67,7 +67,7 @@ class Main
 
     # SPRITE EXAMPLE
     # Make a sprite object
-    sprite = new JSEngine.Views.Sprite(
+    sprite = new Engine.Views.Sprite(
       'Rock' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       70 # x-position
       200 # y-position
@@ -100,7 +100,7 @@ class Main
     engine.loader.hideOverlay()
 
 # Start engine
-new JSEngine
+new Engine
   # Set main class to load
   gameClass: Main
 

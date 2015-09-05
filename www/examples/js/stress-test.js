@@ -8,17 +8,17 @@ StressTest = (function() {
         return _this.onLoaded();
       };
     })(this));
-    this.objectView = new JSEngine.Views.Container();
-    this.hudView = new JSEngine.Views.Container();
+    this.objectView = new Engine.Views.Container();
+    this.hudView = new Engine.Views.Container();
     engine.currentRoom.addChildren(this.objectView, this.hudView);
-    this.fpsCounter = new JSEngine.Views.TextBlock('FPS: 0', 10, 10, 150, {
+    this.fpsCounter = new Engine.Views.TextBlock('FPS: 0', 10, 10, 150, {
       color: '#FFF'
     });
-    this.objectCounter = new JSEngine.Views.TextBlock('Objects: 0', 10, 30, 150, {
+    this.objectCounter = new Engine.Views.TextBlock('Objects: 0', 10, 30, 150, {
       color: '#FFF'
     });
     this.hudView.addChildren(this.fpsCounter, this.objectCounter);
-    engine.currentRoom.addLoop('each20Frames', new JSEngine.CustomLoop(20));
+    engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
     engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
     engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
   }
@@ -39,8 +39,8 @@ StressTest = (function() {
     }
     _results = [];
     for (i = _i = 0; 0 <= count ? _i < count : _i > count; i = 0 <= count ? ++_i : --_i) {
-      sprite = new JSEngine.Views.GameObject('Rock', Math.random() * 600, Math.random() * 400, Math.random() * Math.PI * 2, {
-        speed: new JSEngine.Geometry.Vector(-5 + Math.random() * 10, -5 + Math.random() * 10)
+      sprite = new Engine.Views.GameObject('Rock', Math.random() * 600, Math.random() * 400, Math.random() * Math.PI * 2, {
+        speed: new Engine.Geometry.Vector(-5 + Math.random() * 10, -5 + Math.random() * 10)
       });
       sprite.checkBounce = function() {
         if (this.x < 0) {
@@ -79,10 +79,10 @@ StressTest = (function() {
   };
 
   StressTest.prototype.controls = function() {
-    if (engine.keyboard.isDown(JSEngine.Globals.KEY_UP)) {
+    if (engine.keyboard.isDown(Engine.Globals.KEY_UP)) {
       this.addObjects();
     }
-    if (engine.keyboard.isDown(JSEngine.Globals.KEY_DOWN)) {
+    if (engine.keyboard.isDown(Engine.Globals.KEY_DOWN)) {
       return this.removeObjects();
     }
   };
@@ -91,7 +91,7 @@ StressTest = (function() {
 
 })();
 
-new JSEngine({
+new Engine({
   gameClass: StressTest,
   themes: ['Example'],
   backgroundColor: "#000",

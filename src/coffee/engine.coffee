@@ -62,7 +62,7 @@ The default options are:
 "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
 ###
-c = window.JSEngine = class Engine
+c = window.Engine = class Engine
   # Load classes for easy usage
   @Helpers:
     MatrixCalculation: require './helpers/matrix-calculation'
@@ -257,10 +257,10 @@ c = window.JSEngine = class Engine
 
     # Create loader object
     ###
-    Global Engine.Loader instance which is created upon engine initialization
+    Global Loader instance which is created upon engine initialization
     @global
     ###
-    @loader = new Engine.Loader()
+    @loader = new module.exports::constructor.Loader()
 
     # Load themes
     @defaultTheme = @options.themes[0]
@@ -307,8 +307,8 @@ c = window.JSEngine = class Engine
 
     # Make main camera
     @cameras.push new @constructor.Camera(
-      new Engine.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
-      new Engine.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY))
+      new module.exports::constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
+      new module.exports::constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY))
 
     # Disable right click inside arena
     if @disableRightClick
@@ -316,8 +316,8 @@ c = window.JSEngine = class Engine
         false
 
     # Create objects required by the engine
-    @keyboard = new Engine.Input.Keyboard()
-    @pointer = new Engine.Input.Pointer()
+    @keyboard = new module.exports::constructor.Input.Keyboard()
+    @pointer = new module.exports::constructor.Input.Pointer()
 
     # Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
     if @pauseOnBlur
@@ -352,10 +352,10 @@ c = window.JSEngine = class Engine
   initRenderer: ->
     if not @disableWebGL and (@canvas.getContext("webgl") or @canvas.getContext("experimental-webgl"))
       console.log 'Using WebGL renderer'
-      @renderer = new Engine.Renderers.WebGLRenderer(@canvas)
+      @renderer = new module.exports::constructor.Renderers.WebGLRenderer(@canvas)
     else
       console.log 'Using canvas renderer'
-      @renderer = new Engine.Renderers.CanvasRenderer(@canvas)
+      @renderer = new module.exports::constructor.Renderers.CanvasRenderer(@canvas)
     return
 
   ###
@@ -424,21 +424,21 @@ c = window.JSEngine = class Engine
   convertSpeed: (speed, from, to) ->
     throw new Error("Missing argument: speed") if speed is undefined #dev
     return new @constructor.Vector(@convertSpeed(speed.x, from, to), @convertSpeed(speed.y, from, to)) if speed instanceof @constructor.Geometry.Vector
-    from = (if from isnt undefined then from else Engine.Globals.SPEED_PIXELS_PER_SECOND)
-    to = (if to isnt undefined then to else Engine.Globals.SPEED_PIXELS_PER_FRAME)
+    from = (if from isnt undefined then from else module.exports::constructor.Globals.SPEED_PIXELS_PER_SECOND)
+    to = (if to isnt undefined then to else module.exports::constructor.Globals.SPEED_PIXELS_PER_FRAME)
 
     # Convert all formats to pixels per frame
     switch from
-      when Engine.Globals.SPEED_PIXELS_PER_SECOND
+      when module.exports::constructor.Globals.SPEED_PIXELS_PER_SECOND
         speed = speed * @gameTimeIncrease / 1000
       # Convert pixels per frame to the output format
-      when Engine.Globals.SPEED_PIXELS_PER_FRAME
+      when module.exports::constructor.Globals.SPEED_PIXELS_PER_FRAME
         speed
 
     switch to
-      when Engine.Globals.SPEED_PIXELS_PER_SECOND
+      when module.exports::constructor.Globals.SPEED_PIXELS_PER_SECOND
         speed = speed / @gameTimeIncrease * 1000
-      when Engine.Globals.SPEED_PIXELS_PER_FRAME
+      when module.exports::constructor.Globals.SPEED_PIXELS_PER_FRAME
         speed
 
   ###

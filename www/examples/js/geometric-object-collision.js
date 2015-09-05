@@ -4,19 +4,19 @@ var GeometricObjectCollision;
 GeometricObjectCollision = (function() {
   function GeometricObjectCollision() {
     var textOptions;
-    this.circle = new JSEngine.Views.Circle(300, 200, 80, "#F11", "#F11");
-    this.line = new JSEngine.Views.Line(null, null, "#F00", 6).setFromCoordinates(20, 320, 80, 380);
-    this.polygon = new JSEngine.Views.Polygon([], "#FFF", "#F00", 6).setFromCoordinates(540, 40, 535, 70.5, 560, 70.5, 540, 50, 560, 35);
-    this.rectangle = new JSEngine.Views.Rectangle(20.5, 130.5, 100, 40, "#FFF", "#F00", 6);
-    this.circle2 = new JSEngine.Views.Circle(530, 330, 50, "#FFF", "#F00", 6);
+    this.circle = new Engine.Views.Circle(300, 200, 80, "#F11", "#F11");
+    this.line = new Engine.Views.Line(null, null, "#F00", 6).setFromCoordinates(20, 320, 80, 380);
+    this.polygon = new Engine.Views.Polygon([], "#FFF", "#F00", 6).setFromCoordinates(540, 40, 535, 70.5, 560, 70.5, 540, 50, 560, 35);
+    this.rectangle = new Engine.Views.Rectangle(20.5, 130.5, 100, 40, "#FFF", "#F00", 6);
+    this.circle2 = new Engine.Views.Circle(530, 330, 50, "#FFF", "#F00", 6);
     textOptions = {
       color: '#FFF'
     };
-    this.text = new JSEngine.Views.TextBlock('Use arrow keys to move the circle in the middle', 10, 10, 600, textOptions);
-    this.text2 = new JSEngine.Views.TextBlock('Distance to line: 0', 10, 30, 600, textOptions);
-    this.text3 = new JSEngine.Views.TextBlock('Distance to polygon: 0', 10, 50, 600, textOptions);
-    this.text4 = new JSEngine.Views.TextBlock('Distance to circle: 0', 10, 70, 600, textOptions);
-    this.text5 = new JSEngine.Views.TextBlock('Distance to rectangle: 0', 10, 90, 600, textOptions);
+    this.text = new Engine.Views.TextBlock('Use arrow keys to move the circle in the middle', 10, 10, 600, textOptions);
+    this.text2 = new Engine.Views.TextBlock('Distance to line: 0', 10, 30, 600, textOptions);
+    this.text3 = new Engine.Views.TextBlock('Distance to polygon: 0', 10, 50, 600, textOptions);
+    this.text4 = new Engine.Views.TextBlock('Distance to circle: 0', 10, 70, 600, textOptions);
+    this.text5 = new Engine.Views.TextBlock('Distance to rectangle: 0', 10, 90, 600, textOptions);
     engine.currentRoom.addChildren(this.circle, this.line, this.polygon, this.rectangle, this.circle2, this.text, this.text2, this.text3, this.text4, this.text5);
     engine.loader.hideOverlay((function(_this) {
       return function() {
@@ -33,16 +33,16 @@ GeometricObjectCollision = (function() {
     var dx, dy;
     dx = 0;
     dy = 0;
-    if (engine.keyboard.isDown(JSEngine.Globals.KEY_LEFT)) {
+    if (engine.keyboard.isDown(Engine.Globals.KEY_LEFT)) {
       dx = -engine.convertSpeed(200);
     }
-    if (engine.keyboard.isDown(JSEngine.Globals.KEY_RIGHT)) {
+    if (engine.keyboard.isDown(Engine.Globals.KEY_RIGHT)) {
       dx = engine.convertSpeed(200);
     }
-    if (engine.keyboard.isDown(JSEngine.Globals.KEY_UP)) {
+    if (engine.keyboard.isDown(Engine.Globals.KEY_UP)) {
       dy = -engine.convertSpeed(200);
     }
-    if (engine.keyboard.isDown(JSEngine.Globals.KEY_DOWN)) {
+    if (engine.keyboard.isDown(Engine.Globals.KEY_DOWN)) {
       dy = engine.convertSpeed(200);
     }
     this.circle.move(dx, dy);
@@ -56,7 +56,7 @@ GeometricObjectCollision = (function() {
 
 })();
 
-new JSEngine({
+new Engine({
   gameClass: GeometricObjectCollision,
   themes: ['Example'],
   canvasResX: 600,

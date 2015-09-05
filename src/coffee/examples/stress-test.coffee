@@ -2,15 +2,15 @@ class StressTest
   constructor: ->
     engine.loader.hideOverlay => @onLoaded()
 
-    @objectView = new JSEngine.Views.Container()
-    @hudView = new JSEngine.Views.Container()
+    @objectView = new Engine.Views.Container()
+    @hudView = new Engine.Views.Container()
     engine.currentRoom.addChildren @objectView, @hudView
 
-    @fpsCounter = new JSEngine.Views.TextBlock 'FPS: 0', 10, 10, 150, {color: '#FFF'}
-    @objectCounter = new JSEngine.Views.TextBlock 'Objects: 0', 10, 30, 150, {color: '#FFF'}
+    @fpsCounter = new Engine.Views.TextBlock 'FPS: 0', 10, 10, 150, {color: '#FFF'}
+    @objectCounter = new Engine.Views.TextBlock 'Objects: 0', 10, 30, 150, {color: '#FFF'}
     @hudView.addChildren @fpsCounter, @objectCounter
 
-    engine.currentRoom.addLoop 'each20Frames', new JSEngine.CustomLoop(20)
+    engine.currentRoom.addLoop 'each20Frames', new Engine.CustomLoop(20)
     engine.currentRoom.loops.each20Frames.attachFunction @, @updateFPS
     engine.currentRoom.loops.eachFrame.attachFunction @, @controls
 
@@ -23,12 +23,12 @@ class StressTest
 
   addObjects: (count = 10)->
     for i in [0...count]
-      sprite = new JSEngine.Views.GameObject(
+      sprite = new Engine.Views.GameObject(
           'Rock'
           Math.random() * 600
           Math.random() * 400
           Math.random() * Math.PI * 2
-          {speed: new JSEngine.Geometry.Vector(-5 + Math.random() * 10, -5 + Math.random() * 10)}
+          {speed: new Engine.Geometry.Vector(-5 + Math.random() * 10, -5 + Math.random() * 10)}
       )
       sprite.checkBounce = ->
         if @x < 0
@@ -57,12 +57,12 @@ class StressTest
 
   controls: ->
     # Add objects when arrow up key is down
-    @addObjects() if engine.keyboard.isDown JSEngine.Globals.KEY_UP
+    @addObjects() if engine.keyboard.isDown Engine.Globals.KEY_UP
 
     # Remove objects when arrow down key is down
-    @removeObjects() if engine.keyboard.isDown JSEngine.Globals.KEY_DOWN
+    @removeObjects() if engine.keyboard.isDown Engine.Globals.KEY_DOWN
 
-new JSEngine
+new Engine
 	# Set game-class path (Look at this file to start programming your game)
 	gameClass: StressTest
 

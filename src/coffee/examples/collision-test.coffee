@@ -1,5 +1,5 @@
 # Create collision object class
-class CollisionObject extends JSEngine.Views.GameObject
+class CollisionObject extends Engine.Views.GameObject
   constructor: (source, x, y, additionalProperties)->
     # Call the sprite constructor to fully extend the sprite and set all sprite properties
     super source, x, y, 0, additionalProperties
@@ -71,7 +71,7 @@ class CollisionObject extends JSEngine.Views.GameObject
 class CollisionTest
   constructor: ->
     # Add collision checking loop
-    engine.currentRoom.addLoop 'collisionChecking', new JSEngine.CustomLoop(5)
+    engine.currentRoom.addLoop 'collisionChecking', new Engine.CustomLoop(5)
 
     # Make two collision objects
     window.rocks = []
@@ -82,10 +82,10 @@ class CollisionTest
       200 # x-position
       100 # y-position
       {
-        upKey: JSEngine.Globals.KEY_UP
-        downKey: JSEngine.Globals.KEY_DOWN
-        leftKey: JSEngine.Globals.KEY_LEFT
-        rightKey: JSEngine.Globals.KEY_RIGHT
+        upKey: Engine.Globals.KEY_UP
+        downKey: Engine.Globals.KEY_DOWN
+        leftKey: Engine.Globals.KEY_LEFT
+        rightKey: Engine.Globals.KEY_RIGHT
       }
     )
 
@@ -106,7 +106,7 @@ class CollisionTest
       engine.currentRoom.addChildren rock
 
 # Start engine
-new JSEngine
+new Engine
   # Set game-class path (Look at this file to start programming your game)
   gameClass: CollisionTest
 

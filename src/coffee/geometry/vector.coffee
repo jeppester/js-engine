@@ -10,7 +10,7 @@ Mixins =
 ###
 Constructor for the Vector class. Uses set-function to set the vector from x- and y values.
 
-@name Engine.Geometry.Vector
+@name Vector
 @class A math class which is used for handling two-dimensional vectors
 @augments Mixin.Animatable
 

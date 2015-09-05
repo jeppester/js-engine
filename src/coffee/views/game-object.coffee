@@ -13,7 +13,7 @@ The constructor for the GameObject class.
 - Has collision checking
 @augments View.Collidable
 
-@property {Engine.CustomLoop} loop The loop to which movement of the object has been assigned
+@property {CustomLoop} loop The loop to which movement of the object has been assigned
 @property {boolean} alive Whether or not the object is alive. If the object is not alive, it will not move
 @property {Math.Vector} speed The two-directional velocity of the object in px/second
 

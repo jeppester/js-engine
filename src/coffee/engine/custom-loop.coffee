@@ -1,10 +1,10 @@
 module.exports = -> module.exports::constructor.apply @, arguments
 
 ###
-@name Engine.CustomLoop
+@name CustomLoop
 @class A loop class.
 Contains a list of functions to run each time the loop executes.
-For the loop to be executed, it will have to be added to the current room via the Engine.currentRoom.addLoop.
+For the loop to be executed, it will have to be added to the current room via the engine.currentRoom.addLoop.
 A loop also has it's own time that is stopped whenever the loop is not executed. This makes it possible to schedule a function execution that will be "postponed" if the loop gets paused.
 
 @property {number} framesPerExecution The number of frames between each execution of the custom loop
@@ -329,13 +329,9 @@ c = class CustomLoop
   @private
   ###
   updateAnimations: ->
-    animId = undefined
-    a = undefined
-    propId = undefined
-    t = undefined
-
     # Run through the animations to update them
     animId = @animations.length - 1
+
     while animId > -1
       a = @animations[animId]
       continue if a is undefined
@@ -348,10 +344,7 @@ c = class CustomLoop
         # If the animation has ended: delete it and set the animated properties to their end values
         for propId of a.prop
           a.obj[propId] = a.prop[propId].end if a.prop.hasOwnProperty(propId)
-        if typeof a.callback is "string"
-          eval a.callback
-        else
-          a.callback.call a.obj
+        a.callback.call a.obj
       else
         # If the animation is still running: Ease the animation of each property
         for propId of a.prop
@@ -360,17 +353,12 @@ c = class CustomLoop
       # Execute onStep-callback if any
       a.onStep and a.onStep()
       animId--
-    return
-
 
   ###
   Executes the custom loop. This will execute all the functions that have been added to the loop, and checks all scheduled executions to see if they should fire.
   This function will automatically be executed, if the loop has been added to the current room, or the engine's masterRoom
   ###
   execute: ->
-    timer = undefined
-    i = undefined
-    exec = undefined
     timer = new Date().getTime()
     return if not @maskFunction() or engine.frames % @framesPerExecution
     @time += engine.gameTimeIncrease if engine.frames - @lastFrame is @framesPerExecution
