@@ -1,6 +1,8 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
-module.exports = class Polygon
+c = class Polygon
   ###
   The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
 
@@ -305,3 +307,6 @@ module.exports = class Polygon
       intersectionCount
     else
       false
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

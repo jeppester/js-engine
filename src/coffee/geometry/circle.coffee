@@ -1,3 +1,5 @@
+module.exports = -> @constructor.apply @, arguments
+
 ###
 Constructor for Circle class, uses the set function, to set the properties of the circle.
 
@@ -13,7 +15,7 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {number} y The y-coordinate for the center of the circle
 @param {number} radius The radius for the circle
 ###
-module.exports = class Circle
+c = class Circle
   # Mix in animatable
   Engine.Helpers.Mixin.mixin @, Engine.Mixins.Animatable
 
@@ -175,3 +177,6 @@ module.exports = class Circle
       object.intersects this
     else #dev
       throw new Error("Argument object has to be of type: Line, Circle, Rectangle or Polygon") #dev
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

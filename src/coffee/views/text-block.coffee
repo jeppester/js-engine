@@ -1,6 +1,8 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
-module.exports = class TextBlock extends Engine.Views.Container
+c = class TextBlock extends Engine.Views.Container
   # Mix in Child
   Engine.Helpers.Mixin.mixin @, Engine.Mixins.Animatable
 
@@ -346,3 +348,6 @@ module.exports = class TextBlock extends Engine.Views.Container
     ret.width = Math.ceil(ret.width + 2)
     ret.height = Math.ceil(ret.height + 2)
     ret
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

@@ -1,3 +1,5 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
 ###
@@ -20,12 +22,12 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {number} [lineWidth=1] The line's width if added to a view (in px)
 @param {string} [lineCap='butt'] The line's cap style if added to a view
 ###
-module.exports = class Line extends Engine.Geometry.Line
+c = class Line extends Engine.Geometry.Line
   # Mix in Child
   Engine.Helpers.Mixin.mixin @, Engine.Views.Child
 
   constructor: (startVector, endVector, strokeStyle, lineWidth, lineCap) ->
-    Engine.Views.Child.call this
+    Engine.Views.Child::constructor.call this
     @renderType = "line"
     if engine.enableRedrawRegions
       @LineInitWithRedrawRegions startVector, endVector, strokeStyle, lineWidth, lineCap
@@ -196,3 +198,6 @@ module.exports = class Line extends Engine.Geometry.Line
   ###
   isVisible: ->
     Engine.Views.Child::isVisible.call(@) and (@a.x isnt @b.x or @a.y isnt @b.y)
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

@@ -1,10 +1,12 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
 ###
 @name View.Child
 @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
 ###
-module.exports = class Child
+c = class Child
   constructor: ->
     @renderType = ""
     @initWithoutRedrawRegions()
@@ -285,3 +287,6 @@ module.exports = class Child
   isVisible: ->
     # If sprites size has been modified to zero, do nothing
     not (@size is 0 or @widthScale is 0 or @heightScale is 0)
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

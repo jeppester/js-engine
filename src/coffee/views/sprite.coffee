@@ -1,3 +1,5 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
 ###
@@ -34,7 +36,7 @@ composite: 'source-over',
 offset: new Math.Vector('center', 'center')
 }</code>
 ###
-module.exports = class Sprite extends Engine.Views.Container
+c = class Sprite extends Engine.Views.Container
   # Mix in animatable
   Engine.Helpers.Mixin.mixin @, Engine.Mixins.Animatable
 
@@ -221,3 +223,6 @@ module.exports = class Sprite extends Engine.Views.Container
     box.width = Math.ceil(box.width + 1)
     box.height = Math.ceil(box.height + 1)
     box
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

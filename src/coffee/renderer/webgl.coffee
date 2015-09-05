@@ -1,8 +1,10 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 TextureShaderProgram = require './webgl/texture-shader-program'
 ColorShaderProgram = require './webgl/color-shader-program'
 
-module.exports = class WebGLRenderer
+c = class WebGLRenderer
   constructor: (@canvas) ->
     # Cache variables
     @cache =
@@ -125,3 +127,6 @@ module.exports = class WebGLRenderer
         @renderTree object.children[i], localWm
         i++
     return
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

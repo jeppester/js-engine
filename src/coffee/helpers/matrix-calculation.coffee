@@ -27,56 +27,32 @@ module.exports = MatrixCalculationHelper =
 
   makeIdentity: ->
     [
-      1
-      0
-      0
-      0
-      1
-      0
-      0
-      0
-      1
+      1, 0, 0
+      0, 1, 0
+      0, 0, 1
     ]
 
   makeTranslation: (tx, ty) ->
     [
-      1
-      0
-      0
-      0
-      1
-      0
-      tx
-      ty
-      1
+      1, 0, 0
+      0, 1, 0
+      tx, ty, 1
     ]
 
   makeRotation: (direction) ->
     c = Math.cos(direction)
     s = Math.sin(direction)
     [
-      c
-      -s
-      0
-      s
-      c
-      0
-      0
-      0
-      1
+      c, -s, 0
+      s, c, 0
+      0, 0, 1
     ]
 
   makeScale: (sx, sy) ->
     [
-      sx
-      0
-      0
-      0
-      sy
-      0
-      0
-      0
-      1
+      sx, 0, 0
+      0, sy, 0
+      0, 0, 1
     ]
 
   matrixDeterminant: (matrix) ->
@@ -118,15 +94,9 @@ module.exports = MatrixCalculationHelper =
     H = -(a * f - c * d)
     I =   a * e - b * d
     @matrixMultiplyNumber [
-      A
-      D
-      G
-      B
-      E
-      H
-      C
-      F
-      I
+      A, D, G
+      B, E, H
+      C, F, I
     ], 1 / det
 
   getNewMatrix: (matrix) ->
@@ -149,15 +119,9 @@ module.exports = MatrixCalculationHelper =
     H = -(a * f - c * d)
     I =   a * e - b * d
     [
-      A
-      D
-      G
-      B
-      E
-      H
-      C
-      F
-      I
+      A, D, G
+      B, E, H
+      C, F, I
     ]
 
   matrixMultiplyNumber: (matrix, factor) ->
@@ -172,15 +136,9 @@ module.exports = MatrixCalculationHelper =
     i = matrix[2 * 3 + 2]
     s = factor
     [
-      a * s
-      b * s
-      c * s
-      d * s
-      e * s
-      f * s
-      g * s
-      h * s
-      i * s
+      a * s, b * s, c * s
+      d * s, e * s, f * s
+      g * s, h * s, i * s
     ]
 
   matrixMultiply: (a, b) ->

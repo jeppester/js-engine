@@ -3,25 +3,25 @@ var RoomTransitions;
 
 RoomTransitions = (function() {
   function RoomTransitions() {
-    var i, j, k, l, m, room;
+    var i, room, _i, _j, _k, _l;
     engine.currentRoom.name = 'room1';
     engine.currentRoom.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#F00'));
-    for (i = j = 0; j < 5; i = ++j) {
+    for (i = _i = 0; _i < 5; i = ++_i) {
       engine.currentRoom.addChildren(new Engine.Views.Sprite('Character', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
     room = new Engine.Room('room2');
     room.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#0F0'));
-    for (i = k = 0; k < 5; i = ++k) {
+    for (i = _j = 0; _j < 5; i = ++_j) {
       room.addChildren(new Engine.Views.Sprite('Rock', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
     room = new Engine.Room('room3');
     room.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#00F'));
-    for (i = l = 0; l < 10; i = ++l) {
+    for (i = _k = 0; _k < 10; i = ++_k) {
       room.addChildren(new Engine.Views.Sprite('Folder.Star2', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
     room = new Engine.Room('room4');
     room.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#FFF'));
-    for (i = m = 0; m < 20; i = ++m) {
+    for (i = _l = 0; _l < 20; i = ++_l) {
       room.addChildren(new Engine.Views.Sprite('Folder.Star3', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
     engine.loader.hideOverlay((function(_this) {

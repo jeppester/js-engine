@@ -1,3 +1,5 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
 ###
@@ -17,7 +19,7 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} width The width of the rectangle
 @param {number} height The height of the rectangle
 ###
-module.exports = class Rectangle extends Engine.Geometry.Vector
+c = class Rectangle extends Engine.Geometry.Vector
   # Mix in animatable
   Engine.Helpers.Mixin.mixin @, Engine.Mixins.Animatable
 
@@ -224,3 +226,6 @@ module.exports = class Rectangle extends Engine.Geometry.Vector
   ###
   intersects: (object) ->
     @getPolygon().intersects object
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

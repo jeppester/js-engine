@@ -1,6 +1,8 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../../engine'
 
-module.exports = class WebGLTextureShaderProgram
+c = class WebGLTextureShaderProgram
   constructor: (gl) ->
     initShaders = undefined
     initBuffers = undefined
@@ -227,3 +229,6 @@ module.exports = class WebGLTextureShaderProgram
     gl.bindTexture gl.TEXTURE_2D, null
     @cache.textures[image.src] = texture
     texture
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

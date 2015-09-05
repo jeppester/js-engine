@@ -874,7 +874,11 @@ Engine.Loader = require('./engine/loader');
 
 
 },{"./engine/camera":2,"./engine/custom-loop":3,"./engine/globals":4,"./engine/loader":5,"./engine/object-creator":6,"./engine/room":7,"./geometry/circle":8,"./geometry/line":9,"./geometry/polygon":10,"./geometry/rectangle":11,"./geometry/vector":12,"./helpers/matrix-calculation":13,"./helpers/mixin":14,"./helpers/room-transition":15,"./helpers/webgl":16,"./input/keyboard":17,"./input/pointer":18,"./mixins/animatable":19,"./renderer/canvas":20,"./renderer/webgl":21,"./sounds/effect":24,"./sounds/music":25,"./views/child":26,"./views/circle":27,"./views/collidable":28,"./views/container":29,"./views/game-object":30,"./views/line":31,"./views/polygon":32,"./views/rectangle":33,"./views/sprite":34,"./views/text-block":35}],2:[function(require,module,exports){
-var Camera, Engine;
+var Camera, Engine, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -896,7 +900,7 @@ The projection region decides where the captured region will be drawn on the mai
 @param {Engine.Room} room The room to capture from
  */
 
-module.exports = Camera = (function() {
+c = Camera = (function() {
   function Camera(captureRegion, projectionRegion, room) {
     if (!captureRegion instanceof Engine.Geometry.Rectangle) {
       throw new Error("Argument captureRegion should be of type: Rectangle");
@@ -914,10 +918,21 @@ module.exports = Camera = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],3:[function(require,module,exports){
-var CustomLoop, Engine;
+var CustomLoop, Engine, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -938,7 +953,7 @@ A loop also has it's own time that is stopped whenever the loop is not executed.
 @param {function} [maskFunction=function(){}] A function that will be run before each execution, if the function returns true the execution proceeds as planned, if not, the execution will not be run
  */
 
-module.exports = CustomLoop = (function() {
+c = CustomLoop = (function() {
   function CustomLoop(framesPerExecution, maskFunction) {
     this.framesPerExecution = (framesPerExecution === void 0 ? 1 : framesPerExecution);
     this.maskFunction = (maskFunction === void 0 ? function() {
@@ -1416,6 +1431,13 @@ module.exports = CustomLoop = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],4:[function(require,module,exports){
@@ -1740,7 +1762,11 @@ module.exports = {
 
 
 },{"../engine":1}],5:[function(require,module,exports){
-var Engine, Loader;
+var Engine, Loader, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -1756,7 +1782,7 @@ On engine startup a Loader object is instantiated to the global variable "loader
 This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
  */
 
-module.exports = Loader = (function() {
+c = Loader = (function() {
   function Loader() {
     this.images = {};
     this.loaded = {
@@ -1885,7 +1911,6 @@ module.exports = Loader = (function() {
       throw new Error("Missing argument: resource");
     }
     themeName = (themeName !== void 0 ? themeName : engine.defaultTheme);
-    mask = void 0;
     mask = this.getResource(resource, "masks", themeName);
     if (mask) {
       return mask;
@@ -1918,9 +1943,6 @@ module.exports = Loader = (function() {
     if (themeName === void 0) {
       throw new Error("Missing argument: themeName");
     }
-    res = void 0;
-    inh = void 0;
-    i = void 0;
     if (resource.indexOf("/") !== -1) {
       resource = resource.replace(/\//g, ".");
     }
@@ -1954,19 +1976,11 @@ module.exports = Loader = (function() {
 
   Loader.prototype.getImageSources = function() {
     var currentDir, i, inheritTheme, loopThrough, object, sourceStrings;
-    object = void 0;
-    sourceStrings = void 0;
-    currentDir = void 0;
-    loopThrough = void 0;
-    inheritTheme = void 0;
-    i = void 0;
     object = this.themes[engine.defaultTheme].images;
     sourceStrings = [];
     currentDir = [];
     loopThrough = function(object) {
       var name, pushStr;
-      pushStr = void 0;
-      name = void 0;
       if (object.src !== void 0) {
         pushStr = currentDir.join(".");
         if (sourceStrings.indexOf(pushStr) === -1) {
@@ -2003,10 +2017,6 @@ module.exports = Loader = (function() {
 
   Loader.prototype.getAllSounds = function() {
     var res, resourceString, theme, themeName;
-    res = void 0;
-    themeName = void 0;
-    theme = void 0;
-    resourceString = void 0;
     res = [];
     for (themeName in this.themes) {
       if (this.themes.hasOwnProperty(themeName)) {
@@ -2030,10 +2040,6 @@ module.exports = Loader = (function() {
 
   Loader.prototype.getAllMusic = function() {
     var res, resourceString, theme, themeName;
-    res = void 0;
-    themeName = void 0;
-    theme = void 0;
-    resourceString = void 0;
     res = [];
     for (themeName in this.themes) {
       if (this.themes.hasOwnProperty(themeName)) {
@@ -2061,8 +2067,6 @@ module.exports = Loader = (function() {
     if (paths === void 0) {
       throw new Error("Missing argument: paths");
     }
-    objectName = void 0;
-    i = void 0;
     for (i in paths) {
       if (paths.hasOwnProperty(i)) {
         objectName = paths[i].match(/(\w*)\.\w+$/)[1];
@@ -2083,7 +2087,6 @@ module.exports = Loader = (function() {
 
   Loader.prototype.reloadAllClasses = function() {
     var i;
-    i = void 0;
     for (i in this.loaded.classes) {
       if (this.loaded.classes.hasOwnProperty(i)) {
         engine.loadFiles(this.loaded.classes[i]);
@@ -2101,19 +2104,13 @@ module.exports = Loader = (function() {
    */
 
   Loader.prototype.loadThemes = function(themeNames, callback) {
-    var codeString, i, name, req, theme, total;
+    var codeString, i, name, req, total;
     if (themeNames === void 0) {
       throw new Error("Missing argument: themeNames");
     }
     if (callback !== void 0) {
       this.onthemesloaded = callback;
     }
-    name = void 0;
-    req = void 0;
-    i = void 0;
-    total = void 0;
-    theme = void 0;
-    codeString = void 0;
     i = 0;
     while (i < themeNames.length) {
       name = themeNames[i];
@@ -2407,10 +2404,6 @@ module.exports = Loader = (function() {
 
   Loader.prototype.checkAllLoaded = function() {
     var i, loaded, theme, total;
-    i = void 0;
-    total = void 0;
-    loaded = void 0;
-    theme = void 0;
     total = 0;
     loaded = 0;
     for (i in this.themes) {
@@ -2433,22 +2426,33 @@ module.exports = Loader = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],6:[function(require,module,exports){
-var Engine, ObjectCreator,
-  slice = [].slice;
+var Engine, ObjectCreator, c, name, value,
+  __slice = [].slice;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
-module.exports = ObjectCreator = (function() {
+c = ObjectCreator = (function() {
   function ObjectCreator(container) {
     this.container = container;
   }
 
   ObjectCreator.prototype.Container = function() {
     var a, children, o;
-    children = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+    children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     a = arguments;
     o = new Engine.Views.Container;
     o.addChildren.apply(o, children);
@@ -2516,12 +2520,23 @@ module.exports = ObjectCreator = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],7:[function(require,module,exports){
-var Engine, Room,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var Engine, Room, c, name, value,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -2546,8 +2561,8 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 @param {function} [onLeft=function () {}] A function to run when the room is left
  */
 
-module.exports = Room = (function(superClass) {
-  extend(Room, superClass);
+c = Room = (function(_super) {
+  __extends(Room, _super);
 
   function Room(name, onEntered, onLeft) {
     Room.__super__.constructor.call(this);
@@ -2587,13 +2602,13 @@ module.exports = Room = (function(superClass) {
    */
 
   Room.prototype.update = function() {
-    var l, name, ref;
+    var l, name, _ref;
     if (this.paused) {
       return;
     }
-    ref = this.loops;
-    for (name in ref) {
-      l = ref[name];
+    _ref = this.loops;
+    for (name in _ref) {
+      l = _ref[name];
       l.execute();
     }
   };
@@ -2648,9 +2663,22 @@ module.exports = Room = (function(superClass) {
 
 })(Engine.Views.Container);
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],8:[function(require,module,exports){
+var Circle, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
+
 
 /*
 Constructor for Circle class, uses the set function, to set the properties of the circle.
@@ -2667,9 +2695,8 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {number} y The y-coordinate for the center of the circle
 @param {number} radius The radius for the circle
  */
-var Circle;
 
-module.exports = Circle = (function() {
+c = Circle = (function() {
   Engine.Helpers.Mixin.mixin(Circle, Engine.Mixins.Animatable);
 
   function Circle(x, y, radius) {
@@ -2875,10 +2902,21 @@ module.exports = Circle = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{}],9:[function(require,module,exports){
-var Engine, Line;
+var Engine, Line, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -2897,7 +2935,7 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {Engine.Geometry.Vector} endVector A Vector representing the end point of the line
  */
 
-module.exports = Line = (function() {
+c = Line = (function() {
   function Line(startVector, endVector) {
     startVector = (startVector !== void 0 ? startVector : new Engine.Geometry.Vector());
     endVector = (endVector !== void 0 ? endVector : new Engine.Geometry.Vector());
@@ -3151,7 +3189,7 @@ module.exports = Line = (function() {
    */
 
   Line.prototype.createPolygonFromWidth = function(width, lineCap) {
-    var a, angle, b, c, d, i, ort, points, r, segmentRad, startAngle, v;
+    var a, angle, b, d, i, ort, points, r, segmentRad, startAngle, v;
     lineCap = lineCap || "butt";
     v = this.a.copy().subtract(this.b);
     v.set(v.y, -v.x);
@@ -3205,14 +3243,25 @@ module.exports = Line = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],10:[function(require,module,exports){
-var Engine, Polygon;
+var Engine, Polygon, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
-module.exports = Polygon = (function() {
+c = Polygon = (function() {
 
   /*
   The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
@@ -3617,12 +3666,23 @@ module.exports = Polygon = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],11:[function(require,module,exports){
-var Engine, Rectangle,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var Engine, Rectangle, c, name, value,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -3645,8 +3705,8 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} height The height of the rectangle
  */
 
-module.exports = Rectangle = (function(superClass) {
-  extend(Rectangle, superClass);
+c = Rectangle = (function(_super) {
+  __extends(Rectangle, _super);
 
   Engine.Helpers.Mixin.mixin(Rectangle, Engine.Mixins.Animatable);
 
@@ -3919,10 +3979,21 @@ module.exports = Rectangle = (function(superClass) {
 
 })(Engine.Geometry.Vector);
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],12:[function(require,module,exports){
-var Engine, Vector;
+var Engine, Vector, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -3940,7 +4011,7 @@ Constructor for the Vector class. Uses set-function to set the vector from x- an
 @param {number} [y=0] The y-value to set for the vector
  */
 
-module.exports = Vector = (function() {
+c = Vector = (function() {
   function Vector(x, y) {
     this.set(x, y);
     return;
@@ -4227,6 +4298,13 @@ module.exports = Vector = (function() {
   return Vector;
 
 })();
+
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
 
 
 
@@ -4551,9 +4629,6 @@ module.exports = WebGLHelper = {
   },
   setCircle: function(gl, x, y, segmentsCount, radius) {
     var coords, i, segmentLength;
-    i = void 0;
-    coords = void 0;
-    segmentLength = void 0;
     coords = new Array(segmentsCount * 2);
     segmentLength = Math.PI * 2 / segmentsCount;
     i = 0;
@@ -4585,6 +4660,12 @@ module.exports = WebGLHelper = {
 
 
 },{}],17:[function(require,module,exports){
+var Keyboard, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
+
 
 /*
 Constructor for the Keyboard class
@@ -4592,9 +4673,8 @@ Constructor for the Keyboard class
 @name Input.Keyboard
 @class A class that eases checking of the current state of all keys.
  */
-var Keyboard;
 
-module.exports = Keyboard = (function() {
+c = Keyboard = (function() {
   function Keyboard() {
     var key;
     key = void 0;
@@ -4725,10 +4805,21 @@ module.exports = Keyboard = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{}],18:[function(require,module,exports){
-var Engine, Pointer;
+var Engine, Pointer, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -4740,7 +4831,7 @@ Constructor for the Pointer class
 @class A class that eases the use of mouse and touch, by providing functions for checking the current state of both.
  */
 
-module.exports = Pointer = (function() {
+c = Pointer = (function() {
   function Pointer() {
     var button;
     if (engine.host.hasTouch) {
@@ -4833,7 +4924,6 @@ module.exports = Pointer = (function() {
     if (event === void 0) {
       throw new Error("Missing argument: event");
     }
-    button = void 0;
     this.onMouseMove(event);
     if (this.isDown(event.which)) {
       button = this.mouse.buttons[event.which];
@@ -4855,7 +4945,6 @@ module.exports = Pointer = (function() {
     if (event === void 0) {
       throw new Error("Missing argument: event");
     }
-    roomPos = void 0;
     this.mouse.window.set(event.pageX, event.pageY);
     this.mouse.set(this.mouse.window.x - engine.arena.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, this.mouse.window.y - engine.arena.offsetTop - engine.canvas.offsetTop + document.body.scrollTop);
     this.mouse.x = this.mouse.x / engine.arena.offsetWidth * engine.canvasResX;
@@ -4885,13 +4974,13 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.onTouchStart = function(event) {
-    var eventTouch, j, len1, pointerTouch, ref, touchNumber;
+    var eventTouch, pointerTouch, touchNumber, _i, _len, _ref;
     if (event === void 0) {
       throw new Error("Missing argument: event");
     }
-    ref = event.changedTouches;
-    for (j = 0, len1 = ref.length; j < len1; j++) {
-      eventTouch = ref[j];
+    _ref = event.changedTouches;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      eventTouch = _ref[_i];
       touchNumber = this.findTouchNumber();
       pointerTouch = this.touches[touchNumber];
       pointerTouch.identifier = eventTouch.identifier;
@@ -4910,13 +4999,13 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.onTouchEnd = function(event) {
-    var eventTouch, j, len1, pointerTouch, ref;
+    var eventTouch, pointerTouch, _i, _len, _ref;
     if (event === void 0) {
       throw new Error("Missing argument: event");
     }
-    ref = event.changedTouches;
-    for (j = 0, len1 = ref.length; j < len1; j++) {
-      eventTouch = ref[j];
+    _ref = event.changedTouches;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      eventTouch = _ref[_i];
       pointerTouch = this.touches.filter(function(t) {
         return t.identifier === eventTouch.identifier;
       })[0];
@@ -4935,13 +5024,13 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.onTouchMove = function(event) {
-    var eventTouch, j, len1, pointerTouch, ref, roomPos;
+    var eventTouch, pointerTouch, roomPos, _i, _len, _ref;
     if (event === void 0) {
       throw new Error("Missing argument: event");
     }
-    ref = event.touches;
-    for (j = 0, len1 = ref.length; j < len1; j++) {
-      eventTouch = ref[j];
+    _ref = event.touches;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      eventTouch = _ref[_i];
       pointerTouch = this.touches.filter(function(t) {
         return t.identifier === eventTouch.identifier;
       })[0];
@@ -5004,7 +5093,6 @@ module.exports = Pointer = (function() {
     if (button === void 0) {
       throw new Error("Missing argument: button");
     }
-    pointers = void 0;
     switch (this.getButtonType(button)) {
       case "mouse":
         pointers = (button === Engine.Globals.MOUSE_ANY ? this.mouse.buttons : this.mouse.buttons[button]);
@@ -5057,7 +5145,7 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.shapeIsPressed = function(button, shape, outside) {
-    var i, j, len1, pointer, pointers, ret;
+    var pointer, pointers, ret, _i, _len;
     button = (button !== void 0 ? button : Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY);
     if (shape === void 0) {
       throw new Error("Missing argument: shape");
@@ -5065,14 +5153,10 @@ module.exports = Pointer = (function() {
     if (typeof shape.contains !== "function") {
       throw new Error("Argument shape has implement a \"contains\"-function");
     }
-    i = void 0;
-    pointers = void 0;
-    pointer = void 0;
-    ret = void 0;
     pointers = this.isPressed(button);
     ret = [];
-    for (j = 0, len1 = pointers.length; j < len1; j++) {
-      pointer = pointers[j];
+    for (_i = 0, _len = pointers.length; _i < _len; _i++) {
+      pointer = pointers[_i];
       if (pointer.x === false || pointer.y === false) {
         continue;
       }
@@ -5099,7 +5183,7 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.shapeIsReleased = function(button, shape, outside) {
-    var j, len1, pointer, pointers, ret;
+    var pointer, pointers, ret, _i, _len;
     button = (button !== void 0 ? button : Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY);
     if (shape === void 0) {
       throw new Error("Missing argument: shape");
@@ -5109,8 +5193,8 @@ module.exports = Pointer = (function() {
     }
     pointers = this.isReleased(button);
     ret = [];
-    for (j = 0, len1 = pointers.length; j < len1; j++) {
-      pointer = pointers[j];
+    for (_i = 0, _len = pointers.length; _i < _len; _i++) {
+      pointer = pointers[_i];
       if (pointer.x === false || pointer.y === false) {
         continue;
       }
@@ -5137,7 +5221,7 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.shapeIsDown = function(button, shape, outside) {
-    var j, len1, pointer, pointers, ret;
+    var pointer, pointers, ret, _i, _len;
     button = (button !== void 0 ? button : Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY);
     if (shape === void 0) {
       throw new Error("Missing argument: shape");
@@ -5147,8 +5231,8 @@ module.exports = Pointer = (function() {
     }
     pointers = this.isDown(button);
     ret = [];
-    for (j = 0, len1 = pointers.length; j < len1; j++) {
-      pointer = pointers[j];
+    for (_i = 0, _len = pointers.length; _i < _len; _i++) {
+      pointer = pointers[_i];
       if (pointer.x === false || pointer.y === false) {
         continue;
       }
@@ -5195,7 +5279,7 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.checkPointer = function(pointers, state) {
-    var j, len1, pointer, ret;
+    var pointer, ret, _i, _len;
     if (pointers === "undefined") {
       throw new Error("Missing argument: pointers");
     }
@@ -5209,8 +5293,8 @@ module.exports = Pointer = (function() {
       pointers = [pointers];
     }
     ret = [];
-    for (j = 0, len1 = pointers.length; j < len1; j++) {
-      pointer = pointers[j];
+    for (_i = 0, _len = pointers.length; _i < _len; _i++) {
+      pointer = pointers[_i];
       switch (state) {
         case "pressed":
           if (pointer.events[0] > engine.last || pointer.events[1] > engine.last) {
@@ -5246,9 +5330,6 @@ module.exports = Pointer = (function() {
 
   Pointer.prototype.calculateRoomPosition = function(vector) {
     var camera, len, ret;
-    ret = void 0;
-    len = void 0;
-    camera = void 0;
     ret = vector.copy();
     len = engine.cameras.length;
     while (len--) {
@@ -5275,10 +5356,10 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.findTouchNumber = function() {
-    var i, j, len1, ref, touch;
-    ref = this.touches;
-    for (i = j = 0, len1 = ref.length; j < len1; i = ++j) {
-      touch = ref[i];
+    var i, touch, _i, _len, _ref;
+    _ref = this.touches;
+    for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+      touch = _ref[i];
       if (!(touch.events[0] > 0)) {
         return i;
       }
@@ -5321,10 +5402,6 @@ module.exports = Pointer = (function() {
     if (button === void 0) {
       throw new Error("Missing argument: button");
     }
-    i = void 0;
-    pointers = void 0;
-    events = void 0;
-    unpressed = void 0;
     pointers = this.isPressed(button);
     if (!pointers) {
       return false;
@@ -5402,12 +5479,23 @@ module.exports = Pointer = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],19:[function(require,module,exports){
-var Animatable;
+var Animatable, c, name, value;
 
-module.exports = Animatable = (function() {
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
+
+c = Animatable = (function() {
   function Animatable() {}
 
 
@@ -5438,7 +5526,7 @@ module.exports = Animatable = (function() {
    */
 
   Animatable.prototype.animate = function(properties, options) {
-    var anim, c, i, loop_, map, opt;
+    var anim, i, loop_, map, opt;
     if (properties === void 0) {
       throw new Error("Missing argument: properties");
     }
@@ -5493,12 +5581,6 @@ module.exports = Animatable = (function() {
 
   Animatable.prototype.isAnimated = function() {
     var animId, animation, loop_, name, room, roomId;
-    roomId = void 0;
-    room = void 0;
-    name = void 0;
-    loop_ = void 0;
-    animId = void 0;
-    animation = void 0;
     roomId = 0;
     while (roomId < engine.roomList.length) {
       room = engine.roomList[roomId];
@@ -5529,12 +5611,6 @@ module.exports = Animatable = (function() {
 
   Animatable.prototype.propertyIsAnimated = function(property) {
     var animId, animation, loop_, name, room, roomId;
-    roomId = void 0;
-    room = void 0;
-    name = void 0;
-    loop_ = void 0;
-    animId = void 0;
-    animation = void 0;
     roomId = 0;
     while (roomId < engine.roomList.length) {
       room = engine.roomList[roomId];
@@ -5565,13 +5641,6 @@ module.exports = Animatable = (function() {
 
   Animatable.prototype.getAnimations = function() {
     var animId, animation, animations, loop_, name, room, roomId;
-    animations = void 0;
-    roomId = void 0;
-    room = void 0;
-    name = void 0;
-    loop_ = void 0;
-    animId = void 0;
-    animation = void 0;
     animations = [];
     roomId = 0;
     while (roomId < engine.roomList.length) {
@@ -5601,9 +5670,6 @@ module.exports = Animatable = (function() {
 
   Animatable.prototype.stopAnimations = function() {
     var name, room, roomId;
-    roomId = void 0;
-    room = void 0;
-    name = void 0;
     roomId = 0;
     while (roomId < engine.roomList.length) {
       room = engine.roomList[roomId];
@@ -5618,7 +5684,6 @@ module.exports = Animatable = (function() {
 
   Animatable.prototype.schedule = function(func, delay, loopName) {
     var room;
-    room = void 0;
     loopName = loopName || "eachFrame";
     room = this.getRoom();
     if (!room) {
@@ -5631,14 +5696,25 @@ module.exports = Animatable = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{}],20:[function(require,module,exports){
-var CanvasRenderer, Engine;
+var CanvasRenderer, Engine, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
-module.exports = CanvasRenderer = (function() {
+c = CanvasRenderer = (function() {
   function CanvasRenderer(canvas) {
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
@@ -5646,7 +5722,7 @@ module.exports = CanvasRenderer = (function() {
   }
 
   CanvasRenderer.prototype.render = function(cameras) {
-    var c, camera, camerasLength, h, i, ii, rooms, roomsLength, w, wm, wmS, wmT;
+    var camera, camerasLength, h, i, ii, rooms, roomsLength, w, wm, wmS, wmT;
     camerasLength = cameras.length;
     c = this.context;
     c.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -5747,7 +5823,6 @@ module.exports = CanvasRenderer = (function() {
    */
 
   CanvasRenderer.prototype.renderCircle = function(object) {
-    var c;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.fillStyle = object.fillStyle;
@@ -5770,7 +5845,7 @@ module.exports = CanvasRenderer = (function() {
    */
 
   CanvasRenderer.prototype.renderPolygon = function(object) {
-    var c, i, len;
+    var i, len;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.fillStyle = object.fillStyle;
@@ -5809,7 +5884,6 @@ module.exports = CanvasRenderer = (function() {
    */
 
   CanvasRenderer.prototype.renderLine = function(object) {
-    var c;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.globalAlpha = object.opacity;
@@ -5830,7 +5904,6 @@ module.exports = CanvasRenderer = (function() {
    */
 
   CanvasRenderer.prototype.renderRectangle = function(object) {
-    var c;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.fillStyle = object.fillStyle;
@@ -5851,10 +5924,21 @@ module.exports = CanvasRenderer = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],21:[function(require,module,exports){
-var ColorShaderProgram, Engine, TextureShaderProgram, WebGLRenderer;
+var ColorShaderProgram, Engine, TextureShaderProgram, WebGLRenderer, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -5862,7 +5946,7 @@ TextureShaderProgram = require('./webgl/texture-shader-program');
 
 ColorShaderProgram = require('./webgl/color-shader-program');
 
-module.exports = WebGLRenderer = (function() {
+c = WebGLRenderer = (function() {
   function WebGLRenderer(canvas) {
     var gl, options;
     this.canvas = canvas;
@@ -5979,14 +6063,25 @@ module.exports = WebGLRenderer = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1,"./webgl/color-shader-program":22,"./webgl/texture-shader-program":23}],22:[function(require,module,exports){
-var Engine, WebGLColorShaderProgram;
+var Engine, WebGLColorShaderProgram, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../../engine');
 
-module.exports = WebGLColorShaderProgram = (function() {
+c = WebGLColorShaderProgram = (function() {
   function WebGLColorShaderProgram(gl) {
     this.program = gl.createProgram();
     this.initShaders(gl);
@@ -6040,7 +6135,7 @@ module.exports = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderLine = function(gl, object, wm) {
-    var a, b, c, color, coords, l, len;
+    var a, b, color, coords, l, len;
     l = void 0;
     len = void 0;
     coords = void 0;
@@ -6115,14 +6210,25 @@ module.exports = WebGLColorShaderProgram = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../../engine":1}],23:[function(require,module,exports){
-var Engine, WebGLTextureShaderProgram;
+var Engine, WebGLTextureShaderProgram, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../../engine');
 
-module.exports = WebGLTextureShaderProgram = (function() {
+c = WebGLTextureShaderProgram = (function() {
   function WebGLTextureShaderProgram(gl) {
     var initBuffers, initShaders, locations, program;
     initShaders = void 0;
@@ -6272,9 +6378,22 @@ module.exports = WebGLTextureShaderProgram = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../../engine":1}],24:[function(require,module,exports){
+var Effect, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
+
 
 /*
 Constructor for the sound class
@@ -6286,9 +6405,8 @@ Constructor for the sound class
 
 @param {HTMLAudioElement} audioElement The Audio element to use as source for the sound object
  */
-var Effect;
 
-module.exports = Effect = (function() {
+c = Effect = (function() {
   function Effect(audioElement) {
     if (audioElement === void 0) {
       throw new Error("Missing argument: audioElement");
@@ -6316,15 +6434,15 @@ module.exports = Effect = (function() {
    */
 
   Effect.prototype.cacheCopies = function() {
-    var i, results;
+    var i, _results;
     i = 0;
-    results = [];
+    _results = [];
     while (i < engine.cachedSoundCopies) {
       this.elements.push(this.source.cloneNode());
       this.elements[i].started = false;
-      results.push(i++);
+      _results.push(i++);
     }
-    return results;
+    return _results;
   };
 
 
@@ -6336,13 +6454,13 @@ module.exports = Effect = (function() {
    */
 
   Effect.prototype.play = function(loop_) {
-    var j, len, ref, sound;
+    var sound, _i, _len, _ref;
     if (Engine.Sounds.Muted) {
       return false;
     }
-    ref = this.elements;
-    for (j = 0, len = ref.length; j < len; j++) {
-      sound = ref[j];
+    _ref = this.elements;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      sound = _ref[_i];
       if ((sound.started === false || sound.ended) && !sound.loop) {
         sound.started = true;
         sound.volume = 1;
@@ -6367,13 +6485,13 @@ module.exports = Effect = (function() {
    */
 
   Effect.prototype.stop = function(playbackId) {
-    var j, len, ref, sound;
+    var sound, _i, _len, _ref;
     if (playbackId === void 0) {
       throw new Error("Missing argument: playbackId");
     }
-    ref = this.elements;
-    for (j = 0, len = ref.length; j < len; j++) {
-      sound = ref[j];
+    _ref = this.elements;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      sound = _ref[_i];
       if (sound.playbackId === playbackId && sound.started && !sound.ended) {
         sound.volume = 0;
         sound.loop = false;
@@ -6389,10 +6507,10 @@ module.exports = Effect = (function() {
    */
 
   Effect.prototype.stopAll = function() {
-    var j, len, ref, sound;
-    ref = this.elements;
-    for (j = 0, len = ref.length; j < len; j++) {
-      sound = ref[j];
+    var sound, _i, _len, _ref;
+    _ref = this.elements;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      sound = _ref[_i];
       if (sound.started && !sound.ended) {
         sound.volume = 0;
         sound.loop = false;
@@ -6410,11 +6528,11 @@ module.exports = Effect = (function() {
   Effect.prototype.stopLoop = function(playbackId) {
     var sound;
     throw new Error("Missing argument: playbackId")((function() {
-      var j, len, ref;
+      var _i, _len, _ref;
       if (playbackId === void 0) {
-        ref = this.elements;
-        for (j = 0, len = ref.length; j < len; j++) {
-          sound = ref[j];
+        _ref = this.elements;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          sound = _ref[_i];
           if (sound.playbackId === playbackId && sound.started && !sound.ended) {
             sound.loop = false;
             true;
@@ -6429,9 +6547,22 @@ module.exports = Effect = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{}],25:[function(require,module,exports){
+var Music, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
+
 
 /*
 Constructor for the Music class
@@ -6444,9 +6575,8 @@ Constructor for the Music class
 
 @param {HTMLAudioElement} audioElement The Audio element to use as source for the music object
  */
-var Music;
 
-module.exports = Music = (function() {
+c = Music = (function() {
   function Music(audioElement) {
     if (audioElement === void 0) {
       throw new Error("Missing argument: audioElement");
@@ -6521,10 +6651,21 @@ module.exports = Music = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{}],26:[function(require,module,exports){
-var Child, Engine;
+var Child, Engine, c, name, value;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -6534,7 +6675,7 @@ Engine = require('../engine');
 @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
  */
 
-module.exports = Child = (function() {
+c = Child = (function() {
   function Child() {
     this.renderType = "";
     this.initWithoutRedrawRegions();
@@ -6875,12 +7016,23 @@ module.exports = Child = (function() {
 
 })();
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],27:[function(require,module,exports){
-var Circle, Engine,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var Circle, Engine, c, name, value,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -6908,8 +7060,8 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {number} [lineWidth = 1] The circle's width if added to a view (in px)
  */
 
-module.exports = Circle = (function(superClass) {
-  extend(Circle, superClass);
+c = Circle = (function(_super) {
+  __extends(Circle, _super);
 
   Engine.Helpers.Mixin.mixin(Circle, Engine.Views.Child);
 
@@ -6923,7 +7075,7 @@ module.exports = Circle = (function(superClass) {
     if (lineWidth == null) {
       lineWidth = 0;
     }
-    Engine.Views.Child.call(this);
+    Engine.Views.Child.prototype.constructor.call(this);
     this.renderType = "circle";
     if (engine.enableRedrawRegions) {
       this.CircleInitWithRedrawRegions(x, y, radius, fillStyle, strokeStyle, lineWidth);
@@ -6933,10 +7085,10 @@ module.exports = Circle = (function(superClass) {
     return;
   }
 
-  Circle.prototype.CircleInitWithoutRedrawRegions = function(x, y, radius, fillStyle1, strokeStyle1, lineWidth1) {
-    this.fillStyle = fillStyle1;
-    this.strokeStyle = strokeStyle1;
-    this.lineWidth = lineWidth1;
+  Circle.prototype.CircleInitWithoutRedrawRegions = function(x, y, radius, fillStyle, strokeStyle, lineWidth) {
+    this.fillStyle = fillStyle;
+    this.strokeStyle = strokeStyle;
+    this.lineWidth = lineWidth;
     this.set(x, y, radius);
   };
 
@@ -7016,12 +7168,23 @@ module.exports = Circle = (function(superClass) {
 
 })(Engine.Geometry.Circle);
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],28:[function(require,module,exports){
-var Collidable, Engine,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var Collidable, Engine, c, name, value,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -7044,11 +7207,11 @@ Can check both for precise (bitmap-based) collisions and bounding box collisions
 @param {object} [additionalProperties] An object containing key-value pairs that will be set as properties for the created object. Can be used for setting advanced options such as sprite offset and opacity.
  */
 
-module.exports = Collidable = (function(superClass) {
-  extend(Collidable, superClass);
+c = Collidable = (function(_super) {
+  __extends(Collidable, _super);
 
   function Collidable(source, x, y, direction, additionalProperties) {
-    Engine.Views.Sprite.call(this, source, x, y, direction, additionalProperties);
+    Collidable.__super__.constructor.apply(this, arguments);
     this.mask = (this.mask ? this.mask : engine.loader.getMask(source, this.getTheme()));
     this.collisionResolution = (this.collisionResolution ? this.collisionResolution : engine.defaultCollisionResolution);
   }
@@ -7296,7 +7459,7 @@ module.exports = Collidable = (function(superClass) {
   };
 
   Collidable.prototype.createCollisionBitmap = function(objects) {
-    var c, calc, canvas, i, ii, lm, mask, obj, offset, parents, wm;
+    var calc, canvas, i, ii, lm, mask, obj, offset, parents, wm;
     mask = this.mask;
     calc = Engine.Helpers.MatrixCalculation;
     canvas = document.createElement("canvas");
@@ -7350,13 +7513,24 @@ module.exports = Collidable = (function(superClass) {
 
 })(Engine.Views.Sprite);
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],29:[function(require,module,exports){
-var Container, Engine,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty,
-  slice = [].slice;
+var Container, Engine, c, name, value,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __slice = [].slice;
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -7378,12 +7552,12 @@ All objects which are drawn on the game's canvas extends the View-class.
 @param {Child} child3 A third ...
  */
 
-module.exports = Container = (function(superClass) {
-  extend(Container, superClass);
+c = Container = (function(_super) {
+  __extends(Container, _super);
 
   function Container() {
     var children;
-    children = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+    children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     this.children = [];
     Container.__super__.constructor.call(this);
     this.parent = void 0;
@@ -7714,12 +7888,23 @@ module.exports = Container = (function(superClass) {
 
 })(Engine.Views.Child);
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],30:[function(require,module,exports){
-var Engine, GameObject,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var Engine, GameObject, c, name, value,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -7756,8 +7941,8 @@ speed: new Math.Vector(0, 0)
 </code>
  */
 
-module.exports = GameObject = (function(superClass) {
-  extend(GameObject, superClass);
+c = GameObject = (function(_super) {
+  __extends(GameObject, _super);
 
   function GameObject(source, x, y, direction, additionalProperties) {
     if (source === void 0) {
@@ -7795,12 +7980,23 @@ module.exports = GameObject = (function(superClass) {
 
 })(Engine.Views.Collidable);
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],31:[function(require,module,exports){
-var Engine, Line,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var Engine, Line, c, name, value,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -7826,13 +8022,13 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {string} [lineCap='butt'] The line's cap style if added to a view
  */
 
-module.exports = Line = (function(superClass) {
-  extend(Line, superClass);
+c = Line = (function(_super) {
+  __extends(Line, _super);
 
   Engine.Helpers.Mixin.mixin(Line, Engine.Views.Child);
 
   function Line(startVector, endVector, strokeStyle, lineWidth, lineCap) {
-    Engine.Views.Child.call(this);
+    Engine.Views.Child.prototype.constructor.call(this);
     this.renderType = "line";
     if (engine.enableRedrawRegions) {
       this.LineInitWithRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
@@ -8018,12 +8214,23 @@ module.exports = Line = (function(superClass) {
 
 })(Engine.Geometry.Line);
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],32:[function(require,module,exports){
-var Engine, Polygon,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var Engine, Polygon, c, name, value,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -8047,8 +8254,8 @@ The constructor for the Polygon class. Uses the setFromPoints-function to set th
 @param {number} [lineWidth = 1] The polygon's width if added to a view (in px)
  */
 
-module.exports = Polygon = (function(superClass) {
-  extend(Polygon, superClass);
+c = Polygon = (function(_super) {
+  __extends(Polygon, _super);
 
   Engine.Helpers.Mixin.mixin(Polygon, Engine.Views.Child);
 
@@ -8056,7 +8263,7 @@ module.exports = Polygon = (function(superClass) {
     this.fillStyle = fillStyle != null ? fillStyle : '#000';
     this.strokeStyle = strokeStyle != null ? strokeStyle : "#000";
     this.lineWidth = lineWidth != null ? lineWidth : 0;
-    Engine.Views.Child.call(this);
+    Engine.Views.Child.prototype.constructor.call(this);
     this.renderType = "polygon";
     this.setFromPoints(points);
     this.opacity = 1;
@@ -8089,12 +8296,23 @@ module.exports = Polygon = (function(superClass) {
 
 })(Engine.Geometry.Polygon);
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],33:[function(require,module,exports){
-var Engine, Rectangle,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var Engine, Rectangle, c, name, value,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -8124,8 +8342,8 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} [lineWidth = 1] The rectangle's width if added to a view (in px)
  */
 
-module.exports = Rectangle = (function(superClass) {
-  extend(Rectangle, superClass);
+c = Rectangle = (function(_super) {
+  __extends(Rectangle, _super);
 
   Engine.Helpers.Mixin.mixin(Rectangle, Engine.Views.Child);
 
@@ -8145,7 +8363,7 @@ module.exports = Rectangle = (function(superClass) {
     if (lineWidth == null) {
       lineWidth = 0;
     }
-    Engine.Views.Child.call(this);
+    Engine.Views.Child.prototype.constructor.call(this);
     this.renderType = "rectangle";
     if (engine.enableRedrawRegions) {
       this.RectangleInitWithRedrawRegions(x, y, width, height, fillStyle, strokeStyle, lineWidth);
@@ -8160,14 +8378,14 @@ module.exports = Rectangle = (function(superClass) {
   @lends View.Rectangle.prototype
    */
 
-  Rectangle.prototype.RectangleInitWithoutRedrawRegions = function(x1, y1, width1, height1, fillStyle1, strokeStyle1, lineWidth) {
+  Rectangle.prototype.RectangleInitWithoutRedrawRegions = function(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
     var hidden;
-    this.x = x1;
-    this.y = y1;
-    this.width = width1;
-    this.height = height1;
-    this.fillStyle = fillStyle1;
-    this.strokeStyle = strokeStyle1;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.fillStyle = fillStyle;
+    this.strokeStyle = strokeStyle;
     hidden = {
       lineWidth: lineWidth
     };
@@ -8309,12 +8527,23 @@ module.exports = Rectangle = (function(superClass) {
 
 })(Engine.Geometry.Rectangle);
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],34:[function(require,module,exports){
-var Engine, Sprite,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var Engine, Sprite, c, name, value,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
@@ -8354,8 +8583,8 @@ offset: new Math.Vector('center', 'center')
 }</code>
  */
 
-module.exports = Sprite = (function(superClass) {
-  extend(Sprite, superClass);
+c = Sprite = (function(_super) {
+  __extends(Sprite, _super);
 
   Engine.Helpers.Mixin.mixin(Sprite, Engine.Mixins.Animatable);
 
@@ -8557,17 +8786,28 @@ module.exports = Sprite = (function(superClass) {
 
 })(Engine.Views.Container);
 
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
+
 
 
 },{"../engine":1}],35:[function(require,module,exports){
-var Engine, TextBlock,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var Engine, TextBlock, c, name, value,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = function() {
+  return this.constructor.apply(this, arguments);
+};
 
 Engine = require('../engine');
 
-module.exports = TextBlock = (function(superClass) {
-  extend(TextBlock, superClass);
+c = TextBlock = (function(_super) {
+  __extends(TextBlock, _super);
 
   Engine.Helpers.Mixin.mixin(TextBlock, Engine.Mixins.Animatable);
 
@@ -8925,6 +9165,13 @@ module.exports = TextBlock = (function(superClass) {
   return TextBlock;
 
 })(Engine.Views.Container);
+
+module.exports.prototype = c.prototype;
+
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
 
 
 

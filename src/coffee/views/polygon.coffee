@@ -1,3 +1,5 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
 ###
@@ -18,13 +20,13 @@ The constructor for the Polygon class. Uses the setFromPoints-function to set th
 @param {string} [strokeStyle = "#000"] The polygon's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The polygon's width if added to a view (in px)
 ###
-module.exports = class Polygon extends Engine.Geometry.Polygon
+c = class Polygon extends Engine.Geometry.Polygon
   # Mix in Child
   Engine.Helpers.Mixin.mixin @, Engine.Views.Child
 
   constructor: (points, @fillStyle = '#000', @strokeStyle = "#000", @lineWidth = 0) ->
     # "Fake" extend child (to get view.child properties)
-    Engine.Views.Child.call @
+    Engine.Views.Child::constructor.call @
     @renderType = "polygon"
     @setFromPoints points
     @opacity = 1
@@ -51,3 +53,6 @@ module.exports = class Polygon extends Engine.Geometry.Polygon
     rect.width += ln * 2
     rect.height += ln * 2
     rect.add @parent.getRoomPosition()
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

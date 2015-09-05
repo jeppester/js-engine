@@ -1,10 +1,10 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var CollisionObject, CollisionTest,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-CollisionObject = (function(superClass) {
-  extend(CollisionObject, superClass);
+CollisionObject = (function(_super) {
+  __extends(CollisionObject, _super);
 
   function CollisionObject(source, x, y, additionalProperties) {
     CollisionObject.__super__.constructor.call(this, source, x, y, 0, additionalProperties);
@@ -30,11 +30,11 @@ CollisionObject = (function(superClass) {
   };
 
   CollisionObject.prototype.collisionCheck = function() {
-    var colPos, collision, i, j, len, ref, rock, speed;
+    var colPos, collision, i, rock, speed, _i, _len, _ref;
     if (collision = this.collidesWith(window.rocks, true, true)) {
-      ref = collision.objects;
-      for (i = j = 0, len = ref.length; j < len; i = ++j) {
-        rock = ref[i];
+      _ref = collision.objects;
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        rock = _ref[i];
         colPos = collision.positions[i];
         while (true) {
           this.x += Math.cos(colPos.getDirection() - Math.PI);
@@ -89,18 +89,18 @@ CollisionTest = (function() {
   }
 
   CollisionTest.prototype.addRocks = function(number) {
-    var i, j, ref, results, rock;
+    var i, rock, _i, _results;
     if (number == null) {
       number = 1;
     }
-    results = [];
-    for (i = j = 0, ref = number; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+    _results = [];
+    for (i = _i = 0; 0 <= number ? _i < number : _i > number; i = 0 <= number ? ++_i : --_i) {
       rock = new CollisionObject("Rock", 20 + Math.random() * 560, 20 + Math.random() * 360);
       rock.speed.setFromDirection(Math.PI * 2 * Math.random(), 150);
       window.rocks.push(rock);
-      results.push(engine.currentRoom.addChildren(rock));
+      _results.push(engine.currentRoom.addChildren(rock));
     }
-    return results;
+    return _results;
   };
 
   return CollisionTest;

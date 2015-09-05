@@ -1,6 +1,8 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../../engine'
 
-module.exports = class WebGLColorShaderProgram
+c = class WebGLColorShaderProgram
   constructor: (gl) ->
     @program = gl.createProgram()
     @initShaders gl
@@ -191,3 +193,6 @@ module.exports = class WebGLColorShaderProgram
       # Draw
       gl.drawArrays gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2
     return
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

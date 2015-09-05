@@ -1,6 +1,8 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
-module.exports = class ObjectCreator
+c = class ObjectCreator
   constructor: (container)->
     @container = container
 
@@ -53,3 +55,6 @@ module.exports = class ObjectCreator
     o = new Engine.Views.GameObject source, x, y, direction, additionalProperties
     @container.addChildren o
     o
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

@@ -1,3 +1,5 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
 ###
@@ -6,7 +8,7 @@ Constructor for the Pointer class
 @name Input.Pointer
 @class A class that eases the use of mouse and touch, by providing functions for checking the current state of both.
 ###
-module.exports = class Pointer
+c = class Pointer
   constructor: ->
     if engine.host.hasTouch
 
@@ -85,7 +87,6 @@ module.exports = class Pointer
   ###
   onMouseUp: (event) ->
     throw new Error("Missing argument: event") if event is undefined #dev
-    button = undefined
     @onMouseMove event
     if @isDown(event.which)
       button = @mouse.buttons[event.which]
@@ -101,7 +102,6 @@ module.exports = class Pointer
   ###
   onMouseMove: (event) ->
     throw new Error("Missing argument: event") if event is undefined #dev
-    roomPos = undefined
     @mouse.window.set event.pageX, event.pageY
     @mouse.set @mouse.window.x - engine.arena.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, @mouse.window.y - engine.arena.offsetTop - engine.canvas.offsetTop + document.body.scrollTop
 
@@ -222,7 +222,6 @@ module.exports = class Pointer
   ###
   isPressed: (button) ->
     throw new Error("Missing argument: button") if button is undefined #dev
-    pointers = undefined
     switch @getButtonType(button)
       when "mouse"
         pointers = (if button is Engine.Globals.MOUSE_ANY then @mouse.buttons else @mouse.buttons[button])
@@ -263,10 +262,6 @@ module.exports = class Pointer
     button = (if button isnt undefined then button else Engine.Globals.MOUSE_Engine.Globals.TOUCH_ANY)
     throw new Error("Missing argument: shape") if shape is undefined #dev
     throw new Error("Argument shape has implement a \"contains\"-function") if typeof shape.contains isnt "function" #dev
-    i = undefined
-    pointers = undefined
-    pointer = undefined
-    ret = undefined
 
     # Narrow possible presses down to the pressed pointers within the selected buttons
     pointers = @isPressed(button)
@@ -393,9 +388,6 @@ module.exports = class Pointer
   @return {Engine.Geometry.Vector} vector A vector representing the calculated position relative to the room
   ###
   calculateRoomPosition: (vector) ->
-    ret = undefined
-    len = undefined
-    camera = undefined
     ret = vector.copy()
 
     # Find the first camera which covers the position
@@ -456,10 +448,6 @@ module.exports = class Pointer
   ###
   release: (button) ->
     throw new Error("Missing argument: button") if button is undefined #dev
-    i = undefined
-    pointers = undefined
-    events = undefined
-    unpressed = undefined
 
     # Find pressed pointers that are covered by the given button
     pointers = @isPressed(button)
@@ -522,3 +510,6 @@ module.exports = class Pointer
     # Finally: set the cursor
     engine.arena.style.cursor = cursor
     return
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

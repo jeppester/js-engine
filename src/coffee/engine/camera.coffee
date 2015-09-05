@@ -1,3 +1,5 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
 ###
@@ -16,7 +18,7 @@ The projection region decides where the captured region will be drawn on the mai
 @param {Math.Rectangle} projectionRegion A rectangle which defines the region on the main canvas where the captured region should be drawn
 @param {Engine.Room} room The room to capture from
 ###
-module.exports = class Camera
+c = class Camera
   constructor: (captureRegion, projectionRegion, room) ->
     throw new Error("Argument captureRegion should be of type: Rectangle") if not captureRegion instanceof Engine.Geometry.Rectangle #dev
     throw new Error("Argument projectionRegion should be of type: Rectangle") if not projectionRegion instanceof Engine.Geometry.Rectangle #dev
@@ -24,3 +26,6 @@ module.exports = class Camera
     @projectionRegion = projectionRegion
     @room = room or engine.currentRoom
     return
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

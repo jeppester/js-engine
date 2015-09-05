@@ -1,6 +1,8 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
-module.exports = class CanvasRenderer
+c = class CanvasRenderer
   constructor: (@canvas) ->
     @context = @canvas.getContext("2d")
     return
@@ -181,3 +183,6 @@ module.exports = class CanvasRenderer
       c.lineWidth = object.lineWidth
       c.stroke()
     return
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

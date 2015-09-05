@@ -38,60 +38,36 @@ module.exports = WebGLHelper =
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
 
       # Top line
-      ox1
-      oy1
-      ox2
-      oy1
-      ix1
-      iy1
-      ix1
-      iy1
-      ix2
-      iy1
-      ox2
-      oy1
+      ox1, oy1
+      ox2, oy1
+      ix1, iy1
+      ix1, iy1
+      ix2, iy1
+      ox2, oy1
 
       # Left line
-      ox1
-      oy1
-      ox1
-      oy2
-      ix1
-      iy1
-      ix1
-      iy1
-      ix1
-      iy2
-      ox1
-      oy2
+      ox1, oy1
+      ox1, oy2
+      ix1, iy1
+      ix1, iy1
+      ix1, iy2
+      ox1, oy2
 
       # Bottom line
-      ix1
-      iy2
-      ox1
-      oy2
-      ox2
-      oy2
-      ix1
-      iy2
-      ix2
-      iy2
-      ox2
-      oy2
+      ix1, iy2
+      ox1, oy2
+      ox2, oy2
+      ix1, iy2
+      ix2, iy2
+      ox2, oy2
 
       # Right line
-      ox2
-      oy1
-      ox2
-      oy2
-      ix2
-      iy1
-      ix2
-      iy1
-      ix2
-      iy2
-      ox2
-      oy2
+      ox2, oy1
+      ox2, oy2
+      ix2, iy1
+      ix2, iy1
+      ix2, iy2
+      ox2, oy2
     ]), gl.STATIC_DRAW
     return
 
@@ -102,9 +78,6 @@ module.exports = WebGLHelper =
 
   # Produces bufferdata for TRIANGLE_FAN
   setCircle: (gl, x, y, segmentsCount, radius) ->
-    i = undefined
-    coords = undefined
-    segmentLength = undefined
     coords = new Array(segmentsCount * 2)
     segmentLength = Math.PI * 2 / segmentsCount
     i = 0

@@ -1,3 +1,5 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
 ###
@@ -10,7 +12,7 @@ Therefore, remember to call hideOverlay, when your game is ready to be shown.
 On engine startup a Loader object is instantiated to the global variable "loader".
 This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
 ###
-module.exports = class Loader
+c = class Loader
   constructor: ->
     @images = {}
     @loaded = classes: []
@@ -115,12 +117,10 @@ module.exports = class Loader
   getMask: (resource, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
     themeName = (if themeName isnt undefined then themeName else engine.defaultTheme)
-    mask = undefined
 
     # Check if the mask has been generated
     mask = @getResource(resource, "masks", themeName)
     if mask
-
       # If yes, return the mask
       mask
 
@@ -129,7 +129,6 @@ module.exports = class Loader
       mask = @generateMask(resource)
       @themes[themeName].masks[resource] = mask
       mask
-
 
   ###
   Fetches a resource from the Loader's cache. Used by the getImage-, getSound- and getMusic functions.
@@ -144,9 +143,6 @@ module.exports = class Loader
     throw new Error("Missing argument: resource") if resource is undefined #dev
     throw new Error("Missing argument: typeString") if typeString is undefined #dev
     throw new Error("Missing argument: themeName") if themeName is undefined #dev
-    res = undefined
-    inh = undefined
-    i = undefined
     resource = resource.replace(/\//g, ".") if resource.indexOf("/") isnt -1
     res = @themes[themeName][typeString][resource]
 
@@ -168,18 +164,10 @@ module.exports = class Loader
   @return {string[]} An array containing all loaded images' resource strings
   ###
   getImageSources: ->
-    object = undefined
-    sourceStrings = undefined
-    currentDir = undefined
-    loopThrough = undefined
-    inheritTheme = undefined
-    i = undefined
     object = @themes[engine.defaultTheme].images
     sourceStrings = []
     currentDir = []
     loopThrough = (object) ->
-      pushStr = undefined
-      name = undefined
       if object.src isnt undefined
         pushStr = currentDir.join(".")
         sourceStrings.push pushStr if sourceStrings.indexOf(pushStr) is -1
@@ -206,10 +194,6 @@ module.exports = class Loader
   @return {string[]} An array containing all loaded sounds' resource strings
   ###
   getAllSounds: ->
-    res = undefined
-    themeName = undefined
-    theme = undefined
-    resourceString = undefined
     res = []
     for themeName of @themes
       if @themes.hasOwnProperty(themeName)
@@ -225,10 +209,6 @@ module.exports = class Loader
   @return {string[]} An array containing all loaded music tracks' resource strings
   ###
   getAllMusic: ->
-    res = undefined
-    themeName = undefined
-    theme = undefined
-    resourceString = undefined
     res = []
     for themeName of @themes
       if @themes.hasOwnProperty(themeName)
@@ -246,8 +226,6 @@ module.exports = class Loader
   ###
   loadClasses: (paths) ->
     throw new Error("Missing argument: paths") if paths is undefined #dev
-    objectName = undefined
-    i = undefined
     for i of paths
       if paths.hasOwnProperty(i)
 
@@ -263,7 +241,6 @@ module.exports = class Loader
   Reloads all classes. This function is very useful for applying code changes without having to refresh the browser, usually it has to be run multiple times though, to force the browser not to just load the files from its cache.
   ###
   reloadAllClasses: ->
-    i = undefined
     for i of @loaded.classes
       engine.loadFiles @loaded.classes[i] if @loaded.classes.hasOwnProperty(i)
     return
@@ -279,12 +256,6 @@ module.exports = class Loader
   loadThemes: (themeNames, callback) ->
     throw new Error("Missing argument: themeNames") if themeNames is undefined #dev
     @onthemesloaded = callback if callback isnt undefined
-    name = undefined
-    req = undefined
-    i = undefined
-    total = undefined
-    theme = undefined
-    codeString = undefined
     i = 0
     while i < themeNames.length
       name = themeNames[i]
@@ -535,10 +506,6 @@ module.exports = class Loader
   @return {boolean} Whether or not all themes' resources has been successfully loaded
   ###
   checkAllLoaded: ->
-    i = undefined
-    total = undefined
-    loaded = undefined
-    theme = undefined
     total = 0
     loaded = 0
     for i of @themes
@@ -550,3 +517,6 @@ module.exports = class Loader
       @onthemesloaded() if @onthemesloaded
       return true
     false
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

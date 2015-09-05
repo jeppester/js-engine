@@ -1,3 +1,5 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
 ###
@@ -12,7 +14,7 @@ Constructor for the Vector class. Uses set-function to set the vector from x- an
 @param {number} [x=0] The x-value to set for the vector
 @param {number} [y=0] The y-value to set for the vector
 ###
-module.exports = class Vector
+c = class Vector
   constructor: (x, y) ->
     @set x, y
     return
@@ -214,3 +216,6 @@ module.exports = class Vector
     return object.getDistance(this) if object instanceof Engine.Geometry.Rectangle
     return object.getDistance(this) if object instanceof Engine.Geometry.Polygon
     throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon") #dev
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

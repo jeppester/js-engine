@@ -1,3 +1,5 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
 ###
@@ -13,7 +15,7 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {Engine.Geometry.Vector} startVector A Vector representing the start point of the line
 @param {Engine.Geometry.Vector} endVector A Vector representing the end point of the line
 ###
-module.exports = class Line
+c = class Line
   constructor: (startVector, endVector) ->
     startVector = (if startVector isnt undefined then startVector else new Engine.Geometry.Vector())
     endVector = (if endVector isnt undefined then endVector else new Engine.Geometry.Vector())
@@ -269,3 +271,6 @@ module.exports = class Line
       @a.copy()
       @b.copy()
     ])
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

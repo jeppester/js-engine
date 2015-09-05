@@ -1,4 +1,6 @@
-module.exports = class Animatable
+module.exports = -> @constructor.apply @, arguments
+
+c = class Animatable
   ###
   Used for animating numeric properties of the owner of the function.
   Available easing functions are:
@@ -73,13 +75,6 @@ module.exports = class Animatable
   @return {boolean} Whether or not the object is being animated
   ###
   isAnimated: ->
-    roomId = undefined
-    room = undefined
-    name = undefined
-    loop_ = undefined
-    animId = undefined
-    animation = undefined
-
     # Look through all room on the room list, to see if one of the rooms' loops contains an animation of the object
     roomId = 0
     while roomId < engine.roomList.length
@@ -101,13 +96,6 @@ module.exports = class Animatable
   @return {boolean} Whether or not the property is being animated
   ###
   propertyIsAnimated: (property) ->
-    roomId = undefined
-    room = undefined
-    name = undefined
-    loop_ = undefined
-    animId = undefined
-    animation = undefined
-
     # Look through all room on the room list, to see if one of the rooms' loops contains an animation of the object
     roomId = 0
     while roomId < engine.roomList.length
@@ -129,13 +117,6 @@ module.exports = class Animatable
   @return {Object[]} An array of all the current animations of the object
   ###
   getAnimations: ->
-    animations = undefined
-    roomId = undefined
-    room = undefined
-    name = undefined
-    loop_ = undefined
-    animId = undefined
-    animation = undefined
     animations = []
     roomId = 0
     while roomId < engine.roomList.length
@@ -155,9 +136,6 @@ module.exports = class Animatable
   Stops all current animations of the object.
   ###
   stopAnimations: ->
-    roomId = undefined
-    room = undefined
-    name = undefined
     roomId = 0
     while roomId < engine.roomList.length
       room = engine.roomList[roomId]
@@ -167,7 +145,6 @@ module.exports = class Animatable
     return
 
   schedule: (func, delay, loopName) ->
-    room = undefined
     loopName = loopName or "eachFrame"
     room = @getRoom()
     #dev
@@ -175,3 +152,6 @@ module.exports = class Animatable
     #dev
     room.loops[loopName].schedule this, func, delay
     return
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c

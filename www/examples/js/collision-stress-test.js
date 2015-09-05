@@ -46,30 +46,30 @@ CollisionStressTest = (function() {
   };
 
   CollisionStressTest.prototype.addObjects = function(count) {
-    var i, j, ref, results, sprite;
+    var i, sprite, _i, _results;
     if (count == null) {
       count = 10;
     }
-    results = [];
-    for (i = j = 0, ref = count; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+    _results = [];
+    for (i = _i = 0; 0 <= count ? _i < count : _i > count; i = 0 <= count ? ++_i : --_i) {
       sprite = new Engine.Views.GameObject('Rock', Math.random() * 600, Math.random() * 400);
-      results.push(this.objectView.addChildren(sprite));
+      _results.push(this.objectView.addChildren(sprite));
     }
-    return results;
+    return _results;
   };
 
   CollisionStressTest.prototype.removeObjects = function(count) {
-    var i, j, objects, ref, results;
+    var i, objects, _i, _results;
     if (count == null) {
       count = 10;
     }
     objects = this.objectView.getChildren();
     count = Math.min(count, objects.length);
-    results = [];
-    for (i = j = 0, ref = count; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-      results.push(engine.purge(objects.shift()));
+    _results = [];
+    for (i = _i = 0; 0 <= count ? _i < count : _i > count; i = 0 <= count ? ++_i : --_i) {
+      _results.push(engine.purge(objects.shift()));
     }
-    return results;
+    return _results;
   };
 
   CollisionStressTest.prototype.controls = function() {

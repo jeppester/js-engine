@@ -1,3 +1,5 @@
+module.exports = -> @constructor.apply @, arguments
+
 Engine = require '../engine'
 
 ###
@@ -19,7 +21,7 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 @param {function} [onEntered=function () {}] A function to run when the room is entered (set as the engine's current room)
 @param {function} [onLeft=function () {}] A function to run when the room is left
 ###
-module.exports = class Room extends Engine.Views.Container
+c = class Room extends Engine.Views.Container
   constructor: (name, onEntered, onLeft)->
     super()
     @name = (if name then name else engine.roomList.length)
@@ -86,3 +88,6 @@ module.exports = class Room extends Engine.Views.Container
   Delete the remove-method which was inherited from View
   ###
   remove: undefined
+
+module.exports:: = c::
+module.exports[name] = value for name, value of c
