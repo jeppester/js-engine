@@ -1,4 +1,6 @@
-module.exports = class ObjectCreator
+module.exports = -> module.exports::constructor.apply @, arguments
+
+c = class ObjectCreator
   constructor: (container)->
     @container = container
 
@@ -51,6 +53,9 @@ module.exports = class ObjectCreator
     o = new Views.GameObject source, x, y, direction, additionalProperties
     @container.addChildren o
     o
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 Views =
   Circle: require '../views/circle'

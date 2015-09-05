@@ -1,3 +1,5 @@
+module.exports = -> module.exports::constructor.apply @, arguments
+
 Helpers =
   Mixin: require '../helpers/mixin'
 
@@ -7,7 +9,7 @@ Mixins =
 Views =
   Container: require './container'
 
-module.exports = class TextBlock extends Views.Container
+c = class TextBlock extends Views.Container
   # Mix in Child
   Helpers.Mixin.mixin @, Mixins.Animatable
 
@@ -353,6 +355,9 @@ module.exports = class TextBlock extends Views.Container
     ret.width = Math.ceil(ret.width + 2)
     ret.height = Math.ceil(ret.height + 2)
     ret
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 Geometry =
   Vector: require '../geometry/vector'

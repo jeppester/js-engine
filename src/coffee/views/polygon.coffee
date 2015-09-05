@@ -1,3 +1,5 @@
+module.exports = -> module.exports::constructor.apply @, arguments
+
 Helpers =
   Mixin: require '../helpers/mixin'
 
@@ -25,7 +27,7 @@ The constructor for the Polygon class. Uses the setFromPoints-function to set th
 @param {string} [strokeStyle = "#000"] The polygon's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The polygon's width if added to a view (in px)
 ###
-module.exports = class Polygon extends Geometry.Polygon
+c = class Polygon extends Geometry.Polygon
   # Mix in Child
   Helpers.Mixin.mixin @, Views.Child
 
@@ -58,3 +60,6 @@ module.exports = class Polygon extends Geometry.Polygon
     rect.width += ln * 2
     rect.height += ln * 2
     rect.add @parent.getRoomPosition()
+
+module.exports:: = Object.create c::
+module.exports::constructor = c

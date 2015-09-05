@@ -1,4 +1,6 @@
-module.exports = class WebGLTextureShaderProgram
+module.exports = -> module.exports::constructor.apply @, arguments
+
+c = class WebGLTextureShaderProgram
   constructor: (gl) ->
     # Init program
     @cache =
@@ -211,6 +213,9 @@ module.exports = class WebGLTextureShaderProgram
     gl.bindTexture gl.TEXTURE_2D, null
     @cache.textures[image.src] = texture
     texture
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 Helpers =
   WebGL: require '../../helpers/webgl'

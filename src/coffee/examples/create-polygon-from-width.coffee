@@ -53,7 +53,7 @@ new JSEngine
   # Set themes to load
   themes:['Example']
 
-  disableWebGL: true
+  # disableWebGL: true
 
   # Set arena background-color
   backgroundColor: "#000"

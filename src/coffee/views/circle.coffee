@@ -1,3 +1,5 @@
+module.exports = -> module.exports::constructor.apply @, arguments
+
 Helpers =
   Mixin: require '../helpers/mixin'
 
@@ -29,7 +31,7 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {string} [strokeStyle = "#000"] The circle's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The circle's width if added to a view (in px)
 ###
-module.exports = class Circle extends Geometry.Circle
+c = class Circle extends Geometry.Circle
   # Mix in Child
   Helpers.Mixin.mixin @, Views.Child
 
@@ -110,5 +112,8 @@ module.exports = class Circle extends Geometry.Circle
     ln = Math.ceil(@lineWidth / 2)
     rect = new Geometry.Rectangle(Math.floor(@x - (@radius + ln + 5)), Math.floor(@y - (@radius + ln + 5)), Math.ceil((@radius + ln + 5) * 2), Math.ceil((@radius + ln + 5) * 2))
     rect.add @parent.getRoomPosition()
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 Geometry.Rectangle = require '../geometry/rectangle'

@@ -1,3 +1,5 @@
+module.exports = -> module.exports::constructor.apply @, arguments
+
 # Mixins and parent class at top
 Geometry =
   Vector: require '../geometry/vector'
@@ -6,7 +8,7 @@ Geometry =
 @name View.Child
 @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
 ###
-module.exports = class Child
+c = class Child
   constructor: ->
     @renderType = ""
     @initWithoutRedrawRegions()
@@ -281,6 +283,9 @@ module.exports = class Child
   isVisible: ->
     # If sprites size has been modified to zero, do nothing
     not (@size is 0 or @widthScale is 0 or @heightScale is 0)
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 # Classes used in class functions at bottom
 Room = require '../engine/room'

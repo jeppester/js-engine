@@ -49,7 +49,6 @@ CreatePolygonFromWidth = (function() {
 new JSEngine({
   gameClass: CreatePolygonFromWidth,
   themes: ['Example'],
-  disableWebGL: true,
   backgroundColor: "#000",
   canvasResX: 600,
   canvasResY: 400

@@ -1,4 +1,6 @@
-module.exports = class WebGLRenderer
+module.exports = -> module.exports::constructor.apply @, arguments
+
+c = class WebGLRenderer
   constructor: (@canvas) ->
     # Cache variables
     @cache =
@@ -121,6 +123,9 @@ module.exports = class WebGLRenderer
         @renderTree object.children[i], localWm
         i++
     return
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 TextureShaderProgram = require './webgl/texture-shader-program'
 ColorShaderProgram = require './webgl/color-shader-program'

@@ -1,10 +1,12 @@
+module.exports = -> module.exports::constructor.apply @, arguments
+
 ###
 Constructor for the Pointer class
 
 @name Input.Pointer
 @class A class that eases the use of mouse and touch, by providing functions for checking the current state of both.
 ###
-module.exports = class Pointer
+c = class Pointer
   constructor: ->
     if engine.host.hasTouch
 
@@ -506,6 +508,9 @@ module.exports = class Pointer
     # Finally: set the cursor
     engine.arena.style.cursor = cursor
     return
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 Geometry =
   Vector: require '../geometry/vector'

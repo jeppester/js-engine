@@ -1,4 +1,6 @@
-module.exports = class WebGLColorShaderProgram
+module.exports = -> module.exports::constructor.apply @, arguments
+
+c = class WebGLColorShaderProgram
   constructor: (gl) ->
     @program = gl.createProgram()
     @initShaders gl
@@ -189,6 +191,9 @@ module.exports = class WebGLColorShaderProgram
       # Draw
       gl.drawArrays gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2
     return
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 Helpers =
   WebGL: require '../../helpers/webgl'

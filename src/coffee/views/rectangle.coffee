@@ -1,4 +1,4 @@
-console.log 1
+module.exports = -> module.exports::constructor.apply @, arguments
 
 Helpers =
   Mixin: require '../helpers/mixin'
@@ -33,7 +33,7 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {string} [strokeStyle = "#000"] The rectangle's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The rectangle's width if added to a view (in px)
 ###
-module.exports = class Rectangle extends Geometry.Rectangle
+c = class Rectangle extends Geometry.Rectangle
   # Mix in Child
   Helpers.Mixin.mixin @, Views.Child
 
@@ -198,4 +198,5 @@ module.exports = class Rectangle extends Geometry.Rectangle
     rect.height += ln * 2
     rect.add @parent.getRoomPosition()
 
-console.log 2
+module.exports:: = Object.create c::
+module.exports::constructor = c

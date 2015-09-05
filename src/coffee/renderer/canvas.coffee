@@ -1,4 +1,6 @@
-module.exports = class CanvasRenderer
+module.exports = -> module.exports::constructor.apply @, arguments
+
+c = class CanvasRenderer
   constructor: (@canvas) ->
     @context = @canvas.getContext("2d")
     return
@@ -179,6 +181,9 @@ module.exports = class CanvasRenderer
       c.lineWidth = object.lineWidth
       c.stroke()
     return
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 Helpers =
   MatrixCalculation: require '../helpers/matrix-calculation'

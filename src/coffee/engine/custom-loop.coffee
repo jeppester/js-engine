@@ -1,3 +1,5 @@
+module.exports = -> module.exports::constructor.apply @, arguments
+
 ###
 @name Engine.CustomLoop
 @class A loop class.
@@ -13,7 +15,7 @@ A loop also has it's own time that is stopped whenever the loop is not executed.
 @param {number} [framesPerExecution=1] The number of frames between each execution of the custom loop
 @param {function} [maskFunction=function(){}] A function that will be run before each execution, if the function returns true the execution proceeds as planned, if not, the execution will not be run
 ###
-module.exports = class CustomLoop
+c = class CustomLoop
   constructor: (framesPerExecution, maskFunction) ->
     @framesPerExecution = (if framesPerExecution is undefined then 1 else framesPerExecution)
     @maskFunction = (if maskFunction is undefined then -> true else maskFunction)
@@ -353,7 +355,7 @@ module.exports = class CustomLoop
       else
         # If the animation is still running: Ease the animation of each property
         for propId of a.prop
-          a.obj[propId] = a.easing t, a.prop[propId].begin, a.prop[propId].end - a.prop[propId].begin, a.duration if a.prop.hasOwnProperty(propId)
+          a.obj[propId] = Helpers.Easing[a.easing] t, a.prop[propId].begin, a.prop[propId].end - a.prop[propId].begin, a.duration if a.prop.hasOwnProperty(propId)
 
       # Execute onStep-callback if any
       a.onStep and a.onStep()
@@ -404,3 +406,9 @@ module.exports = class CustomLoop
     @addExecutionsQueue()
     @execTime = (new Date().getTime()) - timer
     return
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
+
+Helpers =
+  Easing: require '../helpers/easing'

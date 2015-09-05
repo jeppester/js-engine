@@ -1,3 +1,5 @@
+module.exports = -> module.exports::constructor.apply @, arguments
+
 ###
 The constructor for the Engine class.
 
@@ -60,7 +62,7 @@ The default options are:
 "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
 ###
-module.exports = window.JSEngine = class Engine
+c = window.JSEngine = class Engine
   # Load classes for easy usage
   @Helpers:
     MatrixCalculation: require './helpers/matrix-calculation'
@@ -462,10 +464,9 @@ module.exports = window.JSEngine = class Engine
     transition = (if transition then transition else ROOM_TRANSITION_NONE)
     oldRoom = @currentRoom
     engine.changingRoom = true
-    transition oldRoom, room, transitionOptions, ->
+    @constructor.Helpers.RoomTransition[transition] oldRoom, room, transitionOptions, ->
       engine.changingRoom = false
       engine.currentRoom = room
-      return
 
     oldRoom
 
@@ -778,3 +779,6 @@ module.exports = window.JSEngine = class Engine
     a.click()
     document.body.removeChild a, document.body
     return
+
+module.exports:: = Object.create c::
+module.exports::constructor = c

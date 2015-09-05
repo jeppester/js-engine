@@ -1,3 +1,5 @@
+module.exports = -> module.exports::constructor.apply @, arguments
+
 Views =
   Child: require './child'
 
@@ -17,7 +19,7 @@ All objects which are drawn on the game's canvas extends the View-class.
 @param {Child} child2 An other child to add to the view upon creation
 @param {Child} child3 A third ...
 ###
-module.exports = class Container extends Views.Child
+c = class Container extends Views.Child
   constructor: (children...) ->
     super()
     @children = []
@@ -279,5 +281,8 @@ module.exports = class Container extends Views.Child
   ###
   drawCanvas: undefined
   getRedrawRegion: undefined
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 ObjectCreator = require '../engine/object-creator'

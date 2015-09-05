@@ -1,3 +1,5 @@
+module.exports = -> module.exports::constructor.apply @, arguments
+
 Helpers =
   Mixin: require '../helpers/mixin'
 
@@ -42,7 +44,7 @@ composite: 'source-over',
 offset: new Math.Vector('center', 'center')
 }</code>
 ###
-module.exports = class Sprite extends Views.Container
+c = class Sprite extends Views.Container
   # Mix in animatable
   Helpers.Mixin.mixin @, Mixins.Animatable
 
@@ -180,7 +182,6 @@ module.exports = class Sprite extends Views.Container
   @private
   ###
   refreshSource: ->
-    theme = undefined
     theme = @getTheme()
     @bm = engine.loader.getImage(@source, theme)
     @imageLength = @bm.imageLength
@@ -229,6 +230,9 @@ module.exports = class Sprite extends Views.Container
     box.width = Math.ceil(box.width + 1)
     box.height = Math.ceil(box.height + 1)
     box
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 Geometry =
   Vector: require '../geometry/vector'

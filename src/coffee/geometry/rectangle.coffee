@@ -1,3 +1,5 @@
+module.exports = -> module.exports::constructor.apply @, arguments
+
 # Mixins and parent class at top
 Helpers =
   Mixin: require '../helpers/mixin'
@@ -25,7 +27,7 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} width The width of the rectangle
 @param {number} height The height of the rectangle
 ###
-module.exports = class Rectangle extends Geometry.Vector
+c = class Rectangle extends Geometry.Vector
   # Mix in animatable
   Helpers.Mixin.mixin @, Mixins.Animatable
 
@@ -106,11 +108,6 @@ module.exports = class Rectangle extends Geometry.Vector
   @return {Geometry.Rectangle|boolean} The overlapping rectangle, or false if there is no overlap
   ###
   getOverlap: (rectangle) ->
-    x2 = undefined
-    y2 = undefined
-    rx2 = undefined
-    ry2 = undefined
-    crop = undefined
     x2 = @x + @width
     y2 = @y + @height
     rx2 = rectangle.x + rectangle.width
@@ -232,6 +229,9 @@ module.exports = class Rectangle extends Geometry.Vector
   ###
   intersects: (object) ->
     @getPolygon().intersects object
+
+module.exports:: = Object.create c::
+module.exports::constructor = c
 
 # Classes used in class functions at bottom
 Geometry.Circle = require './circle'
