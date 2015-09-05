@@ -1,10 +1,22 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+Helpers =
+  Mixin: require '../helpers/mixin'
 
-c = class TextBlock extends Engine.Views.Container
+Mixins =
+  Animatable: require '../mixins/animatable'
+
+Geometry =
+  Vector: require '../geometry/vector'
+
+Views =
+  Container: require './container'
+
+Globals = require '../engine/globals'
+
+c = class TextBlock extends Views.Container
   # Mix in Child
-  Engine.Helpers.Mixin.mixin @, Engine.Mixins.Animatable
+  Helpers.Mixin.mixin @, Mixins.Animatable
 
   ###
   The constructor for the TextBlock class.
@@ -157,13 +169,13 @@ c = class TextBlock extends Engine.Views.Container
         value
 
     @lineHeight = (if additionalProperties and additionalProperties.lineHeight then additionalProperties.lineHeight else @font.match(/[0.0-9]+/) * 1.25)
-    offset = Engine.Globals.OFFSET_TOP_LEFT
+    offset = Globals.OFFSET_TOP_LEFT
     if additionalProperties and additionalProperties.offset
       offset = additionalProperties.offset
       delete additionalProperties.offset
 
     # Load additional properties
-    Engine.Helpers.Mixin.import @, additionalProperties
+    Helpers.Mixin.import @, additionalProperties
     @string = string
 
     # Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
@@ -180,44 +192,44 @@ c = class TextBlock extends Engine.Views.Container
   @return {Vector} The offset vector the offset global corresponds to for the instance
   ###
   parseOffsetGlobal: (offset) ->
-    ret = new Engine.Geometry.Vector()
+    ret = new Geometry.Vector()
 
     # calculate horizontal offset
     if [
-      Engine.Globals.OFFSET_TOP_LEFT
-      Engine.Globals.OFFSET_MIDDLE_LEFT
-      Engine.Globals.OFFSET_BOTTOM_LEFT
+      Globals.OFFSET_TOP_LEFT
+      Globals.OFFSET_MIDDLE_LEFT
+      Globals.OFFSET_BOTTOM_LEFT
     ].indexOf(offset) isnt -1
       ret.x = 0
     else if [
-      Engine.Globals.OFFSET_TOP_CENTER
-      Engine.Globals.OFFSET_MIDDLE_CENTER
-      Engine.Globals.OFFSET_BOTTOM_CENTER
+      Globals.OFFSET_TOP_CENTER
+      Globals.OFFSET_MIDDLE_CENTER
+      Globals.OFFSET_BOTTOM_CENTER
     ].indexOf(offset) isnt -1
       ret.x = @clipWidth / 2
     else ret.x = @clipWidth if [
-      Engine.Globals.OFFSET_TOP_RIGHT
-      Engine.Globals.OFFSET_MIDDLE_RIGHT
-      Engine.Globals.OFFSET_BOTTOM_RIGHT
+      Globals.OFFSET_TOP_RIGHT
+      Globals.OFFSET_MIDDLE_RIGHT
+      Globals.OFFSET_BOTTOM_RIGHT
     ].indexOf(offset) isnt -1
 
     # calculate vertical offset
     if [
-      Engine.Globals.OFFSET_TOP_LEFT
-      Engine.Globals.OFFSET_TOP_CENTER
-      Engine.Globals.OFFSET_TOP_RIGHT
+      Globals.OFFSET_TOP_LEFT
+      Globals.OFFSET_TOP_CENTER
+      Globals.OFFSET_TOP_RIGHT
     ].indexOf(offset) isnt -1
       ret.y = 0
     else if [
-      Engine.Globals.OFFSET_MIDDLE_LEFT
-      Engine.Globals.OFFSET_MIDDLE_CENTER
-      Engine.Globals.OFFSET_MIDDLE_RIGHT
+      Globals.OFFSET_MIDDLE_LEFT
+      Globals.OFFSET_MIDDLE_CENTER
+      Globals.OFFSET_MIDDLE_RIGHT
     ].indexOf(offset) isnt -1
       ret.y = @clipHeight / 2
     else ret.y = @clipHeight if [
-      Engine.Globals.OFFSET_BOTTOM_LEFT
-      Engine.Globals.OFFSET_BOTTOM_CENTER
-      Engine.Globals.OFFSET_BOTTOM_RIGHT
+      Globals.OFFSET_BOTTOM_LEFT
+      Globals.OFFSET_BOTTOM_CENTER
+      Globals.OFFSET_BOTTOM_RIGHT
     ].indexOf(offset) isnt -1
     ret
 
@@ -350,4 +362,5 @@ c = class TextBlock extends Engine.Views.Container
     ret
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

@@ -1,37 +1,41 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+Geometry =
+  Circle: require './circle'
+  Polygon: require './polygon'
+  Rectangle: require './rectangle'
+  Vector: require './vector'
 
 ###
 Constructor for the Line class. Uses setFromVectors to create the line's start and end points
 
-@name Engine.Geometry.Line
+@name Geometry.Line
 @class A math class which is used for handling lines
 @augments Mixin.Animatable
 
-@property {Engine.Geometry.Vector} a The line's starting point
-@property {Engine.Geometry.Vector} b The line's ending point
+@property {Geometry.Vector} a The line's starting point
+@property {Geometry.Vector} b The line's ending point
 
-@param {Engine.Geometry.Vector} startVector A Vector representing the start point of the line
-@param {Engine.Geometry.Vector} endVector A Vector representing the end point of the line
+@param {Geometry.Vector} startVector A Vector representing the start point of the line
+@param {Geometry.Vector} endVector A Vector representing the end point of the line
 ###
 c = class Line
   constructor: (startVector, endVector) ->
-    startVector = (if startVector isnt undefined then startVector else new Engine.Geometry.Vector())
-    endVector = (if endVector isnt undefined then endVector else new Engine.Geometry.Vector())
+    startVector = (if startVector isnt undefined then startVector else new Geometry.Vector())
+    endVector = (if endVector isnt undefined then endVector else new Geometry.Vector())
     @setFromVectors startVector, endVector
     return
 
   ###
   Sets the start- and end points from two Vector's.
 
-  @param {Engine.Geometry.Vector} startVector A Vector representing the start point of the line
-  @param {Engine.Geometry.Vector} endVector A Vector representing the end point of the line
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @param {Geometry.Vector} startVector A Vector representing the start point of the line
+  @param {Geometry.Vector} endVector A Vector representing the end point of the line
+  @return {Geometry.Line} The resulting Line object (itself)
   ###
   setFromVectors: (startVector, endVector) ->
-    throw new Error("Argument startVector should be of type: Vector") if not startVector instanceof Engine.Geometry.Vector #dev
-    throw new Error("Argument endVector should be of type: Vector") if not endVector instanceof Engine.Geometry.Vector #dev
+    throw new Error("Argument startVector should be of type: Vector") if not startVector instanceof Geometry.Vector #dev
+    throw new Error("Argument endVector should be of type: Vector") if not endVector instanceof Geometry.Vector #dev
     @a = startVector
     @b = endVector
     this
@@ -43,21 +47,21 @@ c = class Line
   @param {number} y1 The start points' y-coordinate
   @param {number} x2 The end points' x-coordinate
   @param {number} y2 The end points' y-coordinate
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @return {Geometry.Line} The resulting Line object (itself)
   ###
   setFromCoordinates: (x1, y1, x2, y2) ->
     x1 = (if x1 isnt undefined then x1 else 0)
     y1 = (if y1 isnt undefined then y1 else 0)
     x2 = (if x2 isnt undefined then x2 else 0)
     y2 = (if y2 isnt undefined then y2 else 0)
-    @a = new Engine.Geometry.Vector(x1, y1)
-    @b = new Engine.Geometry.Vector(x2, y2)
+    @a = new Geometry.Vector(x1, y1)
+    @b = new Geometry.Vector(x2, y2)
     this
 
   ###
   Copies the Line object
 
-  @return {Engine.Geometry.Line} A copy of the Line object (which can be modified without changing the original object)
+  @return {Geometry.Line} A copy of the Line object (which can be modified without changing the original object)
   ###
   copy: ->
     new @constructor(@a, @b)
@@ -67,7 +71,7 @@ c = class Line
 
   @param {number} x The value to add to both points' x-coordinates
   @param {number} y The value to add to both points' y-coordinates
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @return {Geometry.Line} The resulting Line object (itself)
   ###
   move: (x, y) ->
     @a.move x, y
@@ -78,7 +82,7 @@ c = class Line
   Rotates the line around the zero-vector.
 
   @param {number} direction The number of radians to rotate the line
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @return {Geometry.Line} The resulting Line object (itself)
   ###
   rotate: (direction) ->
     throw new Error("Argument direction should be of type: Number") if typeof direction isnt "number" #dev
@@ -91,7 +95,7 @@ c = class Line
 
   @param {number} scaleH A factor with which to scale the Line horizontally.
   @param {number} [scaleV=scaleH] A factor with which to scale the Line vertically
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @return {Geometry.Line} The resulting Line object (itself)
   ###
   scale: (scaleH, scaleV) ->
     @a.scale scaleH, scaleV
@@ -102,8 +106,8 @@ c = class Line
   Adds a vector to the start- and end points of the line.
   Can by used for the same purpose as move, but takes a vector as argument.
 
-  @param {Engine.Geometry.Vector} vector A vector to add to the line's start- and end points
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @param {Geometry.Vector} vector A vector to add to the line's start- and end points
+  @return {Geometry.Line} The resulting Line object (itself)
   ###
   add: (vector) ->
     @a.add vector
@@ -113,8 +117,8 @@ c = class Line
   ###
   Subtracts a vector from the start- and end points of the line.
 
-  @param {Engine.Geometry.Vector} vector A vector to subtract from the line's start- and end points
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @param {Geometry.Vector} vector A vector to subtract from the line's start- and end points
+  @return {Geometry.Line} The resulting Line object (itself)
   ###
   subtract: (vector) ->
     @a.substract vector
@@ -124,8 +128,8 @@ c = class Line
   ###
   Divides the start- and end points of the line with a vector.
 
-  @param {Engine.Geometry.Vector} vector A vector to divide the line's start- and end points with
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @param {Geometry.Vector} vector A vector to divide the line's start- and end points with
+  @return {Geometry.Line} The resulting Line object (itself)
   ###
   divide: (vector) ->
     @a.divide vector
@@ -135,8 +139,8 @@ c = class Line
   ###
   Multiplies the start- and end points of the line with a vector.
 
-  @param {Engine.Geometry.Vector} vector A vector to multiply the line's start- and end points with
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @param {Geometry.Vector} vector A vector to multiply the line's start- and end points with
+  @return {Geometry.Line} The resulting Line object (itself)
   ###
   multiply: (vector) ->
     @a.multiply vector
@@ -146,7 +150,7 @@ c = class Line
   ###
   Checks whether the line intersects with another line or polygon.
 
-  @param {Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object Geometric object to check for an intersection with
+  @param {Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object Geometric object to check for an intersection with
   @return {boolean} True if the checked object intersects with the line, false if not
   ###
   intersects: (object) ->
@@ -159,11 +163,11 @@ c = class Line
       c1 = (object.b.x - object.a.x) * (@a.y - object.b.y) - (@a.x - object.b.x) * (object.b.y - object.a.y)
       c2 = (object.b.x - object.a.x) * (@b.y - object.b.y) - (@b.x - object.b.x) * (object.b.y - object.a.y)
       c1 * c2 < 0
-    else if object instanceof Engine.Geometry.Circle
+    else if object instanceof Geometry.Circle
       object.intersects this
-    else if object instanceof Engine.Geometry.Rectangle
+    else if object instanceof Geometry.Rectangle
       object.getPolygon().intersects this
-    else if object instanceof Engine.Geometry.Polygon
+    else if object instanceof Geometry.Polygon
       object.intersects this
     else #dev
       throw new Error("Argument object should be of type: Line, Rectangle, Circle or Polygon") #dev
@@ -179,11 +183,11 @@ c = class Line
   ###
   Calculates the shortest distance from the Line object to another geometric object
 
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object The object to calculate the distance to
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object The object to calculate the distance to
   @return {number} The distance
   ###
   getDistance: (object) ->
-    if object instanceof Engine.Geometry.Vector
+    if object instanceof Geometry.Vector
       # Get all possibly used vectors
       ba = @a.copy().subtract(@b)
       ab = @b.copy().subtract(@a)
@@ -207,9 +211,9 @@ c = class Line
       # Else, return the shortest of the distances from each line to the other line's points
       else
         Math.min @getDistance(object.a), @getDistance(object.b), object.getDistance(@a), object.getDistance(@b)
-    else if object instanceof Engine.Geometry.Rectangle
+    else if object instanceof Geometry.Rectangle
       object.getDistance this
-    else if object instanceof Engine.Geometry.Circle
+    else if object instanceof Geometry.Circle
       object.getDistance this
     else #dev
       throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon") #dev
@@ -236,7 +240,7 @@ c = class Line
         b.move -ort.y, ort.x
         c.move ort.y, -ort.x
         d.move ort.y, -ort.x
-      new Engine.Geometry.Polygon([
+      new Geometry.Polygon([
         a
         b
         c
@@ -252,25 +256,26 @@ c = class Line
       i = 0
       while i < 16
         angle = startAngle + segmentRad * i
-        points[i] = new Engine.Geometry.Vector(@a.x + width * Math.cos(angle), @a.y + width * Math.sin(angle))
+        points[i] = new Geometry.Vector(@a.x + width * Math.cos(angle), @a.y + width * Math.sin(angle))
         i++
       i = 0
       while i < 16
         angle = startAngle + segmentRad * (i + 15)
-        points[i + 16] = new Engine.Geometry.Vector(@b.x + width * Math.cos(angle), @b.y + width * Math.sin(angle))
+        points[i + 16] = new Geometry.Vector(@b.x + width * Math.cos(angle), @b.y + width * Math.sin(angle))
         i++
-      new Engine.Geometry.Polygon(points)
+      new Geometry.Polygon(points)
 
   ###
   Creates a polygon with the same points as the line.
 
-  @return {Engine.Geometry.Polygon} The created Polygon object
+  @return {Geometry.Polygon} The created Polygon object
   ###
   getPolygon: ->
-    new Engine.Geometry.Polygon([
+    new Geometry.Polygon([
       @a.copy()
       @b.copy()
     ])
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

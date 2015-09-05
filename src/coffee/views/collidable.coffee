@@ -1,6 +1,13 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+Views =
+  Sprite: require './sprite'
+
+Helpers =
+  MatrixCalculation: require '../helpers/matrix-calculation'
+
+Geometry =
+  Vector: require '../geometry/vector'
 
 ###
 The constructor for the Collidable class
@@ -19,7 +26,7 @@ Can check both for precise (bitmap-based) collisions and bounding box collisions
 @param {number} [direction=0] The direction of the created object. Defaults to 0
 @param {object} [additionalProperties] An object containing key-value pairs that will be set as properties for the created object. Can be used for setting advanced options such as sprite offset and opacity.
 ###
-c = class Collidable extends Engine.Views.Sprite
+c = class Collidable extends Views.Sprite
   constructor: (source, x, y, direction, additionalProperties) ->
     super
     @mask = (if @mask then @mask else engine.loader.getMask(source, @getTheme()))
@@ -90,7 +97,7 @@ c = class Collidable extends Engine.Views.Sprite
 
           # Calculate a combined position
           if ret.positions.length
-            ret.combinedPosition = new Engine.Geometry.Vector()
+            ret.combinedPosition = new Geometry.Vector()
             ret.combinedPosition.pixelCount = 0
             ret.positions.forEach (p) ->
               ret.combinedPosition.add p.scale(p.pixelCount)
@@ -225,7 +232,7 @@ c = class Collidable extends Engine.Views.Sprite
       avY /= @size * @heightScale
 
       # Rotate the position according to the object's direction
-      retVector = new Engine.Geometry.Vector(avX, avY)
+      retVector = new Geometry.Vector(avX, avY)
       retVector.rotate @direction
 
       # Save the number of colliding pixels
@@ -236,7 +243,7 @@ c = class Collidable extends Engine.Views.Sprite
   createCollisionBitmap: (objects) ->
     # Get mask from loader object
     mask = @mask
-    calc = Engine.Helpers.MatrixCalculation
+    calc = Helpers.MatrixCalculation
 
     # Create a new canvas for checking for a collision
     canvas = document.createElement("canvas")
@@ -307,4 +314,5 @@ c = class Collidable extends Engine.Views.Sprite
     c.getImageData 0, 0, canvas.width, canvas.height
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

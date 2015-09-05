@@ -1,6 +1,13 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+Helpers =
+  Mixin: require '../helpers/mixin'
+
+Geometry =
+  Polygon: require '../geometry/polygon'
+
+Views =
+  Child: require './child'
 
 ###
 The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
@@ -20,13 +27,13 @@ The constructor for the Polygon class. Uses the setFromPoints-function to set th
 @param {string} [strokeStyle = "#000"] The polygon's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The polygon's width if added to a view (in px)
 ###
-c = class Polygon extends Engine.Geometry.Polygon
+c = class Polygon extends Geometry.Polygon
   # Mix in Child
-  Engine.Helpers.Mixin.mixin @, Engine.Views.Child
+  Helpers.Mixin.mixin @, Views.Child
 
   constructor: (points, @fillStyle = '#000', @strokeStyle = "#000", @lineWidth = 0) ->
     # "Fake" extend child (to get view.child properties)
-    Engine.Views.Child::constructor.call @
+    Views.Child::constructor.call @
     @renderType = "polygon"
     @setFromPoints points
     @opacity = 1
@@ -55,4 +62,5 @@ c = class Polygon extends Engine.Geometry.Polygon
     rect.add @parent.getRoomPosition()
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

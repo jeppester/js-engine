@@ -1,6 +1,9 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+Room = require '../engine/room'
+
+Geometry =
+  Vector: require '../geometry/vector'
 
 ###
 @name View.Child
@@ -21,7 +24,7 @@ c = class Child
     @size = 1
     @widthScale = 1
     @heightScale = 1
-    hidden = offset: new Engine.Geometry.Vector()
+    hidden = offset: new Geometry.Vector()
 
     Object.defineProperty @, "offset",
       get: ->
@@ -182,7 +185,7 @@ c = class Child
   @return {Vector} A parsed version of the offset global
   ###
   parseOffsetGlobal: (offset) ->
-    new Engine.Geometry.Vector()
+    new Geometry.Vector()
 
   ###
   Checks if the child object is inside a room that is currently visible
@@ -209,12 +212,8 @@ c = class Child
   @return {Vector|Boolean} The objects position in its room, or false if the object is not placed in any room.
   ###
   getRoomPosition: ->
-    pos = undefined
-    parents = undefined
-    parent = undefined
-    i = undefined
     parents = @getParents()
-    if parents.length and parents[parents.length - 1] instanceof Engine.Room
+    if parents.length and parents[parents.length - 1] instanceof Room
       pos = new Vector(@x, @y)
       i = 0
       while i < parents.length
@@ -246,12 +245,10 @@ c = class Child
   @return {View.Room|Boolean} The room to which the object is currently added, or false if the object is not added to a room
   ###
   getRoom: ->
-    parents = undefined
-    ancestor = undefined
     parents = @getParents()
     return false if parents.length is 0
     ancestor = parents[parents.length - 1]
-    (if ancestor instanceof Engine.Room then ancestor else false)
+    (if ancestor instanceof Room then ancestor else false)
 
   ###
   Sets the position of the object relative to its parent
@@ -289,4 +286,3 @@ c = class Child
     not (@size is 0 or @widthScale is 0 or @heightScale is 0)
 
 module.exports:: = c::
-module.exports[name] = value for name, value of c

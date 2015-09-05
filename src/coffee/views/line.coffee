@@ -1,6 +1,14 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+Helpers =
+  Mixin: require '../helpers/mixin'
+
+Geometry =
+  Vector: require '../geometry/vector'
+  Line: require '../geometry/line'
+
+Views =
+  Child: require './child'
 
 ###
 Constructor for the Line class. Uses setFromVectors to create the line's start and end points
@@ -22,12 +30,12 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {number} [lineWidth=1] The line's width if added to a view (in px)
 @param {string} [lineCap='butt'] The line's cap style if added to a view
 ###
-c = class Line extends Engine.Geometry.Line
+c = class Line extends Geometry.Line
   # Mix in Child
-  Engine.Helpers.Mixin.mixin @, Engine.Views.Child
+  Helpers.Mixin.mixin @, Views.Child
 
   constructor: (startVector, endVector, strokeStyle, lineWidth, lineCap) ->
-    Engine.Views.Child::constructor.call this
+    Views.Child::constructor.call this
     @renderType = "line"
     if engine.enableRedrawRegions
       @LineInitWithRedrawRegions startVector, endVector, strokeStyle, lineWidth, lineCap
@@ -39,7 +47,7 @@ c = class Line extends Engine.Geometry.Line
     @strokeStyle = strokeStyle or "#000"
     @lineWidth = lineWidth or 1
     @lineCap = lineCap or "butt"
-    @setFromVectors startVector or new Engine.Geometry.Vector(), endVector or new Engine.Geometry.Vector()
+    @setFromVectors startVector or new Geometry.Vector(), endVector or new Geometry.Vector()
     return
 
   LineInitWithRedrawRegions: (startVector, endVector, strokeStyle, lineWidth, lineCap) ->
@@ -160,7 +168,7 @@ c = class Line extends Engine.Geometry.Line
           @onAfterChange()
         return
 
-    @setFromVectors startVector or new Engine.Geometry.Vector(), endVector or new Engine.Geometry.Vector()
+    @setFromVectors startVector or new Geometry.Vector(), endVector or new Geometry.Vector()
     return
 
 
@@ -197,7 +205,8 @@ c = class Line extends Engine.Geometry.Line
   @return {Boolean} Whether or not the line is "visible" (if not, renderers will not try to draw it)
   ###
   isVisible: ->
-    Engine.Views.Child::isVisible.call(@) and (@a.x isnt @b.x or @a.y isnt @b.y)
+    Views.Child::isVisible.call(@) and (@a.x isnt @b.x or @a.y isnt @b.y)
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

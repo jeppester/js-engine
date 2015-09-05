@@ -1,9 +1,21 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
+
+Helpers =
+  Mixin: require '../helpers/mixin'
+
+Mixins =
+  Animatable: require '../mixins/animatable'
+
+Geometry =
+  Line: require './line'
+  Polygon: require './polygon'
+  Rectangle: require './rectangle'
+  Vector: require './vector'
 
 ###
 Constructor for Circle class, uses the set function, to set the properties of the circle.
 
-@name Engine.Geometry.Circle
+@name Geometry.Circle
 @class A math class which is used for handling circles
 @augments Mixin.Animatable
 
@@ -17,7 +29,7 @@ Constructor for Circle class, uses the set function, to set the properties of th
 ###
 c = class Circle
   # Mix in animatable
-  Engine.Helpers.Mixin.mixin @, Engine.Mixins.Animatable
+  Helpers.Mixin.mixin @, Mixins.Animatable
 
   constructor: (x, y, radius) ->
     @set x, y, radius
@@ -29,7 +41,7 @@ c = class Circle
   @param {number} x The x-coordinate for the center of the circle
   @param {number} y The y-coordinate for the center of the circle
   @param {number} radius The radius for the circle
-  @return {Engine.Geometry.Circle} The resulting Circle object (itself)
+  @return {Geometry.Circle} The resulting Circle object (itself)
   ###
   set: (x, y, radius) ->
     x = (if x isnt undefined then x else 0)
@@ -43,7 +55,7 @@ c = class Circle
   ###
   Copies the Circle object.
 
-  @return {Engine.Geometry.Circle} A copy of the Circle object (which can be modified without changing the original object)
+  @return {Geometry.Circle} A copy of the Circle object (which can be modified without changing the original object)
   ###
   copy: ->
     new @constructor(@x, @y, @radius)
@@ -53,7 +65,7 @@ c = class Circle
 
   @param {number} x The value to add to the x-coordinate (can be negative)
   @param {number} y The value to add to the y-coordinate (can be negative)
-  @return {Engine.Geometry.Circle} The resulting Circle object (itself)
+  @return {Geometry.Circle} The resulting Circle object (itself)
   ###
   move: (x, y) ->
     throw new Error("Argument x should be of type: Number") if typeof x isnt "number" #dev
@@ -67,7 +79,7 @@ c = class Circle
 
   @param {number} x The x-coordinate of the position to move the Circle to
   @param {number} y The y-coordinate of the position to move the Circle to
-  @return {Engine.Geometry.Circle} The resulting Circle object (itself)
+  @return {Geometry.Circle} The resulting Circle object (itself)
   ###
   moveTo: (x, y) ->
     throw new Error("Argument x should be of type: Number") if typeof x isnt "number" #dev
@@ -82,7 +94,7 @@ c = class Circle
   Also: since ellipses are not supported yet, circles cannot be scaled with various factors horizontally and vertically, like the other geometric objects.
 
   @param {number} factor A factor with which to scale the Circle
-  @return {Engine.Geometry.Circle} The resulting Circle object (itself)
+  @return {Geometry.Circle} The resulting Circle object (itself)
   ###
   scale: (factor) ->
     throw new Error("Argument factor should be of type Number") if typeof factor isnt "number" #dev
@@ -108,19 +120,19 @@ c = class Circle
   ###
   Calculates the shortest distance from the Circle object to another geometric object
 
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object The object to calculate the distance to
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object The object to calculate the distance to
   @return {number} The distance
   ###
   getDistance: (object) ->
-    if object instanceof Engine.Geometry.Vector
-      Math.max 0, object.getDistance(new Engine.Geometry.Vector(@x, @y)) - @radius
-    else if object instanceof Engine.Geometry.Line
-      Math.max 0, object.getDistance(new Engine.Geometry.Vector(@x, @y)) - @radius
+    if object instanceof Geometry.Vector
+      Math.max 0, object.getDistance(new Geometry.Vector(@x, @y)) - @radius
+    else if object instanceof Geometry.Line
+      Math.max 0, object.getDistance(new Geometry.Vector(@x, @y)) - @radius
     else if object instanceof @constructor
-      Math.max 0, new Engine.Geometry.Vector(@x, @y).getDistance(new Engine.Geometry.Vector(object.x, object.y)) - (@radius + object.radius)
-    else if object instanceof Engine.Geometry.Rectangle
+      Math.max 0, new Geometry.Vector(@x, @y).getDistance(new Geometry.Vector(object.x, object.y)) - (@radius + object.radius)
+    else if object instanceof Geometry.Rectangle
       object.getDistance this
-    else if object instanceof Engine.Geometry.Polygon
+    else if object instanceof Geometry.Polygon
       object.getDistance this
     else #dev
       throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon") #dev
@@ -128,26 +140,26 @@ c = class Circle
   ###
   Checks whether or not the Circle contains another geometric object.
 
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object A geometric object to check
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object A geometric object to check
   @return {boolean} True if the Rectangle contains the checked object, false if not
   ###
   contains: (object) ->
     i = undefined
     cDist = undefined
-    if object instanceof Engine.Geometry.Vector
+    if object instanceof Geometry.Vector
       object.copy().move(-@x, -@y).getLength() < @radius
-    else if object instanceof Engine.Geometry.Line
+    else if object instanceof Geometry.Line
       @contains(object.a) and @contains(object.b)
     else if object instanceof @constructor
 
       # Find the distance between the circles' centres
-      cDist = new Engine.Geometry.Vector(object.x, object.y).move(-@x, -@y).getLength()
+      cDist = new Geometry.Vector(object.x, object.y).move(-@x, -@y).getLength()
 
       # If the sum of the distance and the checked circle's radius is smaller than this circles radius, this circle must contain the other circle
       cDist + object.radius < @radius
-    else if object instanceof Engine.Geometry.Rectangle
+    else if object instanceof Geometry.Rectangle
       @contains object.getPolygon()
-    else if object instanceof Engine.Geometry.Polygon
+    else if object instanceof Geometry.Polygon
 
       # Check if any of the polygon's points are outside the circle
       i = 0
@@ -163,20 +175,21 @@ c = class Circle
   ###
   Checks whether or not the Circle intersects with another geometric object.
 
-  @param {Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object A geometric object to check. Supported objects are
+  @param {Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object A geometric object to check. Supported objects are
   @return {boolean} True if the Circle intersects with the checked object, false if not
   ###
   intersects: (object) ->
-    if object instanceof Engine.Geometry.Line
+    if object instanceof Geometry.Line
       @contains(object) is false and object.getDistance(this) <= 0
     else if object instanceof @constructor
-      not @contains(object) and not object.contains(this) and new Engine.Geometry.Vector(@x, @y).getDistance(new Engine.Geometry.Vector(object.x, object.y)) <= @radius + object.radius
-    else if object instanceof Engine.Geometry.Rectangle
+      not @contains(object) and not object.contains(this) and new Geometry.Vector(@x, @y).getDistance(new Geometry.Vector(object.x, object.y)) <= @radius + object.radius
+    else if object instanceof Geometry.Rectangle
       object.getPolygon().intersects this
-    else if object instanceof Engine.Geometry.Polygon
+    else if object instanceof Geometry.Polygon
       object.intersects this
     else #dev
       throw new Error("Argument object has to be of type: Line, Circle, Rectangle or Polygon") #dev
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

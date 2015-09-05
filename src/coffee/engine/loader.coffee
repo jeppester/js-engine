@@ -1,13 +1,18 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+Sounds =
+  Music: require '../sounds/music'
+  Effect: require '../sounds/effect'
+
+Geometry =
+  Rectangle: require '../geometry/rectangle'
 
 ###
 Constructor for the Loader class.
 This function will also create a load overlay which will not disappear until the hideOverlay is called.
 Therefore, remember to call hideOverlay, when your game is ready to be shown.
 
-@name Engine.Loader
+@name Loader
 @class Class for loading and storing resources.
 On engine startup a Loader object is instantiated to the global variable "loader".
 This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
@@ -85,7 +90,7 @@ c = class Loader
 
   @param {string} resource The resource string of the sound that should be fetched
   @param {string} themeName The name of the theme from which the sound should be fetched. If unset, the engine's default theme will be used
-  @return {Engine.Sounds.Effect} A Sound object corresponding to the resource string and theme
+  @return {Sounds.Effect} A Sound object corresponding to the resource string and theme
   ###
   getSound: (resource, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
@@ -98,7 +103,7 @@ c = class Loader
 
   @param {string} resource The resource string of the track that should be fetched
   @param {string} themeName The name of the theme from which the track should be fetched. If unset, the engine's default theme will be used
-  @return {Engine.Sounds.Music} A Music object corresponding to the resource string and theme
+  @return {Sounds.Music} A Music object corresponding to the resource string and theme
   ###
   getMusic: (resource, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
@@ -137,7 +142,7 @@ c = class Loader
   @param {string} resource The resource string of the resource that should be fetched
   @param {string} typeString A string representing the resource type, possible values are: "image", "sfx" and "music"
   @param {string} themeName The name of the theme from which the image should be fetched. If unset, the engine's default theme will be used
-  @return {HTMLImageElement|Engine.Sounds.Effect|Engine.Sounds.Music} The resource corresponding to the provided resource string, resource type and theme name
+  @return {HTMLImageElement|Sounds.Effect|Sounds.Music} The resource corresponding to the provided resource string, resource type and theme name
   ###
   getResource: (resource, typeString, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
@@ -362,7 +367,7 @@ c = class Loader
               console.log "Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/")
               continue
             res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, "/") + "." + format)
-            theme.sfx[path] = new Engine.Sounds.Effect(res)
+            theme.sfx[path] = new Sounds.Effect(res)
             if engine.preloadSounds
               res.setAttribute "preload", "auto"
               res.addEventListener "canplaythrough", onload, false
@@ -375,7 +380,7 @@ c = class Loader
               i++
             throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/")) unless format #dev
             res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, "/") + "." + format)
-            theme.music[path] = new Engine.Sounds.Music(res)
+            theme.music[path] = new Sounds.Music(res)
             if engine.preloadSounds
               res.setAttribute "preload", "auto"
               res.addEventListener "canplaythrough", onload, false
@@ -422,7 +427,7 @@ c = class Loader
         format = path.match(/[^\.]*$/)[0]
         throw new Error("Sound format is not supported:", format) if engine.host.supportedAudio.indexOf(format) is -1 #dev
         res = new Audio(path)
-        theme.sfx[resourceString] = new Engine.Sounds.Effect(res)
+        theme.sfx[resourceString] = new Sounds.Effect(res)
         if engine.preloadSounds
           res.setAttribute "preload", "auto"
           res.addEventListener "canplaythrough", onLoaded, false
@@ -431,7 +436,7 @@ c = class Loader
         format = path.match(/[^\.]*$/)[0]
         throw new Error("Sound format is not supported:", format) if engine.host.supportedAudio.indexOf(format) is -1 #dev
         res = new Audio(path)
-        theme.music[resourceString] = new Engine.Sounds.Music(res)
+        theme.music[resourceString] = new Sounds.Music(res)
         if engine.preloadSounds
           res.setAttribute "preload", "auto"
           res.addEventListener "canplaythrough", onLoaded, false
@@ -495,7 +500,7 @@ c = class Loader
         right = Math.max(x + 1, right)
       pixel++
     ctx.putImageData bitmap, 0, 0
-    canvas.bBox = new Engine.Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon()
+    canvas.bBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon()
     canvas
 
 
@@ -519,4 +524,5 @@ c = class Loader
     false
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

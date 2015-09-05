@@ -1,4 +1,4 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
 ###
 Constructor for the sound class
@@ -97,4 +97,5 @@ c = class Effect
       false
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

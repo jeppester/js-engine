@@ -1,6 +1,7 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+Geometry =
+  Rectangle: require '../geometry/rectangle'
 
 ###
 Constructor for Camera class
@@ -20,12 +21,13 @@ The projection region decides where the captured region will be drawn on the mai
 ###
 c = class Camera
   constructor: (captureRegion, projectionRegion, room) ->
-    throw new Error("Argument captureRegion should be of type: Rectangle") if not captureRegion instanceof Engine.Geometry.Rectangle #dev
-    throw new Error("Argument projectionRegion should be of type: Rectangle") if not projectionRegion instanceof Engine.Geometry.Rectangle #dev
+    throw new Error("Argument captureRegion should be of type: Rectangle") if not captureRegion instanceof Geometry.Rectangle #dev
+    throw new Error("Argument projectionRegion should be of type: Rectangle") if not projectionRegion instanceof Geometry.Rectangle #dev
     @captureRegion = captureRegion
     @projectionRegion = projectionRegion
     @room = room or engine.currentRoom
     return
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

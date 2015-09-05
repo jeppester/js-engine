@@ -1,4 +1,4 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
 c = class Animatable
   ###
@@ -154,4 +154,5 @@ c = class Animatable
     return
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

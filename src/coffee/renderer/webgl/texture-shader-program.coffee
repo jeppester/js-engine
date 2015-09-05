@@ -1,14 +1,9 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
 Engine = require '../../engine'
 
 c = class WebGLTextureShaderProgram
   constructor: (gl) ->
-    initShaders = undefined
-    initBuffers = undefined
-    program = undefined
-    locations = undefined
-
     # Init program
     @cache =
       regularTextCoordBuffer: false
@@ -91,18 +86,9 @@ c = class WebGLTextureShaderProgram
     @cache.regularTextCoordBuffer = gl.createBuffer()
     gl.bindBuffer gl.ARRAY_BUFFER, @cache.regularTextCoordBuffer
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
-      0.0
-      0.0
-      1.0
-      0.0
-      0.0
-      1.0
-      0.0
-      1.0
-      1.0
-      0.0
-      1.0
-      1.0
+      0.0, 0.0, 1.0, 0.0
+      0.0, 1.0, 0.0, 1.0
+      1.0, 0.0, 1.0, 1.0
     ]), gl.STATIC_DRAW
 
     # Animated texture coordinate (the coordinates will be unique for each draw)
@@ -231,4 +217,3 @@ c = class WebGLTextureShaderProgram
     texture
 
 module.exports:: = c::
-module.exports[name] = value for name, value of c

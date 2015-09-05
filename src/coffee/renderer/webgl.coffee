@@ -1,4 +1,4 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
 Engine = require '../engine'
 TextureShaderProgram = require './webgl/texture-shader-program'
@@ -129,4 +129,5 @@ c = class WebGLRenderer
     return
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

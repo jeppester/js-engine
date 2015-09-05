@@ -1,4 +1,6 @@
-Engine = require '../engine'
+Camera = require './camera'
+Helpers =
+  RoomTransition: require '../helpers/room-transition'
 
 ###
 jseGlobals.js:
@@ -224,8 +226,8 @@ module.exports =
   Room transition global for entering a new room with no transition (this is default)
 
   @global
-  @param {Engine.Room} oldRoom The room that is left
-  @param {Engine.Room} newRoom The room that is entered
+  @param {Room} oldRoom The room that is left
+  @param {Room} newRoom The room that is entered
   ###
   ROOM_TRANSITION_NONE: (oldRoom, newRoom, options, callback) ->
     i = 0
@@ -236,13 +238,12 @@ module.exports =
     callback()
     return
 
-
   ###
   Room transition global for entering a new room by sliding the current room to the left
 
   @global
-  @param {Engine.Room} oldRoom The room that is left
-  @param {Engine.Room} newRoom The room that is entered
+  @param {Room} oldRoom The room that is left
+  @param {Room} newRoom The room that is entered
   ###
   ROOM_TRANSITION_SLIDE_SLIDE: (oldRoom, newRoom, options, callback) ->
     newCams = []
@@ -258,13 +259,13 @@ module.exports =
     while i < engine.cameras.length
       camera = engine.cameras[i]
       if camera.room is oldRoom
-        Engine.Helpers.RoomTransition.slideOut camera, options.from, animOptions
-        newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom)
+        Helpers.RoomTransition.slideOut camera, options.from, animOptions
+        newCam = new Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom)
         newCams.push newCam
       i++
     engine.cameras.push.apply engine.cameras, newCams
     newCams.forEach (c) ->
-      Engine.Helpers.RoomTransition.slideIn c, options.from, animOptions
+      Helpers.RoomTransition.slideIn c, options.from, animOptions
       return
 
     engine.masterRoom.loops.eachFrame.schedule oldRoom, (->
@@ -277,13 +278,12 @@ module.exports =
     ), animOptions.duration
     return
 
-
   ###
   Room transition global for entering a new room by squeezing the old room out and sliding the new room in
 
   @global
-  @param {Engine.Room} oldRoom The room that is left
-  @param {Engine.Room} newRoom The room that is entered
+  @param {Room} oldRoom The room that is left
+  @param {Room} newRoom The room that is entered
   ###
   ROOM_TRANSITION_SQUEEZE_SLIDE: (oldRoom, newRoom, options, callback) ->
     newCams = []
@@ -299,13 +299,13 @@ module.exports =
     while i < engine.cameras.length
       camera = engine.cameras[i]
       if camera.room is oldRoom
-        Engine.Helpers.RoomTransition.squeezeOut camera, options.from, animOptions
-        newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom)
+        Helpers.RoomTransition.squeezeOut camera, options.from, animOptions
+        newCam = new Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom)
         newCams.push newCam
       i++
     engine.cameras.push.apply engine.cameras, newCams
     newCams.forEach (c) ->
-      Engine.Helpers.RoomTransition.slideIn c, options.from, animOptions
+      Helpers.RoomTransition.slideIn c, options.from, animOptions
       return
 
     engine.masterRoom.loops.eachFrame.schedule oldRoom, (->
@@ -318,13 +318,12 @@ module.exports =
     ), animOptions.duration
     return
 
-
   ###
   Room transition global for squeezing the old room out and squeezing the new room in
 
   @global
-  @param {Engine.Room} oldRoom The room that is left
-  @param {Engine.Room} newRoom The room that is entered
+  @param {Room} oldRoom The room that is left
+  @param {Room} newRoom The room that is entered
   ###
   ROOM_TRANSITION_SQUEEZE_SQUEEZE: (oldRoom, newRoom, options, callback) ->
     newCams = []
@@ -341,13 +340,13 @@ module.exports =
     while i < engine.cameras.length
       camera = engine.cameras[i]
       if camera.room is oldRoom
-        Engine.Helpers.RoomTransition.squeezeOut camera, options.from, animOptions
-        newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom)
+        Helpers.RoomTransition.squeezeOut camera, options.from, animOptions
+        newCam = new Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom)
         newCams.push newCam
       i++
     engine.cameras.push.apply engine.cameras, newCams
     newCams.forEach (c) ->
-      Engine.Helpers.RoomTransition.squeezeIn c, options.from, animOptions
+      Helpers.RoomTransition.squeezeIn c, options.from, animOptions
       return
 
     engine.masterRoom.loops.eachFrame.schedule oldRoom, (->
@@ -360,13 +359,12 @@ module.exports =
     ), animOptions.duration
     return
 
-
   ###
   Room transition global for sliding the old room out and squeezing the new room in
 
   @global
-  @param {Engine.Room} oldRoom The room that is left
-  @param {Engine.Room} newRoom The room that is entered
+  @param {Room} oldRoom The room that is left
+  @param {Room} newRoom The room that is entered
   ###
   ROOM_TRANSITION_SLIDE_SQUEEZE: (oldRoom, newRoom, options, callback) ->
     newCams = []
@@ -382,13 +380,13 @@ module.exports =
     while i < engine.cameras.length
       camera = engine.cameras[i]
       if camera.room is oldRoom
-        Engine.Helpers.RoomTransition.slideOut camera, options.from, animOptions
-        newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom)
+        Helpers.RoomTransition.slideOut camera, options.from, animOptions
+        newCam = new Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom)
         newCams.push newCam
       i++
     engine.cameras.push.apply engine.cameras, newCams
     newCams.forEach (c) ->
-      Engine.Helpers.RoomTransition.squeezeIn c, options.from, animOptions
+      Helpers.RoomTransition.squeezeIn c, options.from, animOptions
       return
 
     engine.masterRoom.loops.eachFrame.schedule oldRoom, (->

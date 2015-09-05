@@ -1,6 +1,16 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+Helpers =
+  Mixin: require '../helpers/mixin'
+
+Mixins =
+  Animatable: require '../mixins/animatable'
+
+Geometry =
+  Circle: require './circle'
+  Line: require './line'
+  Polygon: require './polygon'
+  Rectangle: require './rectangle'
 
 ###
 Constructor for the Vector class. Uses set-function to set the vector from x- and y values.
@@ -15,7 +25,10 @@ Constructor for the Vector class. Uses set-function to set the vector from x- an
 @param {number} [y=0] The y-value to set for the vector
 ###
 c = class Vector
+  Helpers.Mixin.mixin @, Mixins.Animatable
+
   constructor: (x, y) ->
+    # Mix in animatable
     @set x, y
     return
 
@@ -218,4 +231,5 @@ c = class Vector
     throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon") #dev
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

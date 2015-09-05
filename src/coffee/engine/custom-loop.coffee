@@ -1,6 +1,4 @@
-module.exports = -> @constructor.apply @, arguments
-
-Engine = require '../engine'
+module.exports = -> c.apply @, arguments
 
 ###
 @name Engine.CustomLoop
@@ -410,4 +408,5 @@ c = class CustomLoop
     return
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

@@ -1,4 +1,4 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
 ###
 Constructor for the Keyboard class
@@ -96,4 +96,5 @@ c = class Keyboard
     @keys[key].events.length and -@keys[key].events[0] > engine.last
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

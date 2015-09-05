@@ -1,6 +1,14 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+Helpers =
+  Mixin: require '../helpers/mixin'
+
+Geometry =
+  Circle: require '../geometry/circle'
+  Rectangle: require '../geometry/rectangle'
+
+Views =
+  Child: require './child'
 
 ###
 Constructor for Circle class, uses the set function, to set the properties of the circle.
@@ -24,12 +32,12 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {string} [strokeStyle = "#000"] The circle's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The circle's width if added to a view (in px)
 ###
-c = class Circle extends Engine.Geometry.Circle
+c = class Circle extends Geometry.Circle
   # Mix in Child
-  Engine.Helpers.Mixin.mixin @, Engine.Views.Child
+  Helpers.Mixin.mixin @, Views.Child
 
   constructor: (x, y, radius, fillStyle = "#000", strokeStyle = "#000", lineWidth = 0)->
-    Engine.Views.Child::constructor.call this
+    Views.Child::constructor.call this
 
     @renderType = "circle"
     if engine.enableRedrawRegions
@@ -103,8 +111,9 @@ c = class Circle extends Engine.Geometry.Circle
     rect = undefined
     ln = undefined
     ln = Math.ceil(@lineWidth / 2)
-    rect = new Engine.Geometry.Rectangle(Math.floor(@x - (@radius + ln + 5)), Math.floor(@y - (@radius + ln + 5)), Math.ceil((@radius + ln + 5) * 2), Math.ceil((@radius + ln + 5) * 2))
+    rect = new Geometry.Rectangle(Math.floor(@x - (@radius + ln + 5)), Math.floor(@y - (@radius + ln + 5)), Math.ceil((@radius + ln + 5) * 2), Math.ceil((@radius + ln + 5) * 2))
     rect.add @parent.getRoomPosition()
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

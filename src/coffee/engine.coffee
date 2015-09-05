@@ -1,3 +1,5 @@
+module.exports = -> c.apply @, arguments
+
 ###
 The constructor for the Engine class.
 
@@ -60,7 +62,55 @@ The default options are:
 "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
 ###
-module.exports = window.Engine = class Engine
+c = window.Engine = class Engine
+  # Load classes for easy usage
+  @Helpers:
+    MatrixCalculation: require './helpers/matrix-calculation'
+    Mixin: require './helpers/mixin'
+    RoomTransition: require './helpers/room-transition'
+    WebGL: require './helpers/webgl'
+
+  @Mixins:
+    Animatable: require './mixins/animatable'
+
+  @Input:
+    Keyboard: require './input/keyboard'
+    Pointer: require './input/pointer'
+
+  @Geometry:
+    Vector: require './geometry/vector'
+    Circle: require './geometry/circle'
+    Line: require './geometry/line'
+    Polygon: require './geometry/polygon'
+    Rectangle: require './geometry/rectangle'
+
+  @Renderers:
+    WebGLRenderer: require './renderer/webgl'
+    CanvasRenderer: require './renderer/canvas'
+
+  @Sounds:
+    Effect: require './sounds/effect'
+    Music: require './sounds/music'
+
+  @Views:
+    Child: require './views/child'
+    Container: require './views/container'
+    Circle: require './views/circle'
+    Line: require './views/line'
+    Rectangle: require './views/rectangle'
+    Polygon: require './views/polygon'
+    Sprite: require './views/sprite'
+    TextBlock: require './views/text-block'
+    Collidable: require './views/collidable'
+    GameObject: require './views/game-object'
+
+  @Room: require './engine/room'
+  @Globals: require './engine/globals'
+  @ObjectCreator: require './engine/object-creator'
+  @CustomLoop: require './engine/custom-loop'
+  @Camera: require './engine/camera'
+  @Loader: require './engine/loader'
+
   constructor: (options) ->
     # Set global engine variable
     ###
@@ -70,7 +120,6 @@ module.exports = window.Engine = class Engine
     window.engine = this
     @options = options || {}
     @load()
-    return
 
   ###
   Load all files and functions, that are needed before the engine can start.
@@ -732,50 +781,6 @@ module.exports = window.Engine = class Engine
     document.body.removeChild a, document.body
     return
 
-# Load classes for easy usage
-Engine.Helpers = {}
-Engine.Helpers.MatrixCalculation = require './helpers/matrix-calculation'
-Engine.Helpers.Mixin = require './helpers/mixin'
-Engine.Helpers.RoomTransition = require './helpers/room-transition'
-Engine.Helpers.WebGL = require './helpers/webgl'
+module.exports:: = c::
 
-Engine.Mixins = {}
-Engine.Mixins.Animatable = require './mixins/animatable'
-
-Engine.Input = {}
-Engine.Input.Keyboard = require './input/keyboard'
-Engine.Input.Pointer = require './input/pointer'
-
-Engine.Geometry = {}
-Engine.Geometry.Vector = require './geometry/vector'
-Engine.Geometry.Circle = require './geometry/circle'
-Engine.Geometry.Line = require './geometry/line'
-Engine.Geometry.Polygon = require './geometry/polygon'
-Engine.Geometry.Rectangle = require './geometry/rectangle'
-
-Engine.Renderers = {}
-Engine.Renderers.WebGLRenderer = require './renderer/webgl'
-Engine.Renderers.CanvasRenderer = require './renderer/canvas'
-
-Engine.Sounds = {}
-Engine.Sounds.Effect = require './sounds/effect'
-Engine.Sounds.Music = require './sounds/music'
-
-Engine.Views = {}
-Engine.Views.Child = require './views/child'
-Engine.Views.Container = require './views/container'
-Engine.Views.Circle = require './views/circle'
-Engine.Views.Line = require './views/line'
-Engine.Views.Rectangle = require './views/rectangle'
-Engine.Views.Polygon = require './views/polygon'
-Engine.Views.Sprite = require './views/sprite'
-Engine.Views.TextBlock = require './views/text-block'
-Engine.Views.Collidable = require './views/collidable'
-Engine.Views.GameObject = require './views/game-object'
-
-Engine.Room = require './engine/room'
-Engine.Globals = require './engine/globals'
-Engine.ObjectCreator = require './engine/object-creator'
-Engine.CustomLoop = require './engine/custom-loop'
-Engine.Camera = require './engine/camera'
-Engine.Loader = require './engine/loader'
+module.exports[name] = value for name, value of c

@@ -1,4 +1,10 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var Engine, c, name, value;
+
+module.exports = function() {
+  return c.apply(this, arguments);
+};
+
 
 /*
 The constructor for the Engine class.
@@ -62,9 +68,67 @@ The default options are:
 "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
  */
-var Engine;
 
-module.exports = window.Engine = Engine = (function() {
+c = window.Engine = Engine = (function() {
+  Engine.Helpers = {
+    MatrixCalculation: require('./helpers/matrix-calculation'),
+    Mixin: require('./helpers/mixin'),
+    RoomTransition: require('./helpers/room-transition'),
+    WebGL: require('./helpers/webgl')
+  };
+
+  Engine.Mixins = {
+    Animatable: require('./mixins/animatable')
+  };
+
+  Engine.Input = {
+    Keyboard: require('./input/keyboard'),
+    Pointer: require('./input/pointer')
+  };
+
+  Engine.Geometry = {
+    Vector: require('./geometry/vector'),
+    Circle: require('./geometry/circle'),
+    Line: require('./geometry/line'),
+    Polygon: require('./geometry/polygon'),
+    Rectangle: require('./geometry/rectangle')
+  };
+
+  Engine.Renderers = {
+    WebGLRenderer: require('./renderer/webgl'),
+    CanvasRenderer: require('./renderer/canvas')
+  };
+
+  Engine.Sounds = {
+    Effect: require('./sounds/effect'),
+    Music: require('./sounds/music')
+  };
+
+  Engine.Views = {
+    Child: require('./views/child'),
+    Container: require('./views/container'),
+    Circle: require('./views/circle'),
+    Line: require('./views/line'),
+    Rectangle: require('./views/rectangle'),
+    Polygon: require('./views/polygon'),
+    Sprite: require('./views/sprite'),
+    TextBlock: require('./views/text-block'),
+    Collidable: require('./views/collidable'),
+    GameObject: require('./views/game-object')
+  };
+
+  Engine.Room = require('./engine/room');
+
+  Engine.Globals = require('./engine/globals');
+
+  Engine.ObjectCreator = require('./engine/object-creator');
+
+  Engine.CustomLoop = require('./engine/custom-loop');
+
+  Engine.Camera = require('./engine/camera');
+
+  Engine.Loader = require('./engine/loader');
+
   function Engine(options) {
 
     /*
@@ -74,7 +138,6 @@ module.exports = window.Engine = Engine = (function() {
     window.engine = this;
     this.options = options || {};
     this.load();
-    return;
   }
 
 
@@ -776,94 +839,25 @@ module.exports = window.Engine = Engine = (function() {
 
 })();
 
-Engine.Helpers = {};
+module.exports.prototype = c.prototype;
 
-Engine.Helpers.MatrixCalculation = require('./helpers/matrix-calculation');
-
-Engine.Helpers.Mixin = require('./helpers/mixin');
-
-Engine.Helpers.RoomTransition = require('./helpers/room-transition');
-
-Engine.Helpers.WebGL = require('./helpers/webgl');
-
-Engine.Mixins = {};
-
-Engine.Mixins.Animatable = require('./mixins/animatable');
-
-Engine.Input = {};
-
-Engine.Input.Keyboard = require('./input/keyboard');
-
-Engine.Input.Pointer = require('./input/pointer');
-
-Engine.Geometry = {};
-
-Engine.Geometry.Vector = require('./geometry/vector');
-
-Engine.Geometry.Circle = require('./geometry/circle');
-
-Engine.Geometry.Line = require('./geometry/line');
-
-Engine.Geometry.Polygon = require('./geometry/polygon');
-
-Engine.Geometry.Rectangle = require('./geometry/rectangle');
-
-Engine.Renderers = {};
-
-Engine.Renderers.WebGLRenderer = require('./renderer/webgl');
-
-Engine.Renderers.CanvasRenderer = require('./renderer/canvas');
-
-Engine.Sounds = {};
-
-Engine.Sounds.Effect = require('./sounds/effect');
-
-Engine.Sounds.Music = require('./sounds/music');
-
-Engine.Views = {};
-
-Engine.Views.Child = require('./views/child');
-
-Engine.Views.Container = require('./views/container');
-
-Engine.Views.Circle = require('./views/circle');
-
-Engine.Views.Line = require('./views/line');
-
-Engine.Views.Rectangle = require('./views/rectangle');
-
-Engine.Views.Polygon = require('./views/polygon');
-
-Engine.Views.Sprite = require('./views/sprite');
-
-Engine.Views.TextBlock = require('./views/text-block');
-
-Engine.Views.Collidable = require('./views/collidable');
-
-Engine.Views.GameObject = require('./views/game-object');
-
-Engine.Room = require('./engine/room');
-
-Engine.Globals = require('./engine/globals');
-
-Engine.ObjectCreator = require('./engine/object-creator');
-
-Engine.CustomLoop = require('./engine/custom-loop');
-
-Engine.Camera = require('./engine/camera');
-
-Engine.Loader = require('./engine/loader');
+for (name in c) {
+  value = c[name];
+  module.exports[name] = value;
+}
 
 
 
 },{"./engine/camera":2,"./engine/custom-loop":3,"./engine/globals":4,"./engine/loader":5,"./engine/object-creator":6,"./engine/room":7,"./geometry/circle":8,"./geometry/line":9,"./geometry/polygon":10,"./geometry/rectangle":11,"./geometry/vector":12,"./helpers/matrix-calculation":13,"./helpers/mixin":14,"./helpers/room-transition":15,"./helpers/webgl":16,"./input/keyboard":17,"./input/pointer":18,"./mixins/animatable":19,"./renderer/canvas":20,"./renderer/webgl":21,"./sounds/effect":24,"./sounds/music":25,"./views/child":26,"./views/circle":27,"./views/collidable":28,"./views/container":29,"./views/game-object":30,"./views/line":31,"./views/polygon":32,"./views/rectangle":33,"./views/sprite":34,"./views/text-block":35}],2:[function(require,module,exports){
-var Camera, Engine, c, name, value;
+var Camera, Geometry, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Geometry = {
+  Rectangle: require('../geometry/rectangle')
+};
 
 
 /*
@@ -885,10 +879,10 @@ The projection region decides where the captured region will be drawn on the mai
 
 c = Camera = (function() {
   function Camera(captureRegion, projectionRegion, room) {
-    if (!captureRegion instanceof Engine.Geometry.Rectangle) {
+    if (!captureRegion instanceof Geometry.Rectangle) {
       throw new Error("Argument captureRegion should be of type: Rectangle");
     }
-    if (!projectionRegion instanceof Engine.Geometry.Rectangle) {
+    if (!projectionRegion instanceof Geometry.Rectangle) {
       throw new Error("Argument projectionRegion should be of type: Rectangle");
     }
     this.captureRegion = captureRegion;
@@ -910,14 +904,12 @@ for (name in c) {
 
 
 
-},{"../engine":1}],3:[function(require,module,exports){
-var CustomLoop, Engine, c, name, value;
+},{"../geometry/rectangle":11}],3:[function(require,module,exports){
+var CustomLoop, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
-
-Engine = require('../engine');
 
 
 /*
@@ -1423,10 +1415,14 @@ for (name in c) {
 
 
 
-},{"../engine":1}],4:[function(require,module,exports){
-var Engine;
+},{}],4:[function(require,module,exports){
+var Camera, Helpers;
 
-Engine = require('../engine');
+Camera = require('./camera');
+
+Helpers = {
+  RoomTransition: require('../helpers/room-transition')
+};
 
 
 /*
@@ -1504,8 +1500,8 @@ module.exports = {
   Room transition global for entering a new room with no transition (this is default)
   
   @global
-  @param {Engine.Room} oldRoom The room that is left
-  @param {Engine.Room} newRoom The room that is entered
+  @param {Room} oldRoom The room that is left
+  @param {Room} newRoom The room that is entered
    */
   ROOM_TRANSITION_NONE: function(oldRoom, newRoom, options, callback) {
     var camera, i;
@@ -1524,8 +1520,8 @@ module.exports = {
   Room transition global for entering a new room by sliding the current room to the left
   
   @global
-  @param {Engine.Room} oldRoom The room that is left
-  @param {Engine.Room} newRoom The room that is entered
+  @param {Room} oldRoom The room that is left
+  @param {Room} newRoom The room that is entered
    */
   ROOM_TRANSITION_SLIDE_SLIDE: function(oldRoom, newRoom, options, callback) {
     var animOptions, camera, i, newCam, newCams;
@@ -1542,15 +1538,15 @@ module.exports = {
     while (i < engine.cameras.length) {
       camera = engine.cameras[i];
       if (camera.room === oldRoom) {
-        Engine.Helpers.RoomTransition.slideOut(camera, options.from, animOptions);
-        newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
+        Helpers.RoomTransition.slideOut(camera, options.from, animOptions);
+        newCam = new Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
         newCams.push(newCam);
       }
       i++;
     }
     engine.cameras.push.apply(engine.cameras, newCams);
     newCams.forEach(function(c) {
-      Engine.Helpers.RoomTransition.slideIn(c, options.from, animOptions);
+      Helpers.RoomTransition.slideIn(c, options.from, animOptions);
     });
     engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
       this.play();
@@ -1565,8 +1561,8 @@ module.exports = {
   Room transition global for entering a new room by squeezing the old room out and sliding the new room in
   
   @global
-  @param {Engine.Room} oldRoom The room that is left
-  @param {Engine.Room} newRoom The room that is entered
+  @param {Room} oldRoom The room that is left
+  @param {Room} newRoom The room that is entered
    */
   ROOM_TRANSITION_SQUEEZE_SLIDE: function(oldRoom, newRoom, options, callback) {
     var animOptions, camera, i, newCam, newCams;
@@ -1583,15 +1579,15 @@ module.exports = {
     while (i < engine.cameras.length) {
       camera = engine.cameras[i];
       if (camera.room === oldRoom) {
-        Engine.Helpers.RoomTransition.squeezeOut(camera, options.from, animOptions);
-        newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
+        Helpers.RoomTransition.squeezeOut(camera, options.from, animOptions);
+        newCam = new Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
         newCams.push(newCam);
       }
       i++;
     }
     engine.cameras.push.apply(engine.cameras, newCams);
     newCams.forEach(function(c) {
-      Engine.Helpers.RoomTransition.slideIn(c, options.from, animOptions);
+      Helpers.RoomTransition.slideIn(c, options.from, animOptions);
     });
     engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
       this.play();
@@ -1606,8 +1602,8 @@ module.exports = {
   Room transition global for squeezing the old room out and squeezing the new room in
   
   @global
-  @param {Engine.Room} oldRoom The room that is left
-  @param {Engine.Room} newRoom The room that is entered
+  @param {Room} oldRoom The room that is left
+  @param {Room} newRoom The room that is entered
    */
   ROOM_TRANSITION_SQUEEZE_SQUEEZE: function(oldRoom, newRoom, options, callback) {
     var animOptions, camera, i, newCam, newCams;
@@ -1625,15 +1621,15 @@ module.exports = {
     while (i < engine.cameras.length) {
       camera = engine.cameras[i];
       if (camera.room === oldRoom) {
-        Engine.Helpers.RoomTransition.squeezeOut(camera, options.from, animOptions);
-        newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
+        Helpers.RoomTransition.squeezeOut(camera, options.from, animOptions);
+        newCam = new Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
         newCams.push(newCam);
       }
       i++;
     }
     engine.cameras.push.apply(engine.cameras, newCams);
     newCams.forEach(function(c) {
-      Engine.Helpers.RoomTransition.squeezeIn(c, options.from, animOptions);
+      Helpers.RoomTransition.squeezeIn(c, options.from, animOptions);
     });
     engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
       this.play();
@@ -1648,8 +1644,8 @@ module.exports = {
   Room transition global for sliding the old room out and squeezing the new room in
   
   @global
-  @param {Engine.Room} oldRoom The room that is left
-  @param {Engine.Room} newRoom The room that is entered
+  @param {Room} oldRoom The room that is left
+  @param {Room} newRoom The room that is entered
    */
   ROOM_TRANSITION_SLIDE_SQUEEZE: function(oldRoom, newRoom, options, callback) {
     var animOptions, camera, i, newCam, newCams;
@@ -1666,15 +1662,15 @@ module.exports = {
     while (i < engine.cameras.length) {
       camera = engine.cameras[i];
       if (camera.room === oldRoom) {
-        Engine.Helpers.RoomTransition.slideOut(camera, options.from, animOptions);
-        newCam = new Engine.Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
+        Helpers.RoomTransition.slideOut(camera, options.from, animOptions);
+        newCam = new Camera(camera.captureRegion.copy(), camera.projectionRegion.copy(), newRoom);
         newCams.push(newCam);
       }
       i++;
     }
     engine.cameras.push.apply(engine.cameras, newCams);
     newCams.forEach(function(c) {
-      Engine.Helpers.RoomTransition.squeezeIn(c, options.from, animOptions);
+      Helpers.RoomTransition.squeezeIn(c, options.from, animOptions);
     });
     engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
       this.play();
@@ -1744,14 +1740,21 @@ module.exports = {
 
 
 
-},{"../engine":1}],5:[function(require,module,exports){
-var Engine, Loader, c, name, value;
+},{"../helpers/room-transition":15,"./camera":2}],5:[function(require,module,exports){
+var Geometry, Loader, Sounds, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Sounds = {
+  Music: require('../sounds/music'),
+  Effect: require('../sounds/effect')
+};
+
+Geometry = {
+  Rectangle: require('../geometry/rectangle')
+};
 
 
 /*
@@ -1759,7 +1762,7 @@ Constructor for the Loader class.
 This function will also create a load overlay which will not disappear until the hideOverlay is called.
 Therefore, remember to call hideOverlay, when your game is ready to be shown.
 
-@name Engine.Loader
+@name Loader
 @class Class for loading and storing resources.
 On engine startup a Loader object is instantiated to the global variable "loader".
 This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
@@ -1850,7 +1853,7 @@ c = Loader = (function() {
   
   @param {string} resource The resource string of the sound that should be fetched
   @param {string} themeName The name of the theme from which the sound should be fetched. If unset, the engine's default theme will be used
-  @return {Engine.Sounds.Effect} A Sound object corresponding to the resource string and theme
+  @return {Sounds.Effect} A Sound object corresponding to the resource string and theme
    */
 
   Loader.prototype.getSound = function(resource, themeName) {
@@ -1867,7 +1870,7 @@ c = Loader = (function() {
   
   @param {string} resource The resource string of the track that should be fetched
   @param {string} themeName The name of the theme from which the track should be fetched. If unset, the engine's default theme will be used
-  @return {Engine.Sounds.Music} A Music object corresponding to the resource string and theme
+  @return {Sounds.Music} A Music object corresponding to the resource string and theme
    */
 
   Loader.prototype.getMusic = function(resource, themeName) {
@@ -1912,7 +1915,7 @@ c = Loader = (function() {
   @param {string} resource The resource string of the resource that should be fetched
   @param {string} typeString A string representing the resource type, possible values are: "image", "sfx" and "music"
   @param {string} themeName The name of the theme from which the image should be fetched. If unset, the engine's default theme will be used
-  @return {HTMLImageElement|Engine.Sounds.Effect|Engine.Sounds.Music} The resource corresponding to the provided resource string, resource type and theme name
+  @return {HTMLImageElement|Sounds.Effect|Sounds.Music} The resource corresponding to the provided resource string, resource type and theme name
    */
 
   Loader.prototype.getResource = function(resource, typeString, themeName) {
@@ -2207,7 +2210,7 @@ c = Loader = (function() {
               continue;
             }
             res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, "/") + "." + format);
-            theme.sfx[path] = new Engine.Sounds.Effect(res);
+            theme.sfx[path] = new Sounds.Effect(res);
             if (engine.preloadSounds) {
               res.setAttribute("preload", "auto");
               res.addEventListener("canplaythrough", onload, false);
@@ -2227,7 +2230,7 @@ c = Loader = (function() {
               throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/"));
             }
             res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, "/") + "." + format);
-            theme.music[path] = new Engine.Sounds.Music(res);
+            theme.music[path] = new Sounds.Music(res);
             if (engine.preloadSounds) {
               res.setAttribute("preload", "auto");
               res.addEventListener("canplaythrough", onload, false);
@@ -2288,7 +2291,7 @@ c = Loader = (function() {
           throw new Error("Sound format is not supported:", format);
         }
         res = new Audio(path);
-        theme.sfx[resourceString] = new Engine.Sounds.Effect(res);
+        theme.sfx[resourceString] = new Sounds.Effect(res);
         if (engine.preloadSounds) {
           res.setAttribute("preload", "auto");
           res.addEventListener("canplaythrough", onLoaded, false);
@@ -2301,7 +2304,7 @@ c = Loader = (function() {
           throw new Error("Sound format is not supported:", format);
         }
         res = new Audio(path);
-        theme.music[resourceString] = new Engine.Sounds.Music(res);
+        theme.music[resourceString] = new Sounds.Music(res);
         if (engine.preloadSounds) {
           res.setAttribute("preload", "auto");
           res.addEventListener("canplaythrough", onLoaded, false);
@@ -2373,7 +2376,7 @@ c = Loader = (function() {
       pixel++;
     }
     ctx.putImageData(bitmap, 0, 0);
-    canvas.bBox = new Engine.Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon();
+    canvas.bBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon();
     return canvas;
   };
 
@@ -2418,15 +2421,25 @@ for (name in c) {
 
 
 
-},{"../engine":1}],6:[function(require,module,exports){
-var Engine, ObjectCreator, c, name, value,
+},{"../geometry/rectangle":11,"../sounds/effect":24,"../sounds/music":25}],6:[function(require,module,exports){
+var ObjectCreator, Views, c, name, value,
   __slice = [].slice;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Views = {
+  Circle: require('../views/circle'),
+  Collidable: require('../views/collidable'),
+  Container: require('../views/container'),
+  GameObject: require('../views/game-object'),
+  Line: require('../views/line'),
+  Polygon: require('../views/polygon'),
+  Rectangle: require('../views/rectangle'),
+  Sprite: require('../views/sprite'),
+  TextBlock: require('../views/text-block')
+};
 
 c = ObjectCreator = (function() {
   function ObjectCreator(container) {
@@ -2437,7 +2450,7 @@ c = ObjectCreator = (function() {
     var a, children, o;
     children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     a = arguments;
-    o = new Engine.Views.Container;
+    o = new Views.Container;
     o.addChildren.apply(o, children);
     this.container.addChildren(o);
     return o;
@@ -2445,56 +2458,56 @@ c = ObjectCreator = (function() {
 
   ObjectCreator.prototype.Circle = function(x, y, radius, fillStyle, strokeStyle, lineWidth) {
     var o;
-    o = new Engine.Views.Circle(x, y, radius, fillStyle, strokeStyle, lineWidth);
+    o = new Views.Circle(x, y, radius, fillStyle, strokeStyle, lineWidth);
     this.container.addChildren(o);
     return o;
   };
 
   ObjectCreator.prototype.Line = function(startVector, endVector, strokeStyle, lineWidth, lineCap) {
     var o;
-    o = new Engine.Views.Line(startVector, endVector, strokeStyle, lineWidth, lineCap);
+    o = new Views.Line(startVector, endVector, strokeStyle, lineWidth, lineCap);
     this.container.addChildren(o);
     return o;
   };
 
   ObjectCreator.prototype.Polygon = function(points, fillStyle, strokeStyle, lineWidth) {
     var o;
-    o = new Engine.Views.Polygon(points, fillStyle, strokeStyle, lineWidth);
+    o = new Views.Polygon(points, fillStyle, strokeStyle, lineWidth);
     this.container.addChildren(o);
     return o;
   };
 
   ObjectCreator.prototype.Rectangle = function(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
     var o;
-    o = new Engine.Views.Rectangle(x, y, width, height, fillStyle, strokeStyle, lineWidth);
+    o = new Views.Rectangle(x, y, width, height, fillStyle, strokeStyle, lineWidth);
     this.container.addChildren(o);
     return o;
   };
 
   ObjectCreator.prototype.TextBlock = function(string, x, y, width, additionalProperties) {
     var o;
-    o = new Engine.Views.TextBlock(string, x, y, width, additionalProperties);
+    o = new Views.TextBlock(string, x, y, width, additionalProperties);
     this.container.addChildren(o);
     return o;
   };
 
   ObjectCreator.prototype.Sprite = function(source, x, y, direction, additionalProperties) {
     var o;
-    o = new Engine.Views.Sprite(source, x, y, direction, additionalProperties);
+    o = new Views.Sprite(source, x, y, direction, additionalProperties);
     this.container.addChildren(o);
     return o;
   };
 
   ObjectCreator.prototype.Collidable = function(source, x, y, direction, additionalProperties) {
     var o;
-    o = new Engine.Views.Collidable(source, x, y, direction, additionalProperties);
+    o = new Views.Collidable(source, x, y, direction, additionalProperties);
     this.container.addChildren(o);
     return o;
   };
 
   ObjectCreator.prototype.GameObject = function(source, x, y, direction, additionalProperties) {
     var o;
-    o = new Engine.Views.GameObject(source, x, y, direction, additionalProperties);
+    o = new Views.GameObject(source, x, y, direction, additionalProperties);
     this.container.addChildren(o);
     return o;
   };
@@ -2512,22 +2525,26 @@ for (name in c) {
 
 
 
-},{"../engine":1}],7:[function(require,module,exports){
-var Engine, Room, c, name, value,
+},{"../views/circle":27,"../views/collidable":28,"../views/container":29,"../views/game-object":30,"../views/line":31,"../views/polygon":32,"../views/rectangle":33,"../views/sprite":34,"../views/text-block":35}],7:[function(require,module,exports){
+var CustomLoop, Room, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+CustomLoop = require('./custom-loop');
+
+Views = {
+  Container: require('../views/container')
+};
 
 
 /*
 Constructor for the Room class
 
-@name Engine.Room
+@name Room
 @class A room is the space wherein game objects reside.
 A room holds a list of objects to draw, and a list of custom loops.
 If a room is set as the engine's current room (engine.currentRoom); its objects will be drawn, and its custom loops will be executed each time the engine's main loop executes.
@@ -2554,7 +2571,7 @@ c = Room = (function(_super) {
     this.onLeft = (onLeft !== void 0 ? onLeft : function() {});
     this.loops = {};
     this.paused = false;
-    this.addLoop("eachFrame", new Engine.CustomLoop());
+    this.addLoop("eachFrame", new CustomLoop());
     engine.addRoom(this);
     return;
   }
@@ -2602,7 +2619,7 @@ c = Room = (function(_super) {
   After being added, the loop will be executed in each frame.
   
   @param {string} name The name the use for the custom loop in the room. When added the loop can be accessed with: [The room].loops[name]
-  @param {Engine.CustomLoop} loop The loop to add
+  @param {CustomLoop} loop The loop to add
    */
 
   Room.prototype.addLoop = function(name, loop_) {
@@ -2644,29 +2661,39 @@ c = Room = (function(_super) {
 
   return Room;
 
-})(Engine.Views.Container);
+})(Views.Container);
 
 module.exports.prototype = c.prototype;
 
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
 
 
-
-},{"../engine":1}],8:[function(require,module,exports){
-var Circle, c, name, value;
+},{"../views/container":29,"./custom-loop":3}],8:[function(require,module,exports){
+var Circle, Geometry, Helpers, Mixins, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
+};
+
+Helpers = {
+  Mixin: require('../helpers/mixin')
+};
+
+Mixins = {
+  Animatable: require('../mixins/animatable')
+};
+
+Geometry = {
+  Line: require('./line'),
+  Polygon: require('./polygon'),
+  Rectangle: require('./rectangle'),
+  Vector: require('./vector')
 };
 
 
 /*
 Constructor for Circle class, uses the set function, to set the properties of the circle.
 
-@name Engine.Geometry.Circle
+@name Geometry.Circle
 @class A math class which is used for handling circles
 @augments Mixin.Animatable
 
@@ -2680,7 +2707,7 @@ Constructor for Circle class, uses the set function, to set the properties of th
  */
 
 c = Circle = (function() {
-  Engine.Helpers.Mixin.mixin(Circle, Engine.Mixins.Animatable);
+  Helpers.Mixin.mixin(Circle, Mixins.Animatable);
 
   function Circle(x, y, radius) {
     this.set(x, y, radius);
@@ -2694,7 +2721,7 @@ c = Circle = (function() {
   @param {number} x The x-coordinate for the center of the circle
   @param {number} y The y-coordinate for the center of the circle
   @param {number} radius The radius for the circle
-  @return {Engine.Geometry.Circle} The resulting Circle object (itself)
+  @return {Geometry.Circle} The resulting Circle object (itself)
    */
 
   Circle.prototype.set = function(x, y, radius) {
@@ -2711,7 +2738,7 @@ c = Circle = (function() {
   /*
   Copies the Circle object.
   
-  @return {Engine.Geometry.Circle} A copy of the Circle object (which can be modified without changing the original object)
+  @return {Geometry.Circle} A copy of the Circle object (which can be modified without changing the original object)
    */
 
   Circle.prototype.copy = function() {
@@ -2724,7 +2751,7 @@ c = Circle = (function() {
   
   @param {number} x The value to add to the x-coordinate (can be negative)
   @param {number} y The value to add to the y-coordinate (can be negative)
-  @return {Engine.Geometry.Circle} The resulting Circle object (itself)
+  @return {Geometry.Circle} The resulting Circle object (itself)
    */
 
   Circle.prototype.move = function(x, y) {
@@ -2745,7 +2772,7 @@ c = Circle = (function() {
   
   @param {number} x The x-coordinate of the position to move the Circle to
   @param {number} y The y-coordinate of the position to move the Circle to
-  @return {Engine.Geometry.Circle} The resulting Circle object (itself)
+  @return {Geometry.Circle} The resulting Circle object (itself)
    */
 
   Circle.prototype.moveTo = function(x, y) {
@@ -2767,7 +2794,7 @@ c = Circle = (function() {
   Also: since ellipses are not supported yet, circles cannot be scaled with various factors horizontally and vertically, like the other geometric objects.
   
   @param {number} factor A factor with which to scale the Circle
-  @return {Engine.Geometry.Circle} The resulting Circle object (itself)
+  @return {Geometry.Circle} The resulting Circle object (itself)
    */
 
   Circle.prototype.scale = function(factor) {
@@ -2804,20 +2831,20 @@ c = Circle = (function() {
   /*
   Calculates the shortest distance from the Circle object to another geometric object
   
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object The object to calculate the distance to
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object The object to calculate the distance to
   @return {number} The distance
    */
 
   Circle.prototype.getDistance = function(object) {
-    if (object instanceof Engine.Geometry.Vector) {
-      return Math.max(0, object.getDistance(new Engine.Geometry.Vector(this.x, this.y)) - this.radius);
-    } else if (object instanceof Engine.Geometry.Line) {
-      return Math.max(0, object.getDistance(new Engine.Geometry.Vector(this.x, this.y)) - this.radius);
+    if (object instanceof Geometry.Vector) {
+      return Math.max(0, object.getDistance(new Geometry.Vector(this.x, this.y)) - this.radius);
+    } else if (object instanceof Geometry.Line) {
+      return Math.max(0, object.getDistance(new Geometry.Vector(this.x, this.y)) - this.radius);
     } else if (object instanceof this.constructor) {
-      return Math.max(0, new Engine.Geometry.Vector(this.x, this.y).getDistance(new Engine.Geometry.Vector(object.x, object.y)) - (this.radius + object.radius));
-    } else if (object instanceof Engine.Geometry.Rectangle) {
+      return Math.max(0, new Geometry.Vector(this.x, this.y).getDistance(new Geometry.Vector(object.x, object.y)) - (this.radius + object.radius));
+    } else if (object instanceof Geometry.Rectangle) {
       return object.getDistance(this);
-    } else if (object instanceof Engine.Geometry.Polygon) {
+    } else if (object instanceof Geometry.Polygon) {
       return object.getDistance(this);
     } else {
       throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon");
@@ -2828,7 +2855,7 @@ c = Circle = (function() {
   /*
   Checks whether or not the Circle contains another geometric object.
   
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object A geometric object to check
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object A geometric object to check
   @return {boolean} True if the Rectangle contains the checked object, false if not
    */
 
@@ -2836,16 +2863,16 @@ c = Circle = (function() {
     var cDist, i;
     i = void 0;
     cDist = void 0;
-    if (object instanceof Engine.Geometry.Vector) {
+    if (object instanceof Geometry.Vector) {
       return object.copy().move(-this.x, -this.y).getLength() < this.radius;
-    } else if (object instanceof Engine.Geometry.Line) {
+    } else if (object instanceof Geometry.Line) {
       return this.contains(object.a) && this.contains(object.b);
     } else if (object instanceof this.constructor) {
-      cDist = new Engine.Geometry.Vector(object.x, object.y).move(-this.x, -this.y).getLength();
+      cDist = new Geometry.Vector(object.x, object.y).move(-this.x, -this.y).getLength();
       return cDist + object.radius < this.radius;
-    } else if (object instanceof Engine.Geometry.Rectangle) {
+    } else if (object instanceof Geometry.Rectangle) {
       return this.contains(object.getPolygon());
-    } else if (object instanceof Engine.Geometry.Polygon) {
+    } else if (object instanceof Geometry.Polygon) {
       i = 0;
       while (i < object.points.length) {
         if (!this.contains(object.points[i])) {
@@ -2863,18 +2890,18 @@ c = Circle = (function() {
   /*
   Checks whether or not the Circle intersects with another geometric object.
   
-  @param {Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object A geometric object to check. Supported objects are
+  @param {Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object A geometric object to check. Supported objects are
   @return {boolean} True if the Circle intersects with the checked object, false if not
    */
 
   Circle.prototype.intersects = function(object) {
-    if (object instanceof Engine.Geometry.Line) {
+    if (object instanceof Geometry.Line) {
       return this.contains(object) === false && object.getDistance(this) <= 0;
     } else if (object instanceof this.constructor) {
-      return !this.contains(object) && !object.contains(this) && new Engine.Geometry.Vector(this.x, this.y).getDistance(new Engine.Geometry.Vector(object.x, object.y)) <= this.radius + object.radius;
-    } else if (object instanceof Engine.Geometry.Rectangle) {
+      return !this.contains(object) && !object.contains(this) && new Geometry.Vector(this.x, this.y).getDistance(new Geometry.Vector(object.x, object.y)) <= this.radius + object.radius;
+    } else if (object instanceof Geometry.Rectangle) {
       return object.getPolygon().intersects(this);
-    } else if (object instanceof Engine.Geometry.Polygon) {
+    } else if (object instanceof Geometry.Polygon) {
       return object.intersects(this);
     } else {
       throw new Error("Argument object has to be of type: Line, Circle, Rectangle or Polygon");
@@ -2894,34 +2921,39 @@ for (name in c) {
 
 
 
-},{}],9:[function(require,module,exports){
-var Engine, Line, c, name, value;
+},{"../helpers/mixin":14,"../mixins/animatable":19,"./line":9,"./polygon":10,"./rectangle":11,"./vector":12}],9:[function(require,module,exports){
+var Geometry, Line, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Geometry = {
+  Circle: require('./circle'),
+  Polygon: require('./polygon'),
+  Rectangle: require('./rectangle'),
+  Vector: require('./vector')
+};
 
 
 /*
 Constructor for the Line class. Uses setFromVectors to create the line's start and end points
 
-@name Engine.Geometry.Line
+@name Geometry.Line
 @class A math class which is used for handling lines
 @augments Mixin.Animatable
 
-@property {Engine.Geometry.Vector} a The line's starting point
-@property {Engine.Geometry.Vector} b The line's ending point
+@property {Geometry.Vector} a The line's starting point
+@property {Geometry.Vector} b The line's ending point
 
-@param {Engine.Geometry.Vector} startVector A Vector representing the start point of the line
-@param {Engine.Geometry.Vector} endVector A Vector representing the end point of the line
+@param {Geometry.Vector} startVector A Vector representing the start point of the line
+@param {Geometry.Vector} endVector A Vector representing the end point of the line
  */
 
 c = Line = (function() {
   function Line(startVector, endVector) {
-    startVector = (startVector !== void 0 ? startVector : new Engine.Geometry.Vector());
-    endVector = (endVector !== void 0 ? endVector : new Engine.Geometry.Vector());
+    startVector = (startVector !== void 0 ? startVector : new Geometry.Vector());
+    endVector = (endVector !== void 0 ? endVector : new Geometry.Vector());
     this.setFromVectors(startVector, endVector);
     return;
   }
@@ -2930,16 +2962,16 @@ c = Line = (function() {
   /*
   Sets the start- and end points from two Vector's.
   
-  @param {Engine.Geometry.Vector} startVector A Vector representing the start point of the line
-  @param {Engine.Geometry.Vector} endVector A Vector representing the end point of the line
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @param {Geometry.Vector} startVector A Vector representing the start point of the line
+  @param {Geometry.Vector} endVector A Vector representing the end point of the line
+  @return {Geometry.Line} The resulting Line object (itself)
    */
 
   Line.prototype.setFromVectors = function(startVector, endVector) {
-    if (!startVector instanceof Engine.Geometry.Vector) {
+    if (!startVector instanceof Geometry.Vector) {
       throw new Error("Argument startVector should be of type: Vector");
     }
-    if (!endVector instanceof Engine.Geometry.Vector) {
+    if (!endVector instanceof Geometry.Vector) {
       throw new Error("Argument endVector should be of type: Vector");
     }
     this.a = startVector;
@@ -2955,7 +2987,7 @@ c = Line = (function() {
   @param {number} y1 The start points' y-coordinate
   @param {number} x2 The end points' x-coordinate
   @param {number} y2 The end points' y-coordinate
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @return {Geometry.Line} The resulting Line object (itself)
    */
 
   Line.prototype.setFromCoordinates = function(x1, y1, x2, y2) {
@@ -2963,8 +2995,8 @@ c = Line = (function() {
     y1 = (y1 !== void 0 ? y1 : 0);
     x2 = (x2 !== void 0 ? x2 : 0);
     y2 = (y2 !== void 0 ? y2 : 0);
-    this.a = new Engine.Geometry.Vector(x1, y1);
-    this.b = new Engine.Geometry.Vector(x2, y2);
+    this.a = new Geometry.Vector(x1, y1);
+    this.b = new Geometry.Vector(x2, y2);
     return this;
   };
 
@@ -2972,7 +3004,7 @@ c = Line = (function() {
   /*
   Copies the Line object
   
-  @return {Engine.Geometry.Line} A copy of the Line object (which can be modified without changing the original object)
+  @return {Geometry.Line} A copy of the Line object (which can be modified without changing the original object)
    */
 
   Line.prototype.copy = function() {
@@ -2985,7 +3017,7 @@ c = Line = (function() {
   
   @param {number} x The value to add to both points' x-coordinates
   @param {number} y The value to add to both points' y-coordinates
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @return {Geometry.Line} The resulting Line object (itself)
    */
 
   Line.prototype.move = function(x, y) {
@@ -2999,7 +3031,7 @@ c = Line = (function() {
   Rotates the line around the zero-vector.
   
   @param {number} direction The number of radians to rotate the line
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @return {Geometry.Line} The resulting Line object (itself)
    */
 
   Line.prototype.rotate = function(direction) {
@@ -3017,7 +3049,7 @@ c = Line = (function() {
   
   @param {number} scaleH A factor with which to scale the Line horizontally.
   @param {number} [scaleV=scaleH] A factor with which to scale the Line vertically
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @return {Geometry.Line} The resulting Line object (itself)
    */
 
   Line.prototype.scale = function(scaleH, scaleV) {
@@ -3031,8 +3063,8 @@ c = Line = (function() {
   Adds a vector to the start- and end points of the line.
   Can by used for the same purpose as move, but takes a vector as argument.
   
-  @param {Engine.Geometry.Vector} vector A vector to add to the line's start- and end points
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @param {Geometry.Vector} vector A vector to add to the line's start- and end points
+  @return {Geometry.Line} The resulting Line object (itself)
    */
 
   Line.prototype.add = function(vector) {
@@ -3045,8 +3077,8 @@ c = Line = (function() {
   /*
   Subtracts a vector from the start- and end points of the line.
   
-  @param {Engine.Geometry.Vector} vector A vector to subtract from the line's start- and end points
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @param {Geometry.Vector} vector A vector to subtract from the line's start- and end points
+  @return {Geometry.Line} The resulting Line object (itself)
    */
 
   Line.prototype.subtract = function(vector) {
@@ -3059,8 +3091,8 @@ c = Line = (function() {
   /*
   Divides the start- and end points of the line with a vector.
   
-  @param {Engine.Geometry.Vector} vector A vector to divide the line's start- and end points with
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @param {Geometry.Vector} vector A vector to divide the line's start- and end points with
+  @return {Geometry.Line} The resulting Line object (itself)
    */
 
   Line.prototype.divide = function(vector) {
@@ -3073,8 +3105,8 @@ c = Line = (function() {
   /*
   Multiplies the start- and end points of the line with a vector.
   
-  @param {Engine.Geometry.Vector} vector A vector to multiply the line's start- and end points with
-  @return {Engine.Geometry.Line} The resulting Line object (itself)
+  @param {Geometry.Vector} vector A vector to multiply the line's start- and end points with
+  @return {Geometry.Line} The resulting Line object (itself)
    */
 
   Line.prototype.multiply = function(vector) {
@@ -3087,7 +3119,7 @@ c = Line = (function() {
   /*
   Checks whether the line intersects with another line or polygon.
   
-  @param {Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object Geometric object to check for an intersection with
+  @param {Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object Geometric object to check for an intersection with
   @return {boolean} True if the checked object intersects with the line, false if not
    */
 
@@ -3104,11 +3136,11 @@ c = Line = (function() {
       c1 = (object.b.x - object.a.x) * (this.a.y - object.b.y) - (this.a.x - object.b.x) * (object.b.y - object.a.y);
       c2 = (object.b.x - object.a.x) * (this.b.y - object.b.y) - (this.b.x - object.b.x) * (object.b.y - object.a.y);
       return c1 * c2 < 0;
-    } else if (object instanceof Engine.Geometry.Circle) {
+    } else if (object instanceof Geometry.Circle) {
       return object.intersects(this);
-    } else if (object instanceof Engine.Geometry.Rectangle) {
+    } else if (object instanceof Geometry.Rectangle) {
       return object.getPolygon().intersects(this);
-    } else if (object instanceof Engine.Geometry.Polygon) {
+    } else if (object instanceof Geometry.Polygon) {
       return object.intersects(this);
     } else {
       throw new Error("Argument object should be of type: Line, Rectangle, Circle or Polygon");
@@ -3130,13 +3162,13 @@ c = Line = (function() {
   /*
   Calculates the shortest distance from the Line object to another geometric object
   
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object The object to calculate the distance to
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object The object to calculate the distance to
   @return {number} The distance
    */
 
   Line.prototype.getDistance = function(object) {
     var ab, ac, ba, bc;
-    if (object instanceof Engine.Geometry.Vector) {
+    if (object instanceof Geometry.Vector) {
       ba = this.a.copy().subtract(this.b);
       ab = this.b.copy().subtract(this.a);
       bc = object.copy().subtract(this.b);
@@ -3154,9 +3186,9 @@ c = Line = (function() {
       } else {
         return Math.min(this.getDistance(object.a), this.getDistance(object.b), object.getDistance(this.a), object.getDistance(this.b));
       }
-    } else if (object instanceof Engine.Geometry.Rectangle) {
+    } else if (object instanceof Geometry.Rectangle) {
       return object.getDistance(this);
-    } else if (object instanceof Engine.Geometry.Circle) {
+    } else if (object instanceof Geometry.Circle) {
       return object.getDistance(this);
     } else {
       throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon");
@@ -3189,7 +3221,7 @@ c = Line = (function() {
         c.move(ort.y, -ort.x);
         d.move(ort.y, -ort.x);
       }
-      return new Engine.Geometry.Polygon([a, b, c, d]);
+      return new Geometry.Polygon([a, b, c, d]);
     } else {
       points = new Array(32);
       startAngle = ort.getDirection();
@@ -3198,16 +3230,16 @@ c = Line = (function() {
       i = 0;
       while (i < 16) {
         angle = startAngle + segmentRad * i;
-        points[i] = new Engine.Geometry.Vector(this.a.x + width * Math.cos(angle), this.a.y + width * Math.sin(angle));
+        points[i] = new Geometry.Vector(this.a.x + width * Math.cos(angle), this.a.y + width * Math.sin(angle));
         i++;
       }
       i = 0;
       while (i < 16) {
         angle = startAngle + segmentRad * (i + 15);
-        points[i + 16] = new Engine.Geometry.Vector(this.b.x + width * Math.cos(angle), this.b.y + width * Math.sin(angle));
+        points[i + 16] = new Geometry.Vector(this.b.x + width * Math.cos(angle), this.b.y + width * Math.sin(angle));
         i++;
       }
-      return new Engine.Geometry.Polygon(points);
+      return new Geometry.Polygon(points);
     }
   };
 
@@ -3215,11 +3247,11 @@ c = Line = (function() {
   /*
   Creates a polygon with the same points as the line.
   
-  @return {Engine.Geometry.Polygon} The created Polygon object
+  @return {Geometry.Polygon} The created Polygon object
    */
 
   Line.prototype.getPolygon = function() {
-    return new Engine.Geometry.Polygon([this.a.copy(), this.b.copy()]);
+    return new Geometry.Polygon([this.a.copy(), this.b.copy()]);
   };
 
   return Line;
@@ -3235,24 +3267,29 @@ for (name in c) {
 
 
 
-},{"../engine":1}],10:[function(require,module,exports){
-var Engine, Polygon, c, name, value;
+},{"./circle":8,"./polygon":10,"./rectangle":11,"./vector":12}],10:[function(require,module,exports){
+var Geometry, Polygon, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Geometry = {
+  Circle: require('./circle'),
+  Line: require('./line'),
+  Rectangle: require('./rectangle'),
+  Vector: require('./vector')
+};
 
 c = Polygon = (function() {
 
   /*
   The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
   
-  @name Engine.Geometry.Polygon
+  @name Geometry.Polygon
   @class A math class which is used for handling polygons
-  @property {Engine.Geometry.Vector[]} points An array of the polygon's points. Each point is connect to the previous- and next points, and the first and last points are connected
-  @param {Engine.Geometry.Vector[]} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
+  @property {Geometry.Vector[]} points An array of the polygon's points. Each point is connect to the previous- and next points, and the first and last points are connected
+  @param {Geometry.Vector[]} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
    */
   function Polygon(points) {
     this.setFromPoints(points);
@@ -3263,7 +3300,7 @@ c = Polygon = (function() {
   /*
   Sets the points of the polygon from Vector's.
   
-  @param {Engine.Geometry.Vector[]} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
+  @param {Geometry.Vector[]} points An array of Vector's which are to be used as points for the polygon. Keep in mind that the polygon will NOT copy the points, so changing another reference to one of the added points will change the point inside the polygon.
   @return {Object} The resulting Polygon object (itself)
    */
 
@@ -3296,7 +3333,7 @@ c = Polygon = (function() {
       if (typeof x !== "number" || typeof y !== "number") {
         throw new Error("All arguments should be of type: Number");
       }
-      this.points.push(new Engine.Geometry.Vector(x, y));
+      this.points.push(new Geometry.Vector(x, y));
       i++;
     }
     return this;
@@ -3327,7 +3364,7 @@ c = Polygon = (function() {
   
   @param {number} x The value to add to all points' x-coordinates
   @param {number} y The value to add to all points' y-coordinates
-  @return {Engine.Geometry.Polygon} The resulting Polygon object (itself)
+  @return {Geometry.Polygon} The resulting Polygon object (itself)
    */
 
   Polygon.prototype.move = function(x, y) {
@@ -3337,20 +3374,20 @@ c = Polygon = (function() {
     if (typeof y !== "number") {
       throw new Error("Argument y should be of type Number");
     }
-    return this.add(new Engine.Geometry.Vector(x, y));
+    return this.add(new Geometry.Vector(x, y));
   };
 
 
   /*
   Adds a vector to all points.
   
-  @param {Engine.Geometry.Vector} vector A Vector to add to all points
-  @return {Engine.Geometry.Polygon} The resulting Polygon object (itself)
+  @param {Geometry.Vector} vector A Vector to add to all points
+  @return {Geometry.Polygon} The resulting Polygon object (itself)
    */
 
   Polygon.prototype.add = function(vector) {
     var i;
-    if (!vector instanceof Engine.Geometry.Vector) {
+    if (!vector instanceof Geometry.Vector) {
       throw new Error("Argument vector should be of type Vector");
     }
     i = 0;
@@ -3366,7 +3403,7 @@ c = Polygon = (function() {
   Rotates the Polygon object by rotating all of its points around the zero vector.
   
   @param {number} direction The number of radians to rotate the polygon
-  @return {Engine.Geometry.Polygon} The resulting Polygon object (itself)
+  @return {Geometry.Polygon} The resulting Polygon object (itself)
    */
 
   Polygon.prototype.rotate = function(direction) {
@@ -3388,7 +3425,7 @@ c = Polygon = (function() {
   
   @param {number} scaleH A factor with which to scale the Polygon horizontally. If scaleH is undefined, both width and height will be scaled after this factor
   @param {number} scaleV A factor with which to scale the Polygon vertically
-  @return {Engine.Geometry.Polygon} The resulting Polygon object (itself)
+  @return {Geometry.Polygon} The resulting Polygon object (itself)
    */
 
   Polygon.prototype.scale = function(scaleH, scaleV) {
@@ -3405,7 +3442,7 @@ c = Polygon = (function() {
   /*
   Copies the Polygon object
   
-  @return {Engine.Geometry.Polygon} A copy of the Polygon object (which can be modified without changing the original object)
+  @return {Geometry.Polygon} A copy of the Polygon object (which can be modified without changing the original object)
    */
 
   Polygon.prototype.copy = function() {
@@ -3416,7 +3453,7 @@ c = Polygon = (function() {
   /*
   Fetches all of the polygon's points as Vector objects
   
-  @return {Engine.Geometry.Vector} An array containing all the points of the polygon, as Vector objects
+  @return {Geometry.Vector} An array containing all the points of the polygon, as Vector objects
    */
 
   Polygon.prototype.getPoints = function() {
@@ -3434,7 +3471,7 @@ c = Polygon = (function() {
   /*
   Fetches all of the polygon's sides as Line objects.
   
-  @return {Engine.Geometry.Vector} An array containing all of the polygon's sides as Line objects
+  @return {Geometry.Vector} An array containing all of the polygon's sides as Line objects
    */
 
   Polygon.prototype.getLines = function() {
@@ -3444,7 +3481,7 @@ c = Polygon = (function() {
     i = 0;
     while (i < points.length) {
       to = (i === points.length - 1 ? 0 : i + 1);
-      lines.push(new Engine.Geometry.Line(points[i], points[to]));
+      lines.push(new Geometry.Line(points[i], points[to]));
       i++;
     }
     return lines;
@@ -3454,7 +3491,7 @@ c = Polygon = (function() {
   /*
   Calculates the bounding rectangle of the polygon
   
-  @return {Engine.Geometry.Rectangle} The bounding rectangle
+  @return {Geometry.Rectangle} The bounding rectangle
    */
 
   Polygon.prototype.getBoundingRectangle = function() {
@@ -3462,7 +3499,7 @@ c = Polygon = (function() {
     if (this.points.length === 0) {
       throw new Error("Cannot create bounding rectangle for pointless polygon");
     }
-    startVector = new Engine.Geometry.Vector(this.points[0].x, this.points[0].y);
+    startVector = new Geometry.Vector(this.points[0].x, this.points[0].y);
     endVector = startVector.copy();
     i = 0;
     while (i < this.points.length) {
@@ -3472,14 +3509,14 @@ c = Polygon = (function() {
       endVector.y = Math.max(this.points[i].y, endVector.y);
       i++;
     }
-    return new Engine.Geometry.Rectangle().setFromVectors(startVector, endVector.subtract(startVector));
+    return new Geometry.Rectangle().setFromVectors(startVector, endVector.subtract(startVector));
   };
 
 
   /*
   Calculates the shortest distance from the Polygon object to another geometric object
   
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object The object to calculate the distance to
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object The object to calculate the distance to
   @return {number} The distance
    */
 
@@ -3487,7 +3524,7 @@ c = Polygon = (function() {
     var dist, i, ii, lines, objLines, pVector;
     dist = Number.POSITIVE_INFINITY;
     lines = this.getLines();
-    if (object instanceof Engine.Geometry.Vector) {
+    if (object instanceof Geometry.Vector) {
       i = 0;
       while (i < lines.length) {
         dist = Math.min(dist, lines[i].getDistance(object));
@@ -3497,7 +3534,7 @@ c = Polygon = (function() {
         i++;
       }
       return dist;
-    } else if (object instanceof Engine.Geometry.Line) {
+    } else if (object instanceof Geometry.Line) {
       i = 0;
       while (i < lines.length) {
         dist = Math.min(dist, lines[i].getDistance(object));
@@ -3507,8 +3544,8 @@ c = Polygon = (function() {
         i++;
       }
       return dist;
-    } else if (object instanceof Engine.Geometry.Circle) {
-      pVector = new Engine.Geometry.Vector(object.x, object.y);
+    } else if (object instanceof Geometry.Circle) {
+      pVector = new Geometry.Vector(object.x, object.y);
       i = 0;
       while (i < lines.length) {
         dist = Math.min(dist, lines[i].getDistance(pVector));
@@ -3518,7 +3555,7 @@ c = Polygon = (function() {
         i++;
       }
       return Math.max(0, dist - object.radius);
-    } else if (object instanceof Engine.Geometry.Rectangle) {
+    } else if (object instanceof Geometry.Rectangle) {
       return object.getDistance(this);
     } else if (object instanceof this.constructor) {
       objLines = object.getLines();
@@ -3547,22 +3584,22 @@ c = Polygon = (function() {
   /*
   Checks whether or not the Polygon contains another geometric object.
   
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle} object A geometric object to check
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle} object A geometric object to check
   @return {boolean} True if the Polygon contains the checked object, false if not
    */
 
   Polygon.prototype.contains = function(object) {
-    if (object instanceof Engine.Geometry.Vector) {
-      return this.intersects(new Engine.Geometry.Line().setFromCoordinates(-123456, -98765, object.x, object.y), true) % 2;
-    } else if (object instanceof Engine.Geometry.Line) {
+    if (object instanceof Geometry.Vector) {
+      return this.intersects(new Geometry.Line().setFromCoordinates(-123456, -98765, object.x, object.y), true) % 2;
+    } else if (object instanceof Geometry.Line) {
       return !this.intersects(object) && this.contains(object.a);
-    } else if (object instanceof Engine.Geometry.Circle) {
-      if (this.contains(new Engine.Geometry.Vector(object.x, object.y))) {
+    } else if (object instanceof Geometry.Circle) {
+      if (this.contains(new Geometry.Vector(object.x, object.y))) {
         return !this.intersects(object);
       } else {
         return false;
       }
-    } else if (object instanceof Engine.Geometry.Rectangle) {
+    } else if (object instanceof Geometry.Rectangle) {
       return this.contains(object.getPolygon());
     } else if (object instanceof this.constructor) {
       return object.points.length > 0 && !this.intersects(object) && this.contains(object.points[0]);
@@ -3575,7 +3612,7 @@ c = Polygon = (function() {
   /*
   Checks whether or not the Polygon intersects with another geometric object.
   
-  @param {Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object A geometric object to check for intersections with
+  @param {Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object A geometric object to check for intersections with
   @param {boolean} [countIntersections=true] A geometric object to check for intersections with
   @return {boolean} True if the Polygon intersects with the checked object, false if not
    */
@@ -3586,7 +3623,7 @@ c = Polygon = (function() {
     if (countIntersections) {
       intersectionCount = 0;
     }
-    if (object instanceof Engine.Geometry.Line) {
+    if (object instanceof Geometry.Line) {
       lines = this.getLines();
       i = 0;
       while (i < lines.length) {
@@ -3600,7 +3637,7 @@ c = Polygon = (function() {
         }
         i++;
       }
-    } else if (object instanceof Engine.Geometry.Circle) {
+    } else if (object instanceof Geometry.Circle) {
       lines = this.getLines();
       i = 0;
       while (i < lines.length) {
@@ -3613,7 +3650,7 @@ c = Polygon = (function() {
         }
         i++;
       }
-    } else if (object instanceof Engine.Geometry.Rectangle) {
+    } else if (object instanceof Geometry.Rectangle) {
       return this.intersects(object.getPolygon());
     } else if (object instanceof this.constructor) {
       lines = this.getLines();
@@ -3658,22 +3695,35 @@ for (name in c) {
 
 
 
-},{"../engine":1}],11:[function(require,module,exports){
-var Engine, Rectangle, c, name, value,
+},{"./circle":8,"./line":9,"./rectangle":11,"./vector":12}],11:[function(require,module,exports){
+var Geometry, Helpers, Mixins, Rectangle, c, name, value,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Helpers = {
+  Mixin: require('../helpers/mixin')
+};
+
+Mixins = {
+  Animatable: require('../mixins/animatable')
+};
+
+Geometry = {
+  Circle: require('./circle'),
+  Line: require('./line'),
+  Polygon: require('./polygon'),
+  Vector: require('./vector')
+};
 
 
 /*
 The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
 
-@name Engine.Geometry.Rectangle
+@name Geometry.Rectangle
 @class A rectangle class which is used for handling non-rotated rectangles
 @augments Vector
 
@@ -3691,7 +3741,7 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 c = Rectangle = (function(_super) {
   __extends(Rectangle, _super);
 
-  Engine.Helpers.Mixin.mixin(Rectangle, Engine.Mixins.Animatable);
+  Helpers.Mixin.mixin(Rectangle, Mixins.Animatable);
 
   function Rectangle(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
     this.set(x, y, width, height);
@@ -3705,7 +3755,7 @@ c = Rectangle = (function(_super) {
   @param {number} y The y-coordinate for the rectangle's top left corner
   @param {number} width The width of the rectangle
   @param {number} height The height of the rectangle
-  @return {Engine.Geometry.Rectangle} The resulting Rectangle object (itself)
+  @return {Geometry.Rectangle} The resulting Rectangle object (itself)
    */
 
   Rectangle.prototype.set = function(x, y, width, height) {
@@ -3720,14 +3770,14 @@ c = Rectangle = (function(_super) {
   /*
   Sets the properties of the rectangle from two vectors: one representing the position of the top left corner, another representing the width and height of the rectangle.
   
-  @param {Engine.Geometry.Vector} position A Vector representing the position of the top left corner to set for the Rectangle
-  @param {Engine.Geometry.Vector} size A Vector representing the size (width and height) to set for the Rectangle
-  @return {Engine.Geometry.Rectangle} The resulting Rectangle object (itself)
+  @param {Geometry.Vector} position A Vector representing the position of the top left corner to set for the Rectangle
+  @param {Geometry.Vector} size A Vector representing the size (width and height) to set for the Rectangle
+  @return {Geometry.Rectangle} The resulting Rectangle object (itself)
    */
 
   Rectangle.prototype.setFromVectors = function(position, size) {
-    position = (position !== void 0 ? position : new Engine.Geometry.Vector());
-    size = (size !== void 0 ? size : new Engine.Geometry.Vector());
+    position = (position !== void 0 ? position : new Geometry.Vector());
+    size = (size !== void 0 ? size : new Geometry.Vector());
     this.x = position.x;
     this.y = position.y;
     this.width = size.x;
@@ -3739,7 +3789,7 @@ c = Rectangle = (function(_super) {
   /*
   Copies the Rectangle object
   
-  @return {Engine.Geometry.Rectangle} A copy of the Rectangle object (which can be modified without changing the original object)
+  @return {Geometry.Rectangle} A copy of the Rectangle object (which can be modified without changing the original object)
    */
 
   Rectangle.prototype.copy = function() {
@@ -3752,7 +3802,7 @@ c = Rectangle = (function(_super) {
   
   @param {number} x The value to add to the x-coordinate (can be negative)
   @param {number} y The value to add to the y-coordinate (can be negative)
-  @return {Engine.Geometry.Rectangle} The resulting Rectangle object (itself)
+  @return {Geometry.Rectangle} The resulting Rectangle object (itself)
    */
 
   Rectangle.prototype.move = function(x, y) {
@@ -3773,7 +3823,7 @@ c = Rectangle = (function(_super) {
   
   @param {number} x The x-coordinate of the position to move the Rectangle to
   @param {number} y The y-coordinate of the position to move the Rectangle to
-  @return {Engine.Geometry.Rectangle} The resulting Rectangle object (itself)
+  @return {Geometry.Rectangle} The resulting Rectangle object (itself)
    */
 
   Rectangle.prototype.moveTo = function(x, y) {
@@ -3791,8 +3841,8 @@ c = Rectangle = (function(_super) {
 
   /*
   Calculates the overlapping area of the rectangle and another rectangle
-  @param  {Engine.Geometry.Rectangle} rectangle The rectangle to use for the operation
-  @return {Engine.Geometry.Rectangle|boolean} The overlapping rectangle, or false if there is no overlap
+  @param  {Geometry.Rectangle} rectangle The rectangle to use for the operation
+  @return {Geometry.Rectangle|boolean} The overlapping rectangle, or false if there is no overlap
    */
 
   Rectangle.prototype.getOverlap = function(rectangle) {
@@ -3806,7 +3856,7 @@ c = Rectangle = (function(_super) {
     y2 = this.y + this.height;
     rx2 = rectangle.x + rectangle.width;
     ry2 = rectangle.y + rectangle.height;
-    crop = new Engine.Geometry.Rectangle();
+    crop = new Geometry.Rectangle();
     crop.x = (rectangle.x > this.x ? rectangle.x : this.x);
     crop.y = (rectangle.y > this.y ? rectangle.y : this.y);
     x2 = (rx2 > x2 ? x2 : rx2);
@@ -3827,7 +3877,7 @@ c = Rectangle = (function(_super) {
   
   @param {number} scaleH A factor with which to scale the Rectangle horizontally. If scaleH is undefined, both width and height will be scaled after this factor
   @param {number} scaleV A factor with which to scale the Rectangle vertically
-  @return {Engine.Geometry.Rectangle} The resulting Rectangle object (itself)
+  @return {Geometry.Rectangle} The resulting Rectangle object (itself)
    */
 
   Rectangle.prototype.scale = function(scaleH, scaleV) {
@@ -3844,8 +3894,8 @@ c = Rectangle = (function(_super) {
   /*
   Calculates the bounding rectangle of the of the two rectangles
   
-  @param {Engine.Geometry.Rectangle} rectangle The rectangle to use for the calculation
-  @return {Engine.Geometry.Rectangle} The bounding rectangle for the two rectangles
+  @param {Geometry.Rectangle} rectangle The rectangle to use for the calculation
+  @return {Geometry.Rectangle} The bounding rectangle for the two rectangles
    */
 
   Rectangle.prototype.getBoundingRectangle = function(rectangle) {
@@ -3859,7 +3909,7 @@ c = Rectangle = (function(_super) {
     y2 = this.y + this.height;
     rx2 = rectangle.x + rectangle.width;
     ry2 = rectangle.y + rectangle.height;
-    crop = new Engine.Geometry.Rectangle();
+    crop = new Geometry.Rectangle();
     crop.x = (rectangle.x < this.x ? rectangle.x : this.x);
     crop.y = (rectangle.y < this.y ? rectangle.y : this.y);
     x2 = (rx2 < x2 ? x2 : rx2);
@@ -3873,22 +3923,22 @@ c = Rectangle = (function(_super) {
   /*
   Creates a polygon with the same points as the rectangle.
   
-  @return {Engine.Geometry.Polygon} The created Polygon object
+  @return {Geometry.Polygon} The created Polygon object
    */
 
   Rectangle.prototype.getPolygon = function() {
-    return new Engine.Geometry.Polygon(this.getPoints());
+    return new Geometry.Polygon(this.getPoints());
   };
 
 
   /*
   Fetches the Rectangles points.
   
-  @return {Engine.Geometry.Vector[]} Array of points, in the following order: top left corner, top right corner, bottom right corner, bottom left corner
+  @return {Geometry.Vector[]} Array of points, in the following order: top left corner, top right corner, bottom right corner, bottom left corner
    */
 
   Rectangle.prototype.getPoints = function() {
-    return [new Engine.Geometry.Vector(this.x, this.y), new Engine.Geometry.Vector(this.x + this.width, this.y), new Engine.Geometry.Vector(this.x + this.width, this.y + this.height), new Engine.Geometry.Vector(this.x, this.y + this.height)];
+    return [new Geometry.Vector(this.x, this.y), new Geometry.Vector(this.x + this.width, this.y), new Geometry.Vector(this.x + this.width, this.y + this.height), new Geometry.Vector(this.x, this.y + this.height)];
   };
 
 
@@ -3917,7 +3967,7 @@ c = Rectangle = (function(_super) {
   /*
   Calculates the shortest distance from the Rectangle object to another geometric object
   
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object The object to calculate the distance to
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object The object to calculate the distance to
   @return {number} The distance
    */
 
@@ -3929,18 +3979,18 @@ c = Rectangle = (function(_super) {
   /*
   Checks whether or not the Rectangle contains another geometric object.
   
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object A geometric object to check
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object A geometric object to check
   @return {boolean} True if the Rectangle contains the checked object, false if not
    */
 
   Rectangle.prototype.contains = function(object) {
     if (object instanceof this.constructor) {
-      return this.contains(new Engine.Geometry.Vector(object.x, object.y)) && this.contains(new Engine.Geometry.Vector(object.x + object.width, object.y + object.height));
+      return this.contains(new Geometry.Vector(object.x, object.y)) && this.contains(new Geometry.Vector(object.x + object.width, object.y + object.height));
     }
-    if (object instanceof Engine.Geometry.Line) {
+    if (object instanceof Geometry.Line) {
       return this.contains(object.a) && this.contains(object.b);
     }
-    if (object instanceof Engine.Geometry.Vector) {
+    if (object instanceof Geometry.Vector) {
       return object.x > this.x && object.x < this.x + this.width && object.y > this.y && object.y < this.y + this.height;
     }
     return this.getPolygon().contains(object);
@@ -3950,7 +4000,7 @@ c = Rectangle = (function(_super) {
   /*
   Checks whether or not the Rectangle intersects with another geometric object.
   
-  @param {Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object A geometric object to check
+  @param {Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object A geometric object to check
   @return {boolean} True if the Polygon intersects with the checked object, false if not
    */
 
@@ -3960,7 +4010,7 @@ c = Rectangle = (function(_super) {
 
   return Rectangle;
 
-})(Engine.Geometry.Vector);
+})(Geometry.Vector);
 
 module.exports.prototype = c.prototype;
 
@@ -3971,14 +4021,27 @@ for (name in c) {
 
 
 
-},{"../engine":1}],12:[function(require,module,exports){
-var Engine, Vector, c, name, value;
+},{"../helpers/mixin":14,"../mixins/animatable":19,"./circle":8,"./line":9,"./polygon":10,"./vector":12}],12:[function(require,module,exports){
+var Geometry, Helpers, Mixins, Vector, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Helpers = {
+  Mixin: require('../helpers/mixin')
+};
+
+Mixins = {
+  Animatable: require('../mixins/animatable')
+};
+
+Geometry = {
+  Circle: require('./circle'),
+  Line: require('./line'),
+  Polygon: require('./polygon'),
+  Rectangle: require('./rectangle')
+};
 
 
 /*
@@ -3995,6 +4058,8 @@ Constructor for the Vector class. Uses set-function to set the vector from x- an
  */
 
 c = Vector = (function() {
+  Helpers.Mixin.mixin(Vector, Mixins.Animatable);
+
   function Vector(x, y) {
     this.set(x, y);
     return;
@@ -4291,7 +4356,7 @@ for (name in c) {
 
 
 
-},{"../engine":1}],13:[function(require,module,exports){
+},{"../helpers/mixin":14,"../mixins/animatable":19,"./circle":8,"./line":9,"./polygon":10,"./rectangle":11}],13:[function(require,module,exports){
 var MatrixCalculationHelper;
 
 module.exports = MatrixCalculationHelper = {
@@ -4646,7 +4711,7 @@ module.exports = WebGLHelper = {
 var Keyboard, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
 
@@ -4801,7 +4866,7 @@ for (name in c) {
 var Engine, Pointer, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
 Engine = require('../engine');
@@ -5475,7 +5540,7 @@ for (name in c) {
 var Animatable, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
 c = Animatable = (function() {
@@ -5692,7 +5757,7 @@ for (name in c) {
 var CanvasRenderer, Engine, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
 Engine = require('../engine');
@@ -5920,7 +5985,7 @@ for (name in c) {
 var ColorShaderProgram, Engine, TextureShaderProgram, WebGLRenderer, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
 Engine = require('../engine');
@@ -6059,7 +6124,7 @@ for (name in c) {
 var Engine, WebGLColorShaderProgram, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
 Engine = require('../../engine');
@@ -6203,21 +6268,16 @@ for (name in c) {
 
 
 },{"../../engine":1}],23:[function(require,module,exports){
-var Engine, WebGLTextureShaderProgram, c, name, value;
+var Engine, WebGLTextureShaderProgram, c;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
 Engine = require('../../engine');
 
 c = WebGLTextureShaderProgram = (function() {
   function WebGLTextureShaderProgram(gl) {
-    var initBuffers, initShaders, locations, program;
-    initShaders = void 0;
-    initBuffers = void 0;
-    program = void 0;
-    locations = void 0;
     this.cache = {
       regularTextCoordBuffer: false,
       animatedTextCoordBuffer: false,
@@ -6363,18 +6423,13 @@ c = WebGLTextureShaderProgram = (function() {
 
 module.exports.prototype = c.prototype;
 
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
-
 
 
 },{"../../engine":1}],24:[function(require,module,exports){
 var Effect, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
 
@@ -6543,7 +6598,7 @@ for (name in c) {
 var Music, c, name, value;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
 
@@ -6644,13 +6699,17 @@ for (name in c) {
 
 
 },{}],26:[function(require,module,exports){
-var Child, Engine, c, name, value;
+var Child, Geometry, Room, c;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Room = require('../engine/room');
+
+Geometry = {
+  Vector: require('../geometry/vector')
+};
 
 
 /*
@@ -6676,7 +6735,7 @@ c = Child = (function() {
     this.widthScale = 1;
     this.heightScale = 1;
     hidden = {
-      offset: new Engine.Geometry.Vector()
+      offset: new Geometry.Vector()
     };
     Object.defineProperty(this, "offset", {
       get: function() {
@@ -6849,7 +6908,7 @@ c = Child = (function() {
    */
 
   Child.prototype.parseOffsetGlobal = function(offset) {
-    return new Engine.Geometry.Vector();
+    return new Geometry.Vector();
   };
 
 
@@ -6887,12 +6946,8 @@ c = Child = (function() {
 
   Child.prototype.getRoomPosition = function() {
     var i, parent, parents, pos;
-    pos = void 0;
-    parents = void 0;
-    parent = void 0;
-    i = void 0;
     parents = this.getParents();
-    if (parents.length && parents[parents.length - 1] instanceof Engine.Room) {
+    if (parents.length && parents[parents.length - 1] instanceof Room) {
       pos = new Vector(this.x, this.y);
       i = 0;
       while (i < parents.length) {
@@ -6936,14 +6991,12 @@ c = Child = (function() {
 
   Child.prototype.getRoom = function() {
     var ancestor, parents;
-    parents = void 0;
-    ancestor = void 0;
     parents = this.getParents();
     if (parents.length === 0) {
       return false;
     }
     ancestor = parents[parents.length - 1];
-    if (ancestor instanceof Engine.Room) {
+    if (ancestor instanceof Room) {
       return ancestor;
     } else {
       return false;
@@ -7001,23 +7054,29 @@ c = Child = (function() {
 
 module.exports.prototype = c.prototype;
 
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
 
 
-
-},{"../engine":1}],27:[function(require,module,exports){
-var Circle, Engine, c, name, value,
+},{"../engine/room":7,"../geometry/vector":12}],27:[function(require,module,exports){
+var Circle, Geometry, Helpers, Views, c, name, value,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Helpers = {
+  Mixin: require('../helpers/mixin')
+};
+
+Geometry = {
+  Circle: require('../geometry/circle'),
+  Rectangle: require('../geometry/rectangle')
+};
+
+Views = {
+  Child: require('./child')
+};
 
 
 /*
@@ -7046,7 +7105,7 @@ Constructor for Circle class, uses the set function, to set the properties of th
 c = Circle = (function(_super) {
   __extends(Circle, _super);
 
-  Engine.Helpers.Mixin.mixin(Circle, Engine.Views.Child);
+  Helpers.Mixin.mixin(Circle, Views.Child);
 
   function Circle(x, y, radius, fillStyle, strokeStyle, lineWidth) {
     if (fillStyle == null) {
@@ -7058,7 +7117,7 @@ c = Circle = (function(_super) {
     if (lineWidth == null) {
       lineWidth = 0;
     }
-    Engine.Views.Child.prototype.constructor.call(this);
+    Views.Child.prototype.constructor.call(this);
     this.renderType = "circle";
     if (engine.enableRedrawRegions) {
       this.CircleInitWithRedrawRegions(x, y, radius, fillStyle, strokeStyle, lineWidth);
@@ -7143,13 +7202,13 @@ c = Circle = (function(_super) {
     rect = void 0;
     ln = void 0;
     ln = Math.ceil(this.lineWidth / 2);
-    rect = new Engine.Geometry.Rectangle(Math.floor(this.x - (this.radius + ln + 5)), Math.floor(this.y - (this.radius + ln + 5)), Math.ceil((this.radius + ln + 5) * 2), Math.ceil((this.radius + ln + 5) * 2));
+    rect = new Geometry.Rectangle(Math.floor(this.x - (this.radius + ln + 5)), Math.floor(this.y - (this.radius + ln + 5)), Math.ceil((this.radius + ln + 5) * 2), Math.ceil((this.radius + ln + 5) * 2));
     return rect.add(this.parent.getRoomPosition());
   };
 
   return Circle;
 
-})(Engine.Geometry.Circle);
+})(Geometry.Circle);
 
 module.exports.prototype = c.prototype;
 
@@ -7160,16 +7219,26 @@ for (name in c) {
 
 
 
-},{"../engine":1}],28:[function(require,module,exports){
-var Collidable, Engine, c, name, value,
+},{"../geometry/circle":8,"../geometry/rectangle":11,"../helpers/mixin":14,"./child":26}],28:[function(require,module,exports){
+var Collidable, Geometry, Helpers, Views, c, name, value,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Views = {
+  Sprite: require('./sprite')
+};
+
+Helpers = {
+  MatrixCalculation: require('../helpers/matrix-calculation')
+};
+
+Geometry = {
+  Vector: require('../geometry/vector')
+};
 
 
 /*
@@ -7267,7 +7336,7 @@ c = Collidable = (function(_super) {
             i++;
           }
           if (ret.positions.length) {
-            ret.combinedPosition = new Engine.Geometry.Vector();
+            ret.combinedPosition = new Geometry.Vector();
             ret.combinedPosition.pixelCount = 0;
             ret.positions.forEach(function(p) {
               ret.combinedPosition.add(p.scale(p.pixelCount));
@@ -7433,7 +7502,7 @@ c = Collidable = (function(_super) {
       avY -= this.offset.y;
       avX /= this.size * this.widthScale;
       avY /= this.size * this.heightScale;
-      retVector = new Engine.Geometry.Vector(avX, avY);
+      retVector = new Geometry.Vector(avX, avY);
       retVector.rotate(this.direction);
       retVector.pixelCount = pxArr.length;
       return retVector;
@@ -7444,7 +7513,7 @@ c = Collidable = (function(_super) {
   Collidable.prototype.createCollisionBitmap = function(objects) {
     var calc, canvas, i, ii, lm, mask, obj, offset, parents, wm;
     mask = this.mask;
-    calc = Engine.Helpers.MatrixCalculation;
+    calc = Helpers.MatrixCalculation;
     canvas = document.createElement("canvas");
     canvas.width = Math.ceil(this.clipWidth);
     canvas.height = Math.ceil(this.clipHeight);
@@ -7494,7 +7563,7 @@ c = Collidable = (function(_super) {
 
   return Collidable;
 
-})(Engine.Views.Sprite);
+})(Views.Sprite);
 
 module.exports.prototype = c.prototype;
 
@@ -7505,17 +7574,21 @@ for (name in c) {
 
 
 
-},{"../engine":1}],29:[function(require,module,exports){
-var Container, Engine, c, name, value,
+},{"../geometry/vector":12,"../helpers/matrix-calculation":13,"./sprite":34}],29:[function(require,module,exports){
+var Container, ObjectCreator, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __slice = [].slice;
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+ObjectCreator = require('../engine/object-creator');
+
+Views = {
+  Child: require('./child')
+};
 
 
 /*
@@ -7541,11 +7614,11 @@ c = Container = (function(_super) {
   function Container() {
     var children;
     children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    this.children = [];
+    Container.prototype.prototype = Views.Child.prototype;
     Container.__super__.constructor.call(this);
-    this.parent = void 0;
+    this.children = [];
     this.addChildren.apply(this, children);
-    this.create = new Engine.ObjectCreator(this);
+    this.create = new ObjectCreator(this);
     return;
   }
 
@@ -7566,7 +7639,7 @@ c = Container = (function(_super) {
     i = 0;
     while (i < arguments.length) {
       child = arguments[i];
-      if (!child instanceof Engine.Views.Child) {
+      if (!child instanceof Views.Child) {
         throw new Error("Argument child has to be of type: Child");
       }
       if (child.parent) {
@@ -7613,7 +7686,7 @@ c = Container = (function(_super) {
     i = 0;
     while (i < insertChildren.length) {
       child = insertChildren[i];
-      if (!child instanceof Engine.Views.Child) {
+      if (!child instanceof Views.Child) {
         throw new Error("Argument child has to be of type: Child");
       }
       if (child.parent) {
@@ -7869,27 +7942,28 @@ c = Container = (function(_super) {
 
   return Container;
 
-})(Engine.Views.Child);
+})(Views.Child);
 
 module.exports.prototype = c.prototype;
 
-for (name in c) {
-  value = c[name];
-  module.exports[name] = value;
-}
 
 
-
-},{"../engine":1}],30:[function(require,module,exports){
-var Engine, GameObject, c, name, value,
+},{"../engine/object-creator":6,"./child":26}],30:[function(require,module,exports){
+var GameObject, Geometry, Views, c, name, value,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Views = {
+  Collidable: require('./collidable')
+};
+
+Geometry = {
+  Vector: require('../geometry/vector')
+};
 
 
 /*
@@ -7940,7 +8014,7 @@ c = GameObject = (function(_super) {
     GameObject.__super__.constructor.call(this, source, x, y, direction, additionalProperties);
     this.loop = (this.loop ? this.loop : engine.defaultActivityLoop);
     this.loop.attachFunction(this, this.updatePosition);
-    this.speed = (this.speed ? this.speed : new Engine.Geometry.Vector(0, 0));
+    this.speed = (this.speed ? this.speed : new Geometry.Vector(0, 0));
     this.alive = true;
     return;
   }
@@ -7961,7 +8035,7 @@ c = GameObject = (function(_super) {
 
   return GameObject;
 
-})(Engine.Views.Collidable);
+})(Views.Collidable);
 
 module.exports.prototype = c.prototype;
 
@@ -7972,16 +8046,27 @@ for (name in c) {
 
 
 
-},{"../engine":1}],31:[function(require,module,exports){
-var Engine, Line, c, name, value,
+},{"../geometry/vector":12,"./collidable":28}],31:[function(require,module,exports){
+var Geometry, Helpers, Line, Views, c, name, value,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Helpers = {
+  Mixin: require('../helpers/mixin')
+};
+
+Geometry = {
+  Vector: require('../geometry/vector'),
+  Line: require('../geometry/line')
+};
+
+Views = {
+  Child: require('./child')
+};
 
 
 /*
@@ -8008,10 +8093,10 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 c = Line = (function(_super) {
   __extends(Line, _super);
 
-  Engine.Helpers.Mixin.mixin(Line, Engine.Views.Child);
+  Helpers.Mixin.mixin(Line, Views.Child);
 
   function Line(startVector, endVector, strokeStyle, lineWidth, lineCap) {
-    Engine.Views.Child.prototype.constructor.call(this);
+    Views.Child.prototype.constructor.call(this);
     this.renderType = "line";
     if (engine.enableRedrawRegions) {
       this.LineInitWithRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
@@ -8025,7 +8110,7 @@ c = Line = (function(_super) {
     this.strokeStyle = strokeStyle || "#000";
     this.lineWidth = lineWidth || 1;
     this.lineCap = lineCap || "butt";
-    this.setFromVectors(startVector || new Engine.Geometry.Vector(), endVector || new Engine.Geometry.Vector());
+    this.setFromVectors(startVector || new Geometry.Vector(), endVector || new Geometry.Vector());
   };
 
   Line.prototype.LineInitWithRedrawRegions = function(startVector, endVector, strokeStyle, lineWidth, lineCap) {
@@ -8148,7 +8233,7 @@ c = Line = (function(_super) {
         }
       }
     });
-    this.setFromVectors(startVector || new Engine.Geometry.Vector(), endVector || new Engine.Geometry.Vector());
+    this.setFromVectors(startVector || new Geometry.Vector(), endVector || new Geometry.Vector());
   };
 
 
@@ -8190,12 +8275,12 @@ c = Line = (function(_super) {
    */
 
   Line.prototype.isVisible = function() {
-    return Engine.Views.Child.prototype.isVisible.call(this) && (this.a.x !== this.b.x || this.a.y !== this.b.y);
+    return Views.Child.prototype.isVisible.call(this) && (this.a.x !== this.b.x || this.a.y !== this.b.y);
   };
 
   return Line;
 
-})(Engine.Geometry.Line);
+})(Geometry.Line);
 
 module.exports.prototype = c.prototype;
 
@@ -8206,16 +8291,26 @@ for (name in c) {
 
 
 
-},{"../engine":1}],32:[function(require,module,exports){
-var Engine, Polygon, c, name, value,
+},{"../geometry/line":9,"../geometry/vector":12,"../helpers/mixin":14,"./child":26}],32:[function(require,module,exports){
+var Geometry, Helpers, Polygon, Views, c, name, value,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Helpers = {
+  Mixin: require('../helpers/mixin')
+};
+
+Geometry = {
+  Polygon: require('../geometry/polygon')
+};
+
+Views = {
+  Child: require('./child')
+};
 
 
 /*
@@ -8240,13 +8335,13 @@ The constructor for the Polygon class. Uses the setFromPoints-function to set th
 c = Polygon = (function(_super) {
   __extends(Polygon, _super);
 
-  Engine.Helpers.Mixin.mixin(Polygon, Engine.Views.Child);
+  Helpers.Mixin.mixin(Polygon, Views.Child);
 
   function Polygon(points, fillStyle, strokeStyle, lineWidth) {
     this.fillStyle = fillStyle != null ? fillStyle : '#000';
     this.strokeStyle = strokeStyle != null ? strokeStyle : "#000";
     this.lineWidth = lineWidth != null ? lineWidth : 0;
-    Engine.Views.Child.prototype.constructor.call(this);
+    Views.Child.prototype.constructor.call(this);
     this.renderType = "polygon";
     this.setFromPoints(points);
     this.opacity = 1;
@@ -8277,7 +8372,7 @@ c = Polygon = (function(_super) {
 
   return Polygon;
 
-})(Engine.Geometry.Polygon);
+})(Geometry.Polygon);
 
 module.exports.prototype = c.prototype;
 
@@ -8288,16 +8383,26 @@ for (name in c) {
 
 
 
-},{"../engine":1}],33:[function(require,module,exports){
-var Engine, Rectangle, c, name, value,
+},{"../geometry/polygon":10,"../helpers/mixin":14,"./child":26}],33:[function(require,module,exports){
+var Geometry, Helpers, Rectangle, Views, c, name, value,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Helpers = {
+  Mixin: require('../helpers/mixin')
+};
+
+Geometry = {
+  Rectangle: require('../geometry/rectangle')
+};
+
+Views = {
+  Child: require('./child')
+};
 
 
 /*
@@ -8328,7 +8433,7 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 c = Rectangle = (function(_super) {
   __extends(Rectangle, _super);
 
-  Engine.Helpers.Mixin.mixin(Rectangle, Engine.Views.Child);
+  Helpers.Mixin.mixin(Rectangle, Views.Child);
 
   function Rectangle(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
     if (width == null) {
@@ -8346,7 +8451,7 @@ c = Rectangle = (function(_super) {
     if (lineWidth == null) {
       lineWidth = 0;
     }
-    Engine.Views.Child.prototype.constructor.call(this);
+    Views.Child.prototype.constructor.call(this);
     this.renderType = "rectangle";
     if (engine.enableRedrawRegions) {
       this.RectangleInitWithRedrawRegions(x, y, width, height, fillStyle, strokeStyle, lineWidth);
@@ -8508,7 +8613,7 @@ c = Rectangle = (function(_super) {
 
   return Rectangle;
 
-})(Engine.Geometry.Rectangle);
+})(Geometry.Rectangle);
 
 module.exports.prototype = c.prototype;
 
@@ -8519,16 +8624,33 @@ for (name in c) {
 
 
 
-},{"../engine":1}],34:[function(require,module,exports){
-var Engine, Sprite, c, name, value,
+},{"../geometry/rectangle":11,"../helpers/mixin":14,"./child":26}],34:[function(require,module,exports){
+var Geometry, Globals, Helpers, Mixins, Sprite, Views, c, name, value,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Helpers = {
+  Mixin: require('../helpers/mixin')
+};
+
+Mixins = {
+  Animatable: require('../mixins/animatable')
+};
+
+Geometry = {
+  Vector: require('../geometry/vector'),
+  Rectangle: require('../geometry/rectangle')
+};
+
+Views = {
+  Container: require('./container')
+};
+
+Globals = require('../engine/globals');
 
 
 /*
@@ -8569,7 +8691,7 @@ offset: new Math.Vector('center', 'center')
 c = Sprite = (function(_super) {
   __extends(Sprite, _super);
 
-  Engine.Helpers.Mixin.mixin(Sprite, Engine.Mixins.Animatable);
+  Helpers.Mixin.mixin(Sprite, Mixins.Animatable);
 
   function Sprite(source, x, y, direction, additionalProperties) {
     var offset;
@@ -8611,12 +8733,12 @@ c = Sprite = (function(_super) {
         return value;
       }
     });
-    offset = Engine.Globals.OFFSET_MIDDLE_CENTER;
+    offset = Globals.OFFSET_MIDDLE_CENTER;
     if (additionalProperties && additionalProperties.offset) {
       offset = additionalProperties.offset;
       delete additionalProperties.offset;
     }
-    Engine.Helpers.Mixin["import"](this, additionalProperties);
+    Helpers.Mixin["import"](this, additionalProperties);
     if (!this.refreshSource()) {
       throw new Error("Sprite source was not successfully loaded: " + source);
     }
@@ -8638,22 +8760,22 @@ c = Sprite = (function(_super) {
 
   Sprite.prototype.parseOffsetGlobal = function(offset) {
     var ret;
-    ret = new Engine.Geometry.Vector();
-    if ([Engine.Globals.OFFSET_TOP_LEFT, Engine.Globals.OFFSET_MIDDLE_LEFT, Engine.Globals.OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
+    ret = new Geometry.Vector();
+    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
       ret.x = 0;
-    } else if ([Engine.Globals.OFFSET_TOP_CENTER, Engine.Globals.OFFSET_MIDDLE_CENTER, Engine.Globals.OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
+    } else if ([Globals.OFFSET_TOP_CENTER, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
       ret.x = this.bm.width / this.imageLength / 2;
     } else {
-      if ([Engine.Globals.OFFSET_TOP_RIGHT, Engine.Globals.OFFSET_MIDDLE_RIGHT, Engine.Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+      if ([Globals.OFFSET_TOP_RIGHT, Globals.OFFSET_MIDDLE_RIGHT, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
         ret.x = this.bm.width / this.imageLength;
       }
     }
-    if ([Engine.Globals.OFFSET_TOP_LEFT, Engine.Globals.OFFSET_TOP_CENTER, Engine.Globals.OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
+    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_TOP_CENTER, Globals.OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
       ret.y = 0;
-    } else if ([Engine.Globals.OFFSET_MIDDLE_LEFT, Engine.Globals.OFFSET_MIDDLE_CENTER, Engine.Globals.OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
+    } else if ([Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
       ret.y = this.bm.height / 2;
     } else {
-      if ([Engine.Globals.OFFSET_BOTTOM_LEFT, Engine.Globals.OFFSET_BOTTOM_CENTER, Engine.Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+      if ([Globals.OFFSET_BOTTOM_LEFT, Globals.OFFSET_BOTTOM_CENTER, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
         ret.y = this.bm.height;
       }
     }
@@ -8746,7 +8868,7 @@ c = Sprite = (function(_super) {
     parents = void 0;
     parent = void 0;
     i = void 0;
-    box = new Engine.Geometry.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight).getPolygon();
+    box = new Geometry.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight).getPolygon();
     parents = this.getParents();
     parents.unshift(this);
     i = 0;
@@ -8767,7 +8889,7 @@ c = Sprite = (function(_super) {
 
   return Sprite;
 
-})(Engine.Views.Container);
+})(Views.Container);
 
 module.exports.prototype = c.prototype;
 
@@ -8778,21 +8900,37 @@ for (name in c) {
 
 
 
-},{"../engine":1}],35:[function(require,module,exports){
-var Engine, TextBlock, c, name, value,
+},{"../engine/globals":4,"../geometry/rectangle":11,"../geometry/vector":12,"../helpers/mixin":14,"../mixins/animatable":19,"./container":29}],35:[function(require,module,exports){
+var Geometry, Globals, Helpers, Mixins, TextBlock, Views, c, name, value,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 module.exports = function() {
-  return this.constructor.apply(this, arguments);
+  return c.apply(this, arguments);
 };
 
-Engine = require('../engine');
+Helpers = {
+  Mixin: require('../helpers/mixin')
+};
+
+Mixins = {
+  Animatable: require('../mixins/animatable')
+};
+
+Geometry = {
+  Vector: require('../geometry/vector')
+};
+
+Views = {
+  Container: require('./container')
+};
+
+Globals = require('../engine/globals');
 
 c = TextBlock = (function(_super) {
   __extends(TextBlock, _super);
 
-  Engine.Helpers.Mixin.mixin(TextBlock, Engine.Mixins.Animatable);
+  Helpers.Mixin.mixin(TextBlock, Mixins.Animatable);
 
 
   /*
@@ -8957,12 +9095,12 @@ c = TextBlock = (function(_super) {
       }
     });
     this.lineHeight = (additionalProperties && additionalProperties.lineHeight ? additionalProperties.lineHeight : this.font.match(/[0.0-9]+/) * 1.25);
-    offset = Engine.Globals.OFFSET_TOP_LEFT;
+    offset = Globals.OFFSET_TOP_LEFT;
     if (additionalProperties && additionalProperties.offset) {
       offset = additionalProperties.offset;
       delete additionalProperties.offset;
     }
-    Engine.Helpers.Mixin["import"](this, additionalProperties);
+    Helpers.Mixin["import"](this, additionalProperties);
     this.string = string;
     this.offset = offset;
     if (engine.avoidSubPixelRendering) {
@@ -8982,22 +9120,22 @@ c = TextBlock = (function(_super) {
 
   TextBlock.prototype.parseOffsetGlobal = function(offset) {
     var ret;
-    ret = new Engine.Geometry.Vector();
-    if ([Engine.Globals.OFFSET_TOP_LEFT, Engine.Globals.OFFSET_MIDDLE_LEFT, Engine.Globals.OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
+    ret = new Geometry.Vector();
+    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
       ret.x = 0;
-    } else if ([Engine.Globals.OFFSET_TOP_CENTER, Engine.Globals.OFFSET_MIDDLE_CENTER, Engine.Globals.OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
+    } else if ([Globals.OFFSET_TOP_CENTER, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
       ret.x = this.clipWidth / 2;
     } else {
-      if ([Engine.Globals.OFFSET_TOP_RIGHT, Engine.Globals.OFFSET_MIDDLE_RIGHT, Engine.Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+      if ([Globals.OFFSET_TOP_RIGHT, Globals.OFFSET_MIDDLE_RIGHT, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
         ret.x = this.clipWidth;
       }
     }
-    if ([Engine.Globals.OFFSET_TOP_LEFT, Engine.Globals.OFFSET_TOP_CENTER, Engine.Globals.OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
+    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_TOP_CENTER, Globals.OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
       ret.y = 0;
-    } else if ([Engine.Globals.OFFSET_MIDDLE_LEFT, Engine.Globals.OFFSET_MIDDLE_CENTER, Engine.Globals.OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
+    } else if ([Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
       ret.y = this.clipHeight / 2;
     } else {
-      if ([Engine.Globals.OFFSET_BOTTOM_LEFT, Engine.Globals.OFFSET_BOTTOM_CENTER, Engine.Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
+      if ([Globals.OFFSET_BOTTOM_LEFT, Globals.OFFSET_BOTTOM_CENTER, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
         ret.y = this.clipHeight;
       }
     }
@@ -9147,7 +9285,7 @@ c = TextBlock = (function(_super) {
 
   return TextBlock;
 
-})(Engine.Views.Container);
+})(Views.Container);
 
 module.exports.prototype = c.prototype;
 
@@ -9158,4 +9296,4 @@ for (name in c) {
 
 
 
-},{"../engine":1}]},{},[1]);
+},{"../engine/globals":4,"../geometry/vector":12,"../helpers/mixin":14,"../mixins/animatable":19,"./container":29}]},{},[1]);

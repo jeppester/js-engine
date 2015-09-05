@@ -1,6 +1,9 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+ObjectCreator = require '../engine/object-creator'
+
+Views =
+  Child: require './child'
 
 ###
 Constructor for the View class.
@@ -18,11 +21,11 @@ All objects which are drawn on the game's canvas extends the View-class.
 @param {Child} child2 An other child to add to the view upon creation
 @param {Child} child3 A third ...
 ###
-c = class Container extends Engine.Views.Child
+c = class Container extends Views.Child
   constructor: (children...) ->
-    @children = []
+    Container:::: = Views.Child::
     super()
-    @parent = undefined
+    @children = []
 
     #this.drawCacheCanvas = document.createElement('canvas');
     #	this.drawCacheCtx = Helpers.getCanvasContext(this.drawCacheCanvas);
@@ -30,8 +33,8 @@ c = class Container extends Engine.Views.Child
     #	this.drawCacheOffset = new Math.Vector();
     @addChildren.apply this, children
 
-    # Make an objectcreator for this object
-    @create = new Engine.ObjectCreator(@)
+    # Make an object creator for this object
+    @create = new ObjectCreator(@)
     return
 
   ###
@@ -46,7 +49,7 @@ c = class Container extends Engine.Views.Child
     i = 0
     while i < arguments.length
       child = arguments[i]
-      throw new Error("Argument child has to be of type: Child") if not child instanceof Engine.Views.Child #dev
+      throw new Error("Argument child has to be of type: Child") if not child instanceof Views.Child #dev
 
       # If the child already has a parent, remove the child from that parent
       child.parent.removeChildren child if child.parent
@@ -86,7 +89,7 @@ c = class Container extends Engine.Views.Child
     i = 0
     while i < insertChildren.length
       child = insertChildren[i]
-      throw new Error("Argument child has to be of type: Child") if not child instanceof Engine.Views.Child #dev
+      throw new Error("Argument child has to be of type: Child") if not child instanceof Views.Child #dev
 
       # If the child already has a parent, remove the child from that parent
       child.parent.removeChildren child if child.parent
@@ -256,12 +259,8 @@ c = class Container extends Engine.Views.Child
       if @drawCanvas
         engine.drawCalls++ #dev
         @drawCanvas c
-        #dev
         @drawBoundingBox c if engine.drawBoundingBoxes and @drawBoundingBox #dev
-        #dev
-        #dev
         @drawMask c if engine.drawMasks and @drawMask #dev
-      #dev
 
       # Draw children
       len = @children.length
@@ -287,4 +286,5 @@ c = class Container extends Engine.Views.Child
   getRedrawRegion: undefined
 
 module.exports:: = c::
-module.exports[name] = value for name, value of c
+
+

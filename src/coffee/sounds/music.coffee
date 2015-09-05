@@ -1,4 +1,4 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
 ###
 Constructor for the Music class
@@ -61,4 +61,5 @@ c = class Music
     false
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

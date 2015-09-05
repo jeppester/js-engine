@@ -1,4 +1,4 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
 Engine = require '../engine'
 
@@ -512,4 +512,5 @@ c = class Pointer
     return
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

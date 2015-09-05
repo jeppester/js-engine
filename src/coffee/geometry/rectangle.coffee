@@ -1,11 +1,21 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+Helpers =
+  Mixin: require '../helpers/mixin'
+
+Mixins =
+  Animatable: require '../mixins/animatable'
+
+Geometry =
+  Circle: require './circle'
+  Line: require './line'
+  Polygon: require './polygon'
+  Vector: require './vector'
 
 ###
 The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
 
-@name Engine.Geometry.Rectangle
+@name Geometry.Rectangle
 @class A rectangle class which is used for handling non-rotated rectangles
 @augments Vector
 
@@ -19,9 +29,9 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} width The width of the rectangle
 @param {number} height The height of the rectangle
 ###
-c = class Rectangle extends Engine.Geometry.Vector
+c = class Rectangle extends Geometry.Vector
   # Mix in animatable
-  Engine.Helpers.Mixin.mixin @, Engine.Mixins.Animatable
+  Helpers.Mixin.mixin @, Mixins.Animatable
 
   constructor: (x, y, width, height, fillStyle, strokeStyle, lineWidth) ->
     @set x, y, width, height
@@ -33,7 +43,7 @@ c = class Rectangle extends Engine.Geometry.Vector
   @param {number} y The y-coordinate for the rectangle's top left corner
   @param {number} width The width of the rectangle
   @param {number} height The height of the rectangle
-  @return {Engine.Geometry.Rectangle} The resulting Rectangle object (itself)
+  @return {Geometry.Rectangle} The resulting Rectangle object (itself)
   ###
   set: (x, y, width, height) ->
     @x = (if x isnt undefined then x else 0)
@@ -45,13 +55,13 @@ c = class Rectangle extends Engine.Geometry.Vector
   ###
   Sets the properties of the rectangle from two vectors: one representing the position of the top left corner, another representing the width and height of the rectangle.
 
-  @param {Engine.Geometry.Vector} position A Vector representing the position of the top left corner to set for the Rectangle
-  @param {Engine.Geometry.Vector} size A Vector representing the size (width and height) to set for the Rectangle
-  @return {Engine.Geometry.Rectangle} The resulting Rectangle object (itself)
+  @param {Geometry.Vector} position A Vector representing the position of the top left corner to set for the Rectangle
+  @param {Geometry.Vector} size A Vector representing the size (width and height) to set for the Rectangle
+  @return {Geometry.Rectangle} The resulting Rectangle object (itself)
   ###
   setFromVectors: (position, size) ->
-    position = (if position isnt undefined then position else new Engine.Geometry.Vector())
-    size = (if size isnt undefined then size else new Engine.Geometry.Vector())
+    position = (if position isnt undefined then position else new Geometry.Vector())
+    size = (if size isnt undefined then size else new Geometry.Vector())
     @x = position.x
     @y = position.y
     @width = size.x
@@ -61,7 +71,7 @@ c = class Rectangle extends Engine.Geometry.Vector
   ###
   Copies the Rectangle object
 
-  @return {Engine.Geometry.Rectangle} A copy of the Rectangle object (which can be modified without changing the original object)
+  @return {Geometry.Rectangle} A copy of the Rectangle object (which can be modified without changing the original object)
   ###
   copy: ->
     new @constructor(@x, @y, @width, @height)
@@ -71,7 +81,7 @@ c = class Rectangle extends Engine.Geometry.Vector
 
   @param {number} x The value to add to the x-coordinate (can be negative)
   @param {number} y The value to add to the y-coordinate (can be negative)
-  @return {Engine.Geometry.Rectangle} The resulting Rectangle object (itself)
+  @return {Geometry.Rectangle} The resulting Rectangle object (itself)
   ###
   move: (x, y) ->
     throw new Error("Argument x should be of type: Number") if typeof x isnt "number" #dev
@@ -85,7 +95,7 @@ c = class Rectangle extends Engine.Geometry.Vector
 
   @param {number} x The x-coordinate of the position to move the Rectangle to
   @param {number} y The y-coordinate of the position to move the Rectangle to
-  @return {Engine.Geometry.Rectangle} The resulting Rectangle object (itself)
+  @return {Geometry.Rectangle} The resulting Rectangle object (itself)
   ###
   moveTo: (x, y) ->
     throw new Error("Argument x should be of type: Number") if typeof x isnt "number" #dev
@@ -96,8 +106,8 @@ c = class Rectangle extends Engine.Geometry.Vector
 
   ###
   Calculates the overlapping area of the rectangle and another rectangle
-  @param  {Engine.Geometry.Rectangle} rectangle The rectangle to use for the operation
-  @return {Engine.Geometry.Rectangle|boolean} The overlapping rectangle, or false if there is no overlap
+  @param  {Geometry.Rectangle} rectangle The rectangle to use for the operation
+  @return {Geometry.Rectangle|boolean} The overlapping rectangle, or false if there is no overlap
   ###
   getOverlap: (rectangle) ->
     x2 = undefined
@@ -109,7 +119,7 @@ c = class Rectangle extends Engine.Geometry.Vector
     y2 = @y + @height
     rx2 = rectangle.x + rectangle.width
     ry2 = rectangle.y + rectangle.height
-    crop = new Engine.Geometry.Rectangle()
+    crop = new Geometry.Rectangle()
     crop.x = (if rectangle.x > @x then rectangle.x else @x)
     crop.y = (if rectangle.y > @y then rectangle.y else @y)
     x2 = (if rx2 > x2 then x2 else rx2)
@@ -124,7 +134,7 @@ c = class Rectangle extends Engine.Geometry.Vector
 
   @param {number} scaleH A factor with which to scale the Rectangle horizontally. If scaleH is undefined, both width and height will be scaled after this factor
   @param {number} scaleV A factor with which to scale the Rectangle vertically
-  @return {Engine.Geometry.Rectangle} The resulting Rectangle object (itself)
+  @return {Geometry.Rectangle} The resulting Rectangle object (itself)
   ###
   scale: (scaleH, scaleV) ->
     throw new Error("Argument scaleH should be of type Number") if typeof scaleH isnt "number" #dev
@@ -136,8 +146,8 @@ c = class Rectangle extends Engine.Geometry.Vector
   ###
   Calculates the bounding rectangle of the of the two rectangles
 
-  @param {Engine.Geometry.Rectangle} rectangle The rectangle to use for the calculation
-  @return {Engine.Geometry.Rectangle} The bounding rectangle for the two rectangles
+  @param {Geometry.Rectangle} rectangle The rectangle to use for the calculation
+  @return {Geometry.Rectangle} The bounding rectangle for the two rectangles
   ###
   getBoundingRectangle: (rectangle) ->
     x2 = undefined
@@ -149,7 +159,7 @@ c = class Rectangle extends Engine.Geometry.Vector
     y2 = @y + @height
     rx2 = rectangle.x + rectangle.width
     ry2 = rectangle.y + rectangle.height
-    crop = new Engine.Geometry.Rectangle()
+    crop = new Geometry.Rectangle()
     crop.x = (if rectangle.x < @x then rectangle.x else @x)
     crop.y = (if rectangle.y < @y then rectangle.y else @y)
     x2 = (if rx2 < x2 then x2 else rx2)
@@ -161,22 +171,22 @@ c = class Rectangle extends Engine.Geometry.Vector
   ###
   Creates a polygon with the same points as the rectangle.
 
-  @return {Engine.Geometry.Polygon} The created Polygon object
+  @return {Geometry.Polygon} The created Polygon object
   ###
   getPolygon: ->
-    new Engine.Geometry.Polygon(@getPoints())
+    new Geometry.Polygon(@getPoints())
 
   ###
   Fetches the Rectangles points.
 
-  @return {Engine.Geometry.Vector[]} Array of points, in the following order: top left corner, top right corner, bottom right corner, bottom left corner
+  @return {Geometry.Vector[]} Array of points, in the following order: top left corner, top right corner, bottom right corner, bottom left corner
   ###
   getPoints: ->
     [
-      new Engine.Geometry.Vector(@x, @y)
-      new Engine.Geometry.Vector(@x + @width, @y)
-      new Engine.Geometry.Vector(@x + @width, @y + @height)
-      new Engine.Geometry.Vector(@x, @y + @height)
+      new Geometry.Vector(@x, @y)
+      new Geometry.Vector(@x + @width, @y)
+      new Geometry.Vector(@x + @width, @y + @height)
+      new Geometry.Vector(@x, @y + @height)
     ]
 
   ###
@@ -198,7 +208,7 @@ c = class Rectangle extends Engine.Geometry.Vector
   ###
   Calculates the shortest distance from the Rectangle object to another geometric object
 
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object The object to calculate the distance to
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object The object to calculate the distance to
   @return {number} The distance
   ###
   getDistance: (object) ->
@@ -207,25 +217,26 @@ c = class Rectangle extends Engine.Geometry.Vector
   ###
   Checks whether or not the Rectangle contains another geometric object.
 
-  @param {Engine.Geometry.Vector|Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object A geometric object to check
+  @param {Geometry.Vector|Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object A geometric object to check
   @return {boolean} True if the Rectangle contains the checked object, false if not
   ###
   contains: (object) ->
 
     # If checked object is a vector, line or rectangle, do fast calculation otherwise convert to polygon and do calculation
-    return @contains(new Engine.Geometry.Vector(object.x, object.y)) and @contains(new Engine.Geometry.Vector(object.x + object.width, object.y + object.height)) if object instanceof @constructor
-    return @contains(object.a) and @contains(object.b) if object instanceof Engine.Geometry.Line
-    return (object.x > @x and object.x < @x + @width and object.y > @y and object.y < @y + @height) if object instanceof Engine.Geometry.Vector
+    return @contains(new Geometry.Vector(object.x, object.y)) and @contains(new Geometry.Vector(object.x + object.width, object.y + object.height)) if object instanceof @constructor
+    return @contains(object.a) and @contains(object.b) if object instanceof Geometry.Line
+    return (object.x > @x and object.x < @x + @width and object.y > @y and object.y < @y + @height) if object instanceof Geometry.Vector
     @getPolygon().contains object
 
   ###
   Checks whether or not the Rectangle intersects with another geometric object.
 
-  @param {Engine.Geometry.Line|Engine.Geometry.Circle|Engine.Geometry.Rectangle|Engine.Geometry.Polygon} object A geometric object to check
+  @param {Geometry.Line|Geometry.Circle|Geometry.Rectangle|Geometry.Polygon} object A geometric object to check
   @return {boolean} True if the Polygon intersects with the checked object, false if not
   ###
   intersects: (object) ->
     @getPolygon().intersects object
 
 module.exports:: = c::
+
 module.exports[name] = value for name, value of c

@@ -1,11 +1,14 @@
-module.exports = -> @constructor.apply @, arguments
+module.exports = -> c.apply @, arguments
 
-Engine = require '../engine'
+CustomLoop = require './custom-loop'
+
+Views =
+  Container: require '../views/container'
 
 ###
 Constructor for the Room class
 
-@name Engine.Room
+@name Room
 @class A room is the space wherein game objects reside.
 A room holds a list of objects to draw, and a list of custom loops.
 If a room is set as the engine's current room (engine.currentRoom); its objects will be drawn, and its custom loops will be executed each time the engine's main loop executes.
@@ -21,7 +24,7 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 @param {function} [onEntered=function () {}] A function to run when the room is entered (set as the engine's current room)
 @param {function} [onLeft=function () {}] A function to run when the room is left
 ###
-c = class Room extends Engine.Views.Container
+c = class Room extends Views.Container
   constructor: (name, onEntered, onLeft)->
     super()
     @name = (if name then name else engine.roomList.length)
@@ -29,7 +32,7 @@ c = class Room extends Engine.Views.Container
     @onLeft = (if onLeft isnt undefined then onLeft else ->)
     @loops = {}
     @paused = false
-    @addLoop "eachFrame", new Engine.CustomLoop()
+    @addLoop "eachFrame", new CustomLoop()
     engine.addRoom this
     return
 
@@ -63,7 +66,7 @@ c = class Room extends Engine.Views.Container
   After being added, the loop will be executed in each frame.
 
   @param {string} name The name the use for the custom loop in the room. When added the loop can be accessed with: [The room].loops[name]
-  @param {Engine.CustomLoop} loop The loop to add
+  @param {CustomLoop} loop The loop to add
   ###
   addLoop: (name, loop_)->
     throw new Error("Missing argument: loop") if loop_ is undefined #dev
@@ -90,4 +93,5 @@ c = class Room extends Engine.Views.Container
   remove: undefined
 
 module.exports:: = c::
-module.exports[name] = value for name, value of c
+
+
