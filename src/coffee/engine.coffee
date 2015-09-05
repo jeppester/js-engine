@@ -77,13 +77,6 @@ module.exports = window.Engine = class Engine
   @private
   ###
   load: ->
-
-    # Define all used vars
-    copyOpt = undefined
-    audioFormats = undefined
-    i = undefined
-    opt = undefined
-
     # Detect host information
     @host =
       hasTouch: "ontouchstart" of document
@@ -235,8 +228,6 @@ module.exports = window.Engine = class Engine
   @private
   ###
   initialize: ->
-    objectName = undefined
-
     # Make array for containing references to all game objects
     @objectIndex = {}
 
@@ -352,10 +343,6 @@ module.exports = window.Engine = class Engine
     if this isnt engine
       engine.autoResizeCanvas()
       return
-    h = undefined
-    w = undefined
-    windowWH = undefined
-    gameWH = undefined
 
     # Check if the window is wider og higher than the game's canvas
     windowWH = window.innerWidth / window.innerHeight
@@ -456,7 +443,6 @@ module.exports = window.Engine = class Engine
   ###
   removeRoom: (room) ->
     throw new Error("Missing argument: room") if room is undefined #dev
-    index = undefined
 
     # If a string has been specified, find the room by name
     if typeof room is "string"
@@ -551,7 +537,6 @@ module.exports = window.Engine = class Engine
   ###
   mainLoop: ->
     return unless @running
-    drawTime = undefined
 
     # Get the current time (for calculating movement based on the precise time change)
     @last = @now
@@ -649,9 +634,6 @@ module.exports = window.Engine = class Engine
   @param {string|string[]} filePaths A file path (string), or an array of file paths to load and execute as JavaScript
   ###
   loadFiles: (filePaths) ->
-    i = undefined
-    req = undefined
-    script = undefined
     filePaths = [filePaths] if typeof filePaths is "string"
 
     # Load first file
@@ -741,8 +723,6 @@ module.exports = window.Engine = class Engine
   Downloads a screen dump of the main canvas. Very usable for creating game screenshots directly from browser consoles.
   ###
   dumpScreen: ->
-    dataString = undefined
-    a = undefined
     dataString = @canvas.toDataURL().replace(/image\/png/, "image/octet-stream")
     a = document.createElement("a")
     a.href = dataString

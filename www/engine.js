@@ -85,10 +85,6 @@ module.exports = window.Engine = Engine = (function() {
 
   Engine.prototype.load = function() {
     var audioFormats, copyOpt, i, opt;
-    copyOpt = void 0;
-    audioFormats = void 0;
-    i = void 0;
-    opt = void 0;
     this.host = {
       hasTouch: "ontouchstart" in document,
       hasMouse: false,
@@ -209,8 +205,6 @@ module.exports = window.Engine = Engine = (function() {
    */
 
   Engine.prototype.initialize = function() {
-    var objectName;
-    objectName = void 0;
     this.objectIndex = {};
     this.frames = 0;
     this.last = new Date().getTime();
@@ -316,10 +310,6 @@ module.exports = window.Engine = Engine = (function() {
       engine.autoResizeCanvas();
       return;
     }
-    h = void 0;
-    w = void 0;
-    windowWH = void 0;
-    gameWH = void 0;
     windowWH = window.innerWidth / window.innerHeight;
     gameWH = this.canvasResX / this.canvasResY;
     if (windowWH > gameWH) {
@@ -443,7 +433,6 @@ module.exports = window.Engine = Engine = (function() {
     if (room === void 0) {
       throw new Error("Missing argument: room");
     }
-    index = void 0;
     if (typeof room === "string") {
       room = this.roomList.getElementByPropertyValue("name", room);
       if (!room) {
@@ -556,7 +545,6 @@ module.exports = window.Engine = Engine = (function() {
     if (!this.running) {
       return;
     }
-    drawTime = void 0;
     this.last = this.now;
     this.now = new Date().getTime();
     this.timeIncrease = this.now - this.last;
@@ -662,9 +650,6 @@ module.exports = window.Engine = Engine = (function() {
 
   Engine.prototype.loadFiles = function(filePaths) {
     var i, req, script;
-    i = void 0;
-    req = void 0;
-    script = void 0;
     if (typeof filePaths === "string") {
       filePaths = [filePaths];
     }
@@ -778,8 +763,6 @@ module.exports = window.Engine = Engine = (function() {
 
   Engine.prototype.dumpScreen = function() {
     var a, dataString;
-    dataString = void 0;
-    a = void 0;
     dataString = this.canvas.toDataURL().replace(/image\/png/, "image/octet-stream");
     a = document.createElement("a");
     a.href = dataString;
