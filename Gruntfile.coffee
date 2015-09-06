@@ -60,7 +60,7 @@ module.exports = (grunt) ->
 
     open:
       development:
-        path: 'http://localhost:8000'
+        path: 'http://localhost:8000/examples'
 
   grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-contrib-watch'

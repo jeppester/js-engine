@@ -1,21 +1,11 @@
-GETTING JSENGINE STARTED
+# jsengine
 
-You can choose either to run JsEngine without a webserver (requires Firefox or Google Chrome), or to place it on a webserver and access it from there.
+jsengine is an easy-to-use 2d game engine, with asset management, rooms, collision detection etc.
 
+I created the engine with the purpose of making it easier for myself to reuse common components in my games. It has also served as my own platform for learning more about canvas, view lists, collision detection and WebGL etc.
 
-HOW TO RUN JSENGINE WITHOUT A WEB SERVER
+## How to view examples
 
-1. Place the JsEngine files anywhere on your computer.
-
-2. Open index.html with Firefox or Google Chrome (Chrome has to be launched with "--disable-web-security"-flag)
-
-3. If a gray webpage with a white 600x400 box appears, everything is working - for examples, see the examples-subfolder.
-
-
-HOW TO RUN JSENGINE ON A WEBSERVER
-
-1. Place the JsEngine files somewhere on your webserver.
-
-2. Access index.html on the webserver with your favorite HTML5 capable browser.If you run a local webserver and have placed JsEngine in the root of the server, the path will normally be: http://localhost.
-
-3. If a gray webpage with a white 600x400 box appears, everything is working - for examples, see the examples-subfolder.
+1. Install dependencies: `npm install`
+2. Run `npm start`, this should open your favorite browser
+3. In the browser, choose an example among the html-files
