@@ -24,7 +24,7 @@ class StressTest
   addObjects: (count = 10)->
     for i in [0...count]
       sprite = new Engine.Views.GameObject(
-          'Rock'
+          'rock'
           Math.random() * 600
           Math.random() * 400
           Math.random() * Math.PI * 2

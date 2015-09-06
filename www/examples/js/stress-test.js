@@ -39,7 +39,7 @@ StressTest = (function() {
     }
     _results = [];
     for (i = _i = 0; 0 <= count ? _i < count : _i > count; i = 0 <= count ? ++_i : --_i) {
-      sprite = new Engine.Views.GameObject('Rock', Math.random() * 600, Math.random() * 400, Math.random() * Math.PI * 2, {
+      sprite = new Engine.Views.GameObject('rock', Math.random() * 600, Math.random() * 400, Math.random() * Math.PI * 2, {
         speed: new Engine.Geometry.Vector(-5 + Math.random() * 10, -5 + Math.random() * 10)
       });
       sprite.checkBounce = function() {
