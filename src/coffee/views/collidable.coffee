@@ -143,7 +143,7 @@ c = class Collidable extends Views.Sprite
       false
 
   getTransformedBoundingBox: ->
-    box = @mask.bBox.copy().move(-@offset.x, -@offset.y)
+    box = @mask.boundingBox.copy().move -@offset.x, -@offset.y
     parents = @getParents()
     parents.unshift this
     i = 0

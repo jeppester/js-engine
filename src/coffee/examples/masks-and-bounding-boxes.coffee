@@ -39,23 +39,25 @@ class MasksAndBBoxes
         text2.string = ''
 
     text1 = engine.currentRoom.create.TextBlock '', 6, 4, 80, {color: '#4F4'}
-    text2 = engine.currentRoom.create.TextBlock '', 6, 78, 80, {color: '#AAF'}
+    text2 = engine.currentRoom.create.TextBlock '', 6, 78, 80, {color: '#000'}
 
     engine.currentRoom.loops.eachFrame.attachFunction object, object.checkCollision
 
 new Engine
-	# Set main class
-	gameClass: MasksAndBBoxes
+  # Set main class
+  gameClass: MasksAndBBoxes
 
-	# Set themes to load
-	themes: ['example']
+  # Set themes to load
+  themes: ['example']
 
-	#disableWebGL: true
+  backgroundColor: '#888'
 
-	# Enable debugging of collision checks
-	drawBoundingBoxes: true
-	drawMasks: true
+  disableWebGL: true
 
-	# Set resolution of the game
-	canvasResX: 100
-	canvasResY: 100
+  # Enable debugging of collision checks
+  drawBoundingBoxes: true
+  drawMasks: true
+
+  # Set resolution of the game
+  canvasResX: 100
+  canvasResY: 100

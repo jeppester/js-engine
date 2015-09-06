@@ -493,7 +493,7 @@ c = class Loader
         right = Math.max(x + 1, right)
       pixel++
     ctx.putImageData bitmap, 0, 0
-    canvas.bBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon()
+    canvas.boundingBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon()
     canvas
 
 

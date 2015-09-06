@@ -36,7 +36,7 @@ MasksAndBBoxes = (function() {
       color: '#4F4'
     });
     text2 = engine.currentRoom.create.TextBlock('', 6, 78, 80, {
-      color: '#AAF'
+      color: '#000'
     });
     return engine.currentRoom.loops.eachFrame.attachFunction(object, object.checkCollision);
   };
@@ -48,6 +48,8 @@ MasksAndBBoxes = (function() {
 new Engine({
   gameClass: MasksAndBBoxes,
   themes: ['example'],
+  backgroundColor: '#888',
+  disableWebGL: true,
   drawBoundingBoxes: true,
   drawMasks: true,
   canvasResX: 100,

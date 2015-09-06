@@ -229,7 +229,7 @@ c = window.Engine = class Engine
 
     # Set style for arena
     @arena.style.position = "absolute"
-    @arena.style.backgroundColor = "#000"
+    @arena.style.backgroundColor = @backgroundColor
     @arena.style.userSelect = "none"
     @arena.style.webkitUserSelect = "none"
     @arena.style.MozUserSelect = "none"

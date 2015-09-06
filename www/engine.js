@@ -226,7 +226,7 @@ c = window.Engine = Engine = (function() {
       throw new Error('Game class missing');
     }
     this.arena.style.position = "absolute";
-    this.arena.style.backgroundColor = "#000";
+    this.arena.style.backgroundColor = this.backgroundColor;
     this.arena.style.userSelect = "none";
     this.arena.style.webkitUserSelect = "none";
     this.arena.style.MozUserSelect = "none";
@@ -2116,7 +2116,7 @@ c = Loader = (function() {
       pixel++;
     }
     ctx.putImageData(bitmap, 0, 0);
-    canvas.bBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon();
+    canvas.boundingBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon();
     return canvas;
   };
 
@@ -5782,7 +5782,7 @@ c = CanvasRenderer = (function() {
   };
 
   CanvasRenderer.prototype.renderTree = function(object, wm) {
-    var i, len, localWm, offset;
+    var i, len, localWm, offset, _results;
     localWm = Helpers.MatrixCalculation.matrixMultiplyArray([Helpers.MatrixCalculation.calculateLocalMatrix(object), wm]);
     if (!object.isVisible()) {
       return;
@@ -5794,8 +5794,16 @@ c = CanvasRenderer = (function() {
     }
     switch (object.renderType) {
       case "textblock":
+        this.renderSprite(object);
+        break;
       case "sprite":
         this.renderSprite(object);
+        if (engine.drawMasks) {
+          this.renderMask(object);
+        }
+        if (engine.drawBoundingBoxes) {
+          this.renderBoundingBox(object);
+        }
         break;
       case "circle":
         this.renderCircle(object);
@@ -5812,10 +5820,12 @@ c = CanvasRenderer = (function() {
     if (object.children) {
       len = object.children.length;
       i = 0;
+      _results = [];
       while (i < len) {
         this.renderTree(object.children[i], localWm);
-        i++;
+        _results.push(i++);
       }
+      return _results;
     }
   };
 
@@ -5836,14 +5846,6 @@ c = CanvasRenderer = (function() {
     this.context.drawImage(object.bm, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight);
   };
 
-
-  /*
-  Draws a Circle object on the canvas (if added as a child of a View)
-  @private
-  @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Circle
-  @param {Math.Vector} drawOffset A vector defining the offset with which to draw the object
-   */
-
   CanvasRenderer.prototype.renderCircle = function(object) {
     c = this.context;
     c.strokeStyle = object.strokeStyle;
@@ -5857,14 +5859,6 @@ c = CanvasRenderer = (function() {
       c.stroke();
     }
   };
-
-
-  /*
-  Draws a Polygon object on the canvas (if added as a child of a View)
-  @private
-  @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Polygon
-  @param {Vector} drawOffset A vector defining the offset with which to draw the object
-   */
 
   CanvasRenderer.prototype.renderPolygon = function(object) {
     var i, len;
@@ -5898,13 +5892,6 @@ c = CanvasRenderer = (function() {
     }
   };
 
-
-  /*
-  Draws a Line object on the canvas (if added as a child of a View)
-  @private
-  @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Line
-   */
-
   CanvasRenderer.prototype.renderLine = function(object) {
     c = this.context;
     c.strokeStyle = object.strokeStyle;
@@ -5916,14 +5903,6 @@ c = CanvasRenderer = (function() {
     c.lineCap = object.lineCap;
     c.stroke();
   };
-
-
-  /*
-  Draws a Rectangle object on the canvas (if added as a child of a View)
-  @private
-  @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Rectangle
-  @param {Vector} cameraOffset A vector defining the offset with which to draw the object
-   */
 
   CanvasRenderer.prototype.renderRectangle = function(object) {
     c = this.context;
@@ -5940,6 +5919,44 @@ c = CanvasRenderer = (function() {
       c.lineWidth = object.lineWidth;
       c.stroke();
     }
+  };
+
+  CanvasRenderer.prototype.renderBoundingBox = function(object) {
+    var box, mask, point, _i, _len, _ref;
+    mask = engine.loader.getMask(object.source, object.getTheme());
+    box = mask.boundingBox;
+    c = this.context;
+    c.strokeStyle = '#0F0';
+    c.setLineDash([]);
+    c.beginPath();
+    _ref = box.points;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      point = _ref[_i];
+      c.lineTo(point.x, point.y);
+    }
+    c.lineWidth = 1;
+    c.globalAlpha = 1;
+    c.closePath();
+    return c.stroke();
+  };
+
+  CanvasRenderer.prototype.renderMask = function(object) {
+    var mask;
+    mask = engine.loader.getMask(object.source, object.getTheme());
+    if (object.imageLength !== 1 && object.animationSpeed !== 0) {
+      if (engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed) {
+        object.imageNumber = object.imageNumber + (object.animationSpeed > 0 ? 1 : -1);
+        object.animationLastSwitch = engine.gameTime;
+        if (object.imageNumber === object.imageLength) {
+          object.imageNumber = (object.animationLoops ? 0 : object.imageLength - 1);
+        } else {
+          if (object.imageNumber === -1) {
+            object.imageNumber = (object.animationLoops ? object.imageLength - 1 : 0);
+          }
+        }
+      }
+    }
+    return this.context.drawImage(mask, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight);
   };
 
   return CanvasRenderer;
@@ -7382,7 +7399,7 @@ c = Collidable = (function(_super) {
 
   Collidable.prototype.getTransformedBoundingBox = function() {
     var box, i, parent, parents;
-    box = this.mask.bBox.copy().move(-this.offset.x, -this.offset.y);
+    box = this.mask.boundingBox.copy().move(-this.offset.x, -this.offset.y);
     parents = this.getParents();
     parents.unshift(this);
     i = 0;
