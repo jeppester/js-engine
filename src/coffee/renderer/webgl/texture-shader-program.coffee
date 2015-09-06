@@ -10,6 +10,7 @@ c = class WebGLTextureShaderProgram
       currentBuffer: false
       currentTexture: undefined
       textures: {}
+      masks: {}
 
     @program = gl.createProgram()
     @initShaders gl
@@ -154,7 +155,7 @@ c = class WebGLTextureShaderProgram
     l = @locations
     delete @cache.textures[object.bm.oldSrc] if object.renderType is "textblock" and @cache.textures[object.bm.oldSrc]
 
-    # Bind the texture (if it is not already the binded)
+    # Bind the texture (if it is not already binded)
     t = @getSpriteTexture(gl, object)
     if @cache.currentTexture isnt t
       @cache.currentTexture = t
@@ -186,13 +187,61 @@ c = class WebGLTextureShaderProgram
     gl.drawArrays gl.TRIANGLES, 0, 6
     return
 
-  getSpriteTexture: (gl, object) ->
-    @cache.textures[object.bm.src] or @createSpriteTexture(gl, object.bm)
+  # Draw functions
+  renderMask: (gl, object, wm) ->
+    l = @locations
 
-  createSpriteTexture: (gl, image) ->
+    # Bind the texture (if it is not already binded)
+    t = @getMaskTexture(gl, object)
+    if @cache.currentTexture isnt t
+      @cache.currentTexture = t
+
+      # Set the correct texture coordinate buffer
+      if object.imageLength is 1
+        @setRegularTextCoordBuffer gl
+      else
+
+        # Set the right sub image
+        if engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed
+          object.imageNumber = object.imageNumber + ((if object.animationSpeed > 0 then 1 else -1))
+          object.animationLastSwitch = engine.gameTime
+          if object.imageNumber is object.imageLength
+            object.imageNumber = (if object.animationLoops then 0 else object.imageLength - 1)
+          else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
+
+        # Set create and set texture coordinate buffer for the object
+        @setAnimatedTextCoordBuffer gl, object
+
+      # Set a rectangle the same size as the image
+      gl.bindTexture gl.TEXTURE_2D, t
+      Helpers.WebGL.setPlane gl, 0, 0, object.clipWidth, object.clipHeight
+
+    # Set matrix
+    gl.uniformMatrix3fv l.u_matrix, false, wm
+
+    # Draw the rectangle.
+    gl.drawArrays gl.TRIANGLES, 0, 6
+    return
+
+  getSpriteTexture: (gl, object) ->
+    c = @cache.textures[object.bm.src]
+    if c
+      c
+    else
+      @cache.textures[object.bm.src] = @createTexture(gl, object.bm)
+
+  getMaskTexture: (gl, object) ->
+    mask = engine.loader.getMask object.source, object.getTheme()
+    c = @cache.masks[object.bm.src]
+    if c
+      c
+    else
+      @cache.masks[object.bm.src] = @createTexture(gl, mask)
+
+  createTexture: (gl, image) ->
     texture = undefined
 
-    # Create a texture.
+    # Create a texture
     texture = gl.createTexture()
 
     # Bind the texture
@@ -211,7 +260,6 @@ c = class WebGLTextureShaderProgram
       # gl.NEAREST is better for drawing a part of an image
       gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST
     gl.bindTexture gl.TEXTURE_2D, null
-    @cache.textures[image.src] = texture
     texture
 
 module.exports:: = Object.create c::

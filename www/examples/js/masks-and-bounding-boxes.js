@@ -49,7 +49,6 @@ new Engine({
   gameClass: MasksAndBBoxes,
   themes: ['example'],
   backgroundColor: '#888',
-  disableWebGL: true,
   drawBoundingBoxes: true,
   drawMasks: true,
   canvasResX: 100,

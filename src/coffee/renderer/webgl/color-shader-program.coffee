@@ -84,13 +84,6 @@ c = class WebGLColorShaderProgram
 
   # Draw functions
   renderLine: (gl, object, wm) ->
-    l = undefined
-    len = undefined
-    coords = undefined
-    color = undefined
-    a = undefined
-    b = undefined
-    c = undefined
     l = @locations
 
     # If the line is transparent, do nothing
@@ -149,15 +142,12 @@ c = class WebGLColorShaderProgram
     return
 
   renderCircle: (gl, object, wm) ->
-    l = undefined
-    perimeter = undefined
-    segmentsCount = undefined
     l = @locations
 
     # Set matrix (it is the same for both fill and stroke)
     gl.uniformMatrix3fv l.u_matrix, false, wm
 
-    # Device how many segments we want
+    # Decide how many segments we want
     if object.radius < 10
       segmentsCount = 12
     else if object.radius < 50

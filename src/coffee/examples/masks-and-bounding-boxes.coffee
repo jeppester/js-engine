@@ -52,7 +52,7 @@ new Engine
 
   backgroundColor: '#888'
 
-  disableWebGL: true
+  # disableWebGL: true
 
   # Enable debugging of collision checks
   drawBoundingBoxes: true

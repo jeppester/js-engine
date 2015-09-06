@@ -5921,25 +5921,6 @@ c = CanvasRenderer = (function() {
     }
   };
 
-  CanvasRenderer.prototype.renderBoundingBox = function(object) {
-    var box, mask, point, _i, _len, _ref;
-    mask = engine.loader.getMask(object.source, object.getTheme());
-    box = mask.boundingBox;
-    c = this.context;
-    c.strokeStyle = '#0F0';
-    c.setLineDash([]);
-    c.beginPath();
-    _ref = box.points;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      point = _ref[_i];
-      c.lineTo(point.x, point.y);
-    }
-    c.lineWidth = 1;
-    c.globalAlpha = 1;
-    c.closePath();
-    return c.stroke();
-  };
-
   CanvasRenderer.prototype.renderMask = function(object) {
     var mask;
     mask = engine.loader.getMask(object.source, object.getTheme());
@@ -5957,6 +5938,25 @@ c = CanvasRenderer = (function() {
       }
     }
     return this.context.drawImage(mask, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight);
+  };
+
+  CanvasRenderer.prototype.renderBoundingBox = function(object) {
+    var box, mask, point, _i, _len, _ref;
+    mask = engine.loader.getMask(object.source, object.getTheme());
+    box = mask.boundingBox;
+    c = this.context;
+    c.strokeStyle = '#0F0';
+    c.setLineDash([]);
+    c.beginPath();
+    _ref = box.points;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      point = _ref[_i];
+      c.lineTo(point.x, point.y);
+    }
+    c.lineWidth = 1;
+    c.globalAlpha = 1;
+    c.closePath();
+    return c.stroke();
   };
 
   return CanvasRenderer;
@@ -6067,9 +6067,15 @@ c = WebGLRenderer = (function() {
     }
     switch (object.renderType) {
       case "textblock":
+        this.setProgram(this.programs.texture);
+        this.currentProgram.renderSprite(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        break;
       case "sprite":
         this.setProgram(this.programs.texture);
         this.currentProgram.renderSprite(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        if (engine.drawMasks) {
+          this.currentProgram.renderMask(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        }
         break;
       case "line":
         this.setProgram(this.programs.color);
@@ -6172,14 +6178,7 @@ c = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderLine = function(gl, object, wm) {
-    var a, b, color, coords, l, len;
-    l = void 0;
-    len = void 0;
-    coords = void 0;
-    color = void 0;
-    a = void 0;
-    b = void 0;
-    c = void 0;
+    var a, b, color, coords, l;
     l = this.locations;
     if (object.strokeStyle === "transparent") {
       return;
@@ -6216,10 +6215,7 @@ c = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderCircle = function(gl, object, wm) {
-    var l, perimeter, segmentsCount;
-    l = void 0;
-    perimeter = void 0;
-    segmentsCount = void 0;
+    var l, segmentsCount;
     l = this.locations;
     gl.uniformMatrix3fv(l.u_matrix, false, wm);
     if (object.radius < 10) {
@@ -6272,7 +6268,8 @@ c = WebGLTextureShaderProgram = (function() {
       rectangleCornerBuffer: false,
       currentBuffer: false,
       currentTexture: void 0,
-      textures: {}
+      textures: {},
+      masks: {}
     };
     this.program = gl.createProgram();
     this.initShaders(gl);
@@ -6382,11 +6379,56 @@ c = WebGLTextureShaderProgram = (function() {
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   };
 
-  WebGLTextureShaderProgram.prototype.getSpriteTexture = function(gl, object) {
-    return this.cache.textures[object.bm.src] || this.createSpriteTexture(gl, object.bm);
+  WebGLTextureShaderProgram.prototype.renderMask = function(gl, object, wm) {
+    var l, t;
+    l = this.locations;
+    t = this.getMaskTexture(gl, object);
+    if (this.cache.currentTexture !== t) {
+      this.cache.currentTexture = t;
+      if (object.imageLength === 1) {
+        this.setRegularTextCoordBuffer(gl);
+      } else {
+        if (engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed) {
+          object.imageNumber = object.imageNumber + (object.animationSpeed > 0 ? 1 : -1);
+          object.animationLastSwitch = engine.gameTime;
+          if (object.imageNumber === object.imageLength) {
+            object.imageNumber = (object.animationLoops ? 0 : object.imageLength - 1);
+          } else {
+            if (object.imageNumber === -1) {
+              object.imageNumber = (object.animationLoops ? object.imageLength - 1 : 0);
+            }
+          }
+        }
+        this.setAnimatedTextCoordBuffer(gl, object);
+      }
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      Helpers.WebGL.setPlane(gl, 0, 0, object.clipWidth, object.clipHeight);
+    }
+    gl.uniformMatrix3fv(l.u_matrix, false, wm);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
   };
 
-  WebGLTextureShaderProgram.prototype.createSpriteTexture = function(gl, image) {
+  WebGLTextureShaderProgram.prototype.getSpriteTexture = function(gl, object) {
+    c = this.cache.textures[object.bm.src];
+    if (c) {
+      return c;
+    } else {
+      return this.cache.textures[object.bm.src] = this.createTexture(gl, object.bm);
+    }
+  };
+
+  WebGLTextureShaderProgram.prototype.getMaskTexture = function(gl, object) {
+    var mask;
+    mask = engine.loader.getMask(object.source, object.getTheme());
+    c = this.cache.masks[object.bm.src];
+    if (c) {
+      return c;
+    } else {
+      return this.cache.masks[object.bm.src] = this.createTexture(gl, mask);
+    }
+  };
+
+  WebGLTextureShaderProgram.prototype.createTexture = function(gl, image) {
     var texture;
     texture = void 0;
     texture = gl.createTexture();
@@ -6401,7 +6443,6 @@ c = WebGLTextureShaderProgram = (function() {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     }
     gl.bindTexture(gl.TEXTURE_2D, null);
-    this.cache.textures[image.src] = texture;
     return texture;
   };
 

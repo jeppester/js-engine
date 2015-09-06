@@ -164,6 +164,21 @@ c = class CanvasRenderer
       c.stroke()
     return
 
+  renderMask: (object)->
+    mask = engine.loader.getMask object.source, object.getTheme()
+
+    # Set the right sub image
+    if object.imageLength isnt 1 and object.animationSpeed isnt 0
+      if engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed
+        object.imageNumber = object.imageNumber + ((if object.animationSpeed > 0 then 1 else -1))
+        object.animationLastSwitch = engine.gameTime
+        if object.imageNumber is object.imageLength
+          object.imageNumber = (if object.animationLoops then 0 else object.imageLength - 1)
+        else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
+
+    # Draw bm
+    @context.drawImage mask, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight
+
   renderBoundingBox: (object)->
     mask = engine.loader.getMask object.source, object.getTheme()
     box = mask.boundingBox
@@ -180,21 +195,6 @@ c = class CanvasRenderer
     c.globalAlpha = 1
     c.closePath()
     c.stroke()
-
-  renderMask: (object)->
-    mask = engine.loader.getMask object.source, object.getTheme()
-
-    # Set the right sub image
-    if object.imageLength isnt 1 and object.animationSpeed isnt 0
-      if engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed
-        object.imageNumber = object.imageNumber + ((if object.animationSpeed > 0 then 1 else -1))
-        object.animationLastSwitch = engine.gameTime
-        if object.imageNumber is object.imageLength
-          object.imageNumber = (if object.animationLoops then 0 else object.imageLength - 1)
-        else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
-
-    # Draw bm
-    @context.drawImage mask, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight
 
 module.exports:: = Object.create c::
 module.exports::constructor = c

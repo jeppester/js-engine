@@ -102,9 +102,20 @@ c = class WebGLRenderer
     switch object.renderType
 
       # Texture based objects
-      when "textblock", "sprite"
+      when "textblock"
         @setProgram @programs.texture
         @currentProgram.renderSprite gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+
+      when "sprite"
+        @setProgram @programs.texture
+        @currentProgram.renderSprite gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+
+        if engine.drawMasks
+          @currentProgram.renderMask gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+
+        # if engine.drawBoundingBoxes
+        #   @setProgram @programs.color
+        #   @currentProgram.renderBoundingBox gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
 
       # Geometric objects
       when "line"
