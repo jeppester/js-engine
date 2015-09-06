@@ -7,9 +7,9 @@ MasksAndBBoxes = (function() {
   }
 
   MasksAndBBoxes.prototype.onLoaded = function() {
-    var object, object2, text;
+    var object, object2, text1, text2;
     engine.loader.hideOverlay();
-    object = new Engine.Views.GameObject('character', 50, 50, 0);
+    object = engine.currentRoom.create.GameObject('character', 50, 50, 0);
     object.animation = function() {
       return this.animate({
         direction: this.direction + Math.PI * 2
@@ -19,19 +19,26 @@ MasksAndBBoxes = (function() {
       });
     };
     object.animation();
-    object2 = new Engine.Views.GameObject('rock', 16, 50, 0);
+    object2 = engine.currentRoom.create.GameObject('rock', 16, 50, 0);
     object.checkCollision = function() {
-      if (this.collidesWith(object2)) {
-        return text.string = 'Collides';
+      if (this.boundingBoxCollidesWith(object2)) {
+        text1.string = 'BB Collides';
       } else {
-        return text.string = '';
+        text1.string = '';
+      }
+      if (this.collidesWith(object2)) {
+        return text2.string = 'BM Collides';
+      } else {
+        return text2.string = '';
       }
     };
-    text = new Engine.Views.TextBlock('', 6, 4, 80, {
-      color: '#FFF'
+    text1 = engine.currentRoom.create.TextBlock('', 6, 4, 80, {
+      color: '#4F4'
     });
-    engine.currentRoom.loops.eachFrame.attachFunction(object, object.checkCollision);
-    return engine.currentRoom.addChildren(object, object2, text);
+    text2 = engine.currentRoom.create.TextBlock('', 6, 78, 80, {
+      color: '#AAF'
+    });
+    return engine.currentRoom.loops.eachFrame.attachFunction(object, object.checkCollision);
   };
 
   return MasksAndBBoxes;

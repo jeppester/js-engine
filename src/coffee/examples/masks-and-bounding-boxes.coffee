@@ -6,7 +6,7 @@ class MasksAndBBoxes
     # Hide loader overlay
     engine.loader.hideOverlay()
 
-    object = new Engine.Views.GameObject(
+    object = engine.currentRoom.create.GameObject(
       'character' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       50 # x-position
       50 # y-position
@@ -21,22 +21,27 @@ class MasksAndBBoxes
       )
     object.animation()
 
-    object2 = new Engine.Views.GameObject(
+    object2 = engine.currentRoom.create.GameObject(
       'rock' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       16 # x-position
       50 # y-position
       0 # Direction (in radians)
     )
     object.checkCollision = ->
-      if @collidesWith object2
-        text.string = 'Collides'
+      if @boundingBoxCollidesWith object2
+        text1.string = 'BB Collides'
       else
-        text.string = ''
+        text1.string = ''
 
-    text = new Engine.Views.TextBlock '', 6, 4, 80, {color: '#FFF'}
+      if @collidesWith object2
+        text2.string = 'BM Collides'
+      else
+        text2.string = ''
+
+    text1 = engine.currentRoom.create.TextBlock '', 6, 4, 80, {color: '#4F4'}
+    text2 = engine.currentRoom.create.TextBlock '', 6, 78, 80, {color: '#AAF'}
 
     engine.currentRoom.loops.eachFrame.attachFunction object, object.checkCollision
-    engine.currentRoom.addChildren object, object2, text
 
 new Engine
 	# Set main class
