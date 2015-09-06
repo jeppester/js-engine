@@ -26,7 +26,12 @@ Main = (function() {
   };
 
   Main.prototype.playSound = function() {
-    return engine.loader.getSound('donk').play();
+    switch (Math.floor(Math.random() * 2)) {
+      case 0:
+        return engine.loader.getSound('donk').play();
+      case 1:
+        return engine.loader.getSound('donk2').play();
+    }
   };
 
   Main.prototype.toggleMusic = function() {

@@ -24,7 +24,9 @@ class Main
     @toggleMusic() if engine.keyboard.isPressed Engine.Globals.KEY_ENTER
 
   playSound: ->
-    engine.loader.getSound('donk').play()
+    switch Math.floor Math.random() * 2
+      when 0 then engine.loader.getSound('donk').play()
+      when 1 then engine.loader.getSound('donk2').play()
 
   toggleMusic: ->
     m = engine.loader.getMusic('space-music')
