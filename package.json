@@ -1,6 +1,6 @@
 {
   "name": "jsengine",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "2d game engine",
   "browserify": {
     "transform": [
