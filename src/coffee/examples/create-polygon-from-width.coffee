@@ -51,7 +51,7 @@ new Engine
   gameClass: CreatePolygonFromWidth
 
   # Set themes to load
-  themes:['Example']
+  themes: ['example']
 
   # disableWebGL: true
 

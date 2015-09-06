@@ -6,22 +6,24 @@
 * */
 
 {
-	"name":"Example",
+	"name":"example",
 	"inherit":[],
-	"music":{},
+	"music":{
+		"space-music": "ogg mp3"
+	},
 	"sfx":{
-		"Donk":"wav",
-		"Donk2":"wav"
+		"donk":"ogg mp3",
+		"donk2":"ogg mp3"
 	},
 	"images":{
-        // Images in image root folder
-		"Character":"png",
-        "Rock":"png",
-        "Dot":"png",
+		// Images in image root folder
+		"character":"png",
+		"rock":"png",
+		"dot":"png",
 
-        // Images inside a folder
-		"Folder.Star1": "png",
-		"Folder.Star2": "png",
-		"Folder.Star3": "png"
+		// Images inside a folder
+		"folder.star1": "png",
+		"folder.star2": "png",
+		"folder.star3": "png"
 	}
 }

@@ -67,7 +67,7 @@ new Engine
 	gameClass: StressTest
 
 	# Set themes to load
-	themes: ['Example']
+	themes: ['example']
 
 	# Disable webgl (to compare performance)
 	#disableWebGL: true

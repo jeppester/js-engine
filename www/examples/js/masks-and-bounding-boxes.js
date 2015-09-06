@@ -9,7 +9,7 @@ MasksAndBBoxes = (function() {
   MasksAndBBoxes.prototype.onLoaded = function() {
     var object, object2, text;
     engine.loader.hideOverlay();
-    object = new Engine.Views.GameObject('Character', 50, 50, 0);
+    object = new Engine.Views.GameObject('character', 50, 50, 0);
     object.animation = function() {
       return this.animate({
         direction: this.direction + Math.PI * 2
@@ -19,7 +19,7 @@ MasksAndBBoxes = (function() {
       });
     };
     object.animation();
-    object2 = new Engine.Views.GameObject('Rock', 16, 50, 0);
+    object2 = new Engine.Views.GameObject('rock', 16, 50, 0);
     object.checkCollision = function() {
       if (this.collidesWith(object2)) {
         return text.string = 'Collides';
@@ -40,7 +40,7 @@ MasksAndBBoxes = (function() {
 
 new Engine({
   gameClass: MasksAndBBoxes,
-  themes: ['Example'],
+  themes: ['example'],
   drawBoundingBoxes: true,
   drawMasks: true,
   canvasResX: 100,

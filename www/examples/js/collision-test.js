@@ -78,7 +78,7 @@ CollisionTest = (function() {
     engine.currentRoom.addLoop('collisionChecking', new Engine.CustomLoop(5));
     window.rocks = [];
     this.addRocks(15);
-    player = new CollisionObject("Character", 200, 100, {
+    player = new CollisionObject("character", 200, 100, {
       upKey: Engine.Globals.KEY_UP,
       downKey: Engine.Globals.KEY_DOWN,
       leftKey: Engine.Globals.KEY_LEFT,
@@ -95,7 +95,7 @@ CollisionTest = (function() {
     }
     _results = [];
     for (i = _i = 0; 0 <= number ? _i < number : _i > number; i = 0 <= number ? ++_i : --_i) {
-      rock = new CollisionObject("Rock", 20 + Math.random() * 560, 20 + Math.random() * 360);
+      rock = new CollisionObject("rock", 20 + Math.random() * 560, 20 + Math.random() * 360);
       rock.speed.setFromDirection(Math.PI * 2 * Math.random(), 150);
       window.rocks.push(rock);
       _results.push(engine.currentRoom.addChildren(rock));
@@ -109,7 +109,7 @@ CollisionTest = (function() {
 
 new Engine({
   gameClass: CollisionTest,
-  themes: ['Example'],
+  themes: ['example'],
   backgroundColor: "#222",
   canvasResX: 600,
   canvasResY: 400

@@ -7,7 +7,7 @@ MovableCharacter = (function(_super) {
   __extends(MovableCharacter, _super);
 
   function MovableCharacter(x, y) {
-    MovableCharacter.__super__.constructor.call(this, 'Character', x, y, 0);
+    MovableCharacter.__super__.constructor.call(this, 'character', x, y, 0);
     engine.currentRoom.loops.eachFrame.attachFunction(this, this.step);
   }
 
@@ -58,7 +58,7 @@ Main = (function() {
       color: '#FFF'
     });
     this.bgView.addChildren(text);
-    sprite = new Engine.Views.Sprite('Rock', 70, 200, 0);
+    sprite = new Engine.Views.Sprite('rock', 70, 200, 0);
     this.fgView.addChildren(sprite);
     sprite.animate({
       dir: Math.PI * 4
@@ -75,7 +75,7 @@ Main = (function() {
 
 new Engine({
   gameClass: Main,
-  themes: ['Example'],
+  themes: ['example'],
   backgroundColor: "#000",
   canvasResX: 600,
   canvasResY: 400

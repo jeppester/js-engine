@@ -4,25 +4,25 @@ class RoomTransitions
     engine.currentRoom.name = 'room1'
     engine.currentRoom.addChildren new Engine.Views.Rectangle(0, 0, 600, 400, '#F00')
     for i in [0...5]
-      engine.currentRoom.addChildren new Engine.Views.Sprite('Character', 100 + Math.random() * 400, 100 + Math.random() * 200)
+      engine.currentRoom.addChildren new Engine.Views.Sprite('character', 100 + Math.random() * 400, 100 + Math.random() * 200)
 
     # Create second room
     room = new Engine.Room 'room2'
     room.addChildren new Engine.Views.Rectangle(0, 0, 600, 400, '#0F0')
     for i in [0...5]
-      room.addChildren new Engine.Views.Sprite('Rock', 100 + Math.random() * 400, 100 + Math.random() * 200)
+      room.addChildren new Engine.Views.Sprite('rock', 100 + Math.random() * 400, 100 + Math.random() * 200)
 
     # Create third room
     room = new Engine.Room 'room3'
     room.addChildren new Engine.Views.Rectangle(0, 0, 600, 400, '#00F')
     for i in [0...10]
-      room.addChildren new Engine.Views.Sprite('Folder.Star2', 100 + Math.random() * 400, 100 + Math.random() * 200)
+      room.addChildren new Engine.Views.Sprite('folder.star2', 100 + Math.random() * 400, 100 + Math.random() * 200)
 
     # Create fourth room
     room = new Engine.Room 'room4'
     room.addChildren new Engine.Views.Rectangle(0, 0, 600, 400, '#FFF')
     for i in [0...20]
-      room.addChildren new Engine.Views.Sprite('Folder.Star3', 100 + Math.random() * 400, 100 + Math.random() * 200)
+      room.addChildren new Engine.Views.Sprite('folder.star3', 100 + Math.random() * 400, 100 + Math.random() * 200)
 
     # Hide loader overlay
     engine.loader.hideOverlay =>
@@ -45,7 +45,7 @@ new Engine
 	gameClass: RoomTransitions
 
 	# Set themes to load
-	themes: ['Example']
+	themes: ['example']
 
 	# disableWebGL: true,
 

@@ -16,7 +16,10 @@ c = class Music
     throw new Error("Missing argument: audioElement") if audioElement is undefined #dev
     throw new Error("Argument audioElement has to be of type HTMLAudioElement") if audioElement.toString() isnt "[object HTMLAudioElement]" #dev
     @source = audioElement
-    @paused = false
+    @source.addEventListener 'ended', => @playing = false
+    @source.addEventListener 'pause', => @playing = false
+    @source.addEventListener 'playing', => @playing = true
+    @playing = false
     return
 
   ###
@@ -28,7 +31,6 @@ c = class Music
   play: (loop_) ->
     return false if engine.musicMuted
     @source.play()
-    @paused = false
     @source.loop = "loop" if loop_
     true
 
@@ -36,7 +38,6 @@ c = class Music
   Pauses the playback of the object
   ###
   pause: ->
-    @paused = true
     @source.pause()
     return
 

@@ -6470,7 +6470,7 @@ c = Effect = (function() {
 
   Effect.prototype.play = function(loop_) {
     var sound, _i, _len, _ref;
-    if (engine.Sounds.Muted) {
+    if (engine.soundsMuted) {
       return false;
     }
     _ref = this.elements;
@@ -6597,7 +6597,22 @@ c = Music = (function() {
       throw new Error("Argument audioElement has to be of type HTMLAudioElement");
     }
     this.source = audioElement;
-    this.paused = false;
+    this.source.addEventListener('ended', (function(_this) {
+      return function() {
+        return _this.playing = false;
+      };
+    })(this));
+    this.source.addEventListener('pause', (function(_this) {
+      return function() {
+        return _this.playing = false;
+      };
+    })(this));
+    this.source.addEventListener('playing', (function(_this) {
+      return function() {
+        return _this.playing = true;
+      };
+    })(this));
+    this.playing = false;
     return;
   }
 
@@ -6614,7 +6629,6 @@ c = Music = (function() {
       return false;
     }
     this.source.play();
-    this.paused = false;
     if (loop_) {
       this.source.loop = "loop";
     }
@@ -6627,7 +6641,6 @@ c = Music = (function() {
    */
 
   Music.prototype.pause = function() {
-    this.paused = true;
     this.source.pause();
   };
 

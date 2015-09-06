@@ -93,7 +93,7 @@ StressTest = (function() {
 
 new Engine({
   gameClass: StressTest,
-  themes: ['Example'],
+  themes: ['example'],
   backgroundColor: "#000",
   pauseOnBlur: false,
   canvasResX: 600,

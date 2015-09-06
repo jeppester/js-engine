@@ -78,7 +78,7 @@ class CollisionTest
     @addRocks 15
 
     player = new CollisionObject(
-      "Character"
+      "character"
       200 # x-position
       100 # y-position
       {
@@ -97,7 +97,7 @@ class CollisionTest
   addRocks: (number = 1)->
     for i in [0...number]
       rock = new CollisionObject(
-        "Rock"
+        "rock"
         20 + Math.random() * 560 # x-position
         20 + Math.random() * 360 # y-position
       )
@@ -111,7 +111,7 @@ new Engine
   gameClass: CollisionTest
 
   # Set themes to load
-  themes:['Example']
+  themes: ['example']
 
   # Set background color
   backgroundColor: "#222"

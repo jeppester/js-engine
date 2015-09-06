@@ -58,7 +58,7 @@ GeometricObjectCollision = (function() {
 
 new Engine({
   gameClass: GeometricObjectCollision,
-  themes: ['Example'],
+  themes: ['example'],
   canvasResX: 600,
   canvasResY: 400
 });

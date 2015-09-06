@@ -48,7 +48,7 @@ CreatePolygonFromWidth = (function() {
 
 new Engine({
   gameClass: CreatePolygonFromWidth,
-  themes: ['Example'],
+  themes: ['example'],
   backgroundColor: "#000",
   canvasResX: 600,
   canvasResY: 400

@@ -7,7 +7,7 @@
  */
 
 {
-	"name":"Empty",
+	"name":"empty",
 	"inherit":[],
 	"music":{},
 	"sfx":{},

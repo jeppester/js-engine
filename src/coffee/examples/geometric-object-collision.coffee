@@ -57,7 +57,7 @@ new Engine
   gameClass: GeometricObjectCollision
 
   # Set themes to load
-  themes: ['Example']
+  themes: ['example']
 
   #disableWebGL: true
 

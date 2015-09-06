@@ -23,7 +23,7 @@ CollisionStressTest = (function() {
     this.collisionDisplay = new Engine.Views.TextBlock('Collides: No', 10, 50, 150, {
       color: '#FFF'
     });
-    this.collider = new Engine.Views.Collidable('Character', 300, 200);
+    this.collider = new Engine.Views.Collidable('character', 300, 200);
     this.hudView.addChildren(this.collider, this.fpsCounter, this.objectCounter, this.collisionDisplay);
     engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
     engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
@@ -52,7 +52,7 @@ CollisionStressTest = (function() {
     }
     _results = [];
     for (i = _i = 0; 0 <= count ? _i < count : _i > count; i = 0 <= count ? ++_i : --_i) {
-      sprite = new Engine.Views.GameObject('Rock', Math.random() * 600, Math.random() * 400);
+      sprite = new Engine.Views.GameObject('rock', Math.random() * 600, Math.random() * 400);
       _results.push(this.objectView.addChildren(sprite));
     }
     return _results;
@@ -93,7 +93,7 @@ CollisionStressTest = (function() {
 
 new Engine({
   gameClass: CollisionStressTest,
-  themes: ['Example'],
+  themes: ['example'],
   backgroundColor: "#000",
   pauseOnBlur: false,
   canvasResX: 600,

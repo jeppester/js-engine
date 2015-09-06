@@ -1,7 +1,7 @@
 # Create movable character by extending Sprite
 class MovableCharacter extends Engine.Views.Sprite
   constructor: (x, y)->
-    super 'Character', x, y, 0
+    super 'character', x, y, 0
 
     engine.currentRoom.loops.eachFrame.attachFunction(
       @ # This object (an instance reference is needed by the engine)
@@ -68,7 +68,7 @@ class Main
     # SPRITE EXAMPLE
     # Make a sprite object
     sprite = new Engine.Views.Sprite(
-      'Rock' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
+      'rock' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       70 # x-position
       200 # y-position
       0 # Direction (in radians)
@@ -105,7 +105,7 @@ new Engine
   gameClass: Main
 
   # Set themes to load
-  themes: ['Example']
+  themes: ['example']
 
   # Set arena background-color
   backgroundColor: "#000"

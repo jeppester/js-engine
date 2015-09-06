@@ -7,7 +7,7 @@ class MasksAndBBoxes
     engine.loader.hideOverlay()
 
     object = new Engine.Views.GameObject(
-      'Character' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
+      'character' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       50 # x-position
       50 # y-position
       0 # Direction (in radians)
@@ -22,7 +22,7 @@ class MasksAndBBoxes
     object.animation()
 
     object2 = new Engine.Views.GameObject(
-      'Rock' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
+      'rock' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       16 # x-position
       50 # y-position
       0 # Direction (in radians)
@@ -43,7 +43,7 @@ new Engine
 	gameClass: MasksAndBBoxes
 
 	# Set themes to load
-	themes: ['Example']
+	themes: ['example']
 
 	#disableWebGL: true
 

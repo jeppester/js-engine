@@ -11,7 +11,7 @@ class CollisionStressTest
     @fpsCounter = new Engine.Views.TextBlock 'FPS: 0', 10, 10, 150, {color: '#FFF'}
     @objectCounter = new Engine.Views.TextBlock 'Objects: 0', 10, 30, 150, {color: '#FFF'}
     @collisionDisplay = new Engine.Views.TextBlock 'Collides: No', 10, 50, 150, {color: '#FFF'}
-    @collider = new Engine.Views.Collidable 'Character', 300, 200
+    @collider = new Engine.Views.Collidable 'character', 300, 200
 
     @hudView.addChildren @collider, @fpsCounter, @objectCounter, @collisionDisplay
 
@@ -34,7 +34,7 @@ class CollisionStressTest
   addObjects: (count = 10)->
     for i in [0...count]
       sprite = new Engine.Views.GameObject(
-        'Rock'
+        'rock'
         Math.random() * 600
         Math.random() * 400
       )
@@ -67,7 +67,7 @@ new Engine
   gameClass: CollisionStressTest
 
   # Set themes to load
-  themes: ['Example']
+  themes: ['example']
 
   # Set arena background-color
   backgroundColor: "#000"
