@@ -78,8 +78,8 @@ c = class WebGLColorShaderProgram
   # When returning to the program reset the buffer
   onSet: (gl) ->
     gl.bindBuffer gl.ARRAY_BUFFER, @vertexBuffer
-    gl.enableVertexAttribArray @locations.a_position
     gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
+    gl.enableVertexAttribArray @locations.a_position
     return
 
   # Draw functions

@@ -1314,9 +1314,9 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.updateAnimations = function() {
-    var a, animId, propId, t, _results;
+    var a, animId, propId, results, t;
     animId = this.animations.length - 1;
-    _results = [];
+    results = [];
     while (animId > -1) {
       a = this.animations[animId];
       if (a === void 0) {
@@ -1339,9 +1339,9 @@ c = CustomLoop = (function() {
         }
       }
       a.onStep && a.onStep();
-      _results.push(animId--);
+      results.push(animId--);
     }
-    return _results;
+    return results;
   };
 
 
@@ -2169,7 +2169,7 @@ Geometry = {
 
 },{"../geometry/rectangle":11,"../sounds/effect":25,"../sounds/music":26}],6:[function(require,module,exports){
 var ObjectCreator, Views, c,
-  __slice = [].slice;
+  slice = [].slice;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -2182,7 +2182,7 @@ c = ObjectCreator = (function() {
 
   ObjectCreator.prototype.Container = function() {
     var a, children, o;
-    children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    children = 1 <= arguments.length ? slice.call(arguments, 0) : [];
     a = arguments;
     o = new Views.Container;
     o.addChildren.apply(o, children);
@@ -2270,8 +2270,8 @@ Views = {
 
 },{"../views/circle":28,"../views/collidable":29,"../views/container":30,"../views/game-object":31,"../views/line":32,"../views/polygon":33,"../views/rectangle":34,"../views/sprite":35,"../views/text-block":36}],7:[function(require,module,exports){
 var CustomLoop, Room, Views, c,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -2302,8 +2302,8 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 @param {function} [onLeft=function () {}] A function to run when the room is left
  */
 
-c = Room = (function(_super) {
-  __extends(Room, _super);
+c = Room = (function(superClass) {
+  extend(Room, superClass);
 
   function Room(name, onEntered, onLeft) {
     Room.__super__.constructor.call(this);
@@ -2343,13 +2343,13 @@ c = Room = (function(_super) {
    */
 
   Room.prototype.update = function() {
-    var l, name, _ref;
+    var l, name, ref;
     if (this.paused) {
       return;
     }
-    _ref = this.loops;
-    for (name in _ref) {
-      l = _ref[name];
+    ref = this.loops;
+    for (name in ref) {
+      l = ref[name];
       l.execute();
     }
   };
@@ -3433,8 +3433,8 @@ Geometry = {
 
 },{"./circle":8,"./line":9,"./rectangle":11,"./vector":12}],11:[function(require,module,exports){
 var Geometry, Helpers, Mixins, Rectangle, c,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -3471,8 +3471,8 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} height The height of the rectangle
  */
 
-c = Rectangle = (function(_super) {
-  __extends(Rectangle, _super);
+c = Rectangle = (function(superClass) {
+  extend(Rectangle, superClass);
 
   Helpers.Mixin.mixin(Rectangle, Mixins.Animatable);
 
@@ -4450,7 +4450,7 @@ module.exports = RoomTransitionHelper = {
   @param {Room} newRoom The room that is entered
    */
   roomTransitionSlideSlide: function(oldRoom, newRoom, options, callback) {
-    var animOptions, c, camera, i, newCam, newCams, _i, _len;
+    var animOptions, c, camera, i, j, len, newCam, newCams;
     newCams = [];
     oldRoom.pause();
     options = options || {};
@@ -4471,8 +4471,8 @@ module.exports = RoomTransitionHelper = {
       i++;
     }
     engine.cameras.push.apply(engine.cameras, newCams);
-    for (_i = 0, _len = newCams.length; _i < _len; _i++) {
-      c = newCams[_i];
+    for (j = 0, len = newCams.length; j < len; j++) {
+      c = newCams[j];
       this.slideIn(c, options.from, animOptions);
     }
     return engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
@@ -4492,7 +4492,7 @@ module.exports = RoomTransitionHelper = {
   @param {Room} newRoom The room that is entered
    */
   roomTransitionSqueezeSlide: function(oldRoom, newRoom, options, callback) {
-    var animOptions, c, camera, i, newCam, newCams, _i, _len;
+    var animOptions, c, camera, i, j, len, newCam, newCams;
     newCams = [];
     oldRoom.pause();
     options = options || {};
@@ -4513,8 +4513,8 @@ module.exports = RoomTransitionHelper = {
       i++;
     }
     engine.cameras.push.apply(engine.cameras, newCams);
-    for (_i = 0, _len = newCams.length; _i < _len; _i++) {
-      c = newCams[_i];
+    for (j = 0, len = newCams.length; j < len; j++) {
+      c = newCams[j];
       this.slideIn(c, options.from, animOptions);
     }
     return engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
@@ -4534,7 +4534,7 @@ module.exports = RoomTransitionHelper = {
   @param {Room} newRoom The room that is entered
    */
   roomTransitionSqueezeSqueeze: function(oldRoom, newRoom, options, callback) {
-    var animOptions, c, camera, i, newCam, newCams, _i, _len;
+    var animOptions, c, camera, i, j, len, newCam, newCams;
     newCams = [];
     oldRoom.pause();
     options = options || {};
@@ -4555,8 +4555,8 @@ module.exports = RoomTransitionHelper = {
       i++;
     }
     engine.cameras.push.apply(engine.cameras, newCams);
-    for (_i = 0, _len = newCams.length; _i < _len; _i++) {
-      c = newCams[_i];
+    for (j = 0, len = newCams.length; j < len; j++) {
+      c = newCams[j];
       this.squeezeIn(c, options.from, animOptions);
     }
     return engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
@@ -4576,7 +4576,7 @@ module.exports = RoomTransitionHelper = {
   @param {Room} newRoom The room that is entered
    */
   roomTransitionSlideSqueeze: function(oldRoom, newRoom, options, callback) {
-    var animOptions, c, camera, i, newCam, newCams, _i, _len;
+    var animOptions, c, camera, i, j, len, newCam, newCams;
     newCams = [];
     oldRoom.pause();
     options = options || {};
@@ -4597,8 +4597,8 @@ module.exports = RoomTransitionHelper = {
       i++;
     }
     engine.cameras.push.apply(engine.cameras, newCams);
-    for (_i = 0, _len = newCams.length; _i < _len; _i++) {
-      c = newCams[_i];
+    for (j = 0, len = newCams.length; j < len; j++) {
+      c = newCams[j];
       this.squeezeIn(c, options.from, animOptions);
     }
     return engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
@@ -4996,13 +4996,13 @@ c = Pointer = (function() {
    */
 
   Pointer.prototype.onTouchStart = function(event) {
-    var eventTouch, pointerTouch, touchNumber, _i, _len, _ref;
+    var eventTouch, j, len1, pointerTouch, ref, touchNumber;
     if (event === void 0) {
       throw new Error("Missing argument: event");
     }
-    _ref = event.changedTouches;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      eventTouch = _ref[_i];
+    ref = event.changedTouches;
+    for (j = 0, len1 = ref.length; j < len1; j++) {
+      eventTouch = ref[j];
       touchNumber = this.findTouchNumber();
       pointerTouch = this.touches[touchNumber];
       pointerTouch.identifier = eventTouch.identifier;
@@ -5021,13 +5021,13 @@ c = Pointer = (function() {
    */
 
   Pointer.prototype.onTouchEnd = function(event) {
-    var eventTouch, pointerTouch, _i, _len, _ref;
+    var eventTouch, j, len1, pointerTouch, ref;
     if (event === void 0) {
       throw new Error("Missing argument: event");
     }
-    _ref = event.changedTouches;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      eventTouch = _ref[_i];
+    ref = event.changedTouches;
+    for (j = 0, len1 = ref.length; j < len1; j++) {
+      eventTouch = ref[j];
       pointerTouch = this.touches.filter(function(t) {
         return t.identifier === eventTouch.identifier;
       })[0];
@@ -5046,13 +5046,13 @@ c = Pointer = (function() {
    */
 
   Pointer.prototype.onTouchMove = function(event) {
-    var eventTouch, pointerTouch, roomPos, _i, _len, _ref;
+    var eventTouch, j, len1, pointerTouch, ref, roomPos;
     if (event === void 0) {
       throw new Error("Missing argument: event");
     }
-    _ref = event.touches;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      eventTouch = _ref[_i];
+    ref = event.touches;
+    for (j = 0, len1 = ref.length; j < len1; j++) {
+      eventTouch = ref[j];
       pointerTouch = this.touches.filter(function(t) {
         return t.identifier === eventTouch.identifier;
       })[0];
@@ -5167,7 +5167,7 @@ c = Pointer = (function() {
    */
 
   Pointer.prototype.shapeIsPressed = function(button, shape, outside) {
-    var pointer, pointers, ret, _i, _len;
+    var j, len1, pointer, pointers, ret;
     button = (button !== void 0 ? button : Globals.MOUSE_TOUCH_ANY);
     if (shape === void 0) {
       throw new Error("Missing argument: shape");
@@ -5177,8 +5177,8 @@ c = Pointer = (function() {
     }
     pointers = this.isPressed(button);
     ret = [];
-    for (_i = 0, _len = pointers.length; _i < _len; _i++) {
-      pointer = pointers[_i];
+    for (j = 0, len1 = pointers.length; j < len1; j++) {
+      pointer = pointers[j];
       if (pointer.x === false || pointer.y === false) {
         continue;
       }
@@ -5205,7 +5205,7 @@ c = Pointer = (function() {
    */
 
   Pointer.prototype.shapeIsReleased = function(button, shape, outside) {
-    var pointer, pointers, ret, _i, _len;
+    var j, len1, pointer, pointers, ret;
     button = (button !== void 0 ? button : Globals.MOUSE_TOUCH_ANY);
     if (shape === void 0) {
       throw new Error("Missing argument: shape");
@@ -5215,8 +5215,8 @@ c = Pointer = (function() {
     }
     pointers = this.isReleased(button);
     ret = [];
-    for (_i = 0, _len = pointers.length; _i < _len; _i++) {
-      pointer = pointers[_i];
+    for (j = 0, len1 = pointers.length; j < len1; j++) {
+      pointer = pointers[j];
       if (pointer.x === false || pointer.y === false) {
         continue;
       }
@@ -5243,7 +5243,7 @@ c = Pointer = (function() {
    */
 
   Pointer.prototype.shapeIsDown = function(button, shape, outside) {
-    var pointer, pointers, ret, _i, _len;
+    var j, len1, pointer, pointers, ret;
     button = (button !== void 0 ? button : Globals.MOUSE_TOUCH_ANY);
     if (shape === void 0) {
       throw new Error("Missing argument: shape");
@@ -5253,8 +5253,8 @@ c = Pointer = (function() {
     }
     pointers = this.isDown(button);
     ret = [];
-    for (_i = 0, _len = pointers.length; _i < _len; _i++) {
-      pointer = pointers[_i];
+    for (j = 0, len1 = pointers.length; j < len1; j++) {
+      pointer = pointers[j];
       if (pointer.x === false || pointer.y === false) {
         continue;
       }
@@ -5301,7 +5301,7 @@ c = Pointer = (function() {
    */
 
   Pointer.prototype.checkPointer = function(pointers, state) {
-    var pointer, ret, _i, _len;
+    var j, len1, pointer, ret;
     if (pointers === "undefined") {
       throw new Error("Missing argument: pointers");
     }
@@ -5315,8 +5315,8 @@ c = Pointer = (function() {
       pointers = [pointers];
     }
     ret = [];
-    for (_i = 0, _len = pointers.length; _i < _len; _i++) {
-      pointer = pointers[_i];
+    for (j = 0, len1 = pointers.length; j < len1; j++) {
+      pointer = pointers[j];
       switch (state) {
         case "pressed":
           if (pointer.events[0] > engine.last || pointer.events[1] > engine.last) {
@@ -5378,10 +5378,10 @@ c = Pointer = (function() {
    */
 
   Pointer.prototype.findTouchNumber = function() {
-    var i, touch, _i, _len, _ref;
-    _ref = this.touches;
-    for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-      touch = _ref[i];
+    var i, j, len1, ref, touch;
+    ref = this.touches;
+    for (i = j = 0, len1 = ref.length; j < len1; i = ++j) {
+      touch = ref[i];
       if (!(touch.events[0] > 0)) {
         return i;
       }
@@ -5782,7 +5782,7 @@ c = CanvasRenderer = (function() {
   };
 
   CanvasRenderer.prototype.renderTree = function(object, wm) {
-    var i, len, localWm, offset, _results;
+    var i, len, localWm, offset, results;
     localWm = Helpers.MatrixCalculation.matrixMultiplyArray([Helpers.MatrixCalculation.calculateLocalMatrix(object), wm]);
     if (!object.isVisible()) {
       return;
@@ -5820,12 +5820,12 @@ c = CanvasRenderer = (function() {
     if (object.children) {
       len = object.children.length;
       i = 0;
-      _results = [];
+      results = [];
       while (i < len) {
         this.renderTree(object.children[i], localWm);
-        _results.push(i++);
+        results.push(i++);
       }
-      return _results;
+      return results;
     }
   };
 
@@ -5941,16 +5941,16 @@ c = CanvasRenderer = (function() {
   };
 
   CanvasRenderer.prototype.renderBoundingBox = function(object) {
-    var box, mask, point, _i, _len, _ref;
+    var box, j, len1, mask, point, ref;
     mask = engine.loader.getMask(object.source, object.getTheme());
     box = mask.boundingBox;
     c = this.context;
     c.strokeStyle = '#0F0';
     c.setLineDash([]);
     c.beginPath();
-    _ref = box.points;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      point = _ref[_i];
+    ref = box.points;
+    for (j = 0, len1 = ref.length; j < len1; j++) {
+      point = ref[j];
       c.lineTo(point.x, point.y);
     }
     c.lineWidth = 1;
@@ -6012,7 +6012,6 @@ c = WebGLRenderer = (function() {
   WebGLRenderer.prototype.setProgram = function(program) {
     var gl;
     if (this.currentProgram !== program) {
-      gl = void 0;
       gl = this.gl;
       this.currentProgram = program;
       gl.useProgram(program.program);
@@ -6173,8 +6172,8 @@ c = WebGLColorShaderProgram = (function() {
 
   WebGLColorShaderProgram.prototype.onSet = function(gl) {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-    gl.enableVertexAttribArray(this.locations.a_position);
     gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(this.locations.a_position);
   };
 
   WebGLColorShaderProgram.prototype.renderLine = function(gl, object, wm) {
@@ -6280,10 +6279,6 @@ c = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.initShaders = function(gl) {
     var fragmentCode, fragmentShader, vertexCode, vertexShader;
-    vertexCode = void 0;
-    fragmentCode = void 0;
-    vertexShader = void 0;
-    fragmentShader = void 0;
     vertexCode = "attribute vec2 a_position; attribute vec2 a_texCoord; uniform vec2 u_resolution; uniform mat3 u_matrix; varying vec2 v_texCoord; void main() { vec2 position = (u_matrix * vec3(a_position, 1)).xy; vec2 zeroToOne = position / u_resolution; vec2 zeroToTwo = zeroToOne * 2.0; vec2 clipSpace = zeroToTwo - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); v_texCoord = a_texCoord; }";
     vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexCode);
@@ -6318,8 +6313,8 @@ c = WebGLTextureShaderProgram = (function() {
   WebGLTextureShaderProgram.prototype.setRegularTextCoordBuffer = function(gl) {
     if (this.cache.currentBuffer !== this.cache.regularTextCoordBuffer) {
       gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.regularTextCoordBuffer);
-      gl.enableVertexAttribArray(this.locations.a_texCoord);
       gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.locations.a_texCoord);
       this.cache.currentBuffer = this.cache.regularTextCoordBuffer;
       gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
     }
@@ -6335,8 +6330,8 @@ c = WebGLTextureShaderProgram = (function() {
     y2 = 1;
     gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.animatedTextCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(this.locations.a_texCoord);
     gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(this.locations.a_texCoord);
     this.cache.currentBuffer = this.cache.animatedTextCoordBuffer;
     gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
   };
@@ -6507,15 +6502,15 @@ c = Effect = (function() {
    */
 
   Effect.prototype.cacheCopies = function() {
-    var i, _results;
+    var i, results;
     i = 0;
-    _results = [];
+    results = [];
     while (i < engine.cachedSoundCopies) {
       this.elements.push(this.source.cloneNode());
       this.elements[i].started = false;
-      _results.push(i++);
+      results.push(i++);
     }
-    return _results;
+    return results;
   };
 
 
@@ -6527,13 +6522,13 @@ c = Effect = (function() {
    */
 
   Effect.prototype.play = function(loop_) {
-    var sound, _i, _len, _ref;
+    var j, len, ref, sound;
     if (engine.soundsMuted) {
       return false;
     }
-    _ref = this.elements;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      sound = _ref[_i];
+    ref = this.elements;
+    for (j = 0, len = ref.length; j < len; j++) {
+      sound = ref[j];
       if ((sound.started === false || sound.ended) && !sound.loop) {
         sound.started = true;
         sound.volume = 1;
@@ -6558,13 +6553,13 @@ c = Effect = (function() {
    */
 
   Effect.prototype.stop = function(playbackId) {
-    var sound, _i, _len, _ref;
+    var j, len, ref, sound;
     if (playbackId === void 0) {
       throw new Error("Missing argument: playbackId");
     }
-    _ref = this.elements;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      sound = _ref[_i];
+    ref = this.elements;
+    for (j = 0, len = ref.length; j < len; j++) {
+      sound = ref[j];
       if (sound.playbackId === playbackId && sound.started && !sound.ended) {
         sound.volume = 0;
         sound.loop = false;
@@ -6580,10 +6575,10 @@ c = Effect = (function() {
    */
 
   Effect.prototype.stopAll = function() {
-    var sound, _i, _len, _ref;
-    _ref = this.elements;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      sound = _ref[_i];
+    var j, len, ref, sound;
+    ref = this.elements;
+    for (j = 0, len = ref.length; j < len; j++) {
+      sound = ref[j];
       if (sound.started && !sound.ended) {
         sound.volume = 0;
         sound.loop = false;
@@ -6601,11 +6596,11 @@ c = Effect = (function() {
   Effect.prototype.stopLoop = function(playbackId) {
     var sound;
     throw new Error("Missing argument: playbackId")((function() {
-      var _i, _len, _ref;
+      var j, len, ref;
       if (playbackId === void 0) {
-        _ref = this.elements;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          sound = _ref[_i];
+        ref = this.elements;
+        for (j = 0, len = ref.length; j < len; j++) {
+          sound = ref[j];
           if (sound.playbackId === playbackId && sound.started && !sound.ended) {
             sound.loop = false;
             true;
@@ -7102,8 +7097,8 @@ Room = require('../engine/room');
 
 },{"../engine/room":7,"../geometry/vector":12}],28:[function(require,module,exports){
 var Circle, Geometry, Helpers, Views, c,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -7145,8 +7140,8 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {number} [lineWidth = 1] The circle's width if added to a view (in px)
  */
 
-c = Circle = (function(_super) {
-  __extends(Circle, _super);
+c = Circle = (function(superClass) {
+  extend(Circle, superClass);
 
   Helpers.Mixin.mixin(Circle, Views.Child);
 
@@ -7170,10 +7165,10 @@ c = Circle = (function(_super) {
     return;
   }
 
-  Circle.prototype.CircleInitWithoutRedrawRegions = function(x, y, radius, fillStyle, strokeStyle, lineWidth) {
-    this.fillStyle = fillStyle;
-    this.strokeStyle = strokeStyle;
-    this.lineWidth = lineWidth;
+  Circle.prototype.CircleInitWithoutRedrawRegions = function(x, y, radius, fillStyle1, strokeStyle1, lineWidth1) {
+    this.fillStyle = fillStyle1;
+    this.strokeStyle = strokeStyle1;
+    this.lineWidth = lineWidth1;
     this.set(x, y, radius);
   };
 
@@ -7263,8 +7258,8 @@ Geometry.Rectangle = require('../geometry/rectangle');
 
 },{"../geometry/circle":8,"../geometry/rectangle":11,"../helpers/mixin":15,"./child":27}],29:[function(require,module,exports){
 var Collidable, Geometry, Helpers, Views, c,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -7293,8 +7288,8 @@ Can check both for precise (bitmap-based) collisions and bounding box collisions
 @param {object} [additionalProperties] An object containing key-value pairs that will be set as properties for the created object. Can be used for setting advanced options such as sprite offset and opacity.
  */
 
-c = Collidable = (function(_super) {
-  __extends(Collidable, _super);
+c = Collidable = (function(superClass) {
+  extend(Collidable, superClass);
 
   function Collidable(source, x, y, direction, additionalProperties) {
     Collidable.__super__.constructor.apply(this, arguments);
@@ -7615,9 +7610,9 @@ Geometry = {
 
 },{"../geometry/vector":12,"../helpers/matrix-calculation":14,"./sprite":35}],30:[function(require,module,exports){
 var Container, ObjectCreator, Views, c,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __slice = [].slice;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty,
+  slice = [].slice;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -7645,12 +7640,12 @@ All objects which are drawn on the game's canvas extends the View-class.
 @param {Child} child3 A third ...
  */
 
-c = Container = (function(_super) {
-  __extends(Container, _super);
+c = Container = (function(superClass) {
+  extend(Container, superClass);
 
   function Container() {
     var children;
-    children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    children = 1 <= arguments.length ? slice.call(arguments, 0) : [];
     Container.__super__.constructor.call(this);
     this.children = [];
     this.addChildren.apply(this, children);
@@ -7990,8 +7985,8 @@ ObjectCreator = require('../engine/object-creator');
 
 },{"../engine/object-creator":6,"./child":27}],31:[function(require,module,exports){
 var GameObject, Geometry, Views, c,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -8034,8 +8029,8 @@ speed: new Math.Vector(0, 0)
 </code>
  */
 
-c = GameObject = (function(_super) {
-  __extends(GameObject, _super);
+c = GameObject = (function(superClass) {
+  extend(GameObject, superClass);
 
   function GameObject(source, x, y, direction, additionalProperties) {
     if (source === void 0) {
@@ -8085,8 +8080,8 @@ Geometry = {
 
 },{"../geometry/vector":12,"./collidable":29}],32:[function(require,module,exports){
 var Geometry, Helpers, Line, Views, c,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -8126,8 +8121,8 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {string} [lineCap='butt'] The line's cap style if added to a view
  */
 
-c = Line = (function(_super) {
-  __extends(Line, _super);
+c = Line = (function(superClass) {
+  extend(Line, superClass);
 
   Helpers.Mixin.mixin(Line, Views.Child);
 
@@ -8328,8 +8323,8 @@ Geometry.Vector = require('../geometry/vector');
 
 },{"../geometry/line":9,"../geometry/vector":12,"../helpers/mixin":15,"./child":27}],33:[function(require,module,exports){
 var Geometry, Helpers, Polygon, Views, c,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -8367,8 +8362,8 @@ The constructor for the Polygon class. Uses the setFromPoints-function to set th
 @param {number} [lineWidth = 1] The polygon's width if added to a view (in px)
  */
 
-c = Polygon = (function(_super) {
-  __extends(Polygon, _super);
+c = Polygon = (function(superClass) {
+  extend(Polygon, superClass);
 
   Helpers.Mixin.mixin(Polygon, Views.Child);
 
@@ -8417,8 +8412,8 @@ module.exports.prototype.constructor = c;
 
 },{"../geometry/polygon":10,"../helpers/mixin":15,"./child":27}],34:[function(require,module,exports){
 var Geometry, Helpers, Rectangle, Views, c,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -8462,8 +8457,8 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} [lineWidth = 1] The rectangle's width if added to a view (in px)
  */
 
-c = Rectangle = (function(_super) {
-  __extends(Rectangle, _super);
+c = Rectangle = (function(superClass) {
+  extend(Rectangle, superClass);
 
   Helpers.Mixin.mixin(Rectangle, Views.Child);
 
@@ -8498,14 +8493,14 @@ c = Rectangle = (function(_super) {
   @lends View.Rectangle.prototype
    */
 
-  Rectangle.prototype.RectangleInitWithoutRedrawRegions = function(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
+  Rectangle.prototype.RectangleInitWithoutRedrawRegions = function(x1, y1, width1, height1, fillStyle1, strokeStyle1, lineWidth) {
     var hidden;
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.fillStyle = fillStyle;
-    this.strokeStyle = strokeStyle;
+    this.x = x1;
+    this.y = y1;
+    this.width = width1;
+    this.height = height1;
+    this.fillStyle = fillStyle1;
+    this.strokeStyle = strokeStyle1;
     hidden = {
       lineWidth: lineWidth
     };
@@ -8655,8 +8650,8 @@ module.exports.prototype.constructor = c;
 
 },{"../geometry/rectangle":11,"../helpers/mixin":15,"./child":27}],35:[function(require,module,exports){
 var Geometry, Globals, Helpers, Mixins, Sprite, Views, c,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -8710,8 +8705,8 @@ offset: new Math.Vector('center', 'center')
 }</code>
  */
 
-c = Sprite = (function(_super) {
-  __extends(Sprite, _super);
+c = Sprite = (function(superClass) {
+  extend(Sprite, superClass);
 
   Helpers.Mixin.mixin(Sprite, Mixins.Animatable);
 
@@ -8927,8 +8922,8 @@ Globals = require('../engine/globals');
 
 },{"../engine/globals":4,"../geometry/rectangle":11,"../geometry/vector":12,"../helpers/mixin":15,"../mixins/animatable":20,"./container":30}],36:[function(require,module,exports){
 var Geometry, Globals, Helpers, Mixins, TextBlock, Views, c,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -8946,8 +8941,8 @@ Views = {
   Container: require('./container')
 };
 
-c = TextBlock = (function(_super) {
-  __extends(TextBlock, _super);
+c = TextBlock = (function(superClass) {
+  extend(TextBlock, superClass);
 
   Helpers.Mixin.mixin(TextBlock, Mixins.Animatable);
 

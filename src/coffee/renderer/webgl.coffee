@@ -36,7 +36,6 @@ c = class WebGLRenderer
 
   setProgram: (program) ->
     if @currentProgram isnt program
-      gl = undefined
       gl = @gl
 
       # Set program

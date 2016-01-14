@@ -19,11 +19,6 @@ c = class WebGLTextureShaderProgram
     return
 
   initShaders: (gl) ->
-    vertexCode = undefined
-    fragmentCode = undefined
-    vertexShader = undefined
-    fragmentShader = undefined
-
     # Vertex shader
     vertexCode = "
       attribute vec2 a_position;
@@ -102,8 +97,8 @@ c = class WebGLTextureShaderProgram
     # Enable the texture coord buffer
     if @cache.currentBuffer isnt @cache.regularTextCoordBuffer
       gl.bindBuffer gl.ARRAY_BUFFER, @cache.regularTextCoordBuffer
-      gl.enableVertexAttribArray @locations.a_texCoord
       gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
+      gl.enableVertexAttribArray @locations.a_texCoord
       @cache.currentBuffer = @cache.regularTextCoordBuffer
 
       # Bind rectangle corner buffer again (when needed instead of all the time)
@@ -135,8 +130,8 @@ c = class WebGLTextureShaderProgram
       x2
       y2
     ]), gl.STATIC_DRAW
-    gl.enableVertexAttribArray @locations.a_texCoord
     gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
+    gl.enableVertexAttribArray @locations.a_texCoord
     @cache.currentBuffer = @cache.animatedTextCoordBuffer
 
     # Bind rectangle corner buffer again (when needed instead of all the time)
