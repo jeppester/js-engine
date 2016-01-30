@@ -28,9 +28,21 @@ c = class Loader
 
     # Make load overlay
     @loadOverlay = document.createElement("div")
-    @loadOverlay.setAttribute "style", "border: 0;position: absolute;top: 0;left: 0;width: 100%;height: 100%;z-index: 100;opacity: 1;"
+    for name, value of {
+      border: 0
+      position: 'absolute'
+      top: 0
+      left: 0
+      width: '100%'
+      height: '100%'
+      zIndex: 100
+      opacity: 1
+    }
+      @loadOverlay.style[name] = value
     @loadOverlay.className = "load-overlay"
-    @loadOverlay.innerHTML = """<div class="load-overlay-text">#{engine.loadText}</div>"""
+    @loadOverlay.innerHTML = """
+      <div class="load-overlay-text">#{engine.loadText}</div>
+    """
     engine.arena.appendChild @loadOverlay
     return
 
@@ -181,7 +193,8 @@ c = class Loader
     i = 0
     while i < @themes[engine.defaultTheme].inherit.length
       inheritTheme = @themes[@themes[engine.defaultTheme].inherit[i]]
-      loopThrough inheritTheme.images if inheritTheme isnt undefined and inheritTheme.images isnt undefined
+      if inheritTheme isnt undefined and inheritTheme.images isnt undefined
+        loopThrough inheritTheme.images
       i++
     sourceStrings
 
@@ -197,7 +210,8 @@ c = class Loader
       if @themes.hasOwnProperty(themeName)
         theme = @themes[themeName]
         for resourceString of theme.sfx
-          res.push theme.sfx[resourceString] if theme.sfx.hasOwnProperty(resourceString)
+          if theme.sfx.hasOwnProperty(resourceString)
+            res.push theme.sfx[resourceString]
     res
 
 
@@ -212,7 +226,8 @@ c = class Loader
       if @themes.hasOwnProperty(themeName)
         theme = @themes[themeName]
         for resourceString of theme.music
-          res.push theme.music[resourceString] if theme.music.hasOwnProperty(resourceString)
+          if theme.music.hasOwnProperty(resourceString)
+            res.push theme.music[resourceString]
     res
 
 
@@ -252,7 +267,8 @@ c = class Loader
   @param {function} callback A callback function to run when all the themes has been loaded
   ###
   loadThemes: (themeNames, callback) ->
-    throw new Error("Missing argument: themeNames") if themeNames is undefined #dev
+    if themeNames is undefined #dev
+      throw new Error "Missing argument: themeNames"
     @onthemesloaded = callback if callback isnt undefined
     i = 0
     while i < themeNames.length
@@ -263,44 +279,35 @@ c = class Loader
 
       # Fetch theme details
       req = new XMLHttpRequest()
-      req.open "GET", engine.themesPath + "/" + name + "/theme.js", false
+      req.open "GET", engine.themesPath + "/" + name + "/theme.js"
       req.send()
 
-      # Check that the theme is actually there
-      if req.status is 404
-        console.log "Theme not found: " + name
-        continue
+      req.addEventListener 'error', =>
+        throw new Error "Theme not found: " + name
 
-      # Get theme details
-      codeString = req.responseText + "\n//# sourceURL=/" + engine.themesPath + "/" + name + "/theme.js"
-      eval "theme = " + codeString
+      req.addEventListener 'load', =>
+        # Get theme details
+        codeString = req.responseText + "\n//# sourceURL=/" + engine.themesPath + "/" + name + "/theme.js"
+        eval "theme = " + codeString
 
-      # Load inherited themes
-      @loadThemes theme.inherit if theme.inherit.length
+        # Load inherited themes
+        @loadThemes theme.inherit if theme.inherit.length
 
-      # Always inherit "External" theme
-      theme.inherit.push "External"
+        # Always inherit "External" theme
+        theme.inherit.push "External"
 
-      # Create new theme
-      @themes[name] = theme
-      theme.resourcesCount = 0
-      theme.resourcesLoaded = 0
-      theme.masks = {}
-      theme.textures = {}
+        # Create new theme
+        @themes[name] = theme
+        theme.resourcesCount = 0
+        theme.resourcesLoaded = 0
+        theme.masks = {}
+        theme.textures = {}
 
-      # Load all images
-      @loadResources theme, theme.images, "images"
-      @loadResources theme, theme.sfx, "sfx"
-      @loadResources theme, theme.music, "music"
+        # Load all images
+        @loadResources theme, theme.images, "images"
+        @loadResources theme, theme.sfx, "sfx"
+        @loadResources theme, theme.music, "music"
       i++
-
-    # Check if the theme was empty, if so, run callback
-    total = 0
-    for i of @themes
-      total += @themes[i].resourcesCount if @themes.hasOwnProperty(i)
-    @onthemesloaded() if @onthemesloaded if total is 0
-    return
-
 
   ###
   Loads resources to a theme. This function is used by loadThemes for caching the theme resources.
