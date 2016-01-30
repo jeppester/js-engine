@@ -69,8 +69,8 @@ c = class WebGLRenderer
         gl.uniform2f @currentProgram.locations.u_resolution, w, h if @currentProgram
 
       # Set camera position
-      camera.localWm ?= new Float32Array 9
-      Helpers.MatrixCalculation.setTranslation(camera.localWm, -camera.captureRegion.x, -camera.captureRegion.y)
+      camera.wm ?= new Float32Array 9
+      Helpers.MatrixCalculation.setTranslation(camera.wm, -camera.captureRegion.x, -camera.captureRegion.y)
 
       # Set camera projection viewport
       gl.viewport camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height
@@ -82,7 +82,7 @@ c = class WebGLRenderer
       ii = 0
       while ii < roomsLength
         # Draw rooms
-        @renderTree rooms[ii], camera.localWm
+        @renderTree rooms[ii], camera.wm
         ii++
       i++
     return
@@ -92,18 +92,19 @@ c = class WebGLRenderer
     gl = @gl
 
     # Create world matrix for object center
-    object.localWm ?= new Float32Array 9
-    Helpers.MatrixCalculation.setLocalMatrix object.localWm, object
-    Helpers.MatrixCalculation.multiply object.localWm, wm
+    object.wm ?= new Float32Array 9
+    Helpers.MatrixCalculation.setLocalMatrix object.wm, object
+    Helpers.MatrixCalculation.multiply object.wm, wm
 
-    if object.offset
+    if object.renderType != ''
       wmWithOffset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
-      Helpers.MatrixCalculation.multiply wmWithOffset, object.localWm
+      Helpers.MatrixCalculation.multiply wmWithOffset, object.wm
 
-    # Set object alpha (because alpha is used by ALL rendered objects)
-    if @cache.currentAlpha isnt object.opacity
-      @cache.currentAlpha = object.opacity
-      gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
+      # Set object alpha (because alpha is used by ALL rendered objects)
+      if @cache.currentAlpha isnt object.opacity
+        @cache.currentAlpha = object.opacity
+        gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
+
     switch object.renderType
 
       # Texture based objects
@@ -137,7 +138,7 @@ c = class WebGLRenderer
       len = object.children.length
       i = 0
       while i < len
-        @renderTree object.children[i], object.localWm
+        @renderTree object.children[i], object.wm
         i++
     return
 

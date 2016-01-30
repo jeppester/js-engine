@@ -5767,7 +5767,7 @@ c = CanvasRenderer = (function() {
   }
 
   CanvasRenderer.prototype.render = function(cameras) {
-    var camera, camerasLength, h, i, ii, rooms, roomsLength, w, wm, wmS, wmT;
+    var camera, camerasLength, h, i, ii, rooms, roomsLength, sx, sy, w;
     camerasLength = cameras.length;
     c = this.context;
     c.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -5777,14 +5777,16 @@ c = CanvasRenderer = (function() {
       c.save();
       w = camera.captureRegion.width;
       h = camera.captureRegion.height;
-      wmT = Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
-      if (camera.captureRegion.width !== 0 && camera.captureRegion.height !== 0) {
-        wmS = Helpers.MatrixCalculation.makeScale(camera.projectionRegion.width / camera.captureRegion.width, camera.projectionRegion.height / camera.captureRegion.height);
-      } else {
-        wmS = Helpers.MatrixCalculation.makeIdentity();
+      if (camera.wm == null) {
+        camera.wm = new Float32Array(9);
       }
-      wm = Helpers.MatrixCalculation.matrixMultiply(wmT, wmS);
-      wm = Helpers.MatrixCalculation.matrixMultiply(wm, Helpers.MatrixCalculation.makeTranslation(camera.projectionRegion.x, camera.projectionRegion.y));
+      Helpers.MatrixCalculation.setTranslation(camera.wm, -camera.captureRegion.x, -camera.captureRegion.y);
+      if (camera.captureRegion.width !== 0 && camera.captureRegion.height !== 0) {
+        sx = camera.projectionRegion.width / camera.captureRegion.width;
+        sy = camera.projectionRegion.height / camera.captureRegion.height;
+        Helpers.MatrixCalculation.multiply(camera.wm, Helpers.MatrixCalculation.getScale(sx, sy));
+      }
+      Helpers.MatrixCalculation.multiply(camera.wm, Helpers.MatrixCalculation.getTranslation(camera.projectionRegion.x, camera.projectionRegion.y));
       c.beginPath();
       c.moveTo(camera.projectionRegion.x, camera.projectionRegion.y);
       c.lineTo(camera.projectionRegion.x + camera.projectionRegion.width, camera.projectionRegion.y);
@@ -5796,7 +5798,7 @@ c = CanvasRenderer = (function() {
       roomsLength = rooms.length;
       ii = 0;
       while (ii < roomsLength) {
-        this.renderTree(rooms[ii], wm);
+        this.renderTree(rooms[ii], camera.wm);
         ii++;
       }
       c.restore();
@@ -5805,14 +5807,19 @@ c = CanvasRenderer = (function() {
   };
 
   CanvasRenderer.prototype.renderTree = function(object, wm) {
-    var i, len, localWm, offset, _results;
-    localWm = Helpers.MatrixCalculation.matrixMultiplyArray([Helpers.MatrixCalculation.calculateLocalMatrix(object), wm]);
+    var i, len, wmWithOffset, _results;
+    if (object.wm == null) {
+      object.wm = new Float32Array(9);
+    }
+    Helpers.MatrixCalculation.setLocalMatrix(object.wm, object);
+    Helpers.MatrixCalculation.multiply(object.wm, wm);
     if (!object.isVisible()) {
       return;
     }
     if (object.renderType !== "") {
-      offset = Helpers.MatrixCalculation.matrixMultiply(Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y), localWm);
-      this.context.setTransform(offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]);
+      wmWithOffset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
+      Helpers.MatrixCalculation.multiply(wmWithOffset, object.wm);
+      this.context.setTransform(wmWithOffset[0], wmWithOffset[1], wmWithOffset[3], wmWithOffset[4], wmWithOffset[6], wmWithOffset[7]);
       this.context.globalAlpha = object.opacity;
     }
     switch (object.renderType) {
@@ -5845,7 +5852,7 @@ c = CanvasRenderer = (function() {
       i = 0;
       _results = [];
       while (i < len) {
-        this.renderTree(object.children[i], localWm);
+        this.renderTree(object.children[i], object.wm);
         _results.push(i++);
       }
       return _results;
@@ -6066,16 +6073,16 @@ c = WebGLRenderer = (function() {
           gl.uniform2f(this.currentProgram.locations.u_resolution, w, h);
         }
       }
-      if (camera.localWm == null) {
-        camera.localWm = new Float32Array(9);
+      if (camera.wm == null) {
+        camera.wm = new Float32Array(9);
       }
-      Helpers.MatrixCalculation.setTranslation(camera.localWm, -camera.captureRegion.x, -camera.captureRegion.y);
+      Helpers.MatrixCalculation.setTranslation(camera.wm, -camera.captureRegion.x, -camera.captureRegion.y);
       gl.viewport(camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height);
       rooms = [engine.masterRoom, camera.room];
       roomsLength = rooms.length;
       ii = 0;
       while (ii < roomsLength) {
-        this.renderTree(rooms[ii], camera.localWm);
+        this.renderTree(rooms[ii], camera.wm);
         ii++;
       }
       i++;
@@ -6088,19 +6095,19 @@ c = WebGLRenderer = (function() {
       return;
     }
     gl = this.gl;
-    if (object.localWm == null) {
-      object.localWm = new Float32Array(9);
+    if (object.wm == null) {
+      object.wm = new Float32Array(9);
     }
-    Helpers.MatrixCalculation.setLocalMatrix(object.localWm, object);
-    Helpers.MatrixCalculation.multiply(object.localWm, wm);
-    if (object.offset) {
+    Helpers.MatrixCalculation.setLocalMatrix(object.wm, object);
+    Helpers.MatrixCalculation.multiply(object.wm, wm);
+    if (object.renderType !== '') {
       wmWithOffset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
-      Helpers.MatrixCalculation.multiply(wmWithOffset, object.localWm);
-    }
-    if (this.cache.currentAlpha !== object.opacity) {
-      this.cache.currentAlpha = object.opacity;
-      if (this.currentProgram) {
-        gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
+      Helpers.MatrixCalculation.multiply(wmWithOffset, object.wm);
+      if (this.cache.currentAlpha !== object.opacity) {
+        this.cache.currentAlpha = object.opacity;
+        if (this.currentProgram) {
+          gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
+        }
       }
     }
     switch (object.renderType) {
@@ -6131,7 +6138,7 @@ c = WebGLRenderer = (function() {
       len = object.children.length;
       i = 0;
       while (i < len) {
-        this.renderTree(object.children[i], object.localWm);
+        this.renderTree(object.children[i], object.wm);
         i++;
       }
     }
@@ -7579,7 +7586,7 @@ c = Collidable = (function(_super) {
   };
 
   Collidable.prototype.createCollisionBitmap = function(objects) {
-    var calc, canvas, mask, obj, parent, parents, wm, _i, _j, _k, _len, _len1, _len2;
+    var calc, canvas, mask, obj, parent, parents, _i, _j, _k, _len, _len1, _len2;
     mask = this.mask;
     calc = Helpers.MatrixCalculation;
     canvas = document.createElement("canvas");
@@ -7591,31 +7598,33 @@ c = Collidable = (function(_super) {
     c.fillRect(0, 0, canvas.width, canvas.height);
     parents = this.getParents();
     parents.unshift(this);
-    wm = new Float32Array(9);
-    calc.setTranslation(wm, this.offset.x, this.offset.y);
+    if (this.wm == null) {
+      this.wm = new Float32Array(9);
+    }
+    calc.setTranslation(this.wm, this.offset.x, this.offset.y);
     for (_i = 0, _len = parents.length; _i < _len; _i++) {
       parent = parents[_i];
-      calc.reverseMultiply(wm, calc.getInverseLocalMatrix(parent));
+      calc.reverseMultiply(this.wm, calc.getInverseLocalMatrix(parent));
     }
     for (_j = 0, _len1 = objects.length; _j < _len1; _j++) {
       obj = objects[_j];
       if (obj === this) {
         throw new Error("Objects are not allowed to check for collisions with themselves");
       }
-      if (obj.localWm == null) {
-        obj.localWm = new Float32Array(9);
+      if (obj.wm == null) {
+        obj.wm = new Float32Array(9);
       }
-      calc.setIdentity(obj.localWm);
+      calc.setIdentity(obj.wm);
       parents = obj.getParents();
       parents.reverse();
       parents.push(obj);
       for (_k = 0, _len2 = parents.length; _k < _len2; _k++) {
         parent = parents[_k];
-        calc.reverseMultiply(obj.localWm, calc.getLocalMatrix(parent));
+        calc.reverseMultiply(obj.wm, calc.getLocalMatrix(parent));
       }
-      calc.multiply(obj.localWm, wm);
-      calc.reverseMultiply(obj.localWm, calc.getTranslation(-obj.offset.x, -obj.offset.y));
-      c.setTransform(obj.localWm[0], obj.localWm[1], obj.localWm[3], obj.localWm[4], obj.localWm[6], obj.localWm[7]);
+      calc.multiply(obj.wm, this.wm);
+      calc.reverseMultiply(obj.wm, calc.getTranslation(-obj.offset.x, -obj.offset.y));
+      c.setTransform(obj.wm[0], obj.wm[1], obj.wm[3], obj.wm[4], obj.wm[6], obj.wm[7]);
       c.drawImage(obj.mask, (obj.clipWidth + obj.bm.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight);
     }
     c.setTransform(1, 0, 0, 1, 0, 0);

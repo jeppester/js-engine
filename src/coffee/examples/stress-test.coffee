@@ -15,7 +15,7 @@ class StressTest
     engine.currentRoom.loops.eachFrame.attachFunction @, @controls
 
   onLoaded: ->
-    @addObjects 8000
+    @addObjects 2000
 
   updateFPS: ->
     @fpsCounter.string = 'FPS: ' + engine.fps;
@@ -70,7 +70,7 @@ new Engine
 	themes: ['example']
 
 	# Disable webgl (to compare performance)
-	# disableWebGL: true
+	disableWebGL: true
 
 	# Set arena background-color
 	backgroundColor: "#000"

@@ -257,11 +257,11 @@ c = class Collidable extends Views.Sprite
     parents.unshift @
 
     # Reset transform to the world matrix
-    wm = new Float32Array 9
-    calc.setTranslation wm, @offset.x, @offset.y
+    @wm ?= new Float32Array 9
+    calc.setTranslation @wm, @offset.x, @offset.y
 
     for parent in parents
-      calc.reverseMultiply wm, calc.getInverseLocalMatrix(parent)
+      calc.reverseMultiply @wm, calc.getInverseLocalMatrix(parent)
 
     # Draw other objects
     for obj in objects
@@ -269,27 +269,27 @@ c = class Collidable extends Views.Sprite
         throw new Error "Objects are not allowed to check for collisions with themselves"
 
       # Create local matrix (to add to the world matrix)
-      obj.localWm ?= new Float32Array 9
-      calc.setIdentity obj.localWm
+      obj.wm ?= new Float32Array 9
+      calc.setIdentity obj.wm
 
       parents = obj.getParents()
       parents.reverse()
       parents.push obj
 
       for parent in parents
-        calc.reverseMultiply(obj.localWm, calc.getLocalMatrix(parent))
+        calc.reverseMultiply(obj.wm, calc.getLocalMatrix(parent))
 
-      calc.multiply(obj.localWm, wm)
-      calc.reverseMultiply(obj.localWm, calc.getTranslation(-obj.offset.x, -obj.offset.y))
+      calc.multiply(obj.wm, @wm)
+      calc.reverseMultiply(obj.wm, calc.getTranslation(-obj.offset.x, -obj.offset.y))
 
       # Set world transform
       c.setTransform(
-        obj.localWm[0]
-        obj.localWm[1]
-        obj.localWm[3]
-        obj.localWm[4]
-        obj.localWm[6]
-        obj.localWm[7]
+        obj.wm[0]
+        obj.wm[1]
+        obj.wm[3]
+        obj.wm[4]
+        obj.wm[6]
+        obj.wm[7]
       )
 
       # Draw object mask

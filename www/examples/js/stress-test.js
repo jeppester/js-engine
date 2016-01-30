@@ -24,7 +24,7 @@ StressTest = (function() {
   }
 
   StressTest.prototype.onLoaded = function() {
-    return this.addObjects(8000);
+    return this.addObjects(2000);
   };
 
   StressTest.prototype.updateFPS = function() {
@@ -94,6 +94,7 @@ StressTest = (function() {
 new Engine({
   gameClass: StressTest,
   themes: ['example'],
+  disableWebGL: true,
   backgroundColor: "#000",
   pauseOnBlur: false,
   canvasResX: 600,

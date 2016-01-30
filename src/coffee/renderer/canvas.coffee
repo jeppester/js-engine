@@ -21,13 +21,14 @@ c = class CanvasRenderer
       h = camera.captureRegion.height
 
       # Set camera position
-      wmT = Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
-      if camera.captureRegion.width isnt 0 and camera.captureRegion.height isnt 0
-        wmS = Helpers.MatrixCalculation.makeScale(camera.projectionRegion.width / camera.captureRegion.width, camera.projectionRegion.height / camera.captureRegion.height)
-      else
-        wmS = Helpers.MatrixCalculation.makeIdentity()
-      wm = Helpers.MatrixCalculation.matrixMultiply(wmT, wmS)
-      wm = Helpers.MatrixCalculation.matrixMultiply(wm, Helpers.MatrixCalculation.makeTranslation(camera.projectionRegion.x, camera.projectionRegion.y))
+      camera.wm ?= new Float32Array 9
+      Helpers.MatrixCalculation.setTranslation camera.wm, -camera.captureRegion.x, -camera.captureRegion.y
+      if camera.captureRegion.width != 0 && camera.captureRegion.height != 0
+        sx = camera.projectionRegion.width / camera.captureRegion.width
+        sy = camera.projectionRegion.height / camera.captureRegion.height
+        Helpers.MatrixCalculation.multiply camera.wm, Helpers.MatrixCalculation.getScale(sx, sy)
+
+      Helpers.MatrixCalculation.multiply camera.wm, Helpers.MatrixCalculation.getTranslation(camera.projectionRegion.x, camera.projectionRegion.y)
 
       # Set camera projection viewport
       c.beginPath()
@@ -46,21 +47,22 @@ c = class CanvasRenderer
       while ii < roomsLength
 
         # Draw rooms
-        @renderTree rooms[ii], wm
+        @renderTree rooms[ii], camera.wm
         ii++
       c.restore()
       i++
     return
 
   renderTree: (object, wm) ->
-    localWm = Helpers.MatrixCalculation.matrixMultiplyArray([
-      Helpers.MatrixCalculation.calculateLocalMatrix(object)
-      wm
-    ])
+    object.wm ?= new Float32Array 9
+    Helpers.MatrixCalculation.setLocalMatrix object.wm, object
+    Helpers.MatrixCalculation.multiply object.wm, wm
+
     return unless object.isVisible()
-    if object.renderType isnt ""
-      offset = Helpers.MatrixCalculation.matrixMultiply Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y), localWm
-      @context.setTransform offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]
+    if object.renderType != ""
+      wmWithOffset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
+      Helpers.MatrixCalculation.multiply wmWithOffset, object.wm
+      @context.setTransform wmWithOffset[0], wmWithOffset[1], wmWithOffset[3], wmWithOffset[4], wmWithOffset[6], wmWithOffset[7]
       @context.globalAlpha = object.opacity
 
     switch object.renderType
@@ -83,7 +85,7 @@ c = class CanvasRenderer
       len = object.children.length
       i = 0
       while i < len
-        @renderTree object.children[i], localWm
+        @renderTree object.children[i], object.wm
         i++
 
   renderSprite: (object) ->
