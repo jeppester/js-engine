@@ -44,7 +44,7 @@ The default options are:
 "cachedSoundCopies": 5, // How many times sounds should be duplicated to allow multiple playbacks
 "canvasResX": 800, // The horizontal resolution to set for the game's main canvas
 "canvasResY": 600, // The vertical resolution to set for the game's main canvas
-"defaultCollisionResolution": 6, // Res. of collision checking, by default every 6th px is checked
+"defaultCollisionResolution": 1, // Res. of collision checking, by default every 6th px is checked
 "disableRightClick": true, // If right clicks inside the arena should be disabled
 "disableWebGL": false, // If WebGL rendering should be disabled
 "preventDefaultKeyboard": false, // Whether or not preventDefault should be called for keyboard events
@@ -181,7 +181,7 @@ c = window.Engine = class Engine
     @disableTouchScroll = true
     @resetCursorOnEachFrame = true
     @cameras = []
-    @defaultCollisionResolution = 6
+    @defaultCollisionResolution = 1
     @redrawObjects = []
     @enableRedrawRegions = false
     @disableWebGL = false

@@ -1,4 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (global){
 var CollisionStressTest;
 
 CollisionStressTest = (function() {
@@ -23,13 +24,13 @@ CollisionStressTest = (function() {
     this.collisionDisplay = new Engine.Views.TextBlock('Collides: No', 10, 50, 150, {
       color: '#FFF'
     });
-    this.collider = new Engine.Views.Collidable('character', 300, 200);
+    global.collider = this.collider = new Engine.Views.Collidable('character', 300, 200);
     this.hudView.addChildren(this.collider, this.fpsCounter, this.objectCounter, this.collisionDisplay);
     engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
     engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
     engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
     engine.currentRoom.loops.eachFrame.attachFunction(this, this.checkCollision);
-    return this.addObjects(200);
+    return this.addObjects(400);
   };
 
   CollisionStressTest.prototype.checkCollision = function() {
@@ -103,4 +104,5 @@ new Engine({
 
 
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[1]);

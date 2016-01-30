@@ -11,7 +11,7 @@ class CollisionStressTest
     @fpsCounter = new Engine.Views.TextBlock 'FPS: 0', 10, 10, 150, {color: '#FFF'}
     @objectCounter = new Engine.Views.TextBlock 'Objects: 0', 10, 30, 150, {color: '#FFF'}
     @collisionDisplay = new Engine.Views.TextBlock 'Collides: No', 10, 50, 150, {color: '#FFF'}
-    @collider = new Engine.Views.Collidable 'character', 300, 200
+    global.collider = @collider = new Engine.Views.Collidable 'character', 300, 200
 
     @hudView.addChildren @collider, @fpsCounter, @objectCounter, @collisionDisplay
 
@@ -19,7 +19,7 @@ class CollisionStressTest
     engine.currentRoom.loops.each20Frames.attachFunction @, @updateFPS
     engine.currentRoom.loops.eachFrame.attachFunction @, @controls
     engine.currentRoom.loops.eachFrame.attachFunction @, @checkCollision
-    @addObjects 200
+    @addObjects 400
 
   checkCollision: ->
     if @collider.collidesWith @objectView.getChildren(), 1
