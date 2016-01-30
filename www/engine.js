@@ -4153,40 +4153,93 @@ module.exports = {
 var MatrixCalculationHelper;
 
 module.exports = MatrixCalculationHelper = {
-  calculateLocalMatrix: function(object) {
-    var position, rotation, scale;
-    scale = void 0;
-    rotation = void 0;
-    position = void 0;
-    scale = this.makeScale(object.widthScale * object.size, object.heightScale * object.size);
-    rotation = this.makeRotation(-object.direction);
-    position = this.makeTranslation(object.x, object.y);
-    return this.matrixMultiplyArray([scale, rotation, position]);
+  getOperationMatrix: function() {
+    if (this.operationMatrix == null) {
+      this.operationMatrix = new Float32Array(9);
+    }
+    this.setIdentity(this.operationMatrix);
+    return this.operationMatrix;
   },
-  calculateInverseLocalMatrix: function(object) {
-    var position, rotation, scale;
-    scale = void 0;
-    rotation = void 0;
-    position = void 0;
-    scale = this.makeScale(1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size));
-    rotation = this.makeRotation(object.direction);
-    position = this.makeTranslation(-object.x, -object.y);
-    return this.matrixMultiplyArray([position, rotation, scale]);
+  calculateLocalMatrix: function(object, cache) {
+    if (cache == null) {
+      cache = new Float32Array(9);
+    }
+    this.setScale(cache, object.widthScale * object.size, object.heightScale * object.size);
+    this.multiply(cache, this.getRotation(-object.direction));
+    this.multiply(cache, this.getTranslation(object.x, object.y));
+    return cache;
   },
-  makeIdentity: function() {
-    return [1, 0, 0, 0, 1, 0, 0, 0, 1];
+  calculateInverseLocalMatrix: function(object, cache) {
+    if (cache == null) {
+      cache = new Float32Array(9);
+    }
+    this.setScale(cache, 1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size));
+    this.multiply(cache, this.getRotation(object.direction));
+    this.multiply(cache, this.getTranslation(-object.x, -object.y));
+    return cache;
   },
-  makeTranslation: function(tx, ty) {
-    return [1, 0, 0, 0, 1, 0, tx, ty, 1];
+  setIdentity: function(matrix) {
+    matrix[0] = 1;
+    matrix[1] = 0;
+    matrix[2] = 0;
+    matrix[3] = 0;
+    matrix[4] = 1;
+    matrix[5] = 0;
+    matrix[6] = 0;
+    matrix[7] = 0;
+    matrix[8] = 1;
+    return matrix;
   },
-  makeRotation: function(direction) {
+  getIdentity: function() {
+    return this.setIdentity(this.getOperationMatrix());
+  },
+  setRotation: function(matrix, direction) {
     var c, s;
     c = Math.cos(direction);
     s = Math.sin(direction);
-    return [c, -s, 0, s, c, 0, 0, 0, 1];
+    matrix[0] = c;
+    matrix[1] = -s;
+    matrix[2] = 0;
+    matrix[3] = s;
+    matrix[4] = c;
+    matrix[5] = 0;
+    matrix[6] = 0;
+    matrix[7] = 0;
+    matrix[8] = 1;
+    return matrix;
   },
-  makeScale: function(sx, sy) {
-    return [sx, 0, 0, 0, sy, 0, 0, 0, 1];
+  getRotation: function(direction) {
+    return this.setRotation(this.getOperationMatrix(), direction);
+  },
+  setTranslation: function(matrix, tx, ty) {
+    matrix[0] = 1;
+    matrix[1] = 0;
+    matrix[2] = 0;
+    matrix[3] = 0;
+    matrix[4] = 1;
+    matrix[5] = 0;
+    matrix[6] = tx;
+    matrix[7] = ty;
+    matrix[8] = 1;
+    return matrix;
+  },
+  getTranslation: function(tx, ty) {
+    return this.setTranslation(this.getOperationMatrix(), tx, ty);
+  },
+  setScale: function(matrix, sx, sy) {
+    matrix[0] = sx;
+    matrix[1] = 0;
+    matrix[2] = 0;
+    matrix[3] = 0;
+    matrix[4] = sy;
+    matrix[5] = 0;
+    matrix[6] = 0;
+    matrix[7] = 0;
+    matrix[8] = 1;
+    return matrix;
+  },
+  getScale: function(sx, sy) {
+    return this.setScale(this.getOperationMatrix(), sx, sy);
   },
   matrixDeterminant: function(matrix) {
     var a, b, c, d, e, f, g, h, i;
@@ -4227,28 +4280,6 @@ module.exports = MatrixCalculationHelper = {
     I = a * e - b * d;
     return this.matrixMultiplyNumber([A, D, G, B, E, H, C, F, I], 1 / det);
   },
-  getNewMatrix: function(matrix) {
-    var A, B, C, D, E, F, G, H, I, a, b, c, d, e, f, g, h, i;
-    a = matrix[0 * 3 + 0];
-    b = matrix[0 * 3 + 1];
-    c = matrix[0 * 3 + 2];
-    d = matrix[1 * 3 + 0];
-    e = matrix[1 * 3 + 1];
-    f = matrix[1 * 3 + 2];
-    g = matrix[2 * 3 + 0];
-    h = matrix[2 * 3 + 1];
-    i = matrix[2 * 3 + 2];
-    A = e * i - f * h;
-    B = -(d * i - f * g);
-    C = d * h - e * g;
-    D = -(b * i - c * h);
-    E = a * i - c * g;
-    F = -(a * h - b * g);
-    G = b * f - c * e;
-    H = -(a * f - c * d);
-    I = a * e - b * d;
-    return [A, D, G, B, E, H, C, F, I];
-  },
   matrixMultiplyNumber: function(matrix, factor) {
     var a, b, c, d, e, f, g, h, i, s;
     a = matrix[0 * 3 + 0];
@@ -4263,7 +4294,7 @@ module.exports = MatrixCalculationHelper = {
     s = factor;
     return [a * s, b * s, c * s, d * s, e * s, f * s, g * s, h * s, i * s];
   },
-  matrixMultiply: function(a, b) {
+  multiply: function(a, b) {
     var a1, a2, b1, b2, c1, c2, d1, d2, e1, e2, f1, f2, g1, g2, h1, h2, i1, i2;
     a1 = a[0 * 3 + 0];
     b1 = a[0 * 3 + 1];
@@ -4283,18 +4314,16 @@ module.exports = MatrixCalculationHelper = {
     g2 = b[2 * 3 + 0];
     h2 = b[2 * 3 + 1];
     i2 = b[2 * 3 + 2];
-    return [a1 * a2 + b1 * d2 + c1 * g2, a1 * b2 + b1 * e2 + c1 * h2, a1 * c2 + b1 * f2 + c1 * i2, d1 * a2 + e1 * d2 + f1 * g2, d1 * b2 + e1 * e2 + f1 * h2, d1 * c2 + e1 * f2 + f1 * i2, g1 * a2 + h1 * d2 + i1 * g2, g1 * b2 + h1 * e2 + i1 * h2, g1 * c2 + h1 * f2 + i1 * i2];
-  },
-  matrixMultiplyArray: function(matrices) {
-    var i, len, r;
-    r = matrices[0];
-    len = matrices.length;
-    i = 1;
-    while (i < len) {
-      r = this.matrixMultiply(r, matrices[i]);
-      i++;
-    }
-    return r;
+    a[0] = a1 * a2 + b1 * d2 + c1 * g2;
+    a[1] = a1 * b2 + b1 * e2 + c1 * h2;
+    a[2] = a1 * c2 + b1 * f2 + c1 * i2;
+    a[3] = d1 * a2 + e1 * d2 + f1 * g2;
+    a[4] = d1 * b2 + e1 * e2 + f1 * h2;
+    a[5] = d1 * c2 + e1 * f2 + f1 * i2;
+    a[6] = g1 * a2 + h1 * d2 + i1 * g2;
+    a[7] = g1 * b2 + h1 * e2 + i1 * h2;
+    a[8] = g1 * c2 + h1 * f2 + i1 * i2;
+    return a;
   }
 };
 
@@ -5993,7 +6022,7 @@ module.exports = function() {
 
 c = WebGLRenderer = (function() {
   function WebGLRenderer(canvas) {
-    var gl, options;
+    var context, options, _i, _len, _ref;
     this.canvas = canvas;
     this.cache = {
       currentAlpha: void 0,
@@ -6008,14 +6037,20 @@ c = WebGLRenderer = (function() {
       premultipliedAlpha: false,
       alpha: false
     };
-    this.gl = this.canvas.getContext("webgl", options) || this.canvas.getContext("experimental-webgl", options);
-    gl = this.gl;
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.enable(gl.BLEND);
+    _ref = ["webgl", "experimental-webgl"];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      context = _ref[_i];
+      this.gl = this.canvas.getContext(context, options);
+      if (this.gl) {
+        break;
+      }
+    }
+    this.gl.pixelStorei(this.gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+    this.gl.enable(this.gl.BLEND);
     this.programs = {
-      texture: new TextureShaderProgram(gl),
-      color: new ColorShaderProgram(gl)
+      texture: new TextureShaderProgram(this.gl),
+      color: new ColorShaderProgram(this.gl)
     };
     return;
   }
@@ -6048,7 +6083,7 @@ c = WebGLRenderer = (function() {
           gl.uniform2f(this.currentProgram.locations.u_resolution, w, h);
         }
       }
-      wm = Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
+      wm = Helpers.MatrixCalculation.setTranslation(new Float32Array(9), -camera.captureRegion.x, -camera.captureRegion.y);
       gl.viewport(camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height);
       rooms = [engine.masterRoom, camera.room];
       roomsLength = rooms.length;
@@ -6062,10 +6097,11 @@ c = WebGLRenderer = (function() {
   };
 
   WebGLRenderer.prototype.renderTree = function(object, wm) {
-    var gl, i, len, localWm, offset;
+    var gl, i, len, offset;
     gl = this.gl;
-    localWm = Helpers.MatrixCalculation.matrixMultiplyArray([Helpers.MatrixCalculation.calculateLocalMatrix(object), wm]);
-    offset = Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y);
+    object.localWm = Helpers.MatrixCalculation.calculateLocalMatrix(object, object.localWm);
+    Helpers.MatrixCalculation.multiply(object.localWm, wm);
+    offset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
     if (!object.isVisible()) {
       return;
     }
@@ -6078,32 +6114,32 @@ c = WebGLRenderer = (function() {
     switch (object.renderType) {
       case "textblock":
         this.setProgram(this.programs.texture);
-        this.currentProgram.renderSprite(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        this.currentProgram.renderSprite(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
         break;
       case "sprite":
         this.setProgram(this.programs.texture);
-        this.currentProgram.renderSprite(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        this.currentProgram.renderSprite(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
         if (engine.drawMasks) {
-          this.currentProgram.renderMask(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+          this.currentProgram.renderMask(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
         }
         break;
       case "line":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderLine(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        this.currentProgram.renderLine(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
         break;
       case "rectangle":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderRectangle(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        this.currentProgram.renderRectangle(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
         break;
       case "circle":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderCircle(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
+        this.currentProgram.renderCircle(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
     }
     if (object.children) {
       len = object.children.length;
       i = 0;
       while (i < len) {
-        this.renderTree(object.children[i], localWm);
+        this.renderTree(object.children[i], object.localWm);
         i++;
       }
     }

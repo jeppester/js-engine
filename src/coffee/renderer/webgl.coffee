@@ -17,20 +17,21 @@ c = class WebGLRenderer
       premultipliedAlpha: false
       alpha: false
 
-    @gl = @canvas.getContext("webgl", options) or @canvas.getContext("experimental-webgl", options)
-    gl = @gl
+    for context in ["webgl", "experimental-webgl"]
+      @gl = @canvas.getContext context, options
+      break if @gl
 
     # Optimize options
-    gl.pixelStorei gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false
+    @gl.pixelStorei @gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false
 
     # Set default blending
-    gl.blendFunc gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA
-    gl.enable gl.BLEND
+    @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+    @gl.enable @gl.BLEND
 
     # Init shader programs
     @programs =
-      texture: new TextureShaderProgram(gl)
-      color: new ColorShaderProgram(gl)
+      texture: new TextureShaderProgram @gl
+      color: new ColorShaderProgram @gl
 
     return
 
@@ -68,7 +69,7 @@ c = class WebGLRenderer
         gl.uniform2f @currentProgram.locations.u_resolution, w, h if @currentProgram
 
       # Set camera position
-      wm = Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
+      wm = Helpers.MatrixCalculation.setTranslation(new Float32Array(9), -camera.captureRegion.x, -camera.captureRegion.y)
 
       # Set camera projection viewport
       gl.viewport camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height
@@ -87,11 +88,12 @@ c = class WebGLRenderer
 
   renderTree: (object, wm) ->
     gl = @gl
-    localWm = Helpers.MatrixCalculation.matrixMultiplyArray([
-      Helpers.MatrixCalculation.calculateLocalMatrix(object)
-      wm
-    ])
-    offset = Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y)
+
+    # Create world matrix for object center
+    object.localWm = Helpers.MatrixCalculation.calculateLocalMatrix object, object.localWm
+    Helpers.MatrixCalculation.multiply object.localWm, wm
+    offset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
+
     return unless object.isVisible()
 
     # Set object alpha (because alpha is used by ALL rendered objects)
@@ -103,34 +105,35 @@ c = class WebGLRenderer
       # Texture based objects
       when "textblock"
         @setProgram @programs.texture
-        @currentProgram.renderSprite gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+        @currentProgram.renderSprite gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
 
       when "sprite"
         @setProgram @programs.texture
-        @currentProgram.renderSprite gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+        @currentProgram.renderSprite gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
 
         if engine.drawMasks
-          @currentProgram.renderMask gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+          @currentProgram.renderMask gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
 
         # if engine.drawBoundingBoxes
         #   @setProgram @programs.color
-        #   @currentProgram.renderBoundingBox gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+        #   @currentProgram.renderBoundingBox gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
 
       # Geometric objects
       when "line"
         @setProgram @programs.color
-        @currentProgram.renderLine gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+        @currentProgram.renderLine gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
       when "rectangle"
         @setProgram @programs.color
-        @currentProgram.renderRectangle gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+        @currentProgram.renderRectangle gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
       when "circle"
         @setProgram @programs.color
-        @currentProgram.renderCircle gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
+        @currentProgram.renderCircle gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
+
     if object.children
       len = object.children.length
       i = 0
       while i < len
-        @renderTree object.children[i], localWm
+        @renderTree object.children[i], object.localWm
         i++
     return
 

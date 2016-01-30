@@ -117,18 +117,15 @@ c = class WebGLTextureShaderProgram
     # Enable the texture coord buffer
     gl.bindBuffer gl.ARRAY_BUFFER, @cache.animatedTextCoordBuffer
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
-      x1
-      y1
-      x2
-      y1
-      x1
-      y2
-      x1
-      y2
-      x2
-      y1
-      x2
-      y2
+      # Triangle 1
+      x1, y1
+      x2, y1
+      x1, y2
+
+      # Triangle 2
+      x1, y2
+      x2, y1
+      x2, y2
     ]), gl.STATIC_DRAW
     gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
     gl.enableVertexAttribArray @locations.a_texCoord
