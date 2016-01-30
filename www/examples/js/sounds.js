@@ -51,6 +51,7 @@ Main = (function() {
 new Engine({
   gameClass: Main,
   themes: ['example'],
+  disableWebGL: /canvas/.test(window.location.search),
   backgroundColor: "#000",
   pauseOnBlur: false,
   canvasResX: 600,

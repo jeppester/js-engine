@@ -59,6 +59,7 @@ GeometricObjectCollision = (function() {
 new Engine({
   gameClass: GeometricObjectCollision,
   themes: ['example'],
+  disableWebGL: /canvas/.test(window.location.search),
   canvasResX: 600,
   canvasResY: 400
 });

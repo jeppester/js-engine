@@ -111,6 +111,7 @@ new Engine({
   gameClass: CollisionTest,
   themes: ['example'],
   backgroundColor: "#222",
+  disableWebGL: /canvas/.test(window.location.search),
   canvasResX: 600,
   canvasResY: 400
 });

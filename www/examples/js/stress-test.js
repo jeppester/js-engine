@@ -94,8 +94,8 @@ StressTest = (function() {
 new Engine({
   gameClass: StressTest,
   themes: ['example'],
-  disableWebGL: true,
   backgroundColor: "#000",
+  disableWebGL: /canvas/.test(window.location.search),
   pauseOnBlur: false,
   canvasResX: 600,
   canvasResY: 400

@@ -50,9 +50,11 @@ new Engine
   # Set themes to load
   themes: ['example']
 
+  # Set background color
   backgroundColor: '#888'
 
-  # disableWebGL: true
+  # Disable webgl using "canvas" search param
+  disableWebGL: /canvas/.test window.location.search
 
   # Enable debugging of collision checks
   drawBoundingBoxes: true

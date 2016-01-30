@@ -64,6 +64,7 @@ RoomTransitions = (function() {
 new Engine({
   gameClass: RoomTransitions,
   themes: ['example'],
+  disableWebGL: /canvas/.test(window.location.search),
   canvasResX: 600,
   canvasResY: 400
 });

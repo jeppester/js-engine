@@ -41,14 +41,15 @@ class RoomTransitions
         engine.goToRoom 'room1', Engine.Globals.ROOM_TRANSITION_SQUEEZE_SLIDE, {duration: 1000, from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]}
 
 new Engine
-	# Set main class to load
-	gameClass: RoomTransitions
+  # Set main class to load
+  gameClass: RoomTransitions
 
-	# Set themes to load
-	themes: ['example']
+  # Set themes to load
+  themes: ['example']
 
-	# disableWebGL: true,
+  # Disable webgl using "canvas" search param
+  disableWebGL: /canvas/.test window.location.search
 
-	# Set resolution of the game
-	canvasResX: 600
-	canvasResY: 400
+  # Set resolution of the game
+  canvasResX: 600
+  canvasResY: 400

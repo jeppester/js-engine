@@ -49,6 +49,7 @@ new Engine({
   gameClass: MasksAndBBoxes,
   themes: ['example'],
   backgroundColor: '#888',
+  disableWebGL: /canvas/.test(window.location.search),
   drawBoundingBoxes: true,
   drawMasks: true,
   canvasResX: 100,

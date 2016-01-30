@@ -36,21 +36,21 @@ class Main
       m.play()
 
 new Engine
-	# Set game-class path (Look at this file to start programming your game)
-	gameClass: Main
+  # Set game-class path (Look at this file to start programming your game)
+  gameClass: Main
 
-	# Set themes to load
-	themes: ['example']
+  # Set themes to load
+  themes: ['example']
 
-	# Disable webgl (to compare performance)
-	#disableWebGL: true
+  # Disable webgl using "canvas" search param
+  disableWebGL: /canvas/.test window.location.search
 
-	# Set arena background-color
-	backgroundColor: "#000"
+  # Set arena background-color
+  backgroundColor: "#000"
 
-	# Disable pause on blur (so that JavaScript profiling can be done easier)
-	pauseOnBlur: false
+  # Disable pause on blur (so that JavaScript profiling can be done easier)
+  pauseOnBlur: false
 
-	# Set resolution of the game
-	canvasResX: 600
-	canvasResY: 400
+  # Set resolution of the game
+  canvasResX: 600
+  canvasResY: 400
