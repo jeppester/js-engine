@@ -4154,29 +4154,28 @@ var MatrixCalculationHelper;
 
 module.exports = MatrixCalculationHelper = {
   getOperationMatrix: function() {
-    if (this.operationMatrix == null) {
-      this.operationMatrix = new Float32Array(9);
-    }
-    this.setIdentity(this.operationMatrix);
-    return this.operationMatrix;
+    return this.operationMatrix != null ? this.operationMatrix : this.operationMatrix = new Float32Array(9);
   },
-  calculateLocalMatrix: function(object, cache) {
-    if (cache == null) {
-      cache = new Float32Array(9);
-    }
-    this.setScale(cache, object.widthScale * object.size, object.heightScale * object.size);
-    this.multiply(cache, this.getRotation(-object.direction));
-    this.multiply(cache, this.getTranslation(object.x, object.y));
-    return cache;
+  getTempLocalMatrix: function() {
+    return this.tempLocalMatrix != null ? this.tempLocalMatrix : this.tempLocalMatrix = new Float32Array(9);
   },
-  calculateInverseLocalMatrix: function(object, cache) {
-    if (cache == null) {
-      cache = new Float32Array(9);
-    }
-    this.setScale(cache, 1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size));
-    this.multiply(cache, this.getRotation(object.direction));
-    this.multiply(cache, this.getTranslation(-object.x, -object.y));
-    return cache;
+  setLocalMatrix: function(matrix, object) {
+    this.setScale(matrix, object.widthScale * object.size, object.heightScale * object.size);
+    this.multiply(matrix, this.getRotation(-object.direction));
+    this.multiply(matrix, this.getTranslation(object.x, object.y));
+    return matrix;
+  },
+  getLocalMatrix: function(object) {
+    return this.setLocalMatrix(this.getTempLocalMatrix(), object);
+  },
+  setInverseLocalMatrix: function(matrix, object) {
+    this.setTranslation(matrix, -object.x, -object.y);
+    this.multiply(matrix, this.getRotation(object.direction));
+    this.multiply(matrix, this.getScale(1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size)));
+    return matrix;
+  },
+  getInverseLocalMatrix: function(object) {
+    return this.setInverseLocalMatrix(this.getTempLocalMatrix(), object);
   },
   setIdentity: function(matrix) {
     matrix[0] = 1;
@@ -4241,61 +4240,11 @@ module.exports = MatrixCalculationHelper = {
   getScale: function(sx, sy) {
     return this.setScale(this.getOperationMatrix(), sx, sy);
   },
-  matrixDeterminant: function(matrix) {
-    var a, b, c, d, e, f, g, h, i;
-    a = matrix[0 * 3 + 0];
-    b = matrix[0 * 3 + 1];
-    c = matrix[0 * 3 + 2];
-    d = matrix[1 * 3 + 0];
-    e = matrix[1 * 3 + 1];
-    f = matrix[1 * 3 + 2];
-    g = matrix[2 * 3 + 0];
-    h = matrix[2 * 3 + 1];
-    i = matrix[2 * 3 + 2];
-    return a * (e * i - f * h) - b * (i * d - f * g) + c * (d * h - e * g);
-  },
-  matrixInverse: function(matrix) {
-    var A, B, C, D, E, F, G, H, I, a, b, c, d, det, e, f, g, h, i;
-    det = this.matrixDeterminant(matrix);
-    if (det === 0) {
-      return false;
-    }
-    a = matrix[0 * 3 + 0];
-    b = matrix[0 * 3 + 1];
-    c = matrix[0 * 3 + 2];
-    d = matrix[1 * 3 + 0];
-    e = matrix[1 * 3 + 1];
-    f = matrix[1 * 3 + 2];
-    g = matrix[2 * 3 + 0];
-    h = matrix[2 * 3 + 1];
-    i = matrix[2 * 3 + 2];
-    A = e * i - f * h;
-    B = -(d * i - f * g);
-    C = d * h - e * g;
-    D = -(b * i - c * h);
-    E = a * i - c * g;
-    F = -(a * h - b * g);
-    G = b * f - c * e;
-    H = -(a * f - c * d);
-    I = a * e - b * d;
-    return this.matrixMultiplyNumber([A, D, G, B, E, H, C, F, I], 1 / det);
-  },
-  matrixMultiplyNumber: function(matrix, factor) {
-    var a, b, c, d, e, f, g, h, i, s;
-    a = matrix[0 * 3 + 0];
-    b = matrix[0 * 3 + 1];
-    c = matrix[0 * 3 + 2];
-    d = matrix[1 * 3 + 0];
-    e = matrix[1 * 3 + 1];
-    f = matrix[1 * 3 + 2];
-    g = matrix[2 * 3 + 0];
-    h = matrix[2 * 3 + 1];
-    i = matrix[2 * 3 + 2];
-    s = factor;
-    return [a * s, b * s, c * s, d * s, e * s, f * s, g * s, h * s, i * s];
-  },
   multiply: function(a, b) {
     var a1, a2, b1, b2, c1, c2, d1, d2, e1, e2, f1, f2, g1, g2, h1, h2, i1, i2;
+    if (a === b) {
+      throw new Error('Multiplying matrix with itself');
+    }
     a1 = a[0 * 3 + 0];
     b1 = a[0 * 3 + 1];
     c1 = a[0 * 3 + 2];
@@ -4324,6 +4273,40 @@ module.exports = MatrixCalculationHelper = {
     a[7] = g1 * b2 + h1 * e2 + i1 * h2;
     a[8] = g1 * c2 + h1 * f2 + i1 * i2;
     return a;
+  },
+  reverseMultiply: function(b, a) {
+    var a1, a2, b1, b2, c1, c2, d1, d2, e1, e2, f1, f2, g1, g2, h1, h2, i1, i2;
+    if (a === b) {
+      throw new Error('Multiplying matrix with itself');
+    }
+    a1 = a[0 * 3 + 0];
+    b1 = a[0 * 3 + 1];
+    c1 = a[0 * 3 + 2];
+    d1 = a[1 * 3 + 0];
+    e1 = a[1 * 3 + 1];
+    f1 = a[1 * 3 + 2];
+    g1 = a[2 * 3 + 0];
+    h1 = a[2 * 3 + 1];
+    i1 = a[2 * 3 + 2];
+    a2 = b[0 * 3 + 0];
+    b2 = b[0 * 3 + 1];
+    c2 = b[0 * 3 + 2];
+    d2 = b[1 * 3 + 0];
+    e2 = b[1 * 3 + 1];
+    f2 = b[1 * 3 + 2];
+    g2 = b[2 * 3 + 0];
+    h2 = b[2 * 3 + 1];
+    i2 = b[2 * 3 + 2];
+    b[0] = a1 * a2 + b1 * d2 + c1 * g2;
+    b[1] = a1 * b2 + b1 * e2 + c1 * h2;
+    b[2] = a1 * c2 + b1 * f2 + c1 * i2;
+    b[3] = d1 * a2 + e1 * d2 + f1 * g2;
+    b[4] = d1 * b2 + e1 * e2 + f1 * h2;
+    b[5] = d1 * c2 + e1 * f2 + f1 * i2;
+    b[6] = g1 * a2 + h1 * d2 + i1 * g2;
+    b[7] = g1 * b2 + h1 * e2 + i1 * h2;
+    b[8] = g1 * c2 + h1 * f2 + i1 * i2;
+    return b;
   }
 };
 
@@ -6068,7 +6051,7 @@ c = WebGLRenderer = (function() {
   };
 
   WebGLRenderer.prototype.render = function(cameras) {
-    var camera, camerasLength, gl, h, i, ii, rooms, roomsLength, w, wm;
+    var camera, camerasLength, gl, h, i, ii, rooms, roomsLength, w;
     gl = this.gl;
     camerasLength = cameras.length;
     i = 0;
@@ -6083,13 +6066,16 @@ c = WebGLRenderer = (function() {
           gl.uniform2f(this.currentProgram.locations.u_resolution, w, h);
         }
       }
-      wm = Helpers.MatrixCalculation.setTranslation(new Float32Array(9), -camera.captureRegion.x, -camera.captureRegion.y);
+      if (camera.localWm == null) {
+        camera.localWm = new Float32Array(9);
+      }
+      Helpers.MatrixCalculation.setTranslation(camera.localWm, -camera.captureRegion.x, -camera.captureRegion.y);
       gl.viewport(camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height);
       rooms = [engine.masterRoom, camera.room];
       roomsLength = rooms.length;
       ii = 0;
       while (ii < roomsLength) {
-        this.renderTree(rooms[ii], wm);
+        this.renderTree(rooms[ii], camera.localWm);
         ii++;
       }
       i++;
@@ -6097,13 +6083,19 @@ c = WebGLRenderer = (function() {
   };
 
   WebGLRenderer.prototype.renderTree = function(object, wm) {
-    var gl, i, len, offset;
-    gl = this.gl;
-    object.localWm = Helpers.MatrixCalculation.calculateLocalMatrix(object, object.localWm);
-    Helpers.MatrixCalculation.multiply(object.localWm, wm);
-    offset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
+    var gl, i, len, wmWithOffset;
     if (!object.isVisible()) {
       return;
+    }
+    gl = this.gl;
+    if (object.localWm == null) {
+      object.localWm = new Float32Array(9);
+    }
+    Helpers.MatrixCalculation.setLocalMatrix(object.localWm, object);
+    Helpers.MatrixCalculation.multiply(object.localWm, wm);
+    if (object.offset) {
+      wmWithOffset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
+      Helpers.MatrixCalculation.multiply(wmWithOffset, object.localWm);
     }
     if (this.cache.currentAlpha !== object.opacity) {
       this.cache.currentAlpha = object.opacity;
@@ -6114,26 +6106,26 @@ c = WebGLRenderer = (function() {
     switch (object.renderType) {
       case "textblock":
         this.setProgram(this.programs.texture);
-        this.currentProgram.renderSprite(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
+        this.currentProgram.renderSprite(gl, object, wmWithOffset);
         break;
       case "sprite":
         this.setProgram(this.programs.texture);
-        this.currentProgram.renderSprite(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
+        this.currentProgram.renderSprite(gl, object, wmWithOffset);
         if (engine.drawMasks) {
-          this.currentProgram.renderMask(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
+          this.currentProgram.renderMask(gl, object, wmWithOffset);
         }
         break;
       case "line":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderLine(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
+        this.currentProgram.renderLine(gl, object, wmWithOffset);
         break;
       case "rectangle":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderRectangle(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
+        this.currentProgram.renderRectangle(gl, object, wmWithOffset);
         break;
       case "circle":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderCircle(gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm));
+        this.currentProgram.renderCircle(gl, object, wmWithOffset);
     }
     if (object.children) {
       len = object.children.length;
@@ -7587,7 +7579,7 @@ c = Collidable = (function(_super) {
   };
 
   Collidable.prototype.createCollisionBitmap = function(objects) {
-    var calc, canvas, i, ii, lm, mask, obj, offset, parents, wm;
+    var calc, canvas, mask, obj, parent, parents, wm, _i, _j, _k, _len, _len1, _len2;
     mask = this.mask;
     calc = Helpers.MatrixCalculation;
     canvas = document.createElement("canvas");
@@ -7599,36 +7591,32 @@ c = Collidable = (function(_super) {
     c.fillRect(0, 0, canvas.width, canvas.height);
     parents = this.getParents();
     parents.unshift(this);
-    wm = calc.makeIdentity();
-    wm = calc.matrixMultiply(calc.makeTranslation(this.offset.x, this.offset.y), wm);
-    i = 0;
-    while (i < parents.length) {
-      wm = calc.matrixMultiply(calc.calculateInverseLocalMatrix(parents[i]), wm);
-      i++;
+    wm = new Float32Array(9);
+    calc.setTranslation(wm, this.offset.x, this.offset.y);
+    for (_i = 0, _len = parents.length; _i < _len; _i++) {
+      parent = parents[_i];
+      calc.reverseMultiply(wm, calc.getInverseLocalMatrix(parent));
     }
-    if (wm === false) {
-      throw new Error("Trying to detect collision for invisble object");
-    }
-    i = 0;
-    while (i < objects.length) {
-      obj = objects[i];
+    for (_j = 0, _len1 = objects.length; _j < _len1; _j++) {
+      obj = objects[_j];
       if (obj === this) {
-        continue;
+        throw new Error("Objects are not allowed to check for collisions with themselves");
       }
-      lm = calc.makeIdentity();
+      if (obj.localWm == null) {
+        obj.localWm = new Float32Array(9);
+      }
+      calc.setIdentity(obj.localWm);
       parents = obj.getParents();
       parents.reverse();
       parents.push(obj);
-      ii = 0;
-      while (ii < parents.length) {
-        lm = calc.matrixMultiply(calc.calculateLocalMatrix(parents[ii]), lm);
-        ii++;
+      for (_k = 0, _len2 = parents.length; _k < _len2; _k++) {
+        parent = parents[_k];
+        calc.reverseMultiply(obj.localWm, calc.getLocalMatrix(parent));
       }
-      offset = calc.matrixMultiply(lm, wm);
-      offset = calc.matrixMultiply(calc.makeTranslation(-obj.offset.x, -obj.offset.y), offset);
-      c.setTransform(offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]);
+      calc.multiply(obj.localWm, wm);
+      calc.reverseMultiply(obj.localWm, calc.getTranslation(-obj.offset.x, -obj.offset.y));
+      c.setTransform(obj.localWm[0], obj.localWm[1], obj.localWm[3], obj.localWm[4], obj.localWm[6], obj.localWm[7]);
       c.drawImage(obj.mask, (obj.clipWidth + obj.bm.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight);
-      i++;
     }
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.globalAlpha = 0.5;

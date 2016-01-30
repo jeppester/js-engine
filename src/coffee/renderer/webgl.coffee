@@ -69,7 +69,8 @@ c = class WebGLRenderer
         gl.uniform2f @currentProgram.locations.u_resolution, w, h if @currentProgram
 
       # Set camera position
-      wm = Helpers.MatrixCalculation.setTranslation(new Float32Array(9), -camera.captureRegion.x, -camera.captureRegion.y)
+      camera.localWm ?= new Float32Array 9
+      Helpers.MatrixCalculation.setTranslation(camera.localWm, -camera.captureRegion.x, -camera.captureRegion.y)
 
       # Set camera projection viewport
       gl.viewport camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height
@@ -81,20 +82,23 @@ c = class WebGLRenderer
       ii = 0
       while ii < roomsLength
         # Draw rooms
-        @renderTree rooms[ii], wm
+        @renderTree rooms[ii], camera.localWm
         ii++
       i++
     return
 
   renderTree: (object, wm) ->
+    return unless object.isVisible()
     gl = @gl
 
     # Create world matrix for object center
-    object.localWm = Helpers.MatrixCalculation.calculateLocalMatrix object, object.localWm
+    object.localWm ?= new Float32Array 9
+    Helpers.MatrixCalculation.setLocalMatrix object.localWm, object
     Helpers.MatrixCalculation.multiply object.localWm, wm
-    offset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
 
-    return unless object.isVisible()
+    if object.offset
+      wmWithOffset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
+      Helpers.MatrixCalculation.multiply wmWithOffset, object.localWm
 
     # Set object alpha (because alpha is used by ALL rendered objects)
     if @cache.currentAlpha isnt object.opacity
@@ -105,29 +109,29 @@ c = class WebGLRenderer
       # Texture based objects
       when "textblock"
         @setProgram @programs.texture
-        @currentProgram.renderSprite gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
+        @currentProgram.renderSprite gl, object, wmWithOffset
 
       when "sprite"
         @setProgram @programs.texture
-        @currentProgram.renderSprite gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
+        @currentProgram.renderSprite gl, object, wmWithOffset
 
         if engine.drawMasks
-          @currentProgram.renderMask gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
+          @currentProgram.renderMask gl, object, wmWithOffset
 
         # if engine.drawBoundingBoxes
         #   @setProgram @programs.color
-        #   @currentProgram.renderBoundingBox gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
+        #   @currentProgram.renderBoundingBox gl, object, wmWithOffset
 
       # Geometric objects
       when "line"
         @setProgram @programs.color
-        @currentProgram.renderLine gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
+        @currentProgram.renderLine gl, object, wmWithOffset
       when "rectangle"
         @setProgram @programs.color
-        @currentProgram.renderRectangle gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
+        @currentProgram.renderRectangle gl, object, wmWithOffset
       when "circle"
         @setProgram @programs.color
-        @currentProgram.renderCircle gl, object, Helpers.MatrixCalculation.multiply(offset, object.localWm)
+        @currentProgram.renderCircle gl, object, wmWithOffset
 
     if object.children
       len = object.children.length

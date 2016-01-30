@@ -254,45 +254,46 @@ c = class Collidable extends Views.Sprite
     c.fillStyle = "#FFF"
     c.fillRect 0, 0, canvas.width, canvas.height
     parents = @getParents()
-    parents.unshift this
+    parents.unshift @
 
     # Reset transform to the world matrix
-    wm = calc.makeIdentity()
-    wm = calc.matrixMultiply(calc.makeTranslation(@offset.x, @offset.y), wm)
-    i = 0
-    while i < parents.length
-      wm = calc.matrixMultiply(calc.calculateInverseLocalMatrix(parents[i]), wm)
-      i++
+    wm = new Float32Array 9
+    calc.setTranslation wm, @offset.x, @offset.y
 
-    # If getInverse returns false, the object is invisible (thus cannot collide)
-    throw new Error("Trying to detect collision for invisble object") if wm is false # dev
+    for parent in parents
+      calc.reverseMultiply wm, calc.getInverseLocalMatrix(parent)
 
     # Draw other objects
-    i = 0
-    while i < objects.length
-      obj = objects[i]
-
-      # If the checked object is "this", do nothing (this situation should maybe result in an error)
-      continue if obj is this
+    for obj in objects
+      if obj == @
+        throw new Error "Objects are not allowed to check for collisions with themselves"
 
       # Create local matrix (to add to the world matrix)
-      lm = calc.makeIdentity()
+      obj.localWm ?= new Float32Array 9
+      calc.setIdentity obj.localWm
+
       parents = obj.getParents()
       parents.reverse()
       parents.push obj
-      ii = 0
-      while ii < parents.length
-        lm = calc.matrixMultiply(calc.calculateLocalMatrix(parents[ii]), lm)
-        ii++
-      offset = calc.matrixMultiply(lm, wm)
-      offset = calc.matrixMultiply(calc.makeTranslation(-obj.offset.x, -obj.offset.y), offset)
+
+      for parent in parents
+        calc.reverseMultiply(obj.localWm, calc.getLocalMatrix(parent))
+
+      calc.multiply(obj.localWm, wm)
+      calc.reverseMultiply(obj.localWm, calc.getTranslation(-obj.offset.x, -obj.offset.y))
 
       # Set world transform
-      c.setTransform offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]
+      c.setTransform(
+        obj.localWm[0]
+        obj.localWm[1]
+        obj.localWm[3]
+        obj.localWm[4]
+        obj.localWm[6]
+        obj.localWm[7]
+      )
 
       # Draw object mask
       c.drawImage obj.mask, (obj.clipWidth + obj.bm.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight
-      i++
 
     # Reset transform
     c.setTransform 1, 0, 0, 1, 0, 0

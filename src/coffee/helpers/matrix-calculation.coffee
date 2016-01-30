@@ -1,24 +1,27 @@
 module.exports = MatrixCalculationHelper =
   getOperationMatrix: ->
     @operationMatrix ?= new Float32Array 9
-    @setIdentity @operationMatrix
-    @operationMatrix
 
-  calculateLocalMatrix: (object, cache) ->
-    cache ?= new Float32Array 9
+  getTempLocalMatrix: ->
+    @tempLocalMatrix ?= new Float32Array 9
 
-    @setScale cache, object.widthScale * object.size, object.heightScale * object.size
-    @multiply cache, @getRotation -object.direction
-    @multiply cache, @getTranslation object.x, object.y
-    cache
+  setLocalMatrix: (matrix, object)->
+    @setScale matrix, object.widthScale * object.size, object.heightScale * object.size
+    @multiply matrix, @getRotation -object.direction
+    @multiply matrix, @getTranslation object.x, object.y
+    matrix
 
-  calculateInverseLocalMatrix: (object, cache) ->
-    cache ?= new Float32Array 9
+  getLocalMatrix: (object)->
+    @setLocalMatrix @getTempLocalMatrix(), object
 
-    @setScale cache, 1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size)
-    @multiply cache, @getRotation object.direction
-    @multiply cache, @getTranslation -object.x, -object.y
-    cache
+  setInverseLocalMatrix: (matrix, object)->
+    @setTranslation matrix, -object.x, -object.y
+    @multiply matrix, @getRotation object.direction
+    @multiply matrix, @getScale(1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size))
+    matrix
+
+  getInverseLocalMatrix: (object)->
+    @setInverseLocalMatrix @getTempLocalMatrix(), object
 
   setIdentity: (matrix)->
     matrix[0] = 1
@@ -95,71 +98,9 @@ module.exports = MatrixCalculationHelper =
   getScale: (sx, sy) ->
     @setScale @getOperationMatrix(), sx, sy
 
-  matrixDeterminant: (matrix) ->
-    a = matrix[0 * 3 + 0]
-    b = matrix[0 * 3 + 1]
-    c = matrix[0 * 3 + 2]
+  multiply: (a, b)->
+    throw new Error 'Multiplying matrix with itself' if a == b
 
-    d = matrix[1 * 3 + 0]
-    e = matrix[1 * 3 + 1]
-    f = matrix[1 * 3 + 2]
-
-    g = matrix[2 * 3 + 0]
-    h = matrix[2 * 3 + 1]
-    i = matrix[2 * 3 + 2]
-
-    a * (e * i - f * h) - b * (i * d - f * g) + c * (d * h - e * g)
-
-  matrixInverse: (matrix) ->
-    # Get determinant
-    det = @matrixDeterminant matrix
-
-    # If determinant is zero return false;
-    return false if det is 0
-
-    # Calculate inverse
-    a = matrix[0 * 3 + 0]
-    b = matrix[0 * 3 + 1]
-    c = matrix[0 * 3 + 2]
-    d = matrix[1 * 3 + 0]
-    e = matrix[1 * 3 + 1]
-    f = matrix[1 * 3 + 2]
-    g = matrix[2 * 3 + 0]
-    h = matrix[2 * 3 + 1]
-    i = matrix[2 * 3 + 2]
-    A =   e * i - f * h
-    B = -(d * i - f * g)
-    C =   d * h - e * g
-    D = -(b * i - c * h)
-    E =   a * i - c * g
-    F = -(a * h - b * g)
-    G =   b * f - c * e
-    H = -(a * f - c * d)
-    I =   a * e - b * d
-    @matrixMultiplyNumber [
-      A, D, G
-      B, E, H
-      C, F, I
-    ], 1 / det
-
-  matrixMultiplyNumber: (matrix, factor) ->
-    a = matrix[0 * 3 + 0]
-    b = matrix[0 * 3 + 1]
-    c = matrix[0 * 3 + 2]
-    d = matrix[1 * 3 + 0]
-    e = matrix[1 * 3 + 1]
-    f = matrix[1 * 3 + 2]
-    g = matrix[2 * 3 + 0]
-    h = matrix[2 * 3 + 1]
-    i = matrix[2 * 3 + 2]
-    s = factor
-    [
-      a * s, b * s, c * s
-      d * s, e * s, f * s
-      g * s, h * s, i * s
-    ]
-
-  multiply: (a, b) ->
     a1 = a[0 * 3 + 0]
     b1 = a[0 * 3 + 1]
     c1 = a[0 * 3 + 2]
@@ -197,3 +138,44 @@ module.exports = MatrixCalculationHelper =
     a[8] = g1 * c2 + h1 * f2 + i1 * i2
 
     a
+
+  reverseMultiply: (b, a)->
+    throw new Error 'Multiplying matrix with itself' if a == b
+
+    a1 = a[0 * 3 + 0]
+    b1 = a[0 * 3 + 1]
+    c1 = a[0 * 3 + 2]
+
+    d1 = a[1 * 3 + 0]
+    e1 = a[1 * 3 + 1]
+    f1 = a[1 * 3 + 2]
+
+    g1 = a[2 * 3 + 0]
+    h1 = a[2 * 3 + 1]
+    i1 = a[2 * 3 + 2]
+
+    a2 = b[0 * 3 + 0]
+    b2 = b[0 * 3 + 1]
+    c2 = b[0 * 3 + 2]
+
+    d2 = b[1 * 3 + 0]
+    e2 = b[1 * 3 + 1]
+    f2 = b[1 * 3 + 2]
+
+    g2 = b[2 * 3 + 0]
+    h2 = b[2 * 3 + 1]
+    i2 = b[2 * 3 + 2]
+
+    b[0] = a1 * a2 + b1 * d2 + c1 * g2
+    b[1] = a1 * b2 + b1 * e2 + c1 * h2
+    b[2] = a1 * c2 + b1 * f2 + c1 * i2
+
+    b[3] = d1 * a2 + e1 * d2 + f1 * g2
+    b[4] = d1 * b2 + e1 * e2 + f1 * h2
+    b[5] = d1 * c2 + e1 * f2 + f1 * i2
+
+    b[6] = g1 * a2 + h1 * d2 + i1 * g2
+    b[7] = g1 * b2 + h1 * e2 + i1 * h2
+    b[8] = g1 * c2 + h1 * f2 + i1 * i2
+
+    b
