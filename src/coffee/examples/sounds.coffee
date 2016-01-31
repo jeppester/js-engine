@@ -1,6 +1,5 @@
 class Main
   constructor: ->
-    console.log 'yay!'
     window.text = engine.currentRoom.create.TextBlock(
       'PRESS SPACE TO PLAY A SOUND EFFECT'
       100
