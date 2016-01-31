@@ -17,12 +17,12 @@ RoomTransitions = (function() {
     room = new Engine.Room('room3');
     room.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#00F'));
     for (i = l = 0; l < 10; i = ++l) {
-      room.addChildren(new Engine.Views.Sprite('folder.star2', 100 + Math.random() * 400, 100 + Math.random() * 200));
+      room.addChildren(new Engine.Views.Sprite('folder/star2', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
     room = new Engine.Room('room4');
     room.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#FFF'));
     for (i = m = 0; m < 20; i = ++m) {
-      room.addChildren(new Engine.Views.Sprite('folder.star3', 100 + Math.random() * 400, 100 + Math.random() * 200));
+      room.addChildren(new Engine.Views.Sprite('folder/star3', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
     engine.loader.hideOverlay((function(_this) {
       return function() {

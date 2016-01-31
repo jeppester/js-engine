@@ -16,13 +16,13 @@ class RoomTransitions
     room = new Engine.Room 'room3'
     room.addChildren new Engine.Views.Rectangle(0, 0, 600, 400, '#00F')
     for i in [0...10]
-      room.addChildren new Engine.Views.Sprite('folder.star2', 100 + Math.random() * 400, 100 + Math.random() * 200)
+      room.addChildren new Engine.Views.Sprite('folder/star2', 100 + Math.random() * 400, 100 + Math.random() * 200)
 
     # Create fourth room
     room = new Engine.Room 'room4'
     room.addChildren new Engine.Views.Rectangle(0, 0, 600, 400, '#FFF')
     for i in [0...20]
-      room.addChildren new Engine.Views.Sprite('folder.star3', 100 + Math.random() * 400, 100 + Math.random() * 200)
+      room.addChildren new Engine.Views.Sprite('folder/star3', 100 + Math.random() * 400, 100 + Math.random() * 200)
 
     # Hide loader overlay
     engine.loader.hideOverlay =>

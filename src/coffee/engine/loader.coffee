@@ -153,7 +153,6 @@ c = class Loader
     throw new Error("Missing argument: resource") if resource is undefined #dev
     throw new Error("Missing argument: typeString") if typeString is undefined #dev
     throw new Error("Missing argument: themeName") if themeName is undefined #dev
-    resource = resource.replace(/\//g, ".") if resource.indexOf("/") isnt -1
     res = @themes[themeName][typeString][resource]
 
     # Search for the resource in inherited themes
@@ -340,7 +339,7 @@ c = class Loader
             format = format[0] if format
 
             # Start loading iage
-            res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, "/") + "." + format
+            res.src = engine.themesPath + "/" + theme.name + "/images/" + path + "." + format
 
             # Find out if the image is a sprite
             images = object[path].match(/; *(\d+) *images?/)
@@ -364,9 +363,9 @@ c = class Loader
               format = engine.host.supportedAudio[i] if object[path].search(engine.host.supportedAudio[i]) isnt -1
               i++
             unless format
-              console.log "Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/")
+              console.log "Sound was not available in a supported format: " + theme.name + "/sfx/" + path
               continue
-            res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, "/") + "." + format)
+            res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path + "." + format)
             theme.sfx[path] = new Sounds.Effect(res)
             if engine.preloadSounds
               res.setAttribute "preload", "auto"
@@ -378,15 +377,15 @@ c = class Loader
             while i < engine.host.supportedAudio.length
               format = engine.host.supportedAudio[i] if object[path].search(engine.host.supportedAudio[i]) isnt -1
               i++
-            throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/")) unless format #dev
-            res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, "/") + "." + format)
+            throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path) unless format #dev
+            res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path + "." + format)
             theme.music[path] = new Sounds.Music(res)
             if engine.preloadSounds
               res.setAttribute "preload", "auto"
               res.addEventListener "canplaythrough", onload, false
               theme.resourcesCount++
         res.setAttribute "data-theme", theme.name
-        res.setAttribute "data-resourceString", path.replace(/\./g, "/")
+        res.setAttribute "data-resourceString", path
     return
 
 

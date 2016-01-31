@@ -1683,9 +1683,6 @@ c = Loader = (function() {
     if (themeName === void 0) {
       throw new Error("Missing argument: themeName");
     }
-    if (resource.indexOf("/") !== -1) {
-      resource = resource.replace(/\//g, ".");
-    }
     res = this.themes[themeName][typeString][resource];
     if (res === void 0) {
       i = 0;
@@ -1931,7 +1928,7 @@ c = Loader = (function() {
             if (format) {
               format = format[0];
             }
-            res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, "/") + "." + format;
+            res.src = engine.themesPath + "/" + theme.name + "/images/" + path + "." + format;
             images = object[path].match(/; *(\d+) *images?/);
             if (images) {
               res.imageLength = parseInt(images[1], 10);
@@ -1957,10 +1954,10 @@ c = Loader = (function() {
               i++;
             }
             if (!format) {
-              console.log("Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/"));
+              console.log("Sound was not available in a supported format: " + theme.name + "/sfx/" + path);
               continue;
             }
-            res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, "/") + "." + format);
+            res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path + "." + format);
             theme.sfx[path] = new Sounds.Effect(res);
             if (engine.preloadSounds) {
               res.setAttribute("preload", "auto");
@@ -1978,9 +1975,9 @@ c = Loader = (function() {
               i++;
             }
             if (!format) {
-              throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/"));
+              throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path);
             }
-            res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, "/") + "." + format);
+            res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path + "." + format);
             theme.music[path] = new Sounds.Music(res);
             if (engine.preloadSounds) {
               res.setAttribute("preload", "auto");
@@ -1989,7 +1986,7 @@ c = Loader = (function() {
             }
         }
         res.setAttribute("data-theme", theme.name);
-        res.setAttribute("data-resourceString", path.replace(/\./g, "/"));
+        res.setAttribute("data-resourceString", path);
       }
     }
   };
