@@ -4639,6 +4639,7 @@ Camera = require('../engine/camera');
 var WebGLHelper;
 
 module.exports = WebGLHelper = {
+  planeCache: new Float32Array(12),
   colorFromCSSString: function(string) {
     var a, b, c;
     if (string.length === 4) {
@@ -4651,12 +4652,25 @@ module.exports = WebGLHelper = {
     }
   },
   setPlane: function(gl, x, y, width, height) {
-    var x1, x2, y1, y2;
+    var p, x1, x2, y1, y2;
     x1 = x;
     x2 = x + width;
     y1 = y;
     y2 = y + height;
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]), gl.STATIC_DRAW);
+    p = this.planeCache;
+    p[0] = x1;
+    p[1] = y1;
+    p[2] = x2;
+    p[3] = y1;
+    p[4] = x1;
+    p[5] = y2;
+    p[6] = x1;
+    p[7] = y2;
+    p[8] = x2;
+    p[9] = y1;
+    p[10] = x2;
+    p[11] = y2;
+    return gl.bufferData(gl.ARRAY_BUFFER, p, gl.STATIC_DRAW);
   },
   setPlaneOutline: function(gl, x, y, width, height, outlineWidth) {
     var ix1, ix2, iy1, iy2, ox1, ox2, oy1, oy2;
@@ -6039,7 +6053,6 @@ c = WebGLRenderer = (function() {
       texture: new TextureShaderProgram(this.gl),
       color: new ColorShaderProgram(this.gl)
     };
-    return;
   }
 
   WebGLRenderer.prototype.setProgram = function(program) {
@@ -6050,7 +6063,7 @@ c = WebGLRenderer = (function() {
       gl.useProgram(program.program);
       program.onSet(gl);
       gl.uniform2f(program.locations.u_resolution, this.cache.currentResolution.width, this.cache.currentResolution.height);
-      gl.uniform1f(this.currentProgram.locations.u_alpha, this.cache.currentAlpha);
+      return gl.uniform1f(this.currentProgram.locations.u_alpha, this.cache.currentAlpha);
     }
   };
 
@@ -6305,24 +6318,31 @@ module.exports = function() {
 c = WebGLTextureShaderProgram = (function() {
   function WebGLTextureShaderProgram(gl) {
     this.cache = {
-      regularTextCoordBuffer: false,
-      animatedTextCoordBuffer: false,
-      rectangleCornerBuffer: false,
-      currentBuffer: false,
-      currentTexture: void 0,
       textures: {},
       masks: {}
     };
+    this.currentTexture = null;
+    this.regularTextCoordBuffer = null;
+    this.rectangleCornerBuffer = null;
+    this.animatedTextCoordBuffer = null;
+    this.currentBuffer = null;
+    this.mode = null;
     this.program = gl.createProgram();
     this.initShaders(gl);
     this.bindLocations(gl);
     this.initBuffers(gl);
-    return;
   }
+
+  WebGLTextureShaderProgram.prototype.setBuffer = function(gl, buffer) {
+    if (this.currentBuffer !== buffer) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      return this.currentBuffer = buffer;
+    }
+  };
 
   WebGLTextureShaderProgram.prototype.initShaders = function(gl) {
     var fragmentCode, fragmentShader, vertexCode, vertexShader;
-    vertexCode = "attribute vec2 a_position; attribute vec2 a_texCoord; uniform vec2 u_resolution; uniform mat3 u_matrix; varying vec2 v_texCoord; void main() { vec2 position = (u_matrix * vec3(a_position, 1)).xy; vec2 zeroToOne = position / u_resolution; vec2 zeroToTwo = zeroToOne * 2.0; vec2 clipSpace = zeroToTwo - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); v_texCoord = a_texCoord; }";
+    vertexCode = "attribute vec2 a_position; attribute vec2 a_texCoord; uniform vec2 u_resolution; uniform mat3 u_matrix; varying vec2 v_texCoord; void main() { vec2 position = (u_matrix * vec3(a_position, 1)).xy; vec2 clipSpace = position / u_resolution * 2.0 - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); v_texCoord = a_texCoord; }";
     vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexCode);
     gl.compileShader(vertexShader);
@@ -6332,11 +6352,11 @@ c = WebGLTextureShaderProgram = (function() {
     gl.shaderSource(fragmentShader, fragmentCode);
     gl.compileShader(fragmentShader);
     gl.attachShader(this.program, fragmentShader);
-    gl.linkProgram(this.program);
+    return gl.linkProgram(this.program);
   };
 
   WebGLTextureShaderProgram.prototype.bindLocations = function(gl) {
-    this.locations = {
+    return this.locations = {
       a_texCoord: gl.getAttribLocation(this.program, "a_texCoord"),
       a_position: gl.getAttribLocation(this.program, "a_position"),
       u_resolution: gl.getUniformLocation(this.program, "u_resolution"),
@@ -6346,43 +6366,45 @@ c = WebGLTextureShaderProgram = (function() {
   };
 
   WebGLTextureShaderProgram.prototype.initBuffers = function(gl) {
-    this.cache.regularTextCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.regularTextCoordBuffer);
+    this.regularTextCoordBuffer = gl.createBuffer();
+    this.setBuffer(gl, this.regularTextCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]), gl.STATIC_DRAW);
-    this.cache.animatedTextCoordBuffer = gl.createBuffer();
-    this.cache.rectangleCornerBuffer = gl.createBuffer();
+    this.animatedTextCoordBuffer = gl.createBuffer();
+    return this.rectangleCornerBuffer = gl.createBuffer();
   };
 
   WebGLTextureShaderProgram.prototype.setRegularTextCoordBuffer = function(gl) {
-    if (this.cache.currentBuffer !== this.cache.regularTextCoordBuffer) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.regularTextCoordBuffer);
-      gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
-      gl.enableVertexAttribArray(this.locations.a_texCoord);
-      this.cache.currentBuffer = this.cache.regularTextCoordBuffer;
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
+    if (this.mode === 'regular') {
+      return;
     }
+    this.mode = 'regular';
+    this.setBuffer(gl, this.regularTextCoordBuffer);
+    gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
+    return gl.enableVertexAttribArray(this.locations.a_texCoord);
   };
 
   WebGLTextureShaderProgram.prototype.setAnimatedTextCoordBuffer = function(gl, object) {
     var x1, x2, y1, y2;
+    if (this.mode === 'animated') {
+      return;
+    }
+    this.mode = 'animated';
     x1 = (object.clipWidth + object.bm.spacing) * object.imageNumber;
     x2 = x1 + object.clipWidth;
     x1 /= object.bm.width;
     x2 /= object.bm.width;
     y1 = 0;
     y2 = 1;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.animatedTextCoordBuffer);
+    this.setBuffer(gl, this.animatedTextCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]), gl.STATIC_DRAW);
     gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(this.locations.a_texCoord);
-    this.cache.currentBuffer = this.cache.animatedTextCoordBuffer;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
+    return gl.enableVertexAttribArray(this.locations.a_texCoord);
   };
 
   WebGLTextureShaderProgram.prototype.onSet = function(gl) {
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
+    this.setBuffer(gl, this.rectangleCornerBuffer);
     gl.enableVertexAttribArray(this.locations.a_position);
-    gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
+    return gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
   };
 
   WebGLTextureShaderProgram.prototype.renderSprite = function(gl, object, wm) {
@@ -6392,8 +6414,8 @@ c = WebGLTextureShaderProgram = (function() {
       delete this.cache.textures[object.bm.oldSrc];
     }
     t = this.getSpriteTexture(gl, object);
-    if (this.cache.currentTexture !== t) {
-      this.cache.currentTexture = t;
+    if (this.currentTexture !== t) {
+      this.currentTexture = t;
       if (object.imageLength === 1) {
         this.setRegularTextCoordBuffer(gl);
       } else {
@@ -6411,9 +6433,10 @@ c = WebGLTextureShaderProgram = (function() {
         this.setAnimatedTextCoordBuffer(gl, object);
       }
       gl.bindTexture(gl.TEXTURE_2D, t);
+      this.setBuffer(gl, this.rectangleCornerBuffer);
       Helpers.WebGL.setPlane(gl, 0, 0, object.clipWidth, object.clipHeight);
     }
-    gl.uniformMatrix3fv(l.u_matrix, false, wm);
+    gl.uniformMatrix3fv(l.u_matrix, gl.FALSE, wm);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   };
 
@@ -6421,8 +6444,8 @@ c = WebGLTextureShaderProgram = (function() {
     var l, t;
     l = this.locations;
     t = this.getMaskTexture(gl, object);
-    if (this.cache.currentTexture !== t) {
-      this.cache.currentTexture = t;
+    if (this.currentTexture !== t) {
+      this.currentTexture = t;
       if (object.imageLength === 1) {
         this.setRegularTextCoordBuffer(gl);
       } else {
@@ -6440,10 +6463,11 @@ c = WebGLTextureShaderProgram = (function() {
         this.setAnimatedTextCoordBuffer(gl, object);
       }
       gl.bindTexture(gl.TEXTURE_2D, t);
+      this.setBuffer(gl, this.rectangleCornerBuffer);
       Helpers.WebGL.setPlane(gl, 0, 0, object.clipWidth, object.clipHeight);
     }
     gl.uniformMatrix3fv(l.u_matrix, false, wm);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    return gl.drawArrays(gl.TRIANGLES, 0, 6);
   };
 
   WebGLTextureShaderProgram.prototype.getSpriteTexture = function(gl, object) {

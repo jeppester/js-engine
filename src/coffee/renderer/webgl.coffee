@@ -33,8 +33,6 @@ c = class WebGLRenderer
       texture: new TextureShaderProgram @gl
       color: new ColorShaderProgram @gl
 
-    return
-
   setProgram: (program) ->
     if @currentProgram isnt program
       gl = @gl
@@ -51,7 +49,6 @@ c = class WebGLRenderer
 
       # Set current alpha
       gl.uniform1f @currentProgram.locations.u_alpha, @cache.currentAlpha
-    return
 
   render: (cameras) ->
     gl = @gl
