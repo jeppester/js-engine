@@ -4150,12 +4150,8 @@ module.exports = {
 var MatrixCalculationHelper;
 
 module.exports = MatrixCalculationHelper = {
-  getOperationMatrix: function() {
-    return this.operationMatrix != null ? this.operationMatrix : this.operationMatrix = new Float32Array(9);
-  },
-  getTempLocalMatrix: function() {
-    return this.tempLocalMatrix != null ? this.tempLocalMatrix : this.tempLocalMatrix = new Float32Array(9);
-  },
+  operationMatrix: new Float32Array(9),
+  tempLocalMatrix: new Float32Array(9),
   setLocalMatrix: function(matrix, object) {
     this.setScale(matrix, object.widthScale * object.size, object.heightScale * object.size);
     this.multiply(matrix, this.getRotation(-object.direction));
@@ -4163,7 +4159,7 @@ module.exports = MatrixCalculationHelper = {
     return matrix;
   },
   getLocalMatrix: function(object) {
-    return this.setLocalMatrix(this.getTempLocalMatrix(), object);
+    return this.setLocalMatrix(this.tempLocalMatrix, object);
   },
   setInverseLocalMatrix: function(matrix, object) {
     this.setTranslation(matrix, -object.x, -object.y);
@@ -4172,7 +4168,7 @@ module.exports = MatrixCalculationHelper = {
     return matrix;
   },
   getInverseLocalMatrix: function(object) {
-    return this.setInverseLocalMatrix(this.getTempLocalMatrix(), object);
+    return this.setInverseLocalMatrix(this.tempLocalMatrix, object);
   },
   setIdentity: function(matrix) {
     matrix[0] = 1;
@@ -4187,7 +4183,7 @@ module.exports = MatrixCalculationHelper = {
     return matrix;
   },
   getIdentity: function() {
-    return this.setIdentity(this.getOperationMatrix());
+    return this.setIdentity(this.operationMatrix);
   },
   setRotation: function(matrix, direction) {
     var c, s;
@@ -4205,7 +4201,7 @@ module.exports = MatrixCalculationHelper = {
     return matrix;
   },
   getRotation: function(direction) {
-    return this.setRotation(this.getOperationMatrix(), direction);
+    return this.setRotation(this.operationMatrix, direction);
   },
   setTranslation: function(matrix, tx, ty) {
     matrix[0] = 1;
@@ -4220,7 +4216,7 @@ module.exports = MatrixCalculationHelper = {
     return matrix;
   },
   getTranslation: function(tx, ty) {
-    return this.setTranslation(this.getOperationMatrix(), tx, ty);
+    return this.setTranslation(this.operationMatrix, tx, ty);
   },
   setScale: function(matrix, sx, sy) {
     matrix[0] = sx;
@@ -4235,7 +4231,7 @@ module.exports = MatrixCalculationHelper = {
     return matrix;
   },
   getScale: function(sx, sy) {
-    return this.setScale(this.getOperationMatrix(), sx, sy);
+    return this.setScale(this.operationMatrix, sx, sy);
   },
   multiply: function(a, b) {
     var a1, a2, b1, b2, c1, c2, d1, d2, e1, e2, f1, f2, g1, g2, h1, h2, i1, i2;

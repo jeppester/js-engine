@@ -1,9 +1,6 @@
 module.exports = MatrixCalculationHelper =
-  getOperationMatrix: ->
-    @operationMatrix ?= new Float32Array 9
-
-  getTempLocalMatrix: ->
-    @tempLocalMatrix ?= new Float32Array 9
+  operationMatrix: new Float32Array 9
+  tempLocalMatrix: new Float32Array 9
 
   setLocalMatrix: (matrix, object)->
     @setScale matrix, object.widthScale * object.size, object.heightScale * object.size
@@ -12,7 +9,7 @@ module.exports = MatrixCalculationHelper =
     matrix
 
   getLocalMatrix: (object)->
-    @setLocalMatrix @getTempLocalMatrix(), object
+    @setLocalMatrix @tempLocalMatrix, object
 
   setInverseLocalMatrix: (matrix, object)->
     @setTranslation matrix, -object.x, -object.y
@@ -21,7 +18,7 @@ module.exports = MatrixCalculationHelper =
     matrix
 
   getInverseLocalMatrix: (object)->
-    @setInverseLocalMatrix @getTempLocalMatrix(), object
+    @setInverseLocalMatrix @tempLocalMatrix, object
 
   setIdentity: (matrix)->
     matrix[0] = 1
@@ -39,7 +36,7 @@ module.exports = MatrixCalculationHelper =
     matrix
 
   getIdentity: ->
-    @setIdentity @getOperationMatrix()
+    @setIdentity @operationMatrix
 
   setRotation: (matrix, direction)->
     c = Math.cos direction
@@ -60,7 +57,7 @@ module.exports = MatrixCalculationHelper =
     matrix
 
   getRotation: (direction)->
-    @setRotation @getOperationMatrix(), direction
+    @setRotation @operationMatrix, direction
 
   setTranslation: (matrix, tx, ty)->
     matrix[0] = 1
@@ -78,7 +75,7 @@ module.exports = MatrixCalculationHelper =
     matrix
 
   getTranslation: (tx, ty) ->
-    @setTranslation @getOperationMatrix(), tx, ty
+    @setTranslation @operationMatrix, tx, ty
 
   setScale: (matrix, sx, sy)->
     matrix[0] = sx
@@ -96,7 +93,7 @@ module.exports = MatrixCalculationHelper =
     matrix
 
   getScale: (sx, sy) ->
-    @setScale @getOperationMatrix(), sx, sy
+    @setScale @operationMatrix, sx, sy
 
   multiply: (a, b)->
     throw new Error 'Multiplying matrix with itself' if a == b
