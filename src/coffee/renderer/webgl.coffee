@@ -1,13 +1,16 @@
 module.exports = -> module.exports::constructor.apply @, arguments
 
 c = class WebGLRenderer
+  currentAlpha: null
+  currentResolution:
+    width: 0
+    height: 0
+
   constructor: (@canvas) ->
     # Cache variables
-    @cache =
-      currentAlpha: undefined
-      currentResolution:
-        width: 0
-        height: 0
+    @currentAlpha = undefined
+    @currentResolution.width = 0
+    @currentResolution.height = 0
 
     @programs = {}
     @currentProgram = false
@@ -43,30 +46,35 @@ c = class WebGLRenderer
 
       # Bind stuff
       program.onSet gl
+      l = program.locations
 
       # Set current resolution var
-      gl.uniform2f program.locations.u_resolution, @cache.currentResolution.width, @cache.currentResolution.height
+      gl.uniform2f l.u_resolution, @currentResolution.width, @currentResolution.height
 
       # Set current alpha
-      gl.uniform1f @currentProgram.locations.u_alpha, @cache.currentAlpha
+      gl.uniform1f l.u_alpha, @currentAlpha
+    return
 
   render: (cameras) ->
     gl = @gl
     for camera in cameras
+      cr = camera.captureRegion
+      pr = camera.projectionRegion
+
       # Setup camera resolution
-      w = camera.captureRegion.width
-      h = camera.captureRegion.height
-      if @cache.currentResolution.width isnt w or @cache.currentResolution.height isnt h
-        @cache.currentResolution.width = w
-        @cache.currentResolution.height = h
+      w = cr.width
+      h = cr.height
+      if @currentResolution.width isnt w or @currentResolution.height isnt h
+        @currentResolution.width = w
+        @currentResolution.height = h
         gl.uniform2f @currentProgram.locations.u_resolution, w, h if @currentProgram
 
       # Set camera position
       camera.wm ?= new Float32Array 9
-      Helpers.MatrixCalculation.setTranslation(camera.wm, -camera.captureRegion.x, -camera.captureRegion.y)
+      Helpers.MatrixCalculation.setTranslation(camera.wm, -cr.x, -cr.y)
 
       # Set camera projection viewport
-      gl.viewport camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height
+      gl.viewport pr.x, pr.y, pr.width, pr.height
       rooms = [ engine.masterRoom, camera.room ]
 
       for room in rooms
@@ -78,6 +86,7 @@ c = class WebGLRenderer
     list = []
     @createRenderList list, room, wm
     @processRenderList list
+    return
 
   createRenderList: (list, object, wm)->
     return unless object.isVisible()
@@ -90,17 +99,19 @@ c = class WebGLRenderer
 
     if object.children
       @createRenderList list, child, object.wm for child in object.children
+    return
 
   processRenderList: (list)->
     @renderObject(object, @gl, engine.drawMasks, engine.drawBoundingBoxes) for object in list
+    return
 
   renderObject: (object, gl, drawMasks, drawBoundingBoxes)->
     wmWithOffset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
     Helpers.MatrixCalculation.multiply wmWithOffset, object.wm
 
     # Set object alpha (because alpha is used by ALL rendered objects)
-    if @cache.currentAlpha != object.opacity
-      @cache.currentAlpha = object.opacity
+    if @currentAlpha != object.opacity
+      @currentAlpha = object.opacity
       gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
 
     switch object.renderType
@@ -128,6 +139,7 @@ c = class WebGLRenderer
       when "circle"
         @setProgram @programs.color
         @currentProgram.renderCircle gl, object, wmWithOffset
+    return
 
 module.exports:: = Object.create c::
 module.exports::constructor = c

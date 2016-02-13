@@ -3,6 +3,7 @@ module.exports = -> module.exports::constructor.apply @, arguments
 c = class WebGLTextureShaderProgram
   textureCache: {}
   maskCache: {}
+  locations: {}
   currentTexture: null
   regularTextCoordBuffer: null
   rectangleCornerBuffer: null
@@ -60,14 +61,15 @@ c = class WebGLTextureShaderProgram
     gl.compileShader fragmentShader
     gl.attachShader @program, fragmentShader
     gl.linkProgram @program
+    return
 
   bindLocations: (gl) ->
-    @locations =
-      a_texCoord:   gl.getAttribLocation @program, "a_texCoord"
-      a_position:   gl.getAttribLocation @program, "a_position"
-      u_resolution: gl.getUniformLocation @program, "u_resolution"
-      u_matrix:     gl.getUniformLocation @program, "u_matrix"
-      u_alpha:      gl.getUniformLocation @program, "u_alpha"
+    @locations.a_texCoord   = gl.getAttribLocation @program, "a_texCoord"
+    @locations.a_position   = gl.getAttribLocation @program, "a_position"
+    @locations.u_resolution = gl.getUniformLocation @program, "u_resolution"
+    @locations.u_matrix     = gl.getUniformLocation @program, "u_matrix"
+    @locations.u_alpha      = gl.getUniformLocation @program, "u_alpha"
+    return
 
   initBuffers: (gl) ->
     # Regular texture coordinate buffer (the coordinates are always the same)
@@ -86,6 +88,7 @@ c = class WebGLTextureShaderProgram
 
     # Rectangle corner buffer
     @rectangleCornerBuffer = gl.createBuffer()
+    return
 
   # Use the same texture coordinate buffer for all non-animated sprites
   setRegularTextCoordBuffer: (gl) ->
@@ -100,9 +103,10 @@ c = class WebGLTextureShaderProgram
     # Always leave the rectangle corner buffer bound, as it is used A LOT
     # and we want to prevent too many buffer binds
     gl.bindBuffer gl.ARRAY_BUFFER, @rectangleCornerBuffer
+    return
 
   # Set a texture coordinate buffer for a specific animated object
-  setAnimatedTextCoordBuffer: (gl, object) ->
+  setAnimatedTextCoordBuffer: (gl, object)->
     return if @mode == 'animated'
     @mode = 'animated'
 
@@ -132,52 +136,60 @@ c = class WebGLTextureShaderProgram
     # Always leave the rectangle corner buffer bound, as it is used A LOT
     # and we want to prevent too many buffer binds
     gl.bindBuffer gl.ARRAY_BUFFER, @rectangleCornerBuffer
+    return
 
   # When returning to the program reset the buffer
   onSet: (gl) ->
     gl.bindBuffer gl.ARRAY_BUFFER, @rectangleCornerBuffer
     gl.enableVertexAttribArray @locations.a_position
     gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
+    return
 
   # Draw functions
-  renderSprite: (gl, object, wm, mask = false) ->
-    l = @locations
-    delete @textureCache[object.bm.oldSrc] if object.renderType is "textblock" and @textureCache[object.bm.oldSrc]
+  renderSprite: (gl, object, wm) ->
+    if object.renderType == "textblock" && @textureCache[object.bm.oldSrc]
+      delete @textureCache[object.bm.oldSrc]
 
-    # Bind the texture (if it is not already bound)
-    t = if mask then @getMaskTexture gl, object else @getSpriteTexture gl, object
-    if @currentTexture != t
-      @currentTexture = t
+    # Set the correct texture coordinate buffer
+    if object.imageLength == 1
+      @setRegularTextCoordBuffer gl
+    else
+      object.updateSubImage()
 
-      # Set the correct texture coordinate buffer
-      if object.imageLength == 1
-        @setRegularTextCoordBuffer gl
-      else
-        # Set the right sub image
-        if engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed
-          object.imageNumber = object.imageNumber + ((if object.animationSpeed > 0 then 1 else -1))
-          object.animationLastSwitch = engine.gameTime
-          if object.imageNumber is object.imageLength
-            object.imageNumber = (if object.animationLoops then 0 else object.imageLength - 1)
-          else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
+      # Set create and set texture coordinate buffer for the object
+      @setAnimatedTextCoordBuffer gl, object
 
-        # Set create and set texture coordinate buffer for the object
-        @setAnimatedTextCoordBuffer gl, object
-
-      # Set a rectangle the same size as the image
-      gl.bindTexture gl.TEXTURE_2D, t
-      Helpers.WebGL.setPlane gl, 0, 0, object.clipWidth, object.clipHeight
-
-    # Set matrix
-    gl.uniformMatrix3fv l.u_matrix, gl.FALSE, wm
-
-    # Draw the rectangle.
-    gl.drawArrays gl.TRIANGLES, 0, 6
+    texture = @getSpriteTexture gl, object
+    @renderTexture(gl, texture, wm, object.clipWidth, object.clipHeight)
     return
 
   # Draw functions
   renderMask: (gl, object, wm) ->
-    @renderSprite gl, object, wm, true
+    # Set the correct texture coordinate buffer
+    if object.imageLength == 1
+      @setRegularTextCoordBuffer gl
+    else
+      # Set create and set texture coordinate buffer for the object
+      @setAnimatedTextCoordBuffer gl, object
+
+    texture = @getMaskTexture gl, object
+    @renderTexture(gl, texture, wm, object.clipWidth, object.clipHeight)
+    return
+
+  renderTexture: (gl, texture, wm, width, height)->
+    if @currentTexture != texture
+      @currentTexture = texture
+
+      # Set a rectangle the same size as the image
+      gl.bindTexture gl.TEXTURE_2D, texture
+      Helpers.WebGL.setPlane gl, 0, 0, width, height
+
+    # Set matrix
+    gl.uniformMatrix3fv @locations.u_matrix, gl.FALSE, wm
+
+    # Draw the rectangle.
+    gl.drawArrays gl.TRIANGLES, 0, 6
+    return
 
   getSpriteTexture: (gl, object) ->
     c = @textureCache[object.bm.src]

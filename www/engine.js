@@ -6016,16 +6016,19 @@ module.exports = function() {
 };
 
 c = WebGLRenderer = (function() {
+  WebGLRenderer.prototype.currentAlpha = null;
+
+  WebGLRenderer.prototype.currentResolution = {
+    width: 0,
+    height: 0
+  };
+
   function WebGLRenderer(canvas) {
     var context, i, len, options, ref;
     this.canvas = canvas;
-    this.cache = {
-      currentAlpha: void 0,
-      currentResolution: {
-        width: 0,
-        height: 0
-      }
-    };
+    this.currentAlpha = void 0;
+    this.currentResolution.width = 0;
+    this.currentResolution.height = 0;
     this.programs = {};
     this.currentProgram = false;
     options = {
@@ -6050,27 +6053,30 @@ c = WebGLRenderer = (function() {
   }
 
   WebGLRenderer.prototype.setProgram = function(program) {
-    var gl;
+    var gl, l;
     if (this.currentProgram !== program) {
       gl = this.gl;
       this.currentProgram = program;
       gl.useProgram(program.program);
       program.onSet(gl);
-      gl.uniform2f(program.locations.u_resolution, this.cache.currentResolution.width, this.cache.currentResolution.height);
-      return gl.uniform1f(this.currentProgram.locations.u_alpha, this.cache.currentAlpha);
+      l = program.locations;
+      gl.uniform2f(l.u_resolution, this.currentResolution.width, this.currentResolution.height);
+      gl.uniform1f(l.u_alpha, this.currentAlpha);
     }
   };
 
   WebGLRenderer.prototype.render = function(cameras) {
-    var camera, gl, h, i, j, len, len1, room, rooms, w;
+    var camera, cr, gl, h, i, j, len, len1, pr, room, rooms, w;
     gl = this.gl;
     for (i = 0, len = cameras.length; i < len; i++) {
       camera = cameras[i];
-      w = camera.captureRegion.width;
-      h = camera.captureRegion.height;
-      if (this.cache.currentResolution.width !== w || this.cache.currentResolution.height !== h) {
-        this.cache.currentResolution.width = w;
-        this.cache.currentResolution.height = h;
+      cr = camera.captureRegion;
+      pr = camera.projectionRegion;
+      w = cr.width;
+      h = cr.height;
+      if (this.currentResolution.width !== w || this.currentResolution.height !== h) {
+        this.currentResolution.width = w;
+        this.currentResolution.height = h;
         if (this.currentProgram) {
           gl.uniform2f(this.currentProgram.locations.u_resolution, w, h);
         }
@@ -6078,8 +6084,8 @@ c = WebGLRenderer = (function() {
       if (camera.wm == null) {
         camera.wm = new Float32Array(9);
       }
-      Helpers.MatrixCalculation.setTranslation(camera.wm, -camera.captureRegion.x, -camera.captureRegion.y);
-      gl.viewport(camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height);
+      Helpers.MatrixCalculation.setTranslation(camera.wm, -cr.x, -cr.y);
+      gl.viewport(pr.x, pr.y, pr.width, pr.height);
       rooms = [engine.masterRoom, camera.room];
       for (j = 0, len1 = rooms.length; j < len1; j++) {
         room = rooms[j];
@@ -6092,11 +6098,11 @@ c = WebGLRenderer = (function() {
     var list;
     list = [];
     this.createRenderList(list, room, wm);
-    return this.processRenderList(list);
+    this.processRenderList(list);
   };
 
   WebGLRenderer.prototype.createRenderList = function(list, object, wm) {
-    var child, i, len, ref, results;
+    var child, i, len, ref;
     if (!object.isVisible()) {
       return;
     }
@@ -6110,31 +6116,27 @@ c = WebGLRenderer = (function() {
     }
     if (object.children) {
       ref = object.children;
-      results = [];
       for (i = 0, len = ref.length; i < len; i++) {
         child = ref[i];
-        results.push(this.createRenderList(list, child, object.wm));
+        this.createRenderList(list, child, object.wm);
       }
-      return results;
     }
   };
 
   WebGLRenderer.prototype.processRenderList = function(list) {
-    var i, len, object, results;
-    results = [];
+    var i, len, object;
     for (i = 0, len = list.length; i < len; i++) {
       object = list[i];
-      results.push(this.renderObject(object, this.gl, engine.drawMasks, engine.drawBoundingBoxes));
+      this.renderObject(object, this.gl, engine.drawMasks, engine.drawBoundingBoxes);
     }
-    return results;
   };
 
   WebGLRenderer.prototype.renderObject = function(object, gl, drawMasks, drawBoundingBoxes) {
     var wmWithOffset;
     wmWithOffset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
     Helpers.MatrixCalculation.multiply(wmWithOffset, object.wm);
-    if (this.cache.currentAlpha !== object.opacity) {
-      this.cache.currentAlpha = object.opacity;
+    if (this.currentAlpha !== object.opacity) {
+      this.currentAlpha = object.opacity;
       if (this.currentProgram) {
         gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
       }
@@ -6148,21 +6150,24 @@ c = WebGLRenderer = (function() {
         }
         if (drawBoundingBoxes) {
           this.setProgram(this.programs.color);
-          return this.currentProgram.renderBoundingBox(gl, object, wmWithOffset);
+          this.currentProgram.renderBoundingBox(gl, object, wmWithOffset);
         }
         break;
       case "textblock":
         this.setProgram(this.programs.texture);
-        return this.currentProgram.renderSprite(gl, object, wmWithOffset);
+        this.currentProgram.renderSprite(gl, object, wmWithOffset);
+        break;
       case "line":
         this.setProgram(this.programs.color);
-        return this.currentProgram.renderLine(gl, object, wmWithOffset);
+        this.currentProgram.renderLine(gl, object, wmWithOffset);
+        break;
       case "rectangle":
         this.setProgram(this.programs.color);
-        return this.currentProgram.renderRectangle(gl, object, wmWithOffset);
+        this.currentProgram.renderRectangle(gl, object, wmWithOffset);
+        break;
       case "circle":
         this.setProgram(this.programs.color);
-        return this.currentProgram.renderCircle(gl, object, wmWithOffset);
+        this.currentProgram.renderCircle(gl, object, wmWithOffset);
     }
   };
 
@@ -6351,6 +6356,8 @@ c = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.maskCache = {};
 
+  WebGLTextureShaderProgram.prototype.locations = {};
+
   WebGLTextureShaderProgram.prototype.currentTexture = null;
 
   WebGLTextureShaderProgram.prototype.regularTextCoordBuffer = null;
@@ -6382,17 +6389,15 @@ c = WebGLTextureShaderProgram = (function() {
     gl.shaderSource(fragmentShader, fragmentCode);
     gl.compileShader(fragmentShader);
     gl.attachShader(this.program, fragmentShader);
-    return gl.linkProgram(this.program);
+    gl.linkProgram(this.program);
   };
 
   WebGLTextureShaderProgram.prototype.bindLocations = function(gl) {
-    return this.locations = {
-      a_texCoord: gl.getAttribLocation(this.program, "a_texCoord"),
-      a_position: gl.getAttribLocation(this.program, "a_position"),
-      u_resolution: gl.getUniformLocation(this.program, "u_resolution"),
-      u_matrix: gl.getUniformLocation(this.program, "u_matrix"),
-      u_alpha: gl.getUniformLocation(this.program, "u_alpha")
-    };
+    this.locations.a_texCoord = gl.getAttribLocation(this.program, "a_texCoord");
+    this.locations.a_position = gl.getAttribLocation(this.program, "a_position");
+    this.locations.u_resolution = gl.getUniformLocation(this.program, "u_resolution");
+    this.locations.u_matrix = gl.getUniformLocation(this.program, "u_matrix");
+    this.locations.u_alpha = gl.getUniformLocation(this.program, "u_alpha");
   };
 
   WebGLTextureShaderProgram.prototype.initBuffers = function(gl) {
@@ -6400,7 +6405,7 @@ c = WebGLTextureShaderProgram = (function() {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.regularTextCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]), gl.STATIC_DRAW);
     this.animatedTextCoordBuffer = gl.createBuffer();
-    return this.rectangleCornerBuffer = gl.createBuffer();
+    this.rectangleCornerBuffer = gl.createBuffer();
   };
 
   WebGLTextureShaderProgram.prototype.setRegularTextCoordBuffer = function(gl) {
@@ -6411,7 +6416,7 @@ c = WebGLTextureShaderProgram = (function() {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.regularTextCoordBuffer);
     gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(this.locations.a_texCoord);
-    return gl.bindBuffer(gl.ARRAY_BUFFER, this.rectangleCornerBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.rectangleCornerBuffer);
   };
 
   WebGLTextureShaderProgram.prototype.setAnimatedTextCoordBuffer = function(gl, object) {
@@ -6430,52 +6435,49 @@ c = WebGLTextureShaderProgram = (function() {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]), gl.STATIC_DRAW);
     gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(this.locations.a_texCoord);
-    return gl.bindBuffer(gl.ARRAY_BUFFER, this.rectangleCornerBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.rectangleCornerBuffer);
   };
 
   WebGLTextureShaderProgram.prototype.onSet = function(gl) {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.rectangleCornerBuffer);
     gl.enableVertexAttribArray(this.locations.a_position);
-    return gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
   };
 
-  WebGLTextureShaderProgram.prototype.renderSprite = function(gl, object, wm, mask) {
-    var l, t;
-    if (mask == null) {
-      mask = false;
-    }
-    l = this.locations;
+  WebGLTextureShaderProgram.prototype.renderSprite = function(gl, object, wm) {
+    var texture;
     if (object.renderType === "textblock" && this.textureCache[object.bm.oldSrc]) {
       delete this.textureCache[object.bm.oldSrc];
     }
-    t = mask ? this.getMaskTexture(gl, object) : this.getSpriteTexture(gl, object);
-    if (this.currentTexture !== t) {
-      this.currentTexture = t;
-      if (object.imageLength === 1) {
-        this.setRegularTextCoordBuffer(gl);
-      } else {
-        if (engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed) {
-          object.imageNumber = object.imageNumber + (object.animationSpeed > 0 ? 1 : -1);
-          object.animationLastSwitch = engine.gameTime;
-          if (object.imageNumber === object.imageLength) {
-            object.imageNumber = (object.animationLoops ? 0 : object.imageLength - 1);
-          } else {
-            if (object.imageNumber === -1) {
-              object.imageNumber = (object.animationLoops ? object.imageLength - 1 : 0);
-            }
-          }
-        }
-        this.setAnimatedTextCoordBuffer(gl, object);
-      }
-      gl.bindTexture(gl.TEXTURE_2D, t);
-      Helpers.WebGL.setPlane(gl, 0, 0, object.clipWidth, object.clipHeight);
+    if (object.imageLength === 1) {
+      this.setRegularTextCoordBuffer(gl);
+    } else {
+      object.updateSubImage();
+      this.setAnimatedTextCoordBuffer(gl, object);
     }
-    gl.uniformMatrix3fv(l.u_matrix, gl.FALSE, wm);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    texture = this.getSpriteTexture(gl, object);
+    this.renderTexture(gl, texture, wm, object.clipWidth, object.clipHeight);
   };
 
   WebGLTextureShaderProgram.prototype.renderMask = function(gl, object, wm) {
-    return this.renderSprite(gl, object, wm, true);
+    var texture;
+    if (object.imageLength === 1) {
+      this.setRegularTextCoordBuffer(gl);
+    } else {
+      this.setAnimatedTextCoordBuffer(gl, object);
+    }
+    texture = this.getMaskTexture(gl, object);
+    this.renderTexture(gl, texture, wm, object.clipWidth, object.clipHeight);
+  };
+
+  WebGLTextureShaderProgram.prototype.renderTexture = function(gl, texture, wm, width, height) {
+    if (this.currentTexture !== texture) {
+      this.currentTexture = texture;
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      Helpers.WebGL.setPlane(gl, 0, 0, width, height);
+    }
+    gl.uniformMatrix3fv(this.locations.u_matrix, gl.FALSE, wm);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
   };
 
   WebGLTextureShaderProgram.prototype.getSpriteTexture = function(gl, object) {
@@ -8941,6 +8943,20 @@ c = Sprite = (function(superClass) {
     }
     this.source = source;
     this.refreshSource();
+  };
+
+  Sprite.prototype.updateSubImage = function() {
+    if (engine.gameTime - this.animationLastSwitch > 1000 / this.animationSpeed) {
+      this.imageNumber = this.imageNumber + (this.animationSpeed > 0 ? 1 : -1);
+      this.animationLastSwitch = this.gameTime;
+      if (this.imageNumber === this.imageLength) {
+        this.imageNumber = (this.animationLoops ? 0 : this.imageLength - 1);
+      } else {
+        if (this.imageNumber === -1) {
+          this.imageNumber = (this.animationLoops ? this.imageLength - 1 : 0);
+        }
+      }
+    }
   };
 
 

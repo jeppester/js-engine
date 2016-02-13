@@ -203,6 +203,16 @@ c = class Sprite extends Views.Container
     @refreshSource()
     return
 
+  updateSubImage: ->
+    # Set the right sub image
+    if engine.gameTime - @animationLastSwitch > 1000 / @animationSpeed
+      @imageNumber = @imageNumber + ((if @animationSpeed > 0 then 1 else -1))
+      @animationLastSwitch = @gameTime
+      if @imageNumber is @imageLength
+        @imageNumber = (if @animationLoops then 0 else @imageLength - 1)
+      else @imageNumber = (if @animationLoops then @imageLength - 1 else 0) if @imageNumber is -1
+    return
+
   ###
   Calculates the region which the sprite will fill out when redrawn.
 
