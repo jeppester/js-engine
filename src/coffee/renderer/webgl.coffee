@@ -105,7 +105,7 @@ c = class WebGLRenderer
         program = @programs.texture
         renderFunction = program.renderSprite
       when "line"
-        program = @programs.texture
+        program = @programs.color
         renderFunction = program.renderLine
       when "rectangle"
         program = @programs.color
@@ -116,7 +116,7 @@ c = class WebGLRenderer
       else
         program = null
 
-    list.push(program, renderFunction, object) if program
+    list.push program, renderFunction, object if program
 
     if object.children
       @createRenderList list, child, object.wm for child in object.children
@@ -165,23 +165,25 @@ c = class WebGLRenderer
     return
 
   processRenderList: (list)->
+    gl = @gl
     i = 0
     while i < list.length
-      @renderObject @gl, list[i], list[i + 1], list[i + 2]
+      program = list[i]
+      renderFunction = list[i + 1]
+      object = list[i + 2]
+
+      wmWithOffset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
+      Helpers.MatrixCalculation.multiply wmWithOffset, object.wm
+
+      # Set object alpha (because alpha is used by ALL rendered objects)
+      if @currentAlpha != object.opacity
+        @currentAlpha = object.opacity
+        gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
+
+      @setProgram program
+      renderFunction.call program, gl, object, wmWithOffset
+
       i += 3
-    return
-
-  renderObject: (gl, program, renderFunction, object)->
-    wmWithOffset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
-    Helpers.MatrixCalculation.multiply wmWithOffset, object.wm
-
-    # Set object alpha (because alpha is used by ALL rendered objects)
-    if @currentAlpha != object.opacity
-      @currentAlpha = object.opacity
-      gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
-
-    @setProgram program
-    renderFunction.call program, gl, object, wmWithOffset
     return
 
 module.exports:: = Object.create c::

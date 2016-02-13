@@ -101,7 +101,7 @@ c = class Sprite extends Views.Container
     throw new Error("Sprite source was not successfully loaded: " + source) unless @refreshSource() #dev
 
     # Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
-    @offset = offset
+    @offsetFromGlobal offset
     if engine.avoidSubPixelRendering
       @offset.x = Math.round(@offset.x)
       @offset.y = Math.round(@offset.y)

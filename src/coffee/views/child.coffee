@@ -11,11 +11,6 @@ Geometry =
 c = class Child
   constructor: ->
     @renderType = ""
-    @initWithoutRedrawRegions()
-    engine.registerObject this
-    return
-
-  initWithoutRedrawRegions: ->
     @x = 0
     @y = 0
     @opacity = 1
@@ -23,158 +18,12 @@ c = class Child
     @size = 1
     @widthScale = 1
     @heightScale = 1
-    hidden = offset: new Geometry.Vector()
-
-    Object.defineProperty @, "offset",
-      get: ->
-        hidden.offset
-
-      set: (value) ->
-        if typeof value is "string"
-          @offsetGlobal = value
-          hidden.offset = @parseOffsetGlobal(value)
-        else
-          @offsetGlobal = false
-          hidden.offset = value
-        value
+    @offset = new Geometry.Vector()
+    engine.registerObject this
     return
 
-  initWithRedrawRegions: ->
-    @hasChanged = false
-
-    # Define hidden vars
-    hidden = undefined
-    hidden =
-      x: 0
-      y: 0
-      opacity: 1
-      direction: 0
-      size: 1
-      widthScale: 1
-      heightScale: 1
-      offset: undefined
-      parentObject: this
-
-    # Define getter/setters for hidden vars
-    Object.defineProperty this, "x",
-      get: ->
-        hidden.x
-
-      set: (value) ->
-        if hidden.x isnt value
-          hidden.x = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "y",
-      get: ->
-        hidden.y
-
-      set: (value) ->
-        if hidden.y isnt value
-          hidden.y = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "opacity",
-      get: ->
-        hidden.opacity
-
-      set: (value) ->
-        if hidden.opacity isnt value
-          hidden.opacity = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "direction",
-      get: ->
-        hidden.direction
-
-      set: (value) ->
-        if hidden.direction isnt value
-          hidden.direction = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "size",
-      get: ->
-        hidden.size
-
-      set: (value) ->
-        if hidden.size isnt value
-          hidden.size = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "widthScale",
-      get: ->
-        hidden.widthScale
-
-      set: (value) ->
-        if hidden.widthScale isnt value
-          hidden.widthScale = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "heightScale",
-      get: ->
-        hidden.heightScale
-
-      set: (value) ->
-        if hidden.heightScale isnt value
-          hidden.heightScale = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "offset",
-      get: ->
-        hidden.offset
-
-      set: (value) ->
-        if hidden.offset isnt value
-          hidden.offset = value
-          off_ =
-            x: value.x
-            y: value.y
-
-
-          # Put getters and setters on points values
-          Object.defineProperty hidden.offset, "x",
-            get: ->
-              off_.x
-
-            set: (value) ->
-              if off_.x isnt value
-                off_.x = value
-                hidden.parentObject.onAfterChange()
-              return
-
-
-          # Put getters and setters on points values
-          Object.defineProperty hidden.offset, "y",
-            get: ->
-              off_.y
-
-            set: (value) ->
-              if off_.y isnt value
-                off_.y = value
-                hidden.parentObject.onAfterChange()
-              return
-
-          @onAfterChange()
-        return
-
-    @offset = new Vector()
-    return
-
-  onAfterChange: ->
-    if not @hasChanged and @isDrawn()
-      @lastRedrawRegion = @currentRedrawRegion
-      @currentRedrawRegion = (if @getCombinedRedrawRegion then @getCombinedRedrawRegion() else @getRedrawRegion())
-      if @currentRedrawRegion
-        engine.redrawObjects.push this
-        @hasChanged = true
-    return
+  offsetFromGlobal: (offset)->
+    @offset = @parseOffsetGlobal offset
 
   ###
   Parses an offset global into an actual Vector offset

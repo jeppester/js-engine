@@ -6124,7 +6124,7 @@ c = WebGLRenderer = (function() {
         renderFunction = program.renderSprite;
         break;
       case "line":
-        program = this.programs.texture;
+        program = this.programs.color;
         renderFunction = program.renderLine;
         break;
       case "rectangle":
@@ -6211,26 +6211,25 @@ c = WebGLRenderer = (function() {
   };
 
   WebGLRenderer.prototype.processRenderList = function(list) {
-    var i;
+    var gl, i, object, program, renderFunction, wmWithOffset;
+    gl = this.gl;
     i = 0;
     while (i < list.length) {
-      this.renderObject(this.gl, list[i], list[i + 1], list[i + 2]);
+      program = list[i];
+      renderFunction = list[i + 1];
+      object = list[i + 2];
+      wmWithOffset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
+      Helpers.MatrixCalculation.multiply(wmWithOffset, object.wm);
+      if (this.currentAlpha !== object.opacity) {
+        this.currentAlpha = object.opacity;
+        if (this.currentProgram) {
+          gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
+        }
+      }
+      this.setProgram(program);
+      renderFunction.call(program, gl, object, wmWithOffset);
       i += 3;
     }
-  };
-
-  WebGLRenderer.prototype.renderObject = function(gl, program, renderFunction, object) {
-    var wmWithOffset;
-    wmWithOffset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
-    Helpers.MatrixCalculation.multiply(wmWithOffset, object.wm);
-    if (this.currentAlpha !== object.opacity) {
-      this.currentAlpha = object.opacity;
-      if (this.currentProgram) {
-        gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
-      }
-    }
-    this.setProgram(program);
-    renderFunction.call(program, gl, object, wmWithOffset);
   };
 
   return WebGLRenderer;
@@ -6894,13 +6893,6 @@ Geometry = {
 c = Child = (function() {
   function Child() {
     this.renderType = "";
-    this.initWithoutRedrawRegions();
-    engine.registerObject(this);
-    return;
-  }
-
-  Child.prototype.initWithoutRedrawRegions = function() {
-    var hidden;
     this.x = 0;
     this.y = 0;
     this.opacity = 1;
@@ -6908,168 +6900,13 @@ c = Child = (function() {
     this.size = 1;
     this.widthScale = 1;
     this.heightScale = 1;
-    hidden = {
-      offset: new Geometry.Vector()
-    };
-    Object.defineProperty(this, "offset", {
-      get: function() {
-        return hidden.offset;
-      },
-      set: function(value) {
-        if (typeof value === "string") {
-          this.offsetGlobal = value;
-          hidden.offset = this.parseOffsetGlobal(value);
-        } else {
-          this.offsetGlobal = false;
-          hidden.offset = value;
-        }
-        return value;
-      }
-    });
-  };
+    this.offset = new Geometry.Vector();
+    engine.registerObject(this);
+    return;
+  }
 
-  Child.prototype.initWithRedrawRegions = function() {
-    var hidden;
-    this.hasChanged = false;
-    hidden = void 0;
-    hidden = {
-      x: 0,
-      y: 0,
-      opacity: 1,
-      direction: 0,
-      size: 1,
-      widthScale: 1,
-      heightScale: 1,
-      offset: void 0,
-      parentObject: this
-    };
-    Object.defineProperty(this, "x", {
-      get: function() {
-        return hidden.x;
-      },
-      set: function(value) {
-        if (hidden.x !== value) {
-          hidden.x = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "y", {
-      get: function() {
-        return hidden.y;
-      },
-      set: function(value) {
-        if (hidden.y !== value) {
-          hidden.y = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "opacity", {
-      get: function() {
-        return hidden.opacity;
-      },
-      set: function(value) {
-        if (hidden.opacity !== value) {
-          hidden.opacity = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "direction", {
-      get: function() {
-        return hidden.direction;
-      },
-      set: function(value) {
-        if (hidden.direction !== value) {
-          hidden.direction = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "size", {
-      get: function() {
-        return hidden.size;
-      },
-      set: function(value) {
-        if (hidden.size !== value) {
-          hidden.size = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "widthScale", {
-      get: function() {
-        return hidden.widthScale;
-      },
-      set: function(value) {
-        if (hidden.widthScale !== value) {
-          hidden.widthScale = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "heightScale", {
-      get: function() {
-        return hidden.heightScale;
-      },
-      set: function(value) {
-        if (hidden.heightScale !== value) {
-          hidden.heightScale = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "offset", {
-      get: function() {
-        return hidden.offset;
-      },
-      set: function(value) {
-        var off_;
-        if (hidden.offset !== value) {
-          hidden.offset = value;
-          off_ = {
-            x: value.x,
-            y: value.y
-          };
-          Object.defineProperty(hidden.offset, "x", {
-            get: function() {
-              return off_.x;
-            },
-            set: function(value) {
-              if (off_.x !== value) {
-                off_.x = value;
-                hidden.parentObject.onAfterChange();
-              }
-            }
-          });
-          Object.defineProperty(hidden.offset, "y", {
-            get: function() {
-              return off_.y;
-            },
-            set: function(value) {
-              if (off_.y !== value) {
-                off_.y = value;
-                hidden.parentObject.onAfterChange();
-              }
-            }
-          });
-          this.onAfterChange();
-        }
-      }
-    });
-    this.offset = new Vector();
-  };
-
-  Child.prototype.onAfterChange = function() {
-    if (!this.hasChanged && this.isDrawn()) {
-      this.lastRedrawRegion = this.currentRedrawRegion;
-      this.currentRedrawRegion = (this.getCombinedRedrawRegion ? this.getCombinedRedrawRegion() : this.getRedrawRegion());
-      if (this.currentRedrawRegion) {
-        engine.redrawObjects.push(this);
-        this.hasChanged = true;
-      }
-    }
+  Child.prototype.offsetFromGlobal = function(offset) {
+    return this.offset = this.parseOffsetGlobal(offset);
   };
 
 
@@ -8896,7 +8733,7 @@ c = Sprite = (function(superClass) {
     if (!this.refreshSource()) {
       throw new Error("Sprite source was not successfully loaded: " + source);
     }
-    this.offset = offset;
+    this.offsetFromGlobal(offset);
     if (engine.avoidSubPixelRendering) {
       this.offset.x = Math.round(this.offset.x);
       this.offset.y = Math.round(this.offset.y);
@@ -9267,7 +9104,7 @@ c = TextBlock = (function(superClass) {
     }
     Helpers.Mixin["import"](this, additionalProperties);
     this.string = string;
-    this.offset = offset;
+    this.offsetFromGlobal(offset);
     if (engine.avoidSubPixelRendering) {
       this.offset.x = Math.round(this.offset.x);
       this.offset.y = Math.round(this.offset.y);

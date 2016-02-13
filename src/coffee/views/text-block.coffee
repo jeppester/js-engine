@@ -174,7 +174,7 @@ c = class TextBlock extends Views.Container
     @string = string
 
     # Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
-    @offset = offset
+    @offsetFromGlobal offset
     if engine.avoidSubPixelRendering
       @offset.x = Math.round(@offset.x)
       @offset.y = Math.round(@offset.y)
