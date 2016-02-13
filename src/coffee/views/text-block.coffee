@@ -9,61 +9,62 @@ Mixins =
 Views =
   Container: require './container'
 
+###
+The constructor for the TextBlock class.
+
+@name View.TextBlock
+@class A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
+@augments Mixin.Animatable
+@augments View.Container
+
+@property {string} font A css string representing the font of the text block
+@property {number} width The width of the text block
+@property {number} height The height of the text block
+@property {string} alignment The text alignment of the text block, possible values are: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT
+@property {string} color A css string representing the text's color
+@property {Vector} offset The offset with which the sprite will be drawn (to its position)
+@property {number} direction The direction of the sprite (in radians)
+@property {number} size A size modifier which modifies both the width and the height of the sprite
+@property {number} widthScale A size modifier which modifies the width of the sprite
+@property {number} heightScale A size modifier which modifies the height of the object
+@property {number} opacity The opacity of the sprite
+
+@param {string} string The string to display inside the TextBlock
+@param {number} [x=0] The x-position of the object in the game arena, in pixels
+@param {number} [y=0] The y-position of the object in the game arena, in pixels
+@param {number} [width=200] The width of the text block, in pixels. When the text reaches the width, it will break into a new line
+@param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
+The default is:<code>
+{
+font: 'normal 14px Verdana',
+color: '#000',
+alignment: ALIGNMENT_LEFT,
+size: 1,
+opacity: 1,
+composite: 'source-over',
+offset: new Vector(0, 0)
+}</code>
+###
 c = class TextBlock extends Views.Container
   # Mix in Child
   Helpers.Mixin.mixin @, Mixins.Animatable
 
-  ###
-  The constructor for the TextBlock class.
+  renderType: "textblock"
 
-  @name View.TextBlock
-  @class A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
-  @augments Mixin.Animatable
-  @augments View.Container
-
-  @property {string} font A css string representing the font of the text block
-  @property {number} width The width of the text block
-  @property {number} height The height of the text block
-  @property {string} alignment The text alignment of the text block, possible values are: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT
-  @property {string} color A css string representing the text's color
-  @property {Vector} offset The offset with which the sprite will be drawn (to its position)
-  @property {number} direction The direction of the sprite (in radians)
-  @property {number} size A size modifier which modifies both the width and the height of the sprite
-  @property {number} widthScale A size modifier which modifies the width of the sprite
-  @property {number} heightScale A size modifier which modifies the height of the object
-  @property {number} opacity The opacity of the sprite
-
-  @param {string} string The string to display inside the TextBlock
-  @param {number} [x=0] The x-position of the object in the game arena, in pixels
-  @param {number} [y=0] The y-position of the object in the game arena, in pixels
-  @param {number} [width=200] The width of the text block, in pixels. When the text reaches the width, it will break into a new line
-  @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
-  The default is:<code>
-  {
-  font: 'normal 14px Verdana',
-  color: '#000',
-  alignment: ALIGNMENT_LEFT,
-  size: 1,
-  opacity: 1,
-  composite: 'source-over',
-  offset: new Vector(0, 0)
-  }</code>
-  ###
   constructor: (string, x, y, width, additionalProperties) ->
     throw new Error("Missing argument: string") if string is undefined #dev
 
     # Call Vector's and view's constructors
     super()
-    @renderType = "textblock"
-    @x = (if x isnt undefined then x else 0)
-    @y = (if y isnt undefined then y else 0)
+    @x = x || 0
+    @y = y || 0
 
     # Animation options
     @imageLength = 1
     @imageNumber = 0
 
     # Load default options
-    @clipWidth = parseInt(width, 10) or 200
+    @clipWidth = width || 200
     @lines = []
     @lineWidth = []
     @bm = document.createElement("canvas")
@@ -72,77 +73,11 @@ c = class TextBlock extends Views.Container
     @bm.height = 10
     @bm.spacing = 0
 
-    # Create getters/setters
-    hidden =
-      string: ""
-      font: "normal 14px Verdana"
-      alignment: "left"
-      color: "#000000"
-      lineHeight: 0
-
-    Object.defineProperty this, "string",
-      get: ->
-        hidden.string
-
-      set: (value) ->
-        hidden.string = (if typeof value is "string" then value else value.toString())
-        @stringToLines()
-        @cacheRendering()
-        engine.enableRedrawRegions and @onAfterChange()
-        value
-
-    Object.defineProperty this, "font",
-      get: ->
-        hidden.font
-
-      set: (value) ->
-        throw new Error("font should be of type: string") if typeof value isnt "string" #dev
-        return value if value is hidden.font
-        hidden.font = value
-        @stringToLines()
-        @cacheRendering()
-        engine.enableRedrawRegions and @onAfterChange()
-        value
-
-    Object.defineProperty this, "alignment",
-      get: ->
-        hidden.alignment
-
-      set: (value) ->
-        throw new Error("alignment should be one of the following: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT") if [ #dev
-          "left"
-          "center"
-          "right"
-        ].indexOf(value) is -1
-        return value if value is hidden.alignment
-        hidden.alignment = value
-        @cacheRendering()
-        engine.enableRedrawRegions and @onAfterChange()
-        value
-
-    Object.defineProperty this, "color",
-      get: ->
-        hidden.color
-
-      set: (value) ->
-        throw new Error("color should be a CSS color string") unless /#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})/.test(value) #dev
-        return value if value is hidden.color
-        hidden.color = value
-        @cacheRendering()
-        engine.enableRedrawRegions and @onAfterChange()
-        value
-
-    Object.defineProperty this, "lineHeight",
-      get: ->
-        hidden.lineHeight
-
-      set: (value) ->
-        hidden.lineHeight = (if typeof value isnt "number" then value else parseFloat(value))
-        @calculateCanvasHeight()
-        @cacheRendering()
-        engine.enableRedrawRegions and @onAfterChange()
-        value
-
+    @string = string || ''
+    @font = "normal 14px Verdana"
+    @alignment = "left"
+    @color = "#000000"
+    @lineHeight = 0
 
     # Define pseudo properties
     Object.defineProperty this, "width",
@@ -171,13 +106,14 @@ c = class TextBlock extends Views.Container
 
     # Load additional properties
     Helpers.Mixin.import @, additionalProperties
-    @string = string
 
     # Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
     @offsetFromGlobal offset
     if engine.avoidSubPixelRendering
       @offset.x = Math.round(@offset.x)
       @offset.y = Math.round(@offset.y)
+
+    @updateCache()
     return
 
   ###
@@ -235,13 +171,6 @@ c = class TextBlock extends Views.Container
   @private
   ###
   stringToLines: ->
-    lt = undefined
-    line = undefined
-    paragraphs = undefined
-    pid = undefined
-    words = undefined
-    wid = undefined
-    word = undefined
     lt = document.createElement("span")
     lt.style.font = @font
     lt.style.visibility = "hidden"
@@ -276,7 +205,6 @@ c = class TextBlock extends Views.Container
     lt.parentNode.removeChild lt
     return
 
-
   ###
   Calculates and sets the height of the cache canvas based on the number of lines, the font height and the line height
   ###
@@ -285,15 +213,21 @@ c = class TextBlock extends Views.Container
     @clipHeight = @bm.height
     return
 
-
   ###
   Does the actual rendering of the text, and caches it (for huge performance gains). This function is automatically called each time a property which affects the rendering has been changed (via the right setter functions).
 
   @private
   ###
-  cacheRendering: ->
-    xOffset = undefined
-    i = undefined
+  updateCache: ->
+    # Use simple hashing for avoiding unnecessary cache updates
+    # The "src" attribute is used because WebGL renderer uses it
+    # as an identifier for cached textures
+    hash = @createHash()
+    return if hash == @bm.src
+    @bm.oldSrc = @bm.src
+    @bm.src = hash
+
+    @stringToLines()
     @bmCtx.clearRect 0, 0, @bm.width, @bm.height
     @bmCtx.font = @font
     @bmCtx.fillStyle = @color
@@ -309,31 +243,30 @@ c = class TextBlock extends Views.Container
           xOffset = (@clipWidth - @lineWidth[i]) / 2
       @bmCtx.fillText @lines[i], xOffset, @lineHeight * i + @font.match(/[0.0-9]+/) * 1 if @lines[i]
       i++
-    @createHash()
+    return
+
+  update: (settings)->
+    @[name] = value for name, value of settings
+    @updateCache()
     return
 
   createHash: ->
-    self = undefined
-    self = this
-    @bm.oldSrc = @bm.src
-    @bm.src = [
+    [
       "string"
       "font"
       "alignment"
       "color"
       "lineHeight"
       "clipWidth"
-    ].map((property) ->
-      self[property]
+    ].map((property)=>
+      @[property]
     ).join("-|-")
-    return
 
   ###
   Checks if the objects is visible. This function runs before each draw to ensure that it is necessary
   @return {boolean} Whether or not the object is visible (based on its size and opacity vars)
   ###
   isVisible: ->
-
     # If sprites size has been modified to zero, do nothing
     not (@size is 0 or @widthScale is 0 or @heightScale is 0 or /^\s*$/.test(@string))
 

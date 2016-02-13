@@ -6891,8 +6891,9 @@ Geometry = {
  */
 
 c = Child = (function() {
+  Child.prototype.renderType = null;
+
   function Child() {
-    this.renderType = "";
     this.x = 0;
     this.y = 0;
     this.opacity = 1;
@@ -8684,15 +8685,16 @@ c = Sprite = (function(superClass) {
 
   Helpers.Mixin.mixin(Sprite, Mixins.Animatable);
 
+  Sprite.prototype.renderType = "sprite";
+
   function Sprite(source, x, y, direction, additionalProperties) {
     var offset;
     if (source === void 0) {
       throw new Error("Missing argument: source");
     }
     Sprite.__super__.constructor.call(this);
-    this.renderType = "sprite";
-    this.x = (x !== void 0 ? x : 0);
-    this.y = (y !== void 0 ? y : 0);
+    this.x = x || 0;
+    this.y = y || 0;
     this.source = source;
     this.direction = (direction !== void 0 ? direction : 0);
     this.imageNumber = 0;
@@ -8929,61 +8931,62 @@ Views = {
   Container: require('./container')
 };
 
+
+/*
+The constructor for the TextBlock class.
+
+@name View.TextBlock
+@class A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
+@augments Mixin.Animatable
+@augments View.Container
+
+@property {string} font A css string representing the font of the text block
+@property {number} width The width of the text block
+@property {number} height The height of the text block
+@property {string} alignment The text alignment of the text block, possible values are: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT
+@property {string} color A css string representing the text's color
+@property {Vector} offset The offset with which the sprite will be drawn (to its position)
+@property {number} direction The direction of the sprite (in radians)
+@property {number} size A size modifier which modifies both the width and the height of the sprite
+@property {number} widthScale A size modifier which modifies the width of the sprite
+@property {number} heightScale A size modifier which modifies the height of the object
+@property {number} opacity The opacity of the sprite
+
+@param {string} string The string to display inside the TextBlock
+@param {number} [x=0] The x-position of the object in the game arena, in pixels
+@param {number} [y=0] The y-position of the object in the game arena, in pixels
+@param {number} [width=200] The width of the text block, in pixels. When the text reaches the width, it will break into a new line
+@param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
+The default is:<code>
+{
+font: 'normal 14px Verdana',
+color: '#000',
+alignment: ALIGNMENT_LEFT,
+size: 1,
+opacity: 1,
+composite: 'source-over',
+offset: new Vector(0, 0)
+}</code>
+ */
+
 c = TextBlock = (function(superClass) {
   extend(TextBlock, superClass);
 
   Helpers.Mixin.mixin(TextBlock, Mixins.Animatable);
 
-
-  /*
-  The constructor for the TextBlock class.
-  
-  @name View.TextBlock
-  @class A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
-  @augments Mixin.Animatable
-  @augments View.Container
-  
-  @property {string} font A css string representing the font of the text block
-  @property {number} width The width of the text block
-  @property {number} height The height of the text block
-  @property {string} alignment The text alignment of the text block, possible values are: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT
-  @property {string} color A css string representing the text's color
-  @property {Vector} offset The offset with which the sprite will be drawn (to its position)
-  @property {number} direction The direction of the sprite (in radians)
-  @property {number} size A size modifier which modifies both the width and the height of the sprite
-  @property {number} widthScale A size modifier which modifies the width of the sprite
-  @property {number} heightScale A size modifier which modifies the height of the object
-  @property {number} opacity The opacity of the sprite
-  
-  @param {string} string The string to display inside the TextBlock
-  @param {number} [x=0] The x-position of the object in the game arena, in pixels
-  @param {number} [y=0] The y-position of the object in the game arena, in pixels
-  @param {number} [width=200] The width of the text block, in pixels. When the text reaches the width, it will break into a new line
-  @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
-  The default is:<code>
-  {
-  font: 'normal 14px Verdana',
-  color: '#000',
-  alignment: ALIGNMENT_LEFT,
-  size: 1,
-  opacity: 1,
-  composite: 'source-over',
-  offset: new Vector(0, 0)
-  }</code>
-   */
+  TextBlock.prototype.renderType = "textblock";
 
   function TextBlock(string, x, y, width, additionalProperties) {
-    var hidden, offset;
+    var offset;
     if (string === void 0) {
       throw new Error("Missing argument: string");
     }
     TextBlock.__super__.constructor.call(this);
-    this.renderType = "textblock";
-    this.x = (x !== void 0 ? x : 0);
-    this.y = (y !== void 0 ? y : 0);
+    this.x = x || 0;
+    this.y = y || 0;
     this.imageLength = 1;
     this.imageNumber = 0;
-    this.clipWidth = parseInt(width, 10) || 200;
+    this.clipWidth = width || 200;
     this.lines = [];
     this.lineWidth = [];
     this.bm = document.createElement("canvas");
@@ -8991,89 +8994,11 @@ c = TextBlock = (function(superClass) {
     this.bm.width = this.clipWidth;
     this.bm.height = 10;
     this.bm.spacing = 0;
-    hidden = {
-      string: "",
-      font: "normal 14px Verdana",
-      alignment: "left",
-      color: "#000000",
-      lineHeight: 0
-    };
-    Object.defineProperty(this, "string", {
-      get: function() {
-        return hidden.string;
-      },
-      set: function(value) {
-        hidden.string = (typeof value === "string" ? value : value.toString());
-        this.stringToLines();
-        this.cacheRendering();
-        engine.enableRedrawRegions && this.onAfterChange();
-        return value;
-      }
-    });
-    Object.defineProperty(this, "font", {
-      get: function() {
-        return hidden.font;
-      },
-      set: function(value) {
-        if (typeof value !== "string") {
-          throw new Error("font should be of type: string");
-        }
-        if (value === hidden.font) {
-          return value;
-        }
-        hidden.font = value;
-        this.stringToLines();
-        this.cacheRendering();
-        engine.enableRedrawRegions && this.onAfterChange();
-        return value;
-      }
-    });
-    Object.defineProperty(this, "alignment", {
-      get: function() {
-        return hidden.alignment;
-      },
-      set: function(value) {
-        if (["left", "center", "right"].indexOf(value) === -1) {
-          throw new Error("alignment should be one of the following: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT");
-        }
-        if (value === hidden.alignment) {
-          return value;
-        }
-        hidden.alignment = value;
-        this.cacheRendering();
-        engine.enableRedrawRegions && this.onAfterChange();
-        return value;
-      }
-    });
-    Object.defineProperty(this, "color", {
-      get: function() {
-        return hidden.color;
-      },
-      set: function(value) {
-        if (!/#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})/.test(value)) {
-          throw new Error("color should be a CSS color string");
-        }
-        if (value === hidden.color) {
-          return value;
-        }
-        hidden.color = value;
-        this.cacheRendering();
-        engine.enableRedrawRegions && this.onAfterChange();
-        return value;
-      }
-    });
-    Object.defineProperty(this, "lineHeight", {
-      get: function() {
-        return hidden.lineHeight;
-      },
-      set: function(value) {
-        hidden.lineHeight = (typeof value !== "number" ? value : parseFloat(value));
-        this.calculateCanvasHeight();
-        this.cacheRendering();
-        engine.enableRedrawRegions && this.onAfterChange();
-        return value;
-      }
-    });
+    this.string = string || '';
+    this.font = "normal 14px Verdana";
+    this.alignment = "left";
+    this.color = "#000000";
+    this.lineHeight = 0;
     Object.defineProperty(this, "width", {
       get: function() {
         return Math.abs(this.clipWidth * this.size * this.widthScale);
@@ -9103,12 +9028,12 @@ c = TextBlock = (function(superClass) {
       delete additionalProperties.offset;
     }
     Helpers.Mixin["import"](this, additionalProperties);
-    this.string = string;
     this.offsetFromGlobal(offset);
     if (engine.avoidSubPixelRendering) {
       this.offset.x = Math.round(this.offset.x);
       this.offset.y = Math.round(this.offset.y);
     }
+    this.updateCache();
     return;
   }
 
@@ -9153,13 +9078,6 @@ c = TextBlock = (function(superClass) {
 
   TextBlock.prototype.stringToLines = function() {
     var line, lt, paragraphs, pid, wid, word, words;
-    lt = void 0;
-    line = void 0;
-    paragraphs = void 0;
-    pid = void 0;
-    words = void 0;
-    wid = void 0;
-    word = void 0;
     lt = document.createElement("span");
     lt.style.font = this.font;
     lt.style.visibility = "hidden";
@@ -9214,10 +9132,15 @@ c = TextBlock = (function(superClass) {
   @private
    */
 
-  TextBlock.prototype.cacheRendering = function() {
-    var i, xOffset;
-    xOffset = void 0;
-    i = void 0;
+  TextBlock.prototype.updateCache = function() {
+    var hash, i, xOffset;
+    hash = this.createHash();
+    if (hash === this.bm.src) {
+      return;
+    }
+    this.bm.oldSrc = this.bm.src;
+    this.bm.src = hash;
+    this.stringToLines();
     this.bmCtx.clearRect(0, 0, this.bm.width, this.bm.height);
     this.bmCtx.font = this.font;
     this.bmCtx.fillStyle = this.color;
@@ -9239,17 +9162,23 @@ c = TextBlock = (function(superClass) {
       }
       i++;
     }
-    this.createHash();
+  };
+
+  TextBlock.prototype.update = function(settings) {
+    var name, value;
+    for (name in settings) {
+      value = settings[name];
+      this[name] = value;
+    }
+    this.updateCache();
   };
 
   TextBlock.prototype.createHash = function() {
-    var self;
-    self = void 0;
-    self = this;
-    this.bm.oldSrc = this.bm.src;
-    this.bm.src = ["string", "font", "alignment", "color", "lineHeight", "clipWidth"].map(function(property) {
-      return self[property];
-    }).join("-|-");
+    return ["string", "font", "alignment", "color", "lineHeight", "clipWidth"].map((function(_this) {
+      return function(property) {
+        return _this[property];
+      };
+    })(this)).join("-|-");
   };
 
 

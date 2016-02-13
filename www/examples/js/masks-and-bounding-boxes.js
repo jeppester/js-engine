@@ -22,14 +22,22 @@ MasksAndBBoxes = (function() {
     object2 = engine.currentRoom.create.GameObject('rock', 16, 50, 0);
     object.checkCollision = function() {
       if (this.boundingBoxCollidesWith(object2)) {
-        text1.string = 'BB Collides';
+        text1.update({
+          string: 'COLLISION'
+        });
       } else {
-        text1.string = '';
+        text1.update({
+          string: 'no collision'
+        });
       }
       if (this.collidesWith(object2)) {
-        return text2.string = 'BM Collides';
+        return text2.update({
+          string: 'COLLISION'
+        });
       } else {
-        return text2.string = '';
+        return text2.update({
+          string: 'no collision'
+        });
       }
     };
     text1 = engine.currentRoom.create.TextBlock('', 6, 4, 80, {

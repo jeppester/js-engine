@@ -25,7 +25,7 @@ CollisionObject = (function(superClass) {
       this.speed.y -= engine.convertSpeed(100);
     }
     if (engine.keyboard.isDown(this.downKey)) {
-      return this.speed.y += engine.convertSpeed(100);
+      this.speed.y += engine.convertSpeed(100);
     }
   };
 
@@ -64,7 +64,7 @@ CollisionObject = (function(superClass) {
     }
     if (this.y > engine.canvasResY - 16) {
       this.y = engine.canvasResY - 16;
-      return this.speed.y = -this.speed.y;
+      this.speed.y = -this.speed.y;
     }
   };
 

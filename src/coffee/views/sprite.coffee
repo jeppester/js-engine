@@ -48,14 +48,15 @@ c = class Sprite extends Views.Container
   # Mix in animatable
   Helpers.Mixin.mixin @, Mixins.Animatable
 
+  renderType: "sprite"
+
   constructor: (source, x, y, direction, additionalProperties) ->
     throw new Error("Missing argument: source") if source is undefined #dev
 
     # Call Vector's and view's constructors
     super()
-    @renderType = "sprite"
-    @x = (if x isnt undefined then x else 0)
-    @y = (if y isnt undefined then y else 0)
+    @x = x || 0
+    @y = y || 0
 
     # Load default options
     @source = source

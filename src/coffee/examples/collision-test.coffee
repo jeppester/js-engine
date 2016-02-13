@@ -30,6 +30,7 @@ class CollisionObject extends Engine.Views.GameObject
 
     # Down
     @speed.y += engine.convertSpeed 100 if engine.keyboard.isDown @downKey
+    return
 
   collisionCheck: ->
     if collision = @collidesWith window.rocks, true, true
@@ -66,6 +67,8 @@ class CollisionObject extends Engine.Views.GameObject
     if @y > engine.canvasResY - 16
       @y = engine.canvasResY - 16
       @speed.y = -@speed.y
+
+    return
 
 # create main class
 class CollisionTest
