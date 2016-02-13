@@ -4156,19 +4156,19 @@ module.exports = MatrixCalculationHelper = {
     this.setScale(matrix, object.widthScale * object.size, object.heightScale * object.size);
     this.multiply(matrix, this.getRotation(-object.direction));
     this.multiply(matrix, this.getTranslation(object.x, object.y));
-    return matrix;
   },
   getLocalMatrix: function(object) {
-    return this.setLocalMatrix(this.tempLocalMatrix, object);
+    this.setLocalMatrix(this.tempLocalMatrix, object);
+    return this.tempLocalMatrix;
   },
   setInverseLocalMatrix: function(matrix, object) {
     this.setTranslation(matrix, -object.x, -object.y);
     this.multiply(matrix, this.getRotation(object.direction));
     this.multiply(matrix, this.getScale(1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size)));
-    return matrix;
   },
   getInverseLocalMatrix: function(object) {
-    return this.setInverseLocalMatrix(this.tempLocalMatrix, object);
+    this.setInverseLocalMatrix(this.tempLocalMatrix, object);
+    return this.tempLocalMatrix;
   },
   setIdentity: function(matrix) {
     matrix[0] = 1;
@@ -4265,7 +4265,6 @@ module.exports = MatrixCalculationHelper = {
     a[6] = g1 * a2 + h1 * d2 + i1 * g2;
     a[7] = g1 * b2 + h1 * e2 + i1 * h2;
     a[8] = g1 * c2 + h1 * f2 + i1 * i2;
-    return a;
   },
   reverseMultiply: function(b, a) {
     var a1, a2, b1, b2, c1, c2, d1, d2, e1, e2, f1, f2, g1, g2, h1, h2, i1, i2;
@@ -4299,7 +4298,6 @@ module.exports = MatrixCalculationHelper = {
     b[6] = g1 * a2 + h1 * d2 + i1 * g2;
     b[7] = g1 * b2 + h1 * e2 + i1 * h2;
     b[8] = g1 * c2 + h1 * f2 + i1 * i2;
-    return b;
   }
 };
 
@@ -6019,7 +6017,7 @@ module.exports = function() {
 
 c = WebGLRenderer = (function() {
   function WebGLRenderer(canvas) {
-    var context, j, len1, options, ref;
+    var context, i, len, options, ref;
     this.canvas = canvas;
     this.cache = {
       currentAlpha: void 0,
@@ -6035,8 +6033,8 @@ c = WebGLRenderer = (function() {
       alpha: false
     };
     ref = ["webgl", "experimental-webgl"];
-    for (j = 0, len1 = ref.length; j < len1; j++) {
-      context = ref[j];
+    for (i = 0, len = ref.length; i < len; i++) {
+      context = ref[i];
       this.gl = this.canvas.getContext(context, options);
       if (this.gl) {
         break;
@@ -6064,11 +6062,9 @@ c = WebGLRenderer = (function() {
   };
 
   WebGLRenderer.prototype.render = function(cameras) {
-    var camera, camerasLength, gl, h, i, ii, rooms, roomsLength, w;
+    var camera, gl, h, i, j, len, len1, room, rooms, w;
     gl = this.gl;
-    camerasLength = cameras.length;
-    i = 0;
-    while (i < camerasLength) {
+    for (i = 0, len = cameras.length; i < len; i++) {
       camera = cameras[i];
       w = camera.captureRegion.width;
       h = camera.captureRegion.height;
@@ -6085,68 +6081,88 @@ c = WebGLRenderer = (function() {
       Helpers.MatrixCalculation.setTranslation(camera.wm, -camera.captureRegion.x, -camera.captureRegion.y);
       gl.viewport(camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height);
       rooms = [engine.masterRoom, camera.room];
-      roomsLength = rooms.length;
-      ii = 0;
-      while (ii < roomsLength) {
-        this.renderTree(rooms[ii], camera.wm);
-        ii++;
+      for (j = 0, len1 = rooms.length; j < len1; j++) {
+        room = rooms[j];
+        this.renderTree(room, camera.wm);
       }
-      i++;
     }
   };
 
-  WebGLRenderer.prototype.renderTree = function(object, wm) {
-    var gl, i, len, wmWithOffset;
+  WebGLRenderer.prototype.renderTree = function(room, wm) {
+    var list;
+    list = [];
+    this.createRenderList(list, room, wm);
+    return this.processRenderList(list);
+  };
+
+  WebGLRenderer.prototype.createRenderList = function(list, object, wm) {
+    var child, i, len, ref, results;
     if (!object.isVisible()) {
       return;
     }
-    gl = this.gl;
     if (object.wm == null) {
       object.wm = new Float32Array(9);
     }
     Helpers.MatrixCalculation.setLocalMatrix(object.wm, object);
     Helpers.MatrixCalculation.multiply(object.wm, wm);
     if (object.renderType !== '') {
-      wmWithOffset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
-      Helpers.MatrixCalculation.multiply(wmWithOffset, object.wm);
-      if (this.cache.currentAlpha !== object.opacity) {
-        this.cache.currentAlpha = object.opacity;
-        if (this.currentProgram) {
-          gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
-        }
+      list.push(object);
+    }
+    if (object.children) {
+      ref = object.children;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        child = ref[i];
+        results.push(this.createRenderList(list, child, object.wm));
+      }
+      return results;
+    }
+  };
+
+  WebGLRenderer.prototype.processRenderList = function(list) {
+    var i, len, object, results;
+    results = [];
+    for (i = 0, len = list.length; i < len; i++) {
+      object = list[i];
+      results.push(this.renderObject(object, this.gl, engine.drawMasks, engine.drawBoundingBoxes));
+    }
+    return results;
+  };
+
+  WebGLRenderer.prototype.renderObject = function(object, gl, drawMasks, drawBoundingBoxes) {
+    var wmWithOffset;
+    wmWithOffset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
+    Helpers.MatrixCalculation.multiply(wmWithOffset, object.wm);
+    if (this.cache.currentAlpha !== object.opacity) {
+      this.cache.currentAlpha = object.opacity;
+      if (this.currentProgram) {
+        gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
       }
     }
     switch (object.renderType) {
-      case "textblock":
-        this.setProgram(this.programs.texture);
-        this.currentProgram.renderSprite(gl, object, wmWithOffset);
-        break;
       case "sprite":
         this.setProgram(this.programs.texture);
         this.currentProgram.renderSprite(gl, object, wmWithOffset);
-        if (engine.drawMasks) {
+        if (drawMasks) {
           this.currentProgram.renderMask(gl, object, wmWithOffset);
         }
+        if (drawBoundingBoxes) {
+          this.setProgram(this.programs.color);
+          return this.currentProgram.renderBoundingBox(gl, object, wmWithOffset);
+        }
         break;
+      case "textblock":
+        this.setProgram(this.programs.texture);
+        return this.currentProgram.renderSprite(gl, object, wmWithOffset);
       case "line":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderLine(gl, object, wmWithOffset);
-        break;
+        return this.currentProgram.renderLine(gl, object, wmWithOffset);
       case "rectangle":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderRectangle(gl, object, wmWithOffset);
-        break;
+        return this.currentProgram.renderRectangle(gl, object, wmWithOffset);
       case "circle":
         this.setProgram(this.programs.color);
-        this.currentProgram.renderCircle(gl, object, wmWithOffset);
-    }
-    if (object.children) {
-      len = object.children.length;
-      i = 0;
-      while (i < len) {
-        this.renderTree(object.children[i], object.wm);
-        i++;
-      }
+        return this.currentProgram.renderCircle(gl, object, wmWithOffset);
     }
   };
 
@@ -6169,7 +6185,7 @@ Helpers = {
 
 
 },{"../helpers/matrix-calculation":14,"./webgl/color-shader-program":23,"./webgl/texture-shader-program":24}],23:[function(require,module,exports){
-var Helpers, WebGLColorShaderProgram, c;
+var Geometry, Helpers, WebGLColorShaderProgram, c;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -6224,8 +6240,8 @@ c = WebGLColorShaderProgram = (function() {
 
   WebGLColorShaderProgram.prototype.onSet = function(gl) {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-    gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(this.locations.a_position);
+    gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
   };
 
   WebGLColorShaderProgram.prototype.renderLine = function(gl, object, wm) {
@@ -6290,6 +6306,21 @@ c = WebGLColorShaderProgram = (function() {
     }
   };
 
+  WebGLColorShaderProgram.prototype.renderBoundingBox = function(gl, object, wm) {
+    var box, height, l, mask, width, x, y;
+    l = this.locations;
+    mask = engine.loader.getMask(object.source, object.getTheme());
+    box = mask.boundingBox;
+    x = box.points[0].x;
+    y = box.points[0].y;
+    width = box.points[2].x - x;
+    height = box.points[2].y - y;
+    gl.uniformMatrix3fv(l.u_matrix, false, wm);
+    gl.uniform1i(l.u_color, Helpers.WebGL.colorFromCSSString('#0F0'));
+    Helpers.WebGL.setPlaneOutline(gl, x, y, width, height, 1);
+    return gl.drawArrays(gl.TRIANGLES, 0, 24);
+  };
+
   return WebGLColorShaderProgram;
 
 })();
@@ -6302,9 +6333,13 @@ Helpers = {
   WebGL: require('../../helpers/webgl')
 };
 
+Geometry = {
+  Line: require('../../geometry/line')
+};
 
 
-},{"../../helpers/webgl":17}],24:[function(require,module,exports){
+
+},{"../../geometry/line":9,"../../helpers/webgl":17}],24:[function(require,module,exports){
 var Helpers, WebGLTextureShaderProgram, c;
 
 module.exports = function() {

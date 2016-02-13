@@ -15,7 +15,7 @@ class StressTest
     engine.currentRoom.loops.eachFrame.attachFunction @, @controls
 
   onLoaded: ->
-    @addObjects 2000
+    @addObjects 4000
 
   updateFPS: ->
     @fpsCounter.string = 'FPS: ' + engine.fps;

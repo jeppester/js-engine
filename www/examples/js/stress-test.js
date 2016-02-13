@@ -24,7 +24,7 @@ StressTest = (function() {
   }
 
   StressTest.prototype.onLoaded = function() {
-    return this.addObjects(2000);
+    return this.addObjects(4000);
   };
 
   StressTest.prototype.updateFPS = function() {

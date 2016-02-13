@@ -6,19 +6,21 @@ module.exports = MatrixCalculationHelper =
     @setScale matrix, object.widthScale * object.size, object.heightScale * object.size
     @multiply matrix, @getRotation -object.direction
     @multiply matrix, @getTranslation object.x, object.y
-    matrix
+    return
 
   getLocalMatrix: (object)->
     @setLocalMatrix @tempLocalMatrix, object
+    @tempLocalMatrix
 
   setInverseLocalMatrix: (matrix, object)->
     @setTranslation matrix, -object.x, -object.y
     @multiply matrix, @getRotation object.direction
     @multiply matrix, @getScale(1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size))
-    matrix
+    return
 
   getInverseLocalMatrix: (object)->
     @setInverseLocalMatrix @tempLocalMatrix, object
+    @tempLocalMatrix
 
   setIdentity: (matrix)->
     matrix[0] = 1
@@ -134,7 +136,7 @@ module.exports = MatrixCalculationHelper =
     a[7] = g1 * b2 + h1 * e2 + i1 * h2
     a[8] = g1 * c2 + h1 * f2 + i1 * i2
 
-    a
+    return
 
   reverseMultiply: (b, a)->
     throw new Error 'Multiplying matrix with itself' if a == b
@@ -175,4 +177,4 @@ module.exports = MatrixCalculationHelper =
     b[7] = g1 * b2 + h1 * e2 + i1 * h2
     b[8] = g1 * c2 + h1 * f2 + i1 * i2
 
-    b
+    return

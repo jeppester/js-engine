@@ -78,8 +78,8 @@ c = class WebGLColorShaderProgram
   # When returning to the program reset the buffer
   onSet: (gl) ->
     gl.bindBuffer gl.ARRAY_BUFFER, @vertexBuffer
-    gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
     gl.enableVertexAttribArray @locations.a_position
+    gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
     return
 
   # Draw functions
@@ -182,8 +182,25 @@ c = class WebGLColorShaderProgram
       gl.drawArrays gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2
     return
 
+  renderBoundingBox: (gl, object, wm)->
+    l = @locations
+    mask = engine.loader.getMask object.source, object.getTheme()
+    box = mask.boundingBox
+    x = box.points[0].x
+    y = box.points[0].y
+    width = box.points[2].x - x
+    height = box.points[2].y - y
+
+    gl.uniformMatrix3fv l.u_matrix, false, wm
+    gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString '#0F0'
+    Helpers.WebGL.setPlaneOutline gl, x, y, width, height, 1
+    gl.drawArrays gl.TRIANGLES, 0, 24
+
 module.exports:: = Object.create c::
 module.exports::constructor = c
 
 Helpers =
   WebGL: require '../../helpers/webgl'
+
+Geometry =
+  Line: require '../../geometry/line'

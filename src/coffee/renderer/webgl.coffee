@@ -52,11 +52,7 @@ c = class WebGLRenderer
 
   render: (cameras) ->
     gl = @gl
-    camerasLength = cameras.length
-    i = 0
-    while i < camerasLength
-      camera = cameras[i]
-
+    for camera in cameras
       # Setup camera resolution
       w = camera.captureRegion.width
       h = camera.captureRegion.height
@@ -71,54 +67,56 @@ c = class WebGLRenderer
 
       # Set camera projection viewport
       gl.viewport camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height
-      rooms = [
-        engine.masterRoom
-        camera.room
-      ]
-      roomsLength = rooms.length
-      ii = 0
-      while ii < roomsLength
+      rooms = [ engine.masterRoom, camera.room ]
+
+      for room in rooms
         # Draw rooms
-        @renderTree rooms[ii], camera.wm
-        ii++
-      i++
+        @renderTree room, camera.wm
     return
 
-  renderTree: (object, wm) ->
+  renderTree: (room, wm)->
+    list = []
+    @createRenderList list, room, wm
+    @processRenderList list
+
+  createRenderList: (list, object, wm)->
     return unless object.isVisible()
-    gl = @gl
 
     # Create world matrix for object center
     object.wm ?= new Float32Array 9
     Helpers.MatrixCalculation.setLocalMatrix object.wm, object
     Helpers.MatrixCalculation.multiply object.wm, wm
+    list.push object unless object.renderType == ''
 
-    if object.renderType != ''
-      wmWithOffset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
-      Helpers.MatrixCalculation.multiply wmWithOffset, object.wm
+    if object.children
+      @createRenderList list, child, object.wm for child in object.children
 
-      # Set object alpha (because alpha is used by ALL rendered objects)
-      if @cache.currentAlpha isnt object.opacity
-        @cache.currentAlpha = object.opacity
-        gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
+  processRenderList: (list)->
+    @renderObject(object, @gl, engine.drawMasks, engine.drawBoundingBoxes) for object in list
+
+  renderObject: (object, gl, drawMasks, drawBoundingBoxes)->
+    wmWithOffset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
+    Helpers.MatrixCalculation.multiply wmWithOffset, object.wm
+
+    # Set object alpha (because alpha is used by ALL rendered objects)
+    if @cache.currentAlpha != object.opacity
+      @cache.currentAlpha = object.opacity
+      gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
 
     switch object.renderType
-
       # Texture based objects
-      when "textblock"
-        @setProgram @programs.texture
-        @currentProgram.renderSprite gl, object, wmWithOffset
-
       when "sprite"
         @setProgram @programs.texture
         @currentProgram.renderSprite gl, object, wmWithOffset
+        @currentProgram.renderMask gl, object, wmWithOffset if drawMasks
 
-        if engine.drawMasks
-          @currentProgram.renderMask gl, object, wmWithOffset
+        if drawBoundingBoxes
+          @setProgram @programs.color
+          @currentProgram.renderBoundingBox gl, object, wmWithOffset
 
-        # if engine.drawBoundingBoxes
-        #   @setProgram @programs.color
-        #   @currentProgram.renderBoundingBox gl, object, wmWithOffset
+      when "textblock"
+        @setProgram @programs.texture
+        @currentProgram.renderSprite gl, object, wmWithOffset
 
       # Geometric objects
       when "line"
@@ -130,14 +128,6 @@ c = class WebGLRenderer
       when "circle"
         @setProgram @programs.color
         @currentProgram.renderCircle gl, object, wmWithOffset
-
-    if object.children
-      len = object.children.length
-      i = 0
-      while i < len
-        @renderTree object.children[i], object.wm
-        i++
-    return
 
 module.exports:: = Object.create c::
 module.exports::constructor = c
