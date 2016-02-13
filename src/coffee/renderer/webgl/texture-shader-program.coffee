@@ -1,20 +1,18 @@
 module.exports = -> module.exports::constructor.apply @, arguments
 
 c = class WebGLTextureShaderProgram
+  textureCache: {}
+  maskCache: {}
+  currentTexture: null
+  regularTextCoordBuffer: null
+  rectangleCornerBuffer: null
+  animatedTextCoordBuffer: null
+  currentBuffer: null
+  mode: null
+  program: null
+
   constructor: (gl) ->
     # Init program
-    @cache =
-      textures: {}
-      masks: {}
-
-    @currentTexture = null
-    @regularTextCoordBuffer = null
-    @rectangleCornerBuffer = null
-    @animatedTextCoordBuffer = null
-    @currentBuffer = null
-
-    @mode = null
-
     @program = gl.createProgram()
     @initShaders gl
     @bindLocations gl
@@ -142,7 +140,7 @@ c = class WebGLTextureShaderProgram
   # Draw functions
   renderSprite: (gl, object, wm) ->
     l = @locations
-    delete @cache.textures[object.bm.oldSrc] if object.renderType is "textblock" and @cache.textures[object.bm.oldSrc]
+    delete @textureCache[object.bm.oldSrc] if object.renderType is "textblock" and @textureCache[object.bm.oldSrc]
 
     # Bind the texture (if it is not already bound)
     t = @getSpriteTexture gl, object
@@ -213,19 +211,19 @@ c = class WebGLTextureShaderProgram
     gl.drawArrays gl.TRIANGLES, 0, 6
 
   getSpriteTexture: (gl, object) ->
-    c = @cache.textures[object.bm.src]
+    c = @textureCache[object.bm.src]
     if c
       c
     else
-      @cache.textures[object.bm.src] = @createTexture(gl, object.bm)
+      @textureCache[object.bm.src] = @createTexture(gl, object.bm)
 
   getMaskTexture: (gl, object) ->
     mask = engine.loader.getMask object.source, object.getTheme()
-    c = @cache.masks[object.bm.src]
+    c = @maskCache[object.bm.src]
     if c
       c
     else
-      @cache.masks[object.bm.src] = @createTexture(gl, mask)
+      @maskCache[object.bm.src] = @createTexture(gl, mask)
 
   createTexture: (gl, image) ->
     texture = undefined

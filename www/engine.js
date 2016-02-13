@@ -6347,17 +6347,25 @@ module.exports = function() {
 };
 
 c = WebGLTextureShaderProgram = (function() {
+  WebGLTextureShaderProgram.prototype.textureCache = {};
+
+  WebGLTextureShaderProgram.prototype.maskCache = {};
+
+  WebGLTextureShaderProgram.prototype.currentTexture = null;
+
+  WebGLTextureShaderProgram.prototype.regularTextCoordBuffer = null;
+
+  WebGLTextureShaderProgram.prototype.rectangleCornerBuffer = null;
+
+  WebGLTextureShaderProgram.prototype.animatedTextCoordBuffer = null;
+
+  WebGLTextureShaderProgram.prototype.currentBuffer = null;
+
+  WebGLTextureShaderProgram.prototype.mode = null;
+
+  WebGLTextureShaderProgram.prototype.program = null;
+
   function WebGLTextureShaderProgram(gl) {
-    this.cache = {
-      textures: {},
-      masks: {}
-    };
-    this.currentTexture = null;
-    this.regularTextCoordBuffer = null;
-    this.rectangleCornerBuffer = null;
-    this.animatedTextCoordBuffer = null;
-    this.currentBuffer = null;
-    this.mode = null;
     this.program = gl.createProgram();
     this.initShaders(gl);
     this.bindLocations(gl);
@@ -6441,8 +6449,8 @@ c = WebGLTextureShaderProgram = (function() {
   WebGLTextureShaderProgram.prototype.renderSprite = function(gl, object, wm) {
     var l, t;
     l = this.locations;
-    if (object.renderType === "textblock" && this.cache.textures[object.bm.oldSrc]) {
-      delete this.cache.textures[object.bm.oldSrc];
+    if (object.renderType === "textblock" && this.textureCache[object.bm.oldSrc]) {
+      delete this.textureCache[object.bm.oldSrc];
     }
     t = this.getSpriteTexture(gl, object);
     if (this.currentTexture !== t) {
@@ -6502,22 +6510,22 @@ c = WebGLTextureShaderProgram = (function() {
   };
 
   WebGLTextureShaderProgram.prototype.getSpriteTexture = function(gl, object) {
-    c = this.cache.textures[object.bm.src];
+    c = this.textureCache[object.bm.src];
     if (c) {
       return c;
     } else {
-      return this.cache.textures[object.bm.src] = this.createTexture(gl, object.bm);
+      return this.textureCache[object.bm.src] = this.createTexture(gl, object.bm);
     }
   };
 
   WebGLTextureShaderProgram.prototype.getMaskTexture = function(gl, object) {
     var mask;
     mask = engine.loader.getMask(object.source, object.getTheme());
-    c = this.cache.masks[object.bm.src];
+    c = this.maskCache[object.bm.src];
     if (c) {
       return c;
     } else {
-      return this.cache.masks[object.bm.src] = this.createTexture(gl, mask);
+      return this.maskCache[object.bm.src] = this.createTexture(gl, mask);
     }
   };
 
