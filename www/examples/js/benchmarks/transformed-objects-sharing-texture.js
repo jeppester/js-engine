@@ -8,6 +8,7 @@ Main = (function() {
         return _this.onLoaded();
       };
     })(this));
+    this.lastFive = [];
     setTimeout(((function(_this) {
       return function() {
         return _this.startTest();
@@ -42,7 +43,19 @@ Main = (function() {
   };
 
   Main.prototype.endTest = function() {
-    console.log("Objects: " + (Object.keys(engine.objectIndex).length - 2) + " - Frames: " + (engine.frames - this.startFrames) + " - FPS: " + ((engine.frames - this.startFrames) / 10));
+    var average, fps, frames, objects;
+    objects = Object.keys(engine.objectIndex).length - 2;
+    frames = engine.frames - this.startFrames;
+    fps = (engine.frames - this.startFrames) / 10;
+    this.lastFive.push(frames);
+    if (this.lastFive.length > 5) {
+      this.lastFive.shift();
+    }
+    average = this.lastFive.reduce(function(a, b) {
+      return a + b;
+    });
+    average /= this.lastFive.length * 10;
+    console.log("Objects: " + objects + " - Frames: " + frames + " - FPS: " + fps + " - Average: " + average);
     return this.startTest();
   };
 

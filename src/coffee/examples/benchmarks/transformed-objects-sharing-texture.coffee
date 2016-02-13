@@ -1,6 +1,7 @@
 class Main
   constructor: ->
     engine.loader.hideOverlay => @onLoaded()
+    @lastFive = []
     setTimeout (=> @startTest()), 2000
 
   getSearch: ->
@@ -20,7 +21,16 @@ class Main
     setTimeout (=> @endTest()), 10000
 
   endTest: ->
-    console.log "Objects: #{(Object.keys(engine.objectIndex).length - 2)} - Frames: #{engine.frames - @startFrames} - FPS: #{(engine.frames - @startFrames) / 10}"
+    objects = (Object.keys(engine.objectIndex).length - 2)
+    frames = engine.frames - @startFrames
+    fps = (engine.frames - @startFrames) / 10
+
+    @lastFive.push frames
+    @lastFive.shift() if @lastFive.length > 5
+    average = @lastFive.reduce (a, b)-> a + b
+    average /= @lastFive.length * 10
+
+    console.log "Objects: #{objects} - Frames: #{frames} - FPS: #{fps} - Average: #{average}"
     @startTest()
 
   addObjects: (count = 10)->
