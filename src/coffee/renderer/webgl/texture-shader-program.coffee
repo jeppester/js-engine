@@ -102,6 +102,7 @@ c = class WebGLTextureShaderProgram
     @setBuffer gl, @regularTextCoordBuffer
     gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
     gl.enableVertexAttribArray @locations.a_texCoord
+    @setBuffer gl, @rectangleCornerBuffer
 
   # Set a texture coordinate buffer for a specific animated object
   setAnimatedTextCoordBuffer: (gl, object) ->
@@ -130,6 +131,7 @@ c = class WebGLTextureShaderProgram
     ]), gl.STATIC_DRAW
     gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
     gl.enableVertexAttribArray @locations.a_texCoord
+    @setBuffer gl, @rectangleCornerBuffer
 
   # When returning to the program reset the buffer
   onSet: (gl) ->
@@ -138,17 +140,17 @@ c = class WebGLTextureShaderProgram
     gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
 
   # Draw functions
-  renderSprite: (gl, object, wm) ->
+  renderSprite: (gl, object, wm, mask = false) ->
     l = @locations
     delete @textureCache[object.bm.oldSrc] if object.renderType is "textblock" and @textureCache[object.bm.oldSrc]
 
     # Bind the texture (if it is not already bound)
-    t = @getSpriteTexture gl, object
+    t = if mask then @getMaskTexture gl, object else @getSpriteTexture gl, object
     if @currentTexture != t
       @currentTexture = t
 
       # Set the correct texture coordinate buffer
-      if object.imageLength is 1
+      if object.imageLength == 1
         @setRegularTextCoordBuffer gl
       else
         # Set the right sub image
@@ -164,7 +166,6 @@ c = class WebGLTextureShaderProgram
 
       # Set a rectangle the same size as the image
       gl.bindTexture gl.TEXTURE_2D, t
-      @setBuffer gl, @rectangleCornerBuffer
       Helpers.WebGL.setPlane gl, 0, 0, object.clipWidth, object.clipHeight
 
     # Set matrix
@@ -176,39 +177,7 @@ c = class WebGLTextureShaderProgram
 
   # Draw functions
   renderMask: (gl, object, wm) ->
-    l = @locations
-
-    # Bind the texture (if it is not already bound)
-    t = @getMaskTexture gl, object
-    if @currentTexture != t
-      @currentTexture = t
-
-      # Set the correct texture coordinate buffer
-      if object.imageLength is 1
-        @setRegularTextCoordBuffer gl
-      else
-
-        # Set the right sub image
-        if engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed
-          object.imageNumber = object.imageNumber + ((if object.animationSpeed > 0 then 1 else -1))
-          object.animationLastSwitch = engine.gameTime
-          if object.imageNumber is object.imageLength
-            object.imageNumber = (if object.animationLoops then 0 else object.imageLength - 1)
-          else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
-
-        # Set create and set texture coordinate buffer for the object
-        @setAnimatedTextCoordBuffer gl, object
-
-      # Set a rectangle the same size as the image
-      gl.bindTexture gl.TEXTURE_2D, t
-      @setBuffer gl, @rectangleCornerBuffer
-      Helpers.WebGL.setPlane gl, 0, 0, object.clipWidth, object.clipHeight
-
-    # Set matrix
-    gl.uniformMatrix3fv l.u_matrix, false, wm
-
-    # Draw the rectangle.
-    gl.drawArrays gl.TRIANGLES, 0, 6
+    @renderSprite gl, object, wm, true
 
   getSpriteTexture: (gl, object) ->
     c = @textureCache[object.bm.src]
