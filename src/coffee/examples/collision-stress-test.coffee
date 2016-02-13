@@ -23,13 +23,13 @@ class CollisionStressTest
 
   checkCollision: ->
     if @collider.collidesWith @objectView.getChildren(), 1
-      @collisionDisplay.update string: 'Collides: Yes'
+      @collisionDisplay.set string: 'Collides: Yes'
     else
-      @collisionDisplay.update string: 'Collides: No'
+      @collisionDisplay.set string: 'Collides: No'
 
   updateFPS: ->
-    @fpsCounter.update string: 'FPS: ' + engine.fps
-    @objectCounter.update string: 'Objects: ' + (Object.keys(engine.objectIndex).length - 2)
+    @fpsCounter.set string: 'FPS: ' + engine.fps
+    @objectCounter.set string: 'Objects: ' + (Object.keys(engine.objectIndex).length - 2)
 
   addObjects: (count = 10)->
     for i in [0...count]

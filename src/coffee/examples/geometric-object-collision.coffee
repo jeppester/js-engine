@@ -47,10 +47,10 @@ class GeometricObjectCollision
     @circle.move dx, dy
 
     # Update text fields
-    @text2.update string: "Distance to line: #{Math.round @circle.getDistance(@line)}#{if @circle.intersects @line then ' (intersects)' else ''}"
-    @text3.update string: "Distance to polygon: #{Math.round @circle.getDistance(@polygon)}#{if @circle.intersects @polygon then ' (intersects)' else ''}"
-    @text4.update string: "Distance to circle: #{Math.round @circle.getDistance(@circle2)}#{if @circle.intersects @circle2 then ' (intersects)' else ''}"
-    @text5.update string: "Distance to rectangle: #{Math.round @circle.getDistance(@rectangle)}#{if @circle.intersects @rectangle then ' (intersects)' else ''}"
+    @text2.set string: "Distance to line: #{Math.round @circle.getDistance(@line)}#{if @circle.intersects @line then ' (intersects)' else ''}"
+    @text3.set string: "Distance to polygon: #{Math.round @circle.getDistance(@polygon)}#{if @circle.intersects @polygon then ' (intersects)' else ''}"
+    @text4.set string: "Distance to circle: #{Math.round @circle.getDistance(@circle2)}#{if @circle.intersects @circle2 then ' (intersects)' else ''}"
+    @text5.set string: "Distance to rectangle: #{Math.round @circle.getDistance(@rectangle)}#{if @circle.intersects @rectangle then ' (intersects)' else ''}"
     return
 
 new Engine

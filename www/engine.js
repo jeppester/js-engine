@@ -9164,7 +9164,7 @@ c = TextBlock = (function(superClass) {
     }
   };
 
-  TextBlock.prototype.update = function(settings) {
+  TextBlock.prototype.set = function(settings) {
     var name, value;
     for (name in settings) {
       value = settings[name];

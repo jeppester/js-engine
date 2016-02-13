@@ -35,21 +35,21 @@ CollisionStressTest = (function() {
 
   CollisionStressTest.prototype.checkCollision = function() {
     if (this.collider.collidesWith(this.objectView.getChildren(), 1)) {
-      return this.collisionDisplay.update({
+      return this.collisionDisplay.set({
         string: 'Collides: Yes'
       });
     } else {
-      return this.collisionDisplay.update({
+      return this.collisionDisplay.set({
         string: 'Collides: No'
       });
     }
   };
 
   CollisionStressTest.prototype.updateFPS = function() {
-    this.fpsCounter.update({
+    this.fpsCounter.set({
       string: 'FPS: ' + engine.fps
     });
-    return this.objectCounter.update({
+    return this.objectCounter.set({
       string: 'Objects: ' + (Object.keys(engine.objectIndex).length - 2)
     });
   };

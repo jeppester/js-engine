@@ -28,10 +28,10 @@ StressTest = (function() {
   };
 
   StressTest.prototype.updateFPS = function() {
-    this.fpsCounter.update({
+    this.fpsCounter.set({
       string: 'FPS: ' + engine.fps
     });
-    return this.objectCounter.update({
+    return this.objectCounter.set({
       string: 'Objects: ' + (Object.keys(engine.objectIndex).length - 6)
     });
   };

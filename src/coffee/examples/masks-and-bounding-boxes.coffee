@@ -29,14 +29,14 @@ class MasksAndBBoxes
     )
     object.checkCollision = ->
       if @boundingBoxCollidesWith object2
-        text1.update string: 'COLLISION'
+        text1.set string: 'COLLISION'
       else
-        text1.update string: 'no collision'
+        text1.set string: 'no collision'
 
       if @collidesWith object2
-        text2.update string: 'COLLISION'
+        text2.set string: 'COLLISION'
       else
-        text2.update string: 'no collision'
+        text2.set string: 'no collision'
 
     text1 = engine.currentRoom.create.TextBlock '', 6, 4, 80, {color: '#4F4'}
     text2 = engine.currentRoom.create.TextBlock '', 6, 78, 80, {color: '#000'}

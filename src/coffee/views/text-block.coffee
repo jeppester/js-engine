@@ -245,7 +245,7 @@ c = class TextBlock extends Views.Container
       i++
     return
 
-  update: (settings)->
+  set: (settings)->
     @[name] = value for name, value of settings
     @updateCache()
     return
