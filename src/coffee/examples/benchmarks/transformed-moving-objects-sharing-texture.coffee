@@ -48,7 +48,24 @@ class Main
     for i in [0...count]
       x = col * xInt
       y = row * yInt
-      sprite = new Engine.Views.Sprite('rock', x, y, direction)
+      speed = new Engine.Geometry.Vector().setFromDirection direction, 5
+      sprite = new Engine.Views.GameObject 'rock', x, y, direction, {speed: speed}
+      sprite.checkBounce = ->
+        if @x < 0
+          @x = 0;
+          @speed.x = -@speed.x
+        else if @x > 600
+          @x = 600
+          @speed.x = -@speed.x
+
+        if @y < 0
+          @y = 0
+          @speed.y = -@speed.y
+        else if @y > 400
+          @y = 400;
+          @speed.y = -@speed.y
+
+      engine.currentRoom.loops.eachFrame.attachFunction sprite, sprite.checkBounce
       engine.currentRoom.addChildren sprite
 
       direction += directionInt

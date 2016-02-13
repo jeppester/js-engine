@@ -63,7 +63,7 @@ Main = (function() {
   };
 
   Main.prototype.addObjects = function(count) {
-    var col, cols, direction, directionInt, i, j, ref, results, row, rows, sprite, x, xInt, y, yInt;
+    var col, cols, direction, directionInt, i, j, ref, results, row, rows, speed, sprite, x, xInt, y, yInt;
     if (count == null) {
       count = 10;
     }
@@ -78,7 +78,27 @@ Main = (function() {
     for (i = j = 0, ref = count; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
       x = col * xInt;
       y = row * yInt;
-      sprite = new Engine.Views.Sprite('rock', x, y, direction);
+      speed = new Engine.Geometry.Vector().setFromDirection(direction, 5);
+      sprite = new Engine.Views.GameObject('rock', x, y, direction, {
+        speed: speed
+      });
+      sprite.checkBounce = function() {
+        if (this.x < 0) {
+          this.x = 0;
+          this.speed.x = -this.speed.x;
+        } else if (this.x > 600) {
+          this.x = 600;
+          this.speed.x = -this.speed.x;
+        }
+        if (this.y < 0) {
+          this.y = 0;
+          return this.speed.y = -this.speed.y;
+        } else if (this.y > 400) {
+          this.y = 400;
+          return this.speed.y = -this.speed.y;
+        }
+      };
+      engine.currentRoom.loops.eachFrame.attachFunction(sprite, sprite.checkBounce);
       engine.currentRoom.addChildren(sprite);
       direction += directionInt;
       ++row;
