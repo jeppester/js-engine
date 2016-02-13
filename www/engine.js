@@ -6359,8 +6359,6 @@ c = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.animatedTextCoordBuffer = null;
 
-  WebGLTextureShaderProgram.prototype.currentBuffer = null;
-
   WebGLTextureShaderProgram.prototype.mode = null;
 
   WebGLTextureShaderProgram.prototype.program = null;
@@ -6371,13 +6369,6 @@ c = WebGLTextureShaderProgram = (function() {
     this.bindLocations(gl);
     this.initBuffers(gl);
   }
-
-  WebGLTextureShaderProgram.prototype.setBuffer = function(gl, buffer) {
-    if (this.currentBuffer !== buffer) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      return this.currentBuffer = buffer;
-    }
-  };
 
   WebGLTextureShaderProgram.prototype.initShaders = function(gl) {
     var fragmentCode, fragmentShader, vertexCode, vertexShader;
@@ -6406,7 +6397,7 @@ c = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.initBuffers = function(gl) {
     this.regularTextCoordBuffer = gl.createBuffer();
-    this.setBuffer(gl, this.regularTextCoordBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.regularTextCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]), gl.STATIC_DRAW);
     this.animatedTextCoordBuffer = gl.createBuffer();
     return this.rectangleCornerBuffer = gl.createBuffer();
@@ -6417,10 +6408,10 @@ c = WebGLTextureShaderProgram = (function() {
       return;
     }
     this.mode = 'regular';
-    this.setBuffer(gl, this.regularTextCoordBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.regularTextCoordBuffer);
     gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(this.locations.a_texCoord);
-    return this.setBuffer(gl, this.rectangleCornerBuffer);
+    return gl.bindBuffer(gl.ARRAY_BUFFER, this.rectangleCornerBuffer);
   };
 
   WebGLTextureShaderProgram.prototype.setAnimatedTextCoordBuffer = function(gl, object) {
@@ -6435,15 +6426,15 @@ c = WebGLTextureShaderProgram = (function() {
     x2 /= object.bm.width;
     y1 = 0;
     y2 = 1;
-    this.setBuffer(gl, this.animatedTextCoordBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.animatedTextCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]), gl.STATIC_DRAW);
     gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(this.locations.a_texCoord);
-    return this.setBuffer(gl, this.rectangleCornerBuffer);
+    return gl.bindBuffer(gl.ARRAY_BUFFER, this.rectangleCornerBuffer);
   };
 
   WebGLTextureShaderProgram.prototype.onSet = function(gl) {
-    this.setBuffer(gl, this.rectangleCornerBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.rectangleCornerBuffer);
     gl.enableVertexAttribArray(this.locations.a_position);
     return gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
   };

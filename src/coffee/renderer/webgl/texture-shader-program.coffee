@@ -7,7 +7,6 @@ c = class WebGLTextureShaderProgram
   regularTextCoordBuffer: null
   rectangleCornerBuffer: null
   animatedTextCoordBuffer: null
-  currentBuffer: null
   mode: null
   program: null
 
@@ -17,11 +16,6 @@ c = class WebGLTextureShaderProgram
     @initShaders gl
     @bindLocations gl
     @initBuffers gl
-
-  setBuffer: (gl, buffer)->
-    unless @currentBuffer == buffer
-      gl.bindBuffer gl.ARRAY_BUFFER, buffer
-      @currentBuffer = buffer
 
   initShaders: (gl) ->
     # Vertex shader
@@ -80,7 +74,7 @@ c = class WebGLTextureShaderProgram
     @regularTextCoordBuffer = gl.createBuffer()
 
     # Set textcoords, since they newer change
-    @setBuffer gl, @regularTextCoordBuffer
+    gl.bindBuffer gl.ARRAY_BUFFER, @regularTextCoordBuffer
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
       0.0, 0.0, 1.0, 0.0
       0.0, 1.0, 0.0, 1.0
@@ -99,10 +93,13 @@ c = class WebGLTextureShaderProgram
     @mode = 'regular'
 
     # Enable the texture coord buffer
-    @setBuffer gl, @regularTextCoordBuffer
+    gl.bindBuffer gl.ARRAY_BUFFER, @regularTextCoordBuffer
     gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
     gl.enableVertexAttribArray @locations.a_texCoord
-    @setBuffer gl, @rectangleCornerBuffer
+
+    # Always leave the rectangle corner buffer bound, as it is used A LOT
+    # and we want to prevent too many buffer binds
+    gl.bindBuffer gl.ARRAY_BUFFER, @rectangleCornerBuffer
 
   # Set a texture coordinate buffer for a specific animated object
   setAnimatedTextCoordBuffer: (gl, object) ->
@@ -117,7 +114,7 @@ c = class WebGLTextureShaderProgram
     y2 = 1
 
     # Enable the texture coord buffer
-    @setBuffer gl, @animatedTextCoordBuffer
+    gl.bindBuffer gl.ARRAY_BUFFER, @animatedTextCoordBuffer
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
       # Triangle 1
       x1, y1
@@ -131,11 +128,14 @@ c = class WebGLTextureShaderProgram
     ]), gl.STATIC_DRAW
     gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
     gl.enableVertexAttribArray @locations.a_texCoord
-    @setBuffer gl, @rectangleCornerBuffer
+
+    # Always leave the rectangle corner buffer bound, as it is used A LOT
+    # and we want to prevent too many buffer binds
+    gl.bindBuffer gl.ARRAY_BUFFER, @rectangleCornerBuffer
 
   # When returning to the program reset the buffer
   onSet: (gl) ->
-    @setBuffer gl, @rectangleCornerBuffer
+    gl.bindBuffer gl.ARRAY_BUFFER, @rectangleCornerBuffer
     gl.enableVertexAttribArray @locations.a_position
     gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
 
