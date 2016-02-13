@@ -1,7 +1,5 @@
 extends ../examples.jade
-
-block title
-  title Collision test
-
-block example
-  script(type="text/javascript", src="js/collision-test.js")
+block variables
+  - var engine_path_prefix = '../'
+  - var title = 'Collision test'
+  - var game_source = 'js/collision-test.js'

@@ -58,7 +58,7 @@ The default options are:
 "pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
 "resetCursorOnEachFrame": true // Whether or not the mouse cursor should be reset on each frame
 "soundsMuted": false, // If all sound effects should be initially muted
-"themesPath": "themes", // The path to the themes-directory
+"themesPath": "assets", // The path to the themes-directory
 "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
 ###

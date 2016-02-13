@@ -1,7 +1,5 @@
 extends ../examples.jade
-
-block title
-  title Room transitions
-
-block example
-  script(type="text/javascript", src="js/room-transitions.js")
+block variables
+  - var engine_path_prefix = '../'
+  - var title = 'Room transitions'
+  - var game_source = 'js/room-transitions.js'

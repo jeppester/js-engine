@@ -1,7 +1,5 @@
 extends ../examples.jade
-
-block title
-  title Masks and bounding boxes
-
-block example
-  script(type="text/javascript", src="js/masks-and-bounding-boxes.js")
+block variables
+  - var engine_path_prefix = '../'
+  - var title = 'Masks and bounding boxes'
+  - var game_source = 'js/masks-and-bounding-boxes.js'

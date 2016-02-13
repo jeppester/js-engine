@@ -29,7 +29,7 @@ StressTest = (function() {
 
   StressTest.prototype.updateFPS = function() {
     this.fpsCounter.string = 'FPS: ' + engine.fps;
-    return this.objectCounter.string = 'Objects: ' + (Object.keys(engine.objectIndex).length - 2);
+    return this.objectCounter.string = 'Objects: ' + (Object.keys(engine.objectIndex).length - 6);
   };
 
   StressTest.prototype.addObjects = function(count) {

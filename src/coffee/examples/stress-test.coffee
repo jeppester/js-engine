@@ -19,16 +19,16 @@ class StressTest
 
   updateFPS: ->
     @fpsCounter.string = 'FPS: ' + engine.fps;
-    @objectCounter.string = 'Objects: ' + (Object.keys(engine.objectIndex).length - 2);
+    @objectCounter.string = 'Objects: ' + (Object.keys(engine.objectIndex).length - 6);
 
   addObjects: (count = 10)->
     for i in [0...count]
       sprite = new Engine.Views.GameObject(
-          'rock'
-          Math.random() * 600
-          Math.random() * 400
-          Math.random() * Math.PI * 2
-          {speed: new Engine.Geometry.Vector(-5 + Math.random() * 10, -5 + Math.random() * 10)}
+        'rock'
+        Math.random() * 600
+        Math.random() * 400
+        Math.random() * Math.PI * 2
+        {speed: new Engine.Geometry.Vector(-5 + Math.random() * 10, -5 + Math.random() * 10)}
       )
       sprite.checkBounce = ->
         if @x < 0
