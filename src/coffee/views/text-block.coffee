@@ -176,10 +176,10 @@ c = class TextBlock extends Views.Container
     # Use simple hashing for avoiding unnecessary cache updates
     # The "src" attribute is used because WebGL renderer uses it
     # as an identifier for cached textures
-    hash = @createHash()
-    return if hash == @texture.src
-    @texture.oldSrc = @texture.src
-    @texture.src = hash
+    cacheKey = @createCacheKey()
+    return if cacheKey == @texture.cacheKey
+    @texture.lastCacheKey = @texture.cacheKey
+    @texture.cacheKey = cacheKey
 
     @stringToLines()
     @textureCtx.clearRect 0, 0, @texture.width, @texture.height
@@ -204,7 +204,7 @@ c = class TextBlock extends Views.Container
     @updateCache()
     return
 
-  createHash: ->
+  createCacheKey: ->
     [
       "string"
       "font"

@@ -1793,32 +1793,6 @@ c = Loader = (function() {
 
 
   /*
-  Loads JavaScript classes from files. The loaded classes' names must follow the following format: [ClassName].js
-  
-  @param {string[]} paths An array of paths to JavaScripts - containing classes - which should be loaded
-  @return {boolean} True, when the classes has been loaded without any errors
-   */
-
-  Loader.prototype.loadClasses = function(paths) {
-    var i, objectName;
-    if (paths === void 0) {
-      throw new Error("Missing argument: paths");
-    }
-    for (i in paths) {
-      if (paths.hasOwnProperty(i)) {
-        objectName = paths[i].match(/(\w*)\.\w+$/)[1];
-        if (window[objectName]) {
-          continue;
-        }
-        engine.loadFiles(paths[i]);
-        this.loaded.classes[objectName] = paths[i];
-      }
-    }
-    return true;
-  };
-
-
-  /*
   Reloads all classes. This function is very useful for applying code changes without having to refresh the browser, usually it has to be run multiple times though, to force the browser not to just load the files from its cache.
    */
 
@@ -1924,6 +1898,7 @@ c = Loader = (function() {
         switch (typeString) {
           case "images":
             res = new Image();
+            res.cacheKey = theme.name + "/" + path;
             format = object[path].match(/(png|jpg|jpeg|svg)/);
             if (format) {
               format = format[0];
@@ -6597,8 +6572,9 @@ c = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.renderSprite = function(gl, object, wm) {
     var texture;
-    if (object.renderType === "textblock" && this.textureCache[object.texture.oldSrc]) {
-      delete this.textureCache[object.texture.oldSrc];
+    if (object.renderType === "textblock" && this.textureCache[object.texture.lastCacheKey]) {
+      gl.deleteTexture(this.textureCache[object.texture.lastCacheKey]);
+      this.textureCache[object.texture.lastCacheKey] = void 0;
     }
     if (object.imageLength === 1) {
       this.setRegularTextCoordBuffer(gl);
@@ -6632,23 +6608,11 @@ c = WebGLTextureShaderProgram = (function() {
   };
 
   WebGLTextureShaderProgram.prototype.getSpriteTexture = function(gl, object) {
-    c = this.textureCache[object.texture.src];
-    if (c) {
-      return c;
-    } else {
-      return this.textureCache[object.texture.src] = this.createTexture(gl, object.texture);
-    }
+    return this.textureCache[object.texture.cacheKey] || (this.textureCache[object.texture.cacheKey] = this.createTexture(gl, object.texture));
   };
 
   WebGLTextureShaderProgram.prototype.getMaskTexture = function(gl, object) {
-    var mask;
-    mask = engine.loader.getMask(object.source, object.getTheme());
-    c = this.maskCache[object.texture.src];
-    if (c) {
-      return c;
-    } else {
-      return this.maskCache[object.texture.src] = this.createTexture(gl, mask);
-    }
+    return this.maskCache[object.texture.cacheKey] || (this.maskCache[object.texture.cacheKey] = this.createTexture(gl, engine.loader.getMask(object.source, object.getTheme())));
   };
 
   WebGLTextureShaderProgram.prototype.createTexture = function(gl, image) {
@@ -9127,13 +9091,13 @@ c = TextBlock = (function(superClass) {
    */
 
   TextBlock.prototype.updateCache = function() {
-    var hash, i, xOffset;
-    hash = this.createHash();
-    if (hash === this.texture.src) {
+    var cacheKey, i, xOffset;
+    cacheKey = this.createCacheKey();
+    if (cacheKey === this.texture.cacheKey) {
       return;
     }
-    this.texture.oldSrc = this.texture.src;
-    this.texture.src = hash;
+    this.texture.lastCacheKey = this.texture.cacheKey;
+    this.texture.cacheKey = cacheKey;
     this.stringToLines();
     this.textureCtx.clearRect(0, 0, this.texture.width, this.texture.height);
     this.textureCtx.font = this.font;
@@ -9167,7 +9131,7 @@ c = TextBlock = (function(superClass) {
     this.updateCache();
   };
 
-  TextBlock.prototype.createHash = function() {
+  TextBlock.prototype.createCacheKey = function() {
     return ["string", "font", "alignment", "color", "lineHeight", "clipWidth"].map((function(_this) {
       return function(property) {
         return _this[property];

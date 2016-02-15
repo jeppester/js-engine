@@ -147,8 +147,9 @@ c = class WebGLTextureShaderProgram
 
   # Draw functions
   renderSprite: (gl, object, wm) ->
-    if object.renderType == "textblock" && @textureCache[object.texture.oldSrc]
-      delete @textureCache[object.texture.oldSrc]
+    if object.renderType == "textblock" && @textureCache[object.texture.lastCacheKey]
+      gl.deleteTexture @textureCache[object.texture.lastCacheKey]
+      @textureCache[object.texture.lastCacheKey] = undefined
 
     # Set the correct texture coordinate buffer
     if object.imageLength == 1
@@ -192,19 +193,12 @@ c = class WebGLTextureShaderProgram
     return
 
   getSpriteTexture: (gl, object) ->
-    c = @textureCache[object.texture.src]
-    if c
-      c
-    else
-      @textureCache[object.texture.src] = @createTexture(gl, object.texture)
+    @textureCache[object.texture.cacheKey] ||
+    @textureCache[object.texture.cacheKey] = @createTexture gl, object.texture
 
   getMaskTexture: (gl, object) ->
-    mask = engine.loader.getMask object.source, object.getTheme()
-    c = @maskCache[object.texture.src]
-    if c
-      c
-    else
-      @maskCache[object.texture.src] = @createTexture(gl, mask)
+    @maskCache[object.texture.cacheKey] ||
+    @maskCache[object.texture.cacheKey] = @createTexture gl, engine.loader.getMask(object.source, object.getTheme())
 
   createTexture: (gl, image) ->
     texture = undefined

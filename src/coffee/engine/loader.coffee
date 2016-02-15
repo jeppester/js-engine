@@ -76,7 +76,6 @@ c = class Loader
     @fade()
     return
 
-
   ###
   Fetches an image from the Loader. This function will automatically be called by objects that implements the Sprite object.
 
@@ -88,7 +87,6 @@ c = class Loader
     throw new Error("Missing argument: resource") if resource is undefined #dev
     themeName = (if themeName isnt undefined then themeName else engine.defaultTheme)
     @getResource resource, "images", themeName
-
 
   ###
   Fetches a sound from the Loader.
@@ -229,26 +227,6 @@ c = class Loader
             res.push theme.music[resourceString]
     res
 
-
-  ###
-  Loads JavaScript classes from files. The loaded classes' names must follow the following format: [ClassName].js
-
-  @param {string[]} paths An array of paths to JavaScripts - containing classes - which should be loaded
-  @return {boolean} True, when the classes has been loaded without any errors
-  ###
-  loadClasses: (paths) ->
-    throw new Error("Missing argument: paths") if paths is undefined #dev
-    for i of paths
-      if paths.hasOwnProperty(i)
-
-        # Check that the object is not already loaded
-        objectName = paths[i].match(/(\w*)\.\w+$/)[1]
-        continue if window[objectName]
-        engine.loadFiles paths[i]
-        @loaded.classes[objectName] = paths[i]
-    true
-
-
   ###
   Reloads all classes. This function is very useful for applying code changes without having to refresh the browser, usually it has to be run multiple times though, to force the browser not to just load the files from its cache.
   ###
@@ -333,6 +311,7 @@ c = class Loader
         switch typeString
           when "images"
             res = new Image()
+            res.cacheKey = "#{theme.name}/#{path}"
 
             # Get image format
             format = object[path].match(/(png|jpg|jpeg|svg)/)
