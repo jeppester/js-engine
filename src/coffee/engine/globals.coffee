@@ -173,40 +173,40 @@ module.exports =
   # Offset options
 
   # Top left offset
-  # @type {String}
-  OFFSET_TOP_LEFT: "tl"
+  # @type {Integer}
+  OFFSET_TOP_LEFT: 0b100000000
 
   # Top center offset
-  # @type {String}
-  OFFSET_TOP_CENTER: "tc"
+  # @type {Integer}
+  OFFSET_TOP_CENTER: 0b010000000
 
   # Top right offset
-  # @type {String}
-  OFFSET_TOP_RIGHT: "tr"
+  # @type {Integer}
+  OFFSET_TOP_RIGHT: 0b001000000
 
   # Middle left offset
-  # @type {String}
-  OFFSET_MIDDLE_LEFT: "ml"
+  # @type {Integer}
+  OFFSET_MIDDLE_LEFT: 0b000100000
 
   # Middle center offset
-  # @type {String}
-  OFFSET_MIDDLE_CENTER: "mc"
+  # @type {Integer}
+  OFFSET_MIDDLE_CENTER: 0b000010000
 
   # Middle right offset
-  # @type {String}
-  OFFSET_MIDDLE_RIGHT: "mr"
+  # @type {Integer}
+  OFFSET_MIDDLE_RIGHT: 0b000001000
 
   # Bottom left offset
-  # @type {String}
-  OFFSET_BOTTOM_LEFT: "bl"
+  # @type {Integer}
+  OFFSET_BOTTOM_LEFT: 0b000000100
 
   # Bottom center offset
-  # @type {String}
-  OFFSET_BOTTOM_CENTER: "bc"
+  # @type {Integer}
+  OFFSET_BOTTOM_CENTER: 0b000000010
 
   # Bottom right offset
-  # @type {String}
-  OFFSET_BOTTOM_RIGHT: "br"
+  # @type {Integer}
+  OFFSET_BOTTOM_RIGHT: 0b000000001
 
   # Alignment options
   # Left text alignment

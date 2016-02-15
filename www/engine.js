@@ -845,7 +845,7 @@ module.exports.prototype.constructor = c;
 
 
 
-},{"./engine/camera":2,"./engine/custom-loop":3,"./engine/globals":4,"./engine/loader":5,"./engine/object-creator":6,"./engine/room":7,"./geometry/circle":8,"./geometry/line":9,"./geometry/polygon":10,"./geometry/rectangle":11,"./geometry/vector":12,"./helpers/matrix-calculation":14,"./helpers/mixin":15,"./helpers/room-transition":16,"./helpers/webgl":17,"./input/keyboard":18,"./input/pointer":19,"./mixins/animatable":20,"./renderer/canvas":21,"./renderer/webgl":22,"./sounds/effect":25,"./sounds/music":26,"./views/child":27,"./views/circle":28,"./views/collidable":29,"./views/container":30,"./views/game-object":31,"./views/line":32,"./views/polygon":33,"./views/rectangle":34,"./views/sprite":35,"./views/text-block":36}],2:[function(require,module,exports){
+},{"./engine/camera":2,"./engine/custom-loop":3,"./engine/globals":4,"./engine/loader":5,"./engine/object-creator":6,"./engine/room":7,"./geometry/circle":8,"./geometry/line":9,"./geometry/polygon":10,"./geometry/rectangle":11,"./geometry/vector":12,"./helpers/matrix-calculation":14,"./helpers/mixin":15,"./helpers/room-transition":16,"./helpers/webgl":17,"./input/keyboard":18,"./input/pointer":19,"./mixins/animatable":20,"./renderer/canvas":22,"./renderer/webgl":23,"./sounds/effect":26,"./sounds/music":27,"./views/child":28,"./views/circle":29,"./views/collidable":30,"./views/container":31,"./views/game-object":32,"./views/line":33,"./views/polygon":34,"./views/rectangle":35,"./views/sprite":36,"./views/text-block":37}],2:[function(require,module,exports){
 var Camera, Geometry, c;
 
 module.exports = function() {
@@ -1460,15 +1460,15 @@ module.exports = {
   MOUSE_TOUCH_ANY: 100,
   SPEED_PIXELS_PER_SECOND: 1,
   SPEED_PIXELS_PER_FRAME: 2,
-  OFFSET_TOP_LEFT: "tl",
-  OFFSET_TOP_CENTER: "tc",
-  OFFSET_TOP_RIGHT: "tr",
-  OFFSET_MIDDLE_LEFT: "ml",
-  OFFSET_MIDDLE_CENTER: "mc",
-  OFFSET_MIDDLE_RIGHT: "mr",
-  OFFSET_BOTTOM_LEFT: "bl",
-  OFFSET_BOTTOM_CENTER: "bc",
-  OFFSET_BOTTOM_RIGHT: "br",
+  OFFSET_TOP_LEFT: 0x100,
+  OFFSET_TOP_CENTER: 0x80,
+  OFFSET_TOP_RIGHT: 0x40,
+  OFFSET_MIDDLE_LEFT: 0x20,
+  OFFSET_MIDDLE_CENTER: 0x10,
+  OFFSET_MIDDLE_RIGHT: 0x8,
+  OFFSET_BOTTOM_LEFT: 0x4,
+  OFFSET_BOTTOM_CENTER: 0x2,
+  OFFSET_BOTTOM_RIGHT: 0x1,
   ALIGNMENT_LEFT: "left",
   ALIGNMENT_CENTER: "center",
   ALIGNMENT_RIGHT: "right",
@@ -2175,7 +2175,7 @@ Geometry = {
 
 
 
-},{"../geometry/rectangle":11,"../sounds/effect":25,"../sounds/music":26}],6:[function(require,module,exports){
+},{"../geometry/rectangle":11,"../sounds/effect":26,"../sounds/music":27}],6:[function(require,module,exports){
 var ObjectCreator, Views, c,
   slice = [].slice;
 
@@ -2276,7 +2276,7 @@ Views = {
 
 
 
-},{"../views/circle":28,"../views/collidable":29,"../views/container":30,"../views/game-object":31,"../views/line":32,"../views/polygon":33,"../views/rectangle":34,"../views/sprite":35,"../views/text-block":36}],7:[function(require,module,exports){
+},{"../views/circle":29,"../views/collidable":30,"../views/container":31,"../views/game-object":32,"../views/line":33,"../views/polygon":34,"../views/rectangle":35,"../views/sprite":36,"../views/text-block":37}],7:[function(require,module,exports){
 var CustomLoop, Room, Views, c,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -2420,7 +2420,7 @@ CustomLoop = require('./custom-loop');
 
 
 
-},{"../views/container":30,"./custom-loop":3}],8:[function(require,module,exports){
+},{"../views/container":31,"./custom-loop":3}],8:[function(require,module,exports){
 var Circle, Geometry, Helpers, Mixins, c;
 
 module.exports = function() {
@@ -5758,6 +5758,96 @@ Globals = require('../engine/globals');
 
 
 },{"../engine/globals":4}],21:[function(require,module,exports){
+var Geometry, Globals, Texture, c;
+
+module.exports = function() {
+  return module.exports.prototype.constructor.apply(this, arguments);
+};
+
+c = Texture = (function() {
+  function Texture() {}
+
+
+  /*
+  Parses an offset global into an actual Math.Vector offset that fits the object's texture
+  
+  @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
+  @return {Math.Vector} The offset vector the offset global corresponds to for the object
+   */
+
+  Texture.prototype.parseOffsetGlobal = function(offset) {
+    var bottom, center, left, middle, ret, right, top;
+    ret = new Geometry.Vector();
+    left = Globals.OFFSET_TOP_LEFT | Globals.OFFSET_MIDDLE_LEFT | Globals.OFFSET_BOTTOM_LEFT;
+    center = Globals.OFFSET_TOP_CENTER | Globals.OFFSET_MIDDLE_CENTER | Globals.OFFSET_BOTTOM_CENTER;
+    right = Globals.OFFSET_TOP_RIGHT | Globals.OFFSET_MIDDLE_RIGHT | Globals.OFFSET_BOTTOM_RIGHT;
+    if (offset & left) {
+      ret.x = 0;
+    } else if (offset & center) {
+      ret.x = this.clipWidth / 2;
+    } else if (offset & right) {
+      ret.x = this.clipWidth;
+    }
+    top = Globals.OFFSET_TOP_LEFT | Globals.OFFSET_TOP_CENTER | Globals.OFFSET_TOP_RIGHT;
+    middle = Globals.OFFSET_MIDDLE_LEFT | Globals.OFFSET_MIDDLE_CENTER | Globals.OFFSET_MIDDLE_RIGHT;
+    bottom = Globals.OFFSET_BOTTOM_LEFT | Globals.OFFSET_BOTTOM_CENTER | Globals.OFFSET_BOTTOM_RIGHT;
+    if (offset & top) {
+      ret.y = 0;
+    } else if (offset & middle) {
+      ret.y = this.clipHeight / 2;
+    } else if (offset & bottom) {
+      ret.y = this.clipHeight;
+    }
+    return ret;
+  };
+
+
+  /*
+  Calculates the region which the object will fill out when redrawn.
+  
+  @private
+  @return {Rectangle} The bounding rectangle of the object
+   */
+
+  Texture.prototype.getRedrawRegion = function() {
+    var box, i, parent, parents;
+    box = new Geometry.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight).getPolygon();
+    parents = this.getParents();
+    parents.unshift(this);
+    i = 0;
+    while (i < parents.length) {
+      parent = parents[i];
+      box.scale(parent.size * parent.widthScale, parent.size * parent.heightScale);
+      box.rotate(parent.direction);
+      box.move(parent.x, parent.y);
+      i++;
+    }
+    box = box.getBoundingRectangle();
+    box.x = Math.floor(box.x);
+    box.y = Math.floor(box.y);
+    box.width = Math.ceil(box.width + 1);
+    box.height = Math.ceil(box.height + 1);
+    return box;
+  };
+
+  return Texture;
+
+})();
+
+module.exports.prototype = Object.create(c.prototype);
+
+module.exports.prototype.constructor = c;
+
+Geometry = {
+  Vector: require('../geometry/vector'),
+  Rectangle: require('../geometry/rectangle')
+};
+
+Globals = require('../engine/globals');
+
+
+
+},{"../engine/globals":4,"../geometry/rectangle":11,"../geometry/vector":12}],22:[function(require,module,exports){
 var CanvasRenderer, Helpers, c;
 
 module.exports = function() {
@@ -5878,7 +5968,7 @@ c = CanvasRenderer = (function() {
         }
       }
     }
-    this.context.drawImage(object.bm, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight);
+    this.context.drawImage(object.texture, (object.clipWidth + object.texture.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight);
   };
 
   CanvasRenderer.prototype.renderCircle = function(object) {
@@ -5972,7 +6062,7 @@ c = CanvasRenderer = (function() {
         }
       }
     }
-    return this.context.drawImage(mask, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight);
+    return this.context.drawImage(mask, (object.clipWidth + object.texture.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight);
   };
 
   CanvasRenderer.prototype.renderBoundingBox = function(object) {
@@ -6008,7 +6098,7 @@ Helpers = {
 
 
 
-},{"../helpers/matrix-calculation":14}],22:[function(require,module,exports){
+},{"../helpers/matrix-calculation":14}],23:[function(require,module,exports){
 var ColorShaderProgram, Helpers, TextureShaderProgram, WebGLRenderer, c;
 
 module.exports = function() {
@@ -6250,7 +6340,7 @@ Helpers = {
 
 
 
-},{"../helpers/matrix-calculation":14,"./webgl/color-shader-program":23,"./webgl/texture-shader-program":24}],23:[function(require,module,exports){
+},{"../helpers/matrix-calculation":14,"./webgl/color-shader-program":24,"./webgl/texture-shader-program":25}],24:[function(require,module,exports){
 var Geometry, Helpers, WebGLColorShaderProgram, c;
 
 module.exports = function() {
@@ -6405,7 +6495,7 @@ Geometry = {
 
 
 
-},{"../../geometry/line":9,"../../helpers/webgl":17}],24:[function(require,module,exports){
+},{"../../geometry/line":9,"../../helpers/webgl":17}],25:[function(require,module,exports){
 var Helpers, WebGLTextureShaderProgram, c;
 
 module.exports = function() {
@@ -6486,10 +6576,10 @@ c = WebGLTextureShaderProgram = (function() {
       return;
     }
     this.mode = 'animated';
-    x1 = (object.clipWidth + object.bm.spacing) * object.imageNumber;
+    x1 = (object.clipWidth + object.texture.spacing) * object.imageNumber;
     x2 = x1 + object.clipWidth;
-    x1 /= object.bm.width;
-    x2 /= object.bm.width;
+    x1 /= object.texture.width;
+    x2 /= object.texture.width;
     y1 = 0;
     y2 = 1;
     gl.bindBuffer(gl.ARRAY_BUFFER, this.animatedTextCoordBuffer);
@@ -6507,8 +6597,8 @@ c = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.renderSprite = function(gl, object, wm) {
     var texture;
-    if (object.renderType === "textblock" && this.textureCache[object.bm.oldSrc]) {
-      delete this.textureCache[object.bm.oldSrc];
+    if (object.renderType === "textblock" && this.textureCache[object.texture.oldSrc]) {
+      delete this.textureCache[object.texture.oldSrc];
     }
     if (object.imageLength === 1) {
       this.setRegularTextCoordBuffer(gl);
@@ -6542,22 +6632,22 @@ c = WebGLTextureShaderProgram = (function() {
   };
 
   WebGLTextureShaderProgram.prototype.getSpriteTexture = function(gl, object) {
-    c = this.textureCache[object.bm.src];
+    c = this.textureCache[object.texture.src];
     if (c) {
       return c;
     } else {
-      return this.textureCache[object.bm.src] = this.createTexture(gl, object.bm);
+      return this.textureCache[object.texture.src] = this.createTexture(gl, object.texture);
     }
   };
 
   WebGLTextureShaderProgram.prototype.getMaskTexture = function(gl, object) {
     var mask;
     mask = engine.loader.getMask(object.source, object.getTheme());
-    c = this.maskCache[object.bm.src];
+    c = this.maskCache[object.texture.src];
     if (c) {
       return c;
     } else {
-      return this.maskCache[object.bm.src] = this.createTexture(gl, mask);
+      return this.maskCache[object.texture.src] = this.createTexture(gl, mask);
     }
   };
 
@@ -6593,7 +6683,7 @@ Helpers = {
 
 
 
-},{"../../helpers/webgl":17}],25:[function(require,module,exports){
+},{"../../helpers/webgl":17}],26:[function(require,module,exports){
 var Effect, c;
 
 module.exports = function() {
@@ -6759,7 +6849,7 @@ module.exports.prototype.constructor = c;
 
 
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var Music, c;
 
 module.exports = function() {
@@ -6873,7 +6963,7 @@ module.exports.prototype.constructor = c;
 
 
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var Child, Geometry, Room, c;
 
 module.exports = function() {
@@ -6907,6 +6997,7 @@ c = Child = (function() {
   }
 
   Child.prototype.offsetFromGlobal = function(offset) {
+    this.offsetGlobal = offset;
     return this.offset = this.parseOffsetGlobal(offset);
   };
 
@@ -6920,7 +7011,7 @@ c = Child = (function() {
    */
 
   Child.prototype.parseOffsetGlobal = function(offset) {
-    return new Geometry.Vector();
+    throw new Error('Offset globals are not supported for this class');
   };
 
 
@@ -7072,7 +7163,7 @@ Room = require('../engine/room');
 
 
 
-},{"../engine/room":7,"../geometry/vector":12}],28:[function(require,module,exports){
+},{"../engine/room":7,"../geometry/vector":12}],29:[function(require,module,exports){
 var Circle, Geometry, Helpers, Views, c,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -7233,7 +7324,7 @@ Geometry.Rectangle = require('../geometry/rectangle');
 
 
 
-},{"../geometry/circle":8,"../geometry/rectangle":11,"../helpers/mixin":15,"./child":27}],29:[function(require,module,exports){
+},{"../geometry/circle":8,"../geometry/rectangle":11,"../helpers/mixin":15,"./child":28}],30:[function(require,module,exports){
 var Collidable, Geometry, Helpers, Views, c,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -7556,12 +7647,12 @@ c = Collidable = (function(superClass) {
       calc.multiply(obj.wm, this.wm);
       calc.reverseMultiply(obj.wm, calc.getTranslation(-obj.offset.x, -obj.offset.y));
       c.setTransform(obj.wm[0], obj.wm[1], obj.wm[3], obj.wm[4], obj.wm[6], obj.wm[7]);
-      c.drawImage(obj.mask, (obj.clipWidth + obj.bm.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight);
+      c.drawImage(obj.mask, (obj.clipWidth + obj.texture.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight);
     }
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.globalAlpha = 0.5;
     c.fillRect(0, 0, canvas.width, canvas.height);
-    c.drawImage(mask, (this.clipWidth + this.bm.spacing) * this.imageNumber, 0, this.clipWidth, this.clipHeight, 0, 0, this.clipWidth, this.clipHeight);
+    c.drawImage(mask, (this.clipWidth + this.texture.spacing) * this.imageNumber, 0, this.clipWidth, this.clipHeight, 0, 0, this.clipWidth, this.clipHeight);
     return c.getImageData(0, 0, canvas.width, canvas.height);
   };
 
@@ -7583,7 +7674,7 @@ Geometry = {
 
 
 
-},{"../geometry/vector":12,"../helpers/matrix-calculation":14,"./sprite":35}],30:[function(require,module,exports){
+},{"../geometry/vector":12,"../helpers/matrix-calculation":14,"./sprite":36}],31:[function(require,module,exports){
 var Container, ObjectCreator, Views, c,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
@@ -7958,7 +8049,7 @@ ObjectCreator = require('../engine/object-creator');
 
 
 
-},{"../engine/object-creator":6,"./child":27}],31:[function(require,module,exports){
+},{"../engine/object-creator":6,"./child":28}],32:[function(require,module,exports){
 var GameObject, Geometry, Views, c,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -8053,7 +8144,7 @@ Geometry = {
 
 
 
-},{"../geometry/vector":12,"./collidable":29}],32:[function(require,module,exports){
+},{"../geometry/vector":12,"./collidable":30}],33:[function(require,module,exports){
 var Geometry, Helpers, Line, Views, c,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -8296,7 +8387,7 @@ Geometry.Vector = require('../geometry/vector');
 
 
 
-},{"../geometry/line":9,"../geometry/vector":12,"../helpers/mixin":15,"./child":27}],33:[function(require,module,exports){
+},{"../geometry/line":9,"../geometry/vector":12,"../helpers/mixin":15,"./child":28}],34:[function(require,module,exports){
 var Geometry, Helpers, Polygon, Views, c,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -8385,7 +8476,7 @@ module.exports.prototype.constructor = c;
 
 
 
-},{"../geometry/polygon":10,"../helpers/mixin":15,"./child":27}],34:[function(require,module,exports){
+},{"../geometry/polygon":10,"../helpers/mixin":15,"./child":28}],35:[function(require,module,exports){
 var Geometry, Helpers, Rectangle, Views, c,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -8623,8 +8714,8 @@ module.exports.prototype.constructor = c;
 
 
 
-},{"../geometry/rectangle":11,"../helpers/mixin":15,"./child":27}],35:[function(require,module,exports){
-var Geometry, Globals, Helpers, Mixins, Sprite, Views, c,
+},{"../geometry/rectangle":11,"../helpers/mixin":15,"./child":28}],36:[function(require,module,exports){
+var Globals, Helpers, Mixins, Sprite, Views, c,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -8637,7 +8728,8 @@ Helpers = {
 };
 
 Mixins = {
-  Animatable: require('../mixins/animatable')
+  Animatable: require('../mixins/animatable'),
+  Texture: require('../mixins/texture')
 };
 
 Views = {
@@ -8685,6 +8777,8 @@ c = Sprite = (function(superClass) {
 
   Helpers.Mixin.mixin(Sprite, Mixins.Animatable);
 
+  Helpers.Mixin.mixin(Sprite, Mixins.Texture);
+
   Sprite.prototype.renderType = "sprite";
 
   function Sprite(source, x, y, direction, additionalProperties) {
@@ -8726,54 +8820,22 @@ c = Sprite = (function(superClass) {
         return value;
       }
     });
-    offset = Globals.OFFSET_MIDDLE_CENTER;
     if (additionalProperties && additionalProperties.offset) {
-      offset = additionalProperties.offset;
-      delete additionalProperties.offset;
+      if (typeof additionalProperties.offset === 'number') {
+        offset = additionalProperties.offset;
+        additionalProperties.offset = void 0;
+      }
+    } else {
+      offset = Globals.OFFSET_MIDDLE_CENTER;
     }
     Helpers.Mixin["import"](this, additionalProperties);
     if (!this.refreshSource()) {
       throw new Error("Sprite source was not successfully loaded: " + source);
     }
-    this.offsetFromGlobal(offset);
-    if (engine.avoidSubPixelRendering) {
-      this.offset.x = Math.round(this.offset.x);
-      this.offset.y = Math.round(this.offset.y);
+    if (offset) {
+      this.offsetFromGlobal(offset);
     }
-    return;
   }
-
-
-  /*
-  Parses an offset global into an actual Math.Vector offset that fits the instance
-  
-  @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
-  @return {Math.Vector} The offset vector the offset global corresponds to for the instance
-   */
-
-  Sprite.prototype.parseOffsetGlobal = function(offset) {
-    var ret;
-    ret = new Geometry.Vector();
-    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
-      ret.x = 0;
-    } else if ([Globals.OFFSET_TOP_CENTER, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
-      ret.x = this.bm.width / this.imageLength / 2;
-    } else {
-      if ([Globals.OFFSET_TOP_RIGHT, Globals.OFFSET_MIDDLE_RIGHT, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-        ret.x = this.bm.width / this.imageLength;
-      }
-    }
-    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_TOP_CENTER, Globals.OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
-      ret.y = 0;
-    } else if ([Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
-      ret.y = this.bm.height / 2;
-    } else {
-      if ([Globals.OFFSET_BOTTOM_LEFT, Globals.OFFSET_BOTTOM_CENTER, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-        ret.y = this.bm.height;
-      }
-    }
-    return ret;
-  };
 
 
   /*
@@ -8784,8 +8846,6 @@ c = Sprite = (function(superClass) {
 
   Sprite.prototype.getTheme = function() {
     var parent, theme;
-    parent = void 0;
-    theme = void 0;
     theme = this.theme;
     parent = this;
     while (theme === void 0) {
@@ -8817,15 +8877,15 @@ c = Sprite = (function(superClass) {
   Sprite.prototype.refreshSource = function() {
     var theme;
     theme = this.getTheme();
-    this.bm = engine.loader.getImage(this.source, theme);
-    this.imageLength = this.bm.imageLength;
+    this.texture = engine.loader.getImage(this.source, theme);
+    this.imageLength = this.texture.imageLength;
     this.imageNumber = Math.min(this.imageLength - 1, this.imageNumber);
-    this.clipWidth = Math.floor(this.bm.width / this.imageLength);
-    this.clipHeight = this.bm.height;
+    this.clipWidth = Math.floor(this.texture.width / this.imageLength);
+    this.clipHeight = this.texture.height;
     if (this.offsetGlobal) {
-      this.offset = this.offsetGlobal;
+      this.offsetFromGlobal(this.offsetGlobal);
     }
-    return this.bm;
+    return this.texture;
   };
 
 
@@ -8860,39 +8920,6 @@ c = Sprite = (function(superClass) {
     }
   };
 
-
-  /*
-  Calculates the region which the sprite will fill out when redrawn.
-  
-  @private
-  @return {Rectangle} The bounding rectangle of the sprite's redraw
-   */
-
-  Sprite.prototype.getRedrawRegion = function() {
-    var box, i, parent, parents;
-    box = void 0;
-    parents = void 0;
-    parent = void 0;
-    i = void 0;
-    box = new Geometry.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight).getPolygon();
-    parents = this.getParents();
-    parents.unshift(this);
-    i = 0;
-    while (i < parents.length) {
-      parent = parents[i];
-      box.scale(parent.size * parent.widthScale, parent.size * parent.heightScale);
-      box.rotate(parent.direction);
-      box.move(parent.x, parent.y);
-      i++;
-    }
-    box = box.getBoundingRectangle();
-    box.x = Math.floor(box.x);
-    box.y = Math.floor(box.y);
-    box.width = Math.ceil(box.width + 1);
-    box.height = Math.ceil(box.height + 1);
-    return box;
-  };
-
   return Sprite;
 
 })(Views.Container);
@@ -8901,16 +8928,11 @@ module.exports.prototype = Object.create(c.prototype);
 
 module.exports.prototype.constructor = c;
 
-Geometry = {
-  Vector: require('../geometry/vector'),
-  Rectangle: require('../geometry/rectangle')
-};
-
 Globals = require('../engine/globals');
 
 
 
-},{"../engine/globals":4,"../geometry/rectangle":11,"../geometry/vector":12,"../helpers/mixin":15,"../mixins/animatable":20,"./container":30}],36:[function(require,module,exports){
+},{"../engine/globals":4,"../helpers/mixin":15,"../mixins/animatable":20,"../mixins/texture":21,"./container":31}],37:[function(require,module,exports){
 var Geometry, Globals, Helpers, Mixins, TextBlock, Views, c,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -8924,7 +8946,8 @@ Helpers = {
 };
 
 Mixins = {
-  Animatable: require('../mixins/animatable')
+  Animatable: require('../mixins/animatable'),
+  Texture: require('../mixins/texture')
 };
 
 Views = {
@@ -8974,6 +8997,8 @@ c = TextBlock = (function(superClass) {
 
   Helpers.Mixin.mixin(TextBlock, Mixins.Animatable);
 
+  Helpers.Mixin.mixin(TextBlock, Mixins.Texture);
+
   TextBlock.prototype.renderType = "textblock";
 
   function TextBlock(string, x, y, width, additionalProperties) {
@@ -8989,11 +9014,11 @@ c = TextBlock = (function(superClass) {
     this.clipWidth = width || 200;
     this.lines = [];
     this.lineWidth = [];
-    this.bm = document.createElement("canvas");
-    this.bmCtx = this.bm.getContext("2d");
-    this.bm.width = this.clipWidth;
-    this.bm.height = 10;
-    this.bm.spacing = 0;
+    this.texture = document.createElement("canvas");
+    this.textureCtx = this.texture.getContext("2d");
+    this.texture.width = this.clipWidth;
+    this.texture.height = 10;
+    this.texture.spacing = 0;
     this.string = string || '';
     this.font = "normal 14px Verdana";
     this.alignment = "left";
@@ -9022,52 +9047,21 @@ c = TextBlock = (function(superClass) {
       }
     });
     this.lineHeight = (additionalProperties && additionalProperties.lineHeight ? additionalProperties.lineHeight : this.font.match(/[0.0-9]+/) * 1.25);
-    offset = Globals.OFFSET_TOP_LEFT;
     if (additionalProperties && additionalProperties.offset) {
-      offset = additionalProperties.offset;
-      delete additionalProperties.offset;
+      if (typeof additionalProperties.offset === 'number') {
+        offset = additionalProperties.offset;
+        additionalProperties.offset = void 0;
+      }
+    } else {
+      offset = Globals.OFFSET_TOP_LEFT;
     }
     Helpers.Mixin["import"](this, additionalProperties);
-    this.offsetFromGlobal(offset);
-    if (engine.avoidSubPixelRendering) {
-      this.offset.x = Math.round(this.offset.x);
-      this.offset.y = Math.round(this.offset.y);
+    if (offset) {
+      this.offsetFromGlobal(offset);
     }
     this.updateCache();
     return;
   }
-
-
-  /*
-  Parses an offset global into an actual Vector offset that fits the instance
-  
-  @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
-  @return {Vector} The offset vector the offset global corresponds to for the instance
-   */
-
-  TextBlock.prototype.parseOffsetGlobal = function(offset) {
-    var ret;
-    ret = new Geometry.Vector();
-    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
-      ret.x = 0;
-    } else if ([Globals.OFFSET_TOP_CENTER, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
-      ret.x = this.clipWidth / 2;
-    } else {
-      if ([Globals.OFFSET_TOP_RIGHT, Globals.OFFSET_MIDDLE_RIGHT, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-        ret.x = this.clipWidth;
-      }
-    }
-    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_TOP_CENTER, Globals.OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
-      ret.y = 0;
-    } else if ([Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
-      ret.y = this.clipHeight / 2;
-    } else {
-      if ([Globals.OFFSET_BOTTOM_LEFT, Globals.OFFSET_BOTTOM_CENTER, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-        ret.y = this.clipHeight;
-      }
-    }
-    return ret;
-  };
 
 
   /*
@@ -9121,8 +9115,8 @@ c = TextBlock = (function(superClass) {
    */
 
   TextBlock.prototype.calculateCanvasHeight = function() {
-    this.bm.height = (this.lines.length - 1) * this.lineHeight + this.font.match(/[0.0-9]+/) * 1.25;
-    this.clipHeight = this.bm.height;
+    this.texture.height = (this.lines.length - 1) * this.lineHeight + this.font.match(/[0.0-9]+/) * 1.25;
+    this.clipHeight = this.texture.height;
   };
 
 
@@ -9135,15 +9129,15 @@ c = TextBlock = (function(superClass) {
   TextBlock.prototype.updateCache = function() {
     var hash, i, xOffset;
     hash = this.createHash();
-    if (hash === this.bm.src) {
+    if (hash === this.texture.src) {
       return;
     }
-    this.bm.oldSrc = this.bm.src;
-    this.bm.src = hash;
+    this.texture.oldSrc = this.texture.src;
+    this.texture.src = hash;
     this.stringToLines();
-    this.bmCtx.clearRect(0, 0, this.bm.width, this.bm.height);
-    this.bmCtx.font = this.font;
-    this.bmCtx.fillStyle = this.color;
+    this.textureCtx.clearRect(0, 0, this.texture.width, this.texture.height);
+    this.textureCtx.font = this.font;
+    this.textureCtx.fillStyle = this.color;
     i = 0;
     while (i < this.lines.length) {
       xOffset = 0;
@@ -9158,7 +9152,7 @@ c = TextBlock = (function(superClass) {
           xOffset = (this.clipWidth - this.lineWidth[i]) / 2;
       }
       if (this.lines[i]) {
-        this.bmCtx.fillText(this.lines[i], xOffset, this.lineHeight * i + this.font.match(/[0.0-9]+/) * 1);
+        this.textureCtx.fillText(this.lines[i], xOffset, this.lineHeight * i + this.font.match(/[0.0-9]+/) * 1);
       }
       i++;
     }
@@ -9191,29 +9185,6 @@ c = TextBlock = (function(superClass) {
     return !(this.size === 0 || this.widthScale === 0 || this.heightScale === 0 || /^\s*$/.test(this.string));
   };
 
-
-  /*
-  Calculates a bounding non-rotated rectangle that the text block will fill when drawn.
-  
-  @private
-  @return {Rectangle} The bounding rectangle of the text block when drawn.
-   */
-
-  TextBlock.prototype.getRedrawRegion = function() {
-    var ret;
-    ret = void 0;
-    ret = new Math.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight);
-    ret = ret.getPolygon();
-    ret = ret.scale(this.size * this.widthScale, this.size * this.heightScale);
-    ret = ret.rotate(this.direction);
-    ret = ret.getBoundingRectangle().add(this.getRoomPosition());
-    ret.x = Math.floor(ret.x - 1);
-    ret.y = Math.floor(ret.y - 1);
-    ret.width = Math.ceil(ret.width + 2);
-    ret.height = Math.ceil(ret.height + 2);
-    return ret;
-  };
-
   return TextBlock;
 
 })(Views.Container);
@@ -9230,4 +9201,4 @@ Globals = require('../engine/globals');
 
 
 
-},{"../engine/globals":4,"../geometry/vector":12,"../helpers/mixin":15,"../mixins/animatable":20,"./container":30}]},{},[1]);
+},{"../engine/globals":4,"../geometry/vector":12,"../helpers/mixin":15,"../mixins/animatable":20,"../mixins/texture":21,"./container":31}]},{},[1]);

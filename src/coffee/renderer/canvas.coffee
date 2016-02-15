@@ -99,7 +99,7 @@ c = class CanvasRenderer
         else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
 
     # Draw bm
-    @context.drawImage object.bm, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight
+    @context.drawImage object.texture, (object.clipWidth + object.texture.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight
     return
 
   renderCircle: (object) ->
@@ -179,7 +179,7 @@ c = class CanvasRenderer
         else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
 
     # Draw bm
-    @context.drawImage mask, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight
+    @context.drawImage mask, (object.clipWidth + object.texture.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight
 
   renderBoundingBox: (object)->
     mask = engine.loader.getMask object.source, object.getTheme()

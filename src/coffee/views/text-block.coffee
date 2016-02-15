@@ -5,6 +5,7 @@ Helpers =
 
 Mixins =
   Animatable: require '../mixins/animatable'
+  Texture: require '../mixins/texture'
 
 Views =
   Container: require './container'
@@ -48,6 +49,7 @@ offset: new Vector(0, 0)
 c = class TextBlock extends Views.Container
   # Mix in Child
   Helpers.Mixin.mixin @, Mixins.Animatable
+  Helpers.Mixin.mixin @, Mixins.Texture
 
   renderType: "textblock"
 
@@ -67,11 +69,11 @@ c = class TextBlock extends Views.Container
     @clipWidth = width || 200
     @lines = []
     @lineWidth = []
-    @bm = document.createElement("canvas")
-    @bmCtx = @bm.getContext("2d")
-    @bm.width = @clipWidth
-    @bm.height = 10
-    @bm.spacing = 0
+    @texture = document.createElement("canvas")
+    @textureCtx = @texture.getContext("2d")
+    @texture.width = @clipWidth
+    @texture.height = 10
+    @texture.spacing = 0
 
     @string = string || ''
     @font = "normal 14px Verdana"
@@ -99,71 +101,23 @@ c = class TextBlock extends Views.Container
         value
 
     @lineHeight = (if additionalProperties and additionalProperties.lineHeight then additionalProperties.lineHeight else @font.match(/[0.0-9]+/) * 1.25)
-    offset = Globals.OFFSET_TOP_LEFT
-    if additionalProperties and additionalProperties.offset
-      offset = additionalProperties.offset
-      delete additionalProperties.offset
+
+    # If an offset global is used, remove it for now, and convert it later
+    if additionalProperties && additionalProperties.offset
+      if typeof additionalProperties.offset == 'number'
+        offset = additionalProperties.offset
+        additionalProperties.offset = undefined
+    else
+      offset = Globals.OFFSET_TOP_LEFT
 
     # Load additional properties
     Helpers.Mixin.import @, additionalProperties
 
-    # Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
-    @offsetFromGlobal offset
-    if engine.avoidSubPixelRendering
-      @offset.x = Math.round(@offset.x)
-      @offset.y = Math.round(@offset.y)
+    # If using an offset global, set offset
+    @offsetFromGlobal offset if offset
 
     @updateCache()
     return
-
-  ###
-  Parses an offset global into an actual Vector offset that fits the instance
-
-  @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
-  @return {Vector} The offset vector the offset global corresponds to for the instance
-  ###
-  parseOffsetGlobal: (offset) ->
-    ret = new Geometry.Vector()
-
-    # calculate horizontal offset
-    if [
-      Globals.OFFSET_TOP_LEFT
-      Globals.OFFSET_MIDDLE_LEFT
-      Globals.OFFSET_BOTTOM_LEFT
-    ].indexOf(offset) isnt -1
-      ret.x = 0
-    else if [
-      Globals.OFFSET_TOP_CENTER
-      Globals.OFFSET_MIDDLE_CENTER
-      Globals.OFFSET_BOTTOM_CENTER
-    ].indexOf(offset) isnt -1
-      ret.x = @clipWidth / 2
-    else ret.x = @clipWidth if [
-      Globals.OFFSET_TOP_RIGHT
-      Globals.OFFSET_MIDDLE_RIGHT
-      Globals.OFFSET_BOTTOM_RIGHT
-    ].indexOf(offset) isnt -1
-
-    # calculate vertical offset
-    if [
-      Globals.OFFSET_TOP_LEFT
-      Globals.OFFSET_TOP_CENTER
-      Globals.OFFSET_TOP_RIGHT
-    ].indexOf(offset) isnt -1
-      ret.y = 0
-    else if [
-      Globals.OFFSET_MIDDLE_LEFT
-      Globals.OFFSET_MIDDLE_CENTER
-      Globals.OFFSET_MIDDLE_RIGHT
-    ].indexOf(offset) isnt -1
-      ret.y = @clipHeight / 2
-    else ret.y = @clipHeight if [
-      Globals.OFFSET_BOTTOM_LEFT
-      Globals.OFFSET_BOTTOM_CENTER
-      Globals.OFFSET_BOTTOM_RIGHT
-    ].indexOf(offset) isnt -1
-    ret
-
 
   ###
   Breaks the TextBlock's text string into lines.
@@ -209,8 +163,8 @@ c = class TextBlock extends Views.Container
   Calculates and sets the height of the cache canvas based on the number of lines, the font height and the line height
   ###
   calculateCanvasHeight: ->
-    @bm.height = (@lines.length - 1) * @lineHeight + @font.match(/[0.0-9]+/) * 1.25
-    @clipHeight = @bm.height
+    @texture.height = (@lines.length - 1) * @lineHeight + @font.match(/[0.0-9]+/) * 1.25
+    @clipHeight = @texture.height
     return
 
   ###
@@ -223,14 +177,14 @@ c = class TextBlock extends Views.Container
     # The "src" attribute is used because WebGL renderer uses it
     # as an identifier for cached textures
     hash = @createHash()
-    return if hash == @bm.src
-    @bm.oldSrc = @bm.src
-    @bm.src = hash
+    return if hash == @texture.src
+    @texture.oldSrc = @texture.src
+    @texture.src = hash
 
     @stringToLines()
-    @bmCtx.clearRect 0, 0, @bm.width, @bm.height
-    @bmCtx.font = @font
-    @bmCtx.fillStyle = @color
+    @textureCtx.clearRect 0, 0, @texture.width, @texture.height
+    @textureCtx.font = @font
+    @textureCtx.fillStyle = @color
     i = 0
     while i < @lines.length
       xOffset = 0
@@ -241,7 +195,7 @@ c = class TextBlock extends Views.Container
           xOffset = @clipWidth - @lineWidth[i]
         when "center"
           xOffset = (@clipWidth - @lineWidth[i]) / 2
-      @bmCtx.fillText @lines[i], xOffset, @lineHeight * i + @font.match(/[0.0-9]+/) * 1 if @lines[i]
+      @textureCtx.fillText @lines[i], xOffset, @lineHeight * i + @font.match(/[0.0-9]+/) * 1 if @lines[i]
       i++
     return
 
@@ -269,25 +223,6 @@ c = class TextBlock extends Views.Container
   isVisible: ->
     # If sprites size has been modified to zero, do nothing
     not (@size is 0 or @widthScale is 0 or @heightScale is 0 or /^\s*$/.test(@string))
-
-  ###
-  Calculates a bounding non-rotated rectangle that the text block will fill when drawn.
-
-  @private
-  @return {Rectangle} The bounding rectangle of the text block when drawn.
-  ###
-  getRedrawRegion: ->
-    ret = undefined
-    ret = new Math.Rectangle(-@offset.x, -@offset.y, @clipWidth, @clipHeight)
-    ret = ret.getPolygon()
-    ret = ret.scale(@size * @widthScale, @size * @heightScale)
-    ret = ret.rotate(@direction)
-    ret = ret.getBoundingRectangle().add(@getRoomPosition())
-    ret.x = Math.floor(ret.x - 1)
-    ret.y = Math.floor(ret.y - 1)
-    ret.width = Math.ceil(ret.width + 2)
-    ret.height = Math.ceil(ret.height + 2)
-    ret
 
 module.exports:: = Object.create c::
 module.exports::constructor = c

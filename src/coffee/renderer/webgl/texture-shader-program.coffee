@@ -110,10 +110,10 @@ c = class WebGLTextureShaderProgram
     return if @mode == 'animated'
     @mode = 'animated'
 
-    x1 = (object.clipWidth + object.bm.spacing) * object.imageNumber
+    x1 = (object.clipWidth + object.texture.spacing) * object.imageNumber
     x2 = x1 + object.clipWidth
-    x1 /= object.bm.width
-    x2 /= object.bm.width
+    x1 /= object.texture.width
+    x2 /= object.texture.width
     y1 = 0
     y2 = 1
 
@@ -147,8 +147,8 @@ c = class WebGLTextureShaderProgram
 
   # Draw functions
   renderSprite: (gl, object, wm) ->
-    if object.renderType == "textblock" && @textureCache[object.bm.oldSrc]
-      delete @textureCache[object.bm.oldSrc]
+    if object.renderType == "textblock" && @textureCache[object.texture.oldSrc]
+      delete @textureCache[object.texture.oldSrc]
 
     # Set the correct texture coordinate buffer
     if object.imageLength == 1
@@ -192,19 +192,19 @@ c = class WebGLTextureShaderProgram
     return
 
   getSpriteTexture: (gl, object) ->
-    c = @textureCache[object.bm.src]
+    c = @textureCache[object.texture.src]
     if c
       c
     else
-      @textureCache[object.bm.src] = @createTexture(gl, object.bm)
+      @textureCache[object.texture.src] = @createTexture(gl, object.texture)
 
   getMaskTexture: (gl, object) ->
     mask = engine.loader.getMask object.source, object.getTheme()
-    c = @maskCache[object.bm.src]
+    c = @maskCache[object.texture.src]
     if c
       c
     else
-      @maskCache[object.bm.src] = @createTexture(gl, mask)
+      @maskCache[object.texture.src] = @createTexture(gl, mask)
 
   createTexture: (gl, image) ->
     texture = undefined

@@ -293,7 +293,7 @@ c = class Collidable extends Views.Sprite
       )
 
       # Draw object mask
-      c.drawImage obj.mask, (obj.clipWidth + obj.bm.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight
+      c.drawImage obj.mask, (obj.clipWidth + obj.texture.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight
 
     # Reset transform
     c.setTransform 1, 0, 0, 1, 0, 0
@@ -303,7 +303,7 @@ c = class Collidable extends Views.Sprite
     c.fillRect 0, 0, canvas.width, canvas.height
 
     # Draw checked objects mask
-    c.drawImage mask, (@clipWidth + @bm.spacing) * @imageNumber, 0, @clipWidth, @clipHeight, 0, 0, @clipWidth, @clipHeight
+    c.drawImage mask, (@clipWidth + @texture.spacing) * @imageNumber, 0, @clipWidth, @clipHeight, 0, 0, @clipWidth, @clipHeight
 
     # Return collision image data
     c.getImageData 0, 0, canvas.width, canvas.height

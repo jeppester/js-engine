@@ -5,10 +5,10 @@ Helpers =
 
 Mixins =
   Animatable: require '../mixins/animatable'
+  Texture: require '../mixins/texture'
 
 Views =
   Container: require './container'
-
 
 ###
 The constructor for Sprite objects.
@@ -47,6 +47,7 @@ offset: new Math.Vector('center', 'center')
 c = class Sprite extends Views.Container
   # Mix in animatable
   Helpers.Mixin.mixin @, Mixins.Animatable
+  Helpers.Mixin.mixin @, Mixins.Texture
 
   renderType: "sprite"
 
@@ -90,71 +91,21 @@ c = class Sprite extends Views.Container
         @heightScale = sign * Math.abs(value / (@clipHeight * @size))
         value
 
-
-    # If an offset static var is used, remove it for now, and convert it later
-    offset = Globals.OFFSET_MIDDLE_CENTER
-    if additionalProperties and additionalProperties.offset
-      offset = additionalProperties.offset
-      delete additionalProperties.offset
+    # If an offset global is used, remove it for now, and convert it later
+    if additionalProperties && additionalProperties.offset
+      if typeof additionalProperties.offset == 'number'
+        offset = additionalProperties.offset
+        additionalProperties.offset = undefined
+    else
+      offset = Globals.OFFSET_MIDDLE_CENTER
 
     # Load additional properties
     Helpers.Mixin.import @, additionalProperties
-    throw new Error("Sprite source was not successfully loaded: " + source) unless @refreshSource() #dev
+    unless @refreshSource() #dev
+      throw new Error("Sprite source was not successfully loaded: " + source) # dev
 
-    # Set offset after the source has been set (otherwise the offset cannot be calculated correctly)
-    @offsetFromGlobal offset
-    if engine.avoidSubPixelRendering
-      @offset.x = Math.round(@offset.x)
-      @offset.y = Math.round(@offset.y)
-    return
-
-  ###
-  Parses an offset global into an actual Math.Vector offset that fits the instance
-
-  @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
-  @return {Math.Vector} The offset vector the offset global corresponds to for the instance
-  ###
-  parseOffsetGlobal: (offset) ->
-    ret = new Geometry.Vector()
-
-    # calculate horizontal offset
-    if [
-      Globals.OFFSET_TOP_LEFT
-      Globals.OFFSET_MIDDLE_LEFT
-      Globals.OFFSET_BOTTOM_LEFT
-    ].indexOf(offset) isnt -1
-      ret.x = 0
-    else if [
-      Globals.OFFSET_TOP_CENTER
-      Globals.OFFSET_MIDDLE_CENTER
-      Globals.OFFSET_BOTTOM_CENTER
-    ].indexOf(offset) isnt -1
-      ret.x = @bm.width / @imageLength / 2
-    else ret.x = @bm.width / @imageLength if [
-      Globals.OFFSET_TOP_RIGHT
-      Globals.OFFSET_MIDDLE_RIGHT
-      Globals.OFFSET_BOTTOM_RIGHT
-    ].indexOf(offset) isnt -1
-
-    # calculate vertical offset
-    if [
-      Globals.OFFSET_TOP_LEFT
-      Globals.OFFSET_TOP_CENTER
-      Globals.OFFSET_TOP_RIGHT
-    ].indexOf(offset) isnt -1
-      ret.y = 0
-    else if [
-      Globals.OFFSET_MIDDLE_LEFT
-      Globals.OFFSET_MIDDLE_CENTER
-      Globals.OFFSET_MIDDLE_RIGHT
-    ].indexOf(offset) isnt -1
-      ret.y = @bm.height / 2
-    else ret.y = @bm.height if [
-      Globals.OFFSET_BOTTOM_LEFT
-      Globals.OFFSET_BOTTOM_CENTER
-      Globals.OFFSET_BOTTOM_RIGHT
-    ].indexOf(offset) isnt -1
-    ret
+    # If using an offset global, set offset
+    @offsetFromGlobal offset if offset
 
   ###
   Fetches the name of the theme which currently applies to the object.
@@ -162,8 +113,6 @@ c = class Sprite extends Views.Container
   @return {string} The name of the object's current theme
   ###
   getTheme: ->
-    parent = undefined
-    theme = undefined
     theme = @theme
     parent = this
     while theme is undefined
@@ -184,13 +133,13 @@ c = class Sprite extends Views.Container
   ###
   refreshSource: ->
     theme = @getTheme()
-    @bm = engine.loader.getImage(@source, theme)
-    @imageLength = @bm.imageLength
+    @texture = engine.loader.getImage(@source, theme)
+    @imageLength = @texture.imageLength
     @imageNumber = Math.min(@imageLength - 1, @imageNumber)
-    @clipWidth = Math.floor(@bm.width / @imageLength)
-    @clipHeight = @bm.height
-    @offset = @offsetGlobal if @offsetGlobal
-    @bm
+    @clipWidth = Math.floor(@texture.width / @imageLength)
+    @clipHeight = @texture.height
+    @offsetFromGlobal @offsetGlobal if @offsetGlobal
+    @texture
 
   ###
   Sets the bitmap-source of the object. For more information about bitmaps and themes, see themes.
@@ -214,39 +163,7 @@ c = class Sprite extends Views.Container
       else @imageNumber = (if @animationLoops then @imageLength - 1 else 0) if @imageNumber is -1
     return
 
-  ###
-  Calculates the region which the sprite will fill out when redrawn.
-
-  @private
-  @return {Rectangle} The bounding rectangle of the sprite's redraw
-  ###
-  getRedrawRegion: ->
-    box = undefined
-    parents = undefined
-    parent = undefined
-    i = undefined
-    box = new Geometry.Rectangle(-@offset.x, -@offset.y, @clipWidth, @clipHeight).getPolygon()
-    parents = @getParents()
-    parents.unshift this
-    i = 0
-    while i < parents.length
-      parent = parents[i]
-      box.scale parent.size * parent.widthScale, parent.size * parent.heightScale
-      box.rotate parent.direction
-      box.move parent.x, parent.y
-      i++
-    box = box.getBoundingRectangle()
-    box.x = Math.floor(box.x)
-    box.y = Math.floor(box.y)
-    box.width = Math.ceil(box.width + 1)
-    box.height = Math.ceil(box.height + 1)
-    box
-
 module.exports:: = Object.create c::
 module.exports::constructor = c
-
-Geometry =
-  Vector: require '../geometry/vector'
-  Rectangle: require '../geometry/rectangle'
 
 Globals = require '../engine/globals'

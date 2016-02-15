@@ -23,6 +23,7 @@ c = class Child
     return
 
   offsetFromGlobal: (offset)->
+    @offsetGlobal = offset
     @offset = @parseOffsetGlobal offset
 
   ###
@@ -33,7 +34,7 @@ c = class Child
   @return {Vector} A parsed version of the offset global
   ###
   parseOffsetGlobal: (offset) ->
-    new Geometry.Vector()
+    throw new Error 'Offset globals are not supported for this class'
 
   ###
   Checks if the child object is inside a room that is currently visible
