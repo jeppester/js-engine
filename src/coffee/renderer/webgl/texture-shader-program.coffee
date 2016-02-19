@@ -12,6 +12,12 @@ c = class WebGLTextureShaderProgram
   program: null
   drawBuffer: []
   textureBuffer: []
+  points: [
+    new Float32Array(2)
+    new Float32Array(2)
+    new Float32Array(2)
+    new Float32Array(2)
+  ]
 
   constructor: (gl) ->
     # Init program
@@ -156,31 +162,24 @@ c = class WebGLTextureShaderProgram
 
     texture = @getSpriteTexture gl, object
 
-    object.points ?= [
-      new Float32Array(2)
-      new Float32Array(2)
-      new Float32Array(2)
-      new Float32Array(2)
-    ]
+    @points[0][0] = 0
+    @points[0][1] = 0
 
-    object.points[0][0] = 0
-    object.points[0][1] = 0
+    @points[1][0] = object.clipWidth
+    @points[1][1] = 0
 
-    object.points[1][0] = object.clipWidth
-    object.points[1][1] = 0
+    @points[2][0] = 0
+    @points[2][1] = object.clipHeight
 
-    object.points[2][0] = 0
-    object.points[2][1] = object.clipHeight
+    @points[3][0] = object.clipWidth
+    @points[3][1] = object.clipHeight
 
-    object.points[3][0] = object.clipWidth
-    object.points[3][1] = object.clipHeight
+    Helpers.MatrixCalculation.transformCoord @points[0], wm
+    Helpers.MatrixCalculation.transformCoord @points[1], wm
+    Helpers.MatrixCalculation.transformCoord @points[2], wm
+    Helpers.MatrixCalculation.transformCoord @points[3], wm
 
-    Helpers.MatrixCalculation.transformCoord object.points[0], wm
-    Helpers.MatrixCalculation.transformCoord object.points[1], wm
-    Helpers.MatrixCalculation.transformCoord object.points[2], wm
-    Helpers.MatrixCalculation.transformCoord object.points[3], wm
-
-    @renderTexture(gl, texture, object.points)
+    @renderTexture(gl, texture, @points)
     return
 
   # Draw functions

@@ -6510,6 +6510,8 @@ c = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.textureBuffer = [];
 
+  WebGLTextureShaderProgram.prototype.points = [new Float32Array(2), new Float32Array(2), new Float32Array(2), new Float32Array(2)];
+
   function WebGLTextureShaderProgram(gl) {
     this.program = gl.createProgram();
     this.initShaders(gl);
@@ -6595,22 +6597,19 @@ c = WebGLTextureShaderProgram = (function() {
       this.setAnimatedTextCoordBuffer(gl, object);
     }
     texture = this.getSpriteTexture(gl, object);
-    if (object.points == null) {
-      object.points = [new Float32Array(2), new Float32Array(2), new Float32Array(2), new Float32Array(2)];
-    }
-    object.points[0][0] = 0;
-    object.points[0][1] = 0;
-    object.points[1][0] = object.clipWidth;
-    object.points[1][1] = 0;
-    object.points[2][0] = 0;
-    object.points[2][1] = object.clipHeight;
-    object.points[3][0] = object.clipWidth;
-    object.points[3][1] = object.clipHeight;
-    Helpers.MatrixCalculation.transformCoord(object.points[0], wm);
-    Helpers.MatrixCalculation.transformCoord(object.points[1], wm);
-    Helpers.MatrixCalculation.transformCoord(object.points[2], wm);
-    Helpers.MatrixCalculation.transformCoord(object.points[3], wm);
-    this.renderTexture(gl, texture, object.points);
+    this.points[0][0] = 0;
+    this.points[0][1] = 0;
+    this.points[1][0] = object.clipWidth;
+    this.points[1][1] = 0;
+    this.points[2][0] = 0;
+    this.points[2][1] = object.clipHeight;
+    this.points[3][0] = object.clipWidth;
+    this.points[3][1] = object.clipHeight;
+    Helpers.MatrixCalculation.transformCoord(this.points[0], wm);
+    Helpers.MatrixCalculation.transformCoord(this.points[1], wm);
+    Helpers.MatrixCalculation.transformCoord(this.points[2], wm);
+    Helpers.MatrixCalculation.transformCoord(this.points[3], wm);
+    this.renderTexture(gl, texture, this.points);
   };
 
   WebGLTextureShaderProgram.prototype.renderMask = function(gl, object, wm) {
