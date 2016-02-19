@@ -184,6 +184,8 @@ c = class WebGLRenderer
       renderFunction.call program, gl, object, wmWithOffset
 
       i += 3
+
+    @currentProgram.flushDrawBuffer gl if @currentProgram
     return
 
 module.exports:: = Object.create c::

@@ -178,3 +178,12 @@ module.exports = MatrixCalculationHelper =
     b[8] = g1 * c2 + h1 * f2 + i1 * i2
 
     return
+
+  transformCoord: (coord, matrix)->
+    x = coord[0]
+    y = coord[1]
+
+    coord[0] = x * matrix[0] + y * matrix[3] + matrix[6]
+    coord[1] = x * matrix[1] + y * matrix[4] + matrix[7]
+
+    return

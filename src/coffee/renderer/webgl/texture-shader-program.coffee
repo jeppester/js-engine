@@ -10,6 +10,8 @@ c = class WebGLTextureShaderProgram
   animatedTextCoordBuffer: null
   mode: null
   program: null
+  drawBuffer: []
+  textureBuffer: []
 
   constructor: (gl) ->
     # Init program
@@ -25,13 +27,11 @@ c = class WebGLTextureShaderProgram
       attribute vec2 a_texCoord;
 
       uniform vec2 u_resolution;
-      uniform mat3 u_matrix;
 
       varying vec2 v_texCoord;
 
       void main() {
-        vec2 position = (u_matrix * vec3(a_position, 1)).xy;
-        vec2 clipSpace = position / u_resolution * 2.0 - 1.0;
+        vec2 clipSpace = a_position / u_resolution * 2.0 - 1.0;
 
         gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
 
@@ -67,7 +67,6 @@ c = class WebGLTextureShaderProgram
     @locations.a_texCoord   = gl.getAttribLocation @program, "a_texCoord"
     @locations.a_position   = gl.getAttribLocation @program, "a_position"
     @locations.u_resolution = gl.getUniformLocation @program, "u_resolution"
-    @locations.u_matrix     = gl.getUniformLocation @program, "u_matrix"
     @locations.u_alpha      = gl.getUniformLocation @program, "u_alpha"
     return
 
@@ -77,11 +76,6 @@ c = class WebGLTextureShaderProgram
 
     # Set textcoords, since they newer change
     gl.bindBuffer gl.ARRAY_BUFFER, @regularTextCoordBuffer
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
-      0.0, 0.0, 1.0, 0.0
-      0.0, 1.0, 0.0, 1.0
-      1.0, 0.0, 1.0, 1.0
-    ]), gl.STATIC_DRAW
 
     # Animated texture coordinate (the coordinates will be unique for each draw)
     @animatedTextCoordBuffer = gl.createBuffer()
@@ -161,7 +155,32 @@ c = class WebGLTextureShaderProgram
       @setAnimatedTextCoordBuffer gl, object
 
     texture = @getSpriteTexture gl, object
-    @renderTexture(gl, texture, wm, object.clipWidth, object.clipHeight)
+
+    object.points ?= [
+      new Float32Array(2)
+      new Float32Array(2)
+      new Float32Array(2)
+      new Float32Array(2)
+    ]
+
+    object.points[0][0] = 0
+    object.points[0][1] = 0
+
+    object.points[1][0] = object.clipWidth
+    object.points[1][1] = 0
+
+    object.points[2][0] = 0
+    object.points[2][1] = object.clipHeight
+
+    object.points[3][0] = object.clipWidth
+    object.points[3][1] = object.clipHeight
+
+    Helpers.MatrixCalculation.transformCoord object.points[0], wm
+    Helpers.MatrixCalculation.transformCoord object.points[1], wm
+    Helpers.MatrixCalculation.transformCoord object.points[2], wm
+    Helpers.MatrixCalculation.transformCoord object.points[3], wm
+
+    @renderTexture(gl, texture, object.points)
     return
 
   # Draw functions
@@ -177,19 +196,22 @@ c = class WebGLTextureShaderProgram
     @renderTexture(gl, texture, wm, object.clipWidth, object.clipHeight)
     return
 
-  renderTexture: (gl, texture, wm, width, height)->
+  renderTexture: (gl, texture, points)->
     if @currentTexture != texture
-      @currentTexture = texture
-
       # Set a rectangle the same size as the image
+      @currentTexture = texture
+      @flushDrawBuffer gl
       gl.bindTexture gl.TEXTURE_2D, texture
-      Helpers.WebGL.setPlane gl, 0, 0, width, height
 
-    # Set matrix
-    gl.uniformMatrix3fv @locations.u_matrix, gl.FALSE, wm
+    @drawBuffer.push(
+      points[0][0], points[0][1], points[1][0], points[1][1], points[2][0], points[2][1]
+      points[2][0], points[2][1], points[1][0], points[1][1], points[3][0], points[3][1]
+    )
 
-    # Draw the rectangle.
-    gl.drawArrays gl.TRIANGLES, 0, 6
+    @textureBuffer.push(
+      0.0, 0.0, 1.0, 0.0, 0.0, 1.0
+      0.0, 1.0, 1.0, 0.0, 1.0, 1.0
+    )
     return
 
   getSpriteTexture: (gl, object) ->
@@ -224,8 +246,22 @@ c = class WebGLTextureShaderProgram
     gl.bindTexture gl.TEXTURE_2D, null
     texture
 
+  flushDrawBuffer: (gl)->
+    if @drawBuffer.length
+      gl.bindBuffer gl.ARRAY_BUFFER, @regularTextCoordBuffer
+      gl.bufferData gl.ARRAY_BUFFER, new Float32Array(@textureBuffer), gl.STATIC_DRAW
+      gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
+      gl.enableVertexAttribArray @locations.a_texCoord
+
+      gl.bindBuffer gl.ARRAY_BUFFER, @rectangleCornerBuffer
+      gl.bufferData gl.ARRAY_BUFFER, new Float32Array(@drawBuffer), gl.STATIC_DRAW
+      gl.drawArrays gl.TRIANGLES, 0, @drawBuffer.length / 2
+      @drawBuffer    = []
+      @textureBuffer = []
+
 module.exports:: = Object.create c::
 module.exports::constructor = c
 
 Helpers =
-  WebGL: require '../../helpers/webgl'
+  WebGL:             require '../../helpers/webgl'
+  MatrixCalculation: require '../../helpers/matrix-calculation'

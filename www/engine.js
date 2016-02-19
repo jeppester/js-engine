@@ -4273,6 +4273,13 @@ module.exports = MatrixCalculationHelper = {
     b[6] = g1 * a2 + h1 * d2 + i1 * g2;
     b[7] = g1 * b2 + h1 * e2 + i1 * h2;
     b[8] = g1 * c2 + h1 * f2 + i1 * i2;
+  },
+  transformCoord: function(coord, matrix) {
+    var x, y;
+    x = coord[0];
+    y = coord[1];
+    coord[0] = x * matrix[0] + y * matrix[3] + matrix[6];
+    coord[1] = x * matrix[1] + y * matrix[4] + matrix[7];
   }
 };
 
@@ -6295,6 +6302,9 @@ c = WebGLRenderer = (function() {
       renderFunction.call(program, gl, object, wmWithOffset);
       i += 3;
     }
+    if (this.currentProgram) {
+      this.currentProgram.flushDrawBuffer(gl);
+    }
   };
 
   return WebGLRenderer;
@@ -6496,6 +6506,10 @@ c = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.program = null;
 
+  WebGLTextureShaderProgram.prototype.drawBuffer = [];
+
+  WebGLTextureShaderProgram.prototype.textureBuffer = [];
+
   function WebGLTextureShaderProgram(gl) {
     this.program = gl.createProgram();
     this.initShaders(gl);
@@ -6505,7 +6519,7 @@ c = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.initShaders = function(gl) {
     var fragmentCode, fragmentShader, vertexCode, vertexShader;
-    vertexCode = "attribute vec2 a_position; attribute vec2 a_texCoord; uniform vec2 u_resolution; uniform mat3 u_matrix; varying vec2 v_texCoord; void main() { vec2 position = (u_matrix * vec3(a_position, 1)).xy; vec2 clipSpace = position / u_resolution * 2.0 - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); v_texCoord = a_texCoord; }";
+    vertexCode = "attribute vec2 a_position; attribute vec2 a_texCoord; uniform vec2 u_resolution; varying vec2 v_texCoord; void main() { vec2 clipSpace = a_position / u_resolution * 2.0 - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); v_texCoord = a_texCoord; }";
     vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexCode);
     gl.compileShader(vertexShader);
@@ -6522,14 +6536,12 @@ c = WebGLTextureShaderProgram = (function() {
     this.locations.a_texCoord = gl.getAttribLocation(this.program, "a_texCoord");
     this.locations.a_position = gl.getAttribLocation(this.program, "a_position");
     this.locations.u_resolution = gl.getUniformLocation(this.program, "u_resolution");
-    this.locations.u_matrix = gl.getUniformLocation(this.program, "u_matrix");
     this.locations.u_alpha = gl.getUniformLocation(this.program, "u_alpha");
   };
 
   WebGLTextureShaderProgram.prototype.initBuffers = function(gl) {
     this.regularTextCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.regularTextCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]), gl.STATIC_DRAW);
     this.animatedTextCoordBuffer = gl.createBuffer();
     this.rectangleCornerBuffer = gl.createBuffer();
   };
@@ -6583,7 +6595,22 @@ c = WebGLTextureShaderProgram = (function() {
       this.setAnimatedTextCoordBuffer(gl, object);
     }
     texture = this.getSpriteTexture(gl, object);
-    this.renderTexture(gl, texture, wm, object.clipWidth, object.clipHeight);
+    if (object.points == null) {
+      object.points = [new Float32Array(2), new Float32Array(2), new Float32Array(2), new Float32Array(2)];
+    }
+    object.points[0][0] = 0;
+    object.points[0][1] = 0;
+    object.points[1][0] = object.clipWidth;
+    object.points[1][1] = 0;
+    object.points[2][0] = 0;
+    object.points[2][1] = object.clipHeight;
+    object.points[3][0] = object.clipWidth;
+    object.points[3][1] = object.clipHeight;
+    Helpers.MatrixCalculation.transformCoord(object.points[0], wm);
+    Helpers.MatrixCalculation.transformCoord(object.points[1], wm);
+    Helpers.MatrixCalculation.transformCoord(object.points[2], wm);
+    Helpers.MatrixCalculation.transformCoord(object.points[3], wm);
+    this.renderTexture(gl, texture, object.points);
   };
 
   WebGLTextureShaderProgram.prototype.renderMask = function(gl, object, wm) {
@@ -6597,14 +6624,14 @@ c = WebGLTextureShaderProgram = (function() {
     this.renderTexture(gl, texture, wm, object.clipWidth, object.clipHeight);
   };
 
-  WebGLTextureShaderProgram.prototype.renderTexture = function(gl, texture, wm, width, height) {
+  WebGLTextureShaderProgram.prototype.renderTexture = function(gl, texture, points) {
     if (this.currentTexture !== texture) {
       this.currentTexture = texture;
+      this.flushDrawBuffer(gl);
       gl.bindTexture(gl.TEXTURE_2D, texture);
-      Helpers.WebGL.setPlane(gl, 0, 0, width, height);
     }
-    gl.uniformMatrix3fv(this.locations.u_matrix, gl.FALSE, wm);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    this.drawBuffer.push(points[0][0], points[0][1], points[1][0], points[1][1], points[2][0], points[2][1], points[2][0], points[2][1], points[1][0], points[1][1], points[3][0], points[3][1]);
+    this.textureBuffer.push(0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0);
   };
 
   WebGLTextureShaderProgram.prototype.getSpriteTexture = function(gl, object) {
@@ -6633,6 +6660,20 @@ c = WebGLTextureShaderProgram = (function() {
     return texture;
   };
 
+  WebGLTextureShaderProgram.prototype.flushDrawBuffer = function(gl) {
+    if (this.drawBuffer.length) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.regularTextCoordBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.textureBuffer), gl.STATIC_DRAW);
+      gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(this.locations.a_texCoord);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.rectangleCornerBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.drawBuffer), gl.STATIC_DRAW);
+      gl.drawArrays(gl.TRIANGLES, 0, this.drawBuffer.length / 2);
+      this.drawBuffer = [];
+      return this.textureBuffer = [];
+    }
+  };
+
   return WebGLTextureShaderProgram;
 
 })();
@@ -6642,12 +6683,13 @@ module.exports.prototype = Object.create(c.prototype);
 module.exports.prototype.constructor = c;
 
 Helpers = {
-  WebGL: require('../../helpers/webgl')
+  WebGL: require('../../helpers/webgl'),
+  MatrixCalculation: require('../../helpers/matrix-calculation')
 };
 
 
 
-},{"../../helpers/webgl":17}],26:[function(require,module,exports){
+},{"../../helpers/matrix-calculation":14,"../../helpers/webgl":17}],26:[function(require,module,exports){
 var Effect, c;
 
 module.exports = function() {
