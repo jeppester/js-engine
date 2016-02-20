@@ -5,13 +5,12 @@ c = class WebGLTextureShaderProgram
   maskCache: {}
   locations: {}
   currentTexture: null
-  regularTextCoordBuffer: null
-  rectangleCornerBuffer: null
-  animatedTextCoordBuffer: null
-  mode: null
+  texCoordBuffer: null
+  positionBuffer: null
+  vertex: null
   program: null
-  drawBuffer: []
-  textureBuffer: []
+  positions: []
+  texCoords: []
   points: [
     new Float32Array(2)
     new Float32Array(2)
@@ -77,73 +76,21 @@ c = class WebGLTextureShaderProgram
     return
 
   initBuffers: (gl) ->
-    # Regular texture coordinate buffer (the coordinates are always the same)
-    @regularTextCoordBuffer = gl.createBuffer()
+    # Texture coordinate buffer
+    @texCoordBuffer = gl.createBuffer()
 
-    # Set textcoords, since they newer change
-    gl.bindBuffer gl.ARRAY_BUFFER, @regularTextCoordBuffer
-
-    # Animated texture coordinate (the coordinates will be unique for each draw)
-    @animatedTextCoordBuffer = gl.createBuffer()
-
-    # Rectangle corner buffer
-    @rectangleCornerBuffer = gl.createBuffer()
+    # Position buffer
+    @positionBuffer = gl.createBuffer()
     return
 
-  # Use the same texture coordinate buffer for all non-animated sprites
-  setRegularTextCoordBuffer: (gl) ->
-    return if @mode == 'regular'
-    @mode = 'regular'
-
-    # Enable the texture coord buffer
-    gl.bindBuffer gl.ARRAY_BUFFER, @regularTextCoordBuffer
+  onSet: (gl)->
+    gl.bindBuffer gl.ARRAY_BUFFER, @texCoordBuffer
     gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
     gl.enableVertexAttribArray @locations.a_texCoord
 
-    # Always leave the rectangle corner buffer bound, as it is used A LOT
-    # and we want to prevent too many buffer binds
-    gl.bindBuffer gl.ARRAY_BUFFER, @rectangleCornerBuffer
-    return
-
-  # Set a texture coordinate buffer for a specific animated object
-  setAnimatedTextCoordBuffer: (gl, object)->
-    return if @mode == 'animated'
-    @mode = 'animated'
-
-    x1 = (object.clipWidth + object.texture.spacing) * object.imageNumber
-    x2 = x1 + object.clipWidth
-    x1 /= object.texture.width
-    x2 /= object.texture.width
-    y1 = 0
-    y2 = 1
-
-    # Enable the texture coord buffer
-    gl.bindBuffer gl.ARRAY_BUFFER, @animatedTextCoordBuffer
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
-      # Triangle 1
-      x1, y1
-      x2, y1
-      x1, y2
-
-      # Triangle 2
-      x1, y2
-      x2, y1
-      x2, y2
-    ]), gl.STATIC_DRAW
-    gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
-    gl.enableVertexAttribArray @locations.a_texCoord
-
-    # Always leave the rectangle corner buffer bound, as it is used A LOT
-    # and we want to prevent too many buffer binds
-    gl.bindBuffer gl.ARRAY_BUFFER, @rectangleCornerBuffer
-    return
-
-  # When returning to the program reset the buffer
-  onSet: (gl) ->
-    gl.bindBuffer gl.ARRAY_BUFFER, @rectangleCornerBuffer
-    gl.enableVertexAttribArray @locations.a_position
+    gl.bindBuffer gl.ARRAY_BUFFER, @positionBuffer
     gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
-    return
+    gl.enableVertexAttribArray @locations.a_position
 
   # Draw functions
   renderSprite: (gl, object, wm) ->
@@ -151,67 +98,68 @@ c = class WebGLTextureShaderProgram
       gl.deleteTexture @textureCache[object.texture.lastCacheKey]
       @textureCache[object.texture.lastCacheKey] = undefined
 
-    # Set the correct texture coordinate buffer
-    if object.imageLength == 1
-      @setRegularTextCoordBuffer gl
-    else
-      object.updateSubImage()
-
-      # Set create and set texture coordinate buffer for the object
-      @setAnimatedTextCoordBuffer gl, object
-
+    # Fetch/update texture
     texture = @getSpriteTexture gl, object
+    @setTexture gl, texture
 
+    # Buffer position
+    @bufferPosition object.clipWidth, object.clipHeight, wm
+
+    # Buffer texture coordinates
+    if object.imageLength == 1
+      @bufferTexCoord()
+    else
+      @bufferAnimatedTexCoord object
+
+    return
+
+  setTexture: (gl, texture)->
+    unless @currentTexture == texture
+      # Set a rectangle the same size as the image
+      @currentTexture = texture
+      @flushBuffers gl
+      gl.bindTexture gl.TEXTURE_2D, texture
+
+  bufferPosition: (width, height, wm)->
     @points[0][0] = 0
     @points[0][1] = 0
-
-    @points[1][0] = object.clipWidth
+    @points[1][0] = width
     @points[1][1] = 0
-
     @points[2][0] = 0
-    @points[2][1] = object.clipHeight
-
-    @points[3][0] = object.clipWidth
-    @points[3][1] = object.clipHeight
-
+    @points[2][1] = height
+    @points[3][0] = width
+    @points[3][1] = height
     Helpers.MatrixCalculation.transformCoord @points[0], wm
     Helpers.MatrixCalculation.transformCoord @points[1], wm
     Helpers.MatrixCalculation.transformCoord @points[2], wm
     Helpers.MatrixCalculation.transformCoord @points[3], wm
 
-    @renderTexture(gl, texture, @points)
-    return
-
-  # Draw functions
-  renderMask: (gl, object, wm) ->
-    # Set the correct texture coordinate buffer
-    if object.imageLength == 1
-      @setRegularTextCoordBuffer gl
-    else
-      # Set create and set texture coordinate buffer for the object
-      @setAnimatedTextCoordBuffer gl, object
-
-    texture = @getMaskTexture gl, object
-    @renderTexture(gl, texture, wm, object.clipWidth, object.clipHeight)
-    return
-
-  renderTexture: (gl, texture, points)->
-    if @currentTexture != texture
-      # Set a rectangle the same size as the image
-      @currentTexture = texture
-      @flushDrawBuffer gl
-      gl.bindTexture gl.TEXTURE_2D, texture
-
-    @drawBuffer.push(
-      points[0][0], points[0][1], points[1][0], points[1][1], points[2][0], points[2][1]
-      points[2][0], points[2][1], points[1][0], points[1][1], points[3][0], points[3][1]
+    @positions.push(
+      @points[0][0], @points[0][1]
+      @points[1][0], @points[1][1]
+      @points[2][0], @points[2][1]
+      @points[2][0], @points[2][1]
+      @points[1][0], @points[1][1]
+      @points[3][0], @points[3][1]
     )
+    return
 
-    @textureBuffer.push(
+  bufferTexCoord: ->
+    @texCoords.push(
       0.0, 0.0, 1.0, 0.0, 0.0, 1.0
       0.0, 1.0, 1.0, 0.0, 1.0, 1.0
     )
-    return
+
+  bufferAnimatedTexCoord: (object)->
+    object.updateSubImage()
+    x1 = (object.clipWidth + object.texture.spacing) * object.imageNumber
+    x2 = x1 + object.clipWidth
+    x1 /= object.texture.width
+    x2 /= object.texture.width
+    @texCoords.push(
+      x1, 0.0, x2, 0.0, x1, 1.0
+      x1, 1.0, x2, 0.0, x2, 1.0
+    )
 
   getSpriteTexture: (gl, object) ->
     @textureCache[object.texture.cacheKey] ||
@@ -245,18 +193,18 @@ c = class WebGLTextureShaderProgram
     gl.bindTexture gl.TEXTURE_2D, null
     texture
 
-  flushDrawBuffer: (gl)->
-    if @drawBuffer.length
-      gl.bindBuffer gl.ARRAY_BUFFER, @regularTextCoordBuffer
-      gl.bufferData gl.ARRAY_BUFFER, new Float32Array(@textureBuffer), gl.STATIC_DRAW
-      gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
-      gl.enableVertexAttribArray @locations.a_texCoord
+  flushBuffers: (gl)->
+    if @positions.length
+      gl.bindBuffer gl.ARRAY_BUFFER, @texCoordBuffer
+      gl.bufferData gl.ARRAY_BUFFER, new Float32Array(@texCoords), gl.DYNAMIC_DRAW
 
-      gl.bindBuffer gl.ARRAY_BUFFER, @rectangleCornerBuffer
-      gl.bufferData gl.ARRAY_BUFFER, new Float32Array(@drawBuffer), gl.STATIC_DRAW
-      gl.drawArrays gl.TRIANGLES, 0, @drawBuffer.length / 2
-      @drawBuffer    = []
-      @textureBuffer = []
+      gl.bindBuffer gl.ARRAY_BUFFER, @positionBuffer
+      gl.bufferData gl.ARRAY_BUFFER, new Float32Array(@positions), gl.DYNAMIC_DRAW
+
+      gl.drawArrays gl.TRIANGLES, 0, @positions.length / 2
+      @positions = []
+      @texCoords = []
+    return
 
 module.exports:: = Object.create c::
 module.exports::constructor = c

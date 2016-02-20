@@ -24,6 +24,9 @@
 		// Images inside a folder
 		"folder/star1": "png",
 		"folder/star2": "png",
-		"folder/star3": "png"
+		"folder/star3": "png",
+
+		// Animated image
+		"animation": "png; 9 images; bordered"
 	}
 }

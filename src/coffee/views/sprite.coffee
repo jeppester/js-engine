@@ -155,10 +155,10 @@ c = class Sprite extends Views.Container
 
   updateSubImage: ->
     # Set the right sub image
-    if engine.gameTime - @animationLastSwitch > 1000 / @animationSpeed
-      @imageNumber = @imageNumber + ((if @animationSpeed > 0 then 1 else -1))
-      @animationLastSwitch = @gameTime
-      if @imageNumber is @imageLength
+    if @animationSpeed != 0 && engine.gameTime - @animationLastSwitch > 1000 / @animationSpeed
+      @imageNumber = @imageNumber + (if @animationSpeed > 0 then 1 else -1)
+      @animationLastSwitch = engine.gameTime
+      if @imageNumber == @imageLength
         @imageNumber = (if @animationLoops then 0 else @imageLength - 1)
       else @imageNumber = (if @animationLoops then @imageLength - 1 else 0) if @imageNumber is -1
     return

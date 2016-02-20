@@ -37,15 +37,18 @@ c = class WebGLRenderer
       color: new ColorShaderProgram @gl
 
   setProgram: (program) ->
-    if @currentProgram isnt program
+    unless @currentProgram == program
       gl = @gl
+
+      # Flush old program
+      @currentProgram.flushBuffers? gl
 
       # Set program
       @currentProgram = program
       gl.useProgram program.program
+      @currentProgram.onSet? gl
 
       # Bind stuff
-      program.onSet gl
       l = program.locations
 
       # Set current resolution var
@@ -185,7 +188,7 @@ c = class WebGLRenderer
 
       i += 3
 
-    @currentProgram.flushDrawBuffer gl if @currentProgram
+    @currentProgram.flushBuffers gl if @currentProgram
     return
 
 module.exports:: = Object.create c::

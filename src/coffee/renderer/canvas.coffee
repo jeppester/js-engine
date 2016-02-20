@@ -69,6 +69,7 @@ c = class CanvasRenderer
       when "textblock"
         @renderSprite object
       when "sprite"
+        object.updateSubImage()
         @renderSprite object
         @renderMask object if engine.drawMasks
         @renderBoundingBox object if engine.drawBoundingBoxes
@@ -89,15 +90,6 @@ c = class CanvasRenderer
         i++
 
   renderSprite: (object) ->
-    # Set the right sub image
-    if object.imageLength isnt 1 and object.animationSpeed isnt 0
-      if engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed
-        object.imageNumber = object.imageNumber + ((if object.animationSpeed > 0 then 1 else -1))
-        object.animationLastSwitch = engine.gameTime
-        if object.imageNumber is object.imageLength
-          object.imageNumber = (if object.animationLoops then 0 else object.imageLength - 1)
-        else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
-
     # Draw bm
     @context.drawImage object.texture, (object.clipWidth + object.texture.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight
     return
