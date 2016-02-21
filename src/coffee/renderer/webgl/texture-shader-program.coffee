@@ -9,8 +9,10 @@ c = class WebGLTextureShaderProgram
   positionBuffer: null
   vertex: null
   program: null
-  positions: []
-  texCoords: []
+  batchSize: 2400
+  positionsCount: 0
+  positions: new Float32Array 2400
+  texCoords: new Float32Array 2400
   points: [
     new Float32Array(2)
     new Float32Array(2)
@@ -111,14 +113,32 @@ c = class WebGLTextureShaderProgram
     else
       @bufferAnimatedTexCoord object
 
+    @positionsCount += 12
+    return
+
+  # Draw functions
+  renderMask: (gl, object, wm) ->
+    # Fetch/update texture
+    texture = @getMaskTexture gl, object
+    @setTexture gl, texture
+
+    # Buffer position
+    @bufferPosition object.clipWidth, object.clipHeight, wm
+
+    # Buffer texture coordinates
+    if object.imageLength == 1
+      @bufferTexCoord()
+    else
+      @bufferAnimatedTexCoord object
+
+    @positionsCount += 12
     return
 
   setTexture: (gl, texture)->
-    unless @currentTexture == texture
+    if @positionsCount == @batchSize || @currentTexture != texture
       # Set a rectangle the same size as the image
-      @currentTexture = texture
       @flushBuffers gl
-      gl.bindTexture gl.TEXTURE_2D, texture
+      @currentTexture = texture
 
   bufferPosition: (width, height, wm)->
     @points[0][0] = 0
@@ -134,21 +154,44 @@ c = class WebGLTextureShaderProgram
     Helpers.MatrixCalculation.transformCoord @points[2], wm
     Helpers.MatrixCalculation.transformCoord @points[3], wm
 
-    @positions.push(
-      @points[0][0], @points[0][1]
-      @points[1][0], @points[1][1]
-      @points[2][0], @points[2][1]
-      @points[2][0], @points[2][1]
-      @points[1][0], @points[1][1]
-      @points[3][0], @points[3][1]
-    )
+    @positions[@positionsCount]      = @points[0][0]
+    @positions[@positionsCount + 1]  = @points[0][1]
+
+    @positions[@positionsCount + 2]  = @points[1][0]
+    @positions[@positionsCount + 3]  = @points[1][1]
+
+    @positions[@positionsCount + 4]  = @points[2][0]
+    @positions[@positionsCount + 5]  = @points[2][1]
+
+    @positions[@positionsCount + 6]  = @points[2][0]
+    @positions[@positionsCount + 7]  = @points[2][1]
+
+    @positions[@positionsCount + 8]  = @points[1][0]
+    @positions[@positionsCount + 9]  = @points[1][1]
+
+    @positions[@positionsCount + 10] = @points[3][0]
+    @positions[@positionsCount + 11] = @points[3][1]
     return
 
   bufferTexCoord: ->
-    @texCoords.push(
-      0.0, 0.0, 1.0, 0.0, 0.0, 1.0
-      0.0, 1.0, 1.0, 0.0, 1.0, 1.0
-    )
+    @texCoords[@positionsCount]      = 0.0
+    @texCoords[@positionsCount + 1]  = 0.0
+
+    @texCoords[@positionsCount + 2]  = 1.0
+    @texCoords[@positionsCount + 3]  = 0.0
+
+    @texCoords[@positionsCount + 4]  = 0.0
+    @texCoords[@positionsCount + 5]  = 1.0
+
+    @texCoords[@positionsCount + 6]  = 0.0
+    @texCoords[@positionsCount + 7]  = 1.0
+
+    @texCoords[@positionsCount + 8]  = 1.0
+    @texCoords[@positionsCount + 9]  = 0.0
+
+    @texCoords[@positionsCount + 10] = 1.0
+    @texCoords[@positionsCount + 11] = 1.0
+    return
 
   bufferAnimatedTexCoord: (object)->
     object.updateSubImage()
@@ -156,10 +199,25 @@ c = class WebGLTextureShaderProgram
     x2 = x1 + object.clipWidth
     x1 /= object.texture.width
     x2 /= object.texture.width
-    @texCoords.push(
-      x1, 0.0, x2, 0.0, x1, 1.0
-      x1, 1.0, x2, 0.0, x2, 1.0
-    )
+
+    @texCoords[@positionsCount]      = x1
+    @texCoords[@positionsCount + 1]  = 0.0
+
+    @texCoords[@positionsCount + 2]  = x2
+    @texCoords[@positionsCount + 3]  = 0.0
+
+    @texCoords[@positionsCount + 4]  = x1
+    @texCoords[@positionsCount + 5]  = 1.0
+
+    @texCoords[@positionsCount + 6]  = x1
+    @texCoords[@positionsCount + 7]  = 1.0
+
+    @texCoords[@positionsCount + 8]  = x2
+    @texCoords[@positionsCount + 9]  = 0.0
+
+    @texCoords[@positionsCount + 10] = x2
+    @texCoords[@positionsCount + 11] = 1.0
+    return
 
   getSpriteTexture: (gl, object) ->
     @textureCache[object.texture.cacheKey] ||
@@ -190,20 +248,27 @@ c = class WebGLTextureShaderProgram
     else
       # gl.NEAREST is better for drawing a part of an image
       gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST
-    gl.bindTexture gl.TEXTURE_2D, null
     texture
 
   flushBuffers: (gl)->
-    if @positions.length
-      gl.bindBuffer gl.ARRAY_BUFFER, @texCoordBuffer
-      gl.bufferData gl.ARRAY_BUFFER, new Float32Array(@texCoords), gl.DYNAMIC_DRAW
+    if @positionsCount
+      gl.bindTexture gl.TEXTURE_2D, @currentTexture
 
-      gl.bindBuffer gl.ARRAY_BUFFER, @positionBuffer
-      gl.bufferData gl.ARRAY_BUFFER, new Float32Array(@positions), gl.DYNAMIC_DRAW
+      if @positionsCount < @batchSize / 2
+        gl.bindBuffer gl.ARRAY_BUFFER, @texCoordBuffer
+        gl.bufferData gl.ARRAY_BUFFER, @texCoords.slice(0, @positionsCount), gl.DYNAMIC_DRAW
 
-      gl.drawArrays gl.TRIANGLES, 0, @positions.length / 2
-      @positions = []
-      @texCoords = []
+        gl.bindBuffer gl.ARRAY_BUFFER, @positionBuffer
+        gl.bufferData gl.ARRAY_BUFFER, @positions.slice(0, @positionsCount), gl.DYNAMIC_DRAW
+      else
+        gl.bindBuffer gl.ARRAY_BUFFER, @texCoordBuffer
+        gl.bufferData gl.ARRAY_BUFFER, @texCoords, gl.DYNAMIC_DRAW
+
+        gl.bindBuffer gl.ARRAY_BUFFER, @positionBuffer
+        gl.bufferData gl.ARRAY_BUFFER, @positions, gl.DYNAMIC_DRAW
+
+      gl.drawArrays gl.TRIANGLES, 0, @positionsCount / 2
+      @positionsCount = 0
     return
 
 module.exports:: = Object.create c::

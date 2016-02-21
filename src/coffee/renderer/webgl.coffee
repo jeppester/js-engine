@@ -188,7 +188,7 @@ c = class WebGLRenderer
 
       i += 3
 
-    @currentProgram.flushBuffers gl if @currentProgram
+    @currentProgram?.flushBuffers? gl
     return
 
 module.exports:: = Object.create c::

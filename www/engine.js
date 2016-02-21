@@ -6276,7 +6276,7 @@ c = WebGLRenderer = (function() {
   };
 
   WebGLRenderer.prototype.processRenderList = function(list) {
-    var gl, i, object, program, renderFunction, wmWithOffset;
+    var gl, i, object, program, ref, renderFunction, wmWithOffset;
     gl = this.gl;
     i = 0;
     while (i < list.length) {
@@ -6295,8 +6295,10 @@ c = WebGLRenderer = (function() {
       renderFunction.call(program, gl, object, wmWithOffset);
       i += 3;
     }
-    if (this.currentProgram) {
-      this.currentProgram.flushBuffers(gl);
+    if ((ref = this.currentProgram) != null) {
+      if (typeof ref.flushBuffers === "function") {
+        ref.flushBuffers(gl);
+      }
     }
   };
 
@@ -6497,9 +6499,13 @@ c = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.program = null;
 
-  WebGLTextureShaderProgram.prototype.positions = [];
+  WebGLTextureShaderProgram.prototype.batchSize = 2400;
 
-  WebGLTextureShaderProgram.prototype.texCoords = [];
+  WebGLTextureShaderProgram.prototype.positionsCount = 0;
+
+  WebGLTextureShaderProgram.prototype.positions = new Float32Array(2400);
+
+  WebGLTextureShaderProgram.prototype.texCoords = new Float32Array(2400);
 
   WebGLTextureShaderProgram.prototype.points = [new Float32Array(2), new Float32Array(2), new Float32Array(2), new Float32Array(2)];
 
@@ -6560,13 +6566,26 @@ c = WebGLTextureShaderProgram = (function() {
     } else {
       this.bufferAnimatedTexCoord(object);
     }
+    this.positionsCount += 12;
+  };
+
+  WebGLTextureShaderProgram.prototype.renderMask = function(gl, object, wm) {
+    var texture;
+    texture = this.getMaskTexture(gl, object);
+    this.setTexture(gl, texture);
+    this.bufferPosition(object.clipWidth, object.clipHeight, wm);
+    if (object.imageLength === 1) {
+      this.bufferTexCoord();
+    } else {
+      this.bufferAnimatedTexCoord(object);
+    }
+    this.positionsCount += 12;
   };
 
   WebGLTextureShaderProgram.prototype.setTexture = function(gl, texture) {
-    if (this.currentTexture !== texture) {
-      this.currentTexture = texture;
+    if (this.positionsCount === this.batchSize || this.currentTexture !== texture) {
       this.flushBuffers(gl);
-      return gl.bindTexture(gl.TEXTURE_2D, texture);
+      return this.currentTexture = texture;
     }
   };
 
@@ -6583,11 +6602,33 @@ c = WebGLTextureShaderProgram = (function() {
     Helpers.MatrixCalculation.transformCoord(this.points[1], wm);
     Helpers.MatrixCalculation.transformCoord(this.points[2], wm);
     Helpers.MatrixCalculation.transformCoord(this.points[3], wm);
-    this.positions.push(this.points[0][0], this.points[0][1], this.points[1][0], this.points[1][1], this.points[2][0], this.points[2][1], this.points[2][0], this.points[2][1], this.points[1][0], this.points[1][1], this.points[3][0], this.points[3][1]);
+    this.positions[this.positionsCount] = this.points[0][0];
+    this.positions[this.positionsCount + 1] = this.points[0][1];
+    this.positions[this.positionsCount + 2] = this.points[1][0];
+    this.positions[this.positionsCount + 3] = this.points[1][1];
+    this.positions[this.positionsCount + 4] = this.points[2][0];
+    this.positions[this.positionsCount + 5] = this.points[2][1];
+    this.positions[this.positionsCount + 6] = this.points[2][0];
+    this.positions[this.positionsCount + 7] = this.points[2][1];
+    this.positions[this.positionsCount + 8] = this.points[1][0];
+    this.positions[this.positionsCount + 9] = this.points[1][1];
+    this.positions[this.positionsCount + 10] = this.points[3][0];
+    this.positions[this.positionsCount + 11] = this.points[3][1];
   };
 
   WebGLTextureShaderProgram.prototype.bufferTexCoord = function() {
-    return this.texCoords.push(0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0);
+    this.texCoords[this.positionsCount] = 0.0;
+    this.texCoords[this.positionsCount + 1] = 0.0;
+    this.texCoords[this.positionsCount + 2] = 1.0;
+    this.texCoords[this.positionsCount + 3] = 0.0;
+    this.texCoords[this.positionsCount + 4] = 0.0;
+    this.texCoords[this.positionsCount + 5] = 1.0;
+    this.texCoords[this.positionsCount + 6] = 0.0;
+    this.texCoords[this.positionsCount + 7] = 1.0;
+    this.texCoords[this.positionsCount + 8] = 1.0;
+    this.texCoords[this.positionsCount + 9] = 0.0;
+    this.texCoords[this.positionsCount + 10] = 1.0;
+    this.texCoords[this.positionsCount + 11] = 1.0;
   };
 
   WebGLTextureShaderProgram.prototype.bufferAnimatedTexCoord = function(object) {
@@ -6597,7 +6638,18 @@ c = WebGLTextureShaderProgram = (function() {
     x2 = x1 + object.clipWidth;
     x1 /= object.texture.width;
     x2 /= object.texture.width;
-    return this.texCoords.push(x1, 0.0, x2, 0.0, x1, 1.0, x1, 1.0, x2, 0.0, x2, 1.0);
+    this.texCoords[this.positionsCount] = x1;
+    this.texCoords[this.positionsCount + 1] = 0.0;
+    this.texCoords[this.positionsCount + 2] = x2;
+    this.texCoords[this.positionsCount + 3] = 0.0;
+    this.texCoords[this.positionsCount + 4] = x1;
+    this.texCoords[this.positionsCount + 5] = 1.0;
+    this.texCoords[this.positionsCount + 6] = x1;
+    this.texCoords[this.positionsCount + 7] = 1.0;
+    this.texCoords[this.positionsCount + 8] = x2;
+    this.texCoords[this.positionsCount + 9] = 0.0;
+    this.texCoords[this.positionsCount + 10] = x2;
+    this.texCoords[this.positionsCount + 11] = 1.0;
   };
 
   WebGLTextureShaderProgram.prototype.getSpriteTexture = function(gl, object) {
@@ -6622,19 +6674,25 @@ c = WebGLTextureShaderProgram = (function() {
     } else {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     }
-    gl.bindTexture(gl.TEXTURE_2D, null);
     return texture;
   };
 
   WebGLTextureShaderProgram.prototype.flushBuffers = function(gl) {
-    if (this.positions.length) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.texCoords), gl.DYNAMIC_DRAW);
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions), gl.DYNAMIC_DRAW);
-      gl.drawArrays(gl.TRIANGLES, 0, this.positions.length / 2);
-      this.positions = [];
-      this.texCoords = [];
+    if (this.positionsCount) {
+      gl.bindTexture(gl.TEXTURE_2D, this.currentTexture);
+      if (this.positionsCount < this.batchSize / 2) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.texCoords.slice(0, this.positionsCount), gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.positions.slice(0, this.positionsCount), gl.DYNAMIC_DRAW);
+      } else {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.texCoords, gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.positions, gl.DYNAMIC_DRAW);
+      }
+      gl.drawArrays(gl.TRIANGLES, 0, this.positionsCount / 2);
+      this.positionsCount = 0;
     }
   };
 
