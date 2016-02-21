@@ -2059,6 +2059,7 @@ c = Loader = (function() {
     canvas.width = image.width;
     canvas.height = image.height;
     canvas.imageLength = image.imageLength;
+    canvas.cacheKey = "mask:" + image.cacheKey;
     ctx = canvas.getContext("2d");
     if (image === false) {
       throw new Error("Trying to create mask for non-existing resource: " + resourceString);
@@ -6553,13 +6554,11 @@ c = WebGLTextureShaderProgram = (function() {
   };
 
   WebGLTextureShaderProgram.prototype.renderSprite = function(gl, object, wm) {
-    var texture;
     if (object.renderType === "textblock" && this.textureCache[object.texture.lastCacheKey]) {
       gl.deleteTexture(this.textureCache[object.texture.lastCacheKey]);
-      this.textureCache[object.texture.lastCacheKey] = void 0;
+      this.textureCache[object.texture.lastCacheKey] = null;
     }
-    texture = this.getSpriteTexture(gl, object);
-    this.setTexture(gl, texture);
+    this.setSpriteTexture(gl, object);
     this.bufferPosition(object.clipWidth, object.clipHeight, wm);
     if (object.imageLength === 1) {
       this.bufferTexCoord();
@@ -6569,10 +6568,14 @@ c = WebGLTextureShaderProgram = (function() {
     this.positionsCount += 12;
   };
 
-  WebGLTextureShaderProgram.prototype.renderMask = function(gl, object, wm) {
+  WebGLTextureShaderProgram.prototype.setSpriteTexture = function(gl, object) {
     var texture;
-    texture = this.getMaskTexture(gl, object);
+    texture = object.texture;
     this.setTexture(gl, texture);
+  };
+
+  WebGLTextureShaderProgram.prototype.renderMask = function(gl, object, wm) {
+    this.setMaskTexture(gl, object);
     this.bufferPosition(object.clipWidth, object.clipHeight, wm);
     if (object.imageLength === 1) {
       this.bufferTexCoord();
@@ -6580,12 +6583,18 @@ c = WebGLTextureShaderProgram = (function() {
       this.bufferAnimatedTexCoord(object);
     }
     this.positionsCount += 12;
+  };
+
+  WebGLTextureShaderProgram.prototype.setMaskTexture = function(gl, object) {
+    var texture;
+    texture = engine.loader.getMask(object.source, object.getTheme());
+    this.setTexture(gl, texture);
   };
 
   WebGLTextureShaderProgram.prototype.setTexture = function(gl, texture) {
     if (this.positionsCount === this.batchSize || this.currentTexture !== texture) {
       this.flushBuffers(gl);
-      return this.currentTexture = texture;
+      this.currentTexture = texture;
     }
   };
 
@@ -6652,17 +6661,12 @@ c = WebGLTextureShaderProgram = (function() {
     this.texCoords[this.positionsCount + 11] = 1.0;
   };
 
-  WebGLTextureShaderProgram.prototype.getSpriteTexture = function(gl, object) {
-    return this.textureCache[object.texture.cacheKey] || (this.textureCache[object.texture.cacheKey] = this.createTexture(gl, object.texture));
+  WebGLTextureShaderProgram.prototype.getGLTexture = function(gl, texture) {
+    return this.textureCache[texture.cacheKey] || (this.textureCache[texture.cacheKey] = this.createGLTexture(gl, texture));
   };
 
-  WebGLTextureShaderProgram.prototype.getMaskTexture = function(gl, object) {
-    return this.maskCache[object.texture.cacheKey] || (this.maskCache[object.texture.cacheKey] = this.createTexture(gl, engine.loader.getMask(object.source, object.getTheme())));
-  };
-
-  WebGLTextureShaderProgram.prototype.createTexture = function(gl, image) {
+  WebGLTextureShaderProgram.prototype.createGLTexture = function(gl, image) {
     var texture;
-    texture = void 0;
     texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
@@ -6678,8 +6682,10 @@ c = WebGLTextureShaderProgram = (function() {
   };
 
   WebGLTextureShaderProgram.prototype.flushBuffers = function(gl) {
+    var texture;
     if (this.positionsCount) {
-      gl.bindTexture(gl.TEXTURE_2D, this.currentTexture);
+      texture = this.getGLTexture(gl, this.currentTexture);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
       if (this.positionsCount < this.batchSize / 2) {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, this.texCoords.slice(0, this.positionsCount), gl.DYNAMIC_DRAW);

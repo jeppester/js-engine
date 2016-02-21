@@ -98,11 +98,10 @@ c = class WebGLTextureShaderProgram
   renderSprite: (gl, object, wm) ->
     if object.renderType == "textblock" && @textureCache[object.texture.lastCacheKey]
       gl.deleteTexture @textureCache[object.texture.lastCacheKey]
-      @textureCache[object.texture.lastCacheKey] = undefined
+      @textureCache[object.texture.lastCacheKey] = null
 
     # Fetch/update texture
-    texture = @getSpriteTexture gl, object
-    @setTexture gl, texture
+    @setSpriteTexture gl, object
 
     # Buffer position
     @bufferPosition object.clipWidth, object.clipHeight, wm
@@ -116,11 +115,15 @@ c = class WebGLTextureShaderProgram
     @positionsCount += 12
     return
 
+  setSpriteTexture: (gl, object)->
+    texture = object.texture
+    @setTexture gl, texture
+    return
+
   # Draw functions
   renderMask: (gl, object, wm) ->
     # Fetch/update texture
-    texture = @getMaskTexture gl, object
-    @setTexture gl, texture
+    @setMaskTexture gl, object
 
     # Buffer position
     @bufferPosition object.clipWidth, object.clipHeight, wm
@@ -132,6 +135,11 @@ c = class WebGLTextureShaderProgram
       @bufferAnimatedTexCoord object
 
     @positionsCount += 12
+    return
+
+  setMaskTexture: (gl, object)->
+    texture = engine.loader.getMask(object.source, object.getTheme())
+    @setTexture gl, texture
     return
 
   setTexture: (gl, texture)->
@@ -139,6 +147,8 @@ c = class WebGLTextureShaderProgram
       # Set a rectangle the same size as the image
       @flushBuffers gl
       @currentTexture = texture
+    return
+
 
   bufferPosition: (width, height, wm)->
     @points[0][0] = 0
@@ -219,17 +229,11 @@ c = class WebGLTextureShaderProgram
     @texCoords[@positionsCount + 11] = 1.0
     return
 
-  getSpriteTexture: (gl, object) ->
-    @textureCache[object.texture.cacheKey] ||
-    @textureCache[object.texture.cacheKey] = @createTexture gl, object.texture
+  getGLTexture: (gl, texture) ->
+    @textureCache[texture.cacheKey] ||
+    @textureCache[texture.cacheKey] = @createGLTexture gl, texture
 
-  getMaskTexture: (gl, object) ->
-    @maskCache[object.texture.cacheKey] ||
-    @maskCache[object.texture.cacheKey] = @createTexture gl, engine.loader.getMask(object.source, object.getTheme())
-
-  createTexture: (gl, image) ->
-    texture = undefined
-
+  createGLTexture: (gl, image) ->
     # Create a texture
     texture = gl.createTexture()
 
@@ -252,7 +256,9 @@ c = class WebGLTextureShaderProgram
 
   flushBuffers: (gl)->
     if @positionsCount
-      gl.bindTexture gl.TEXTURE_2D, @currentTexture
+      texture = @getGLTexture(gl, @currentTexture)
+      gl.bindTexture gl.TEXTURE_2D, texture
+      # gl.bindTexture gl.TEXTURE_2D, @getGLTexture(gl, @currentTexture)
 
       if @positionsCount < @batchSize / 2
         gl.bindBuffer gl.ARRAY_BUFFER, @texCoordBuffer

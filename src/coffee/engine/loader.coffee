@@ -440,6 +440,7 @@ c = class Loader
     canvas.width = image.width
     canvas.height = image.height
     canvas.imageLength = image.imageLength
+    canvas.cacheKey = "mask:" + image.cacheKey
     ctx = canvas.getContext("2d")
     #dev
     throw new Error("Trying to create mask for non-existing resource: " + resourceString) if image is false #dev
@@ -454,7 +455,6 @@ c = class Loader
     right = 0
     pixel = 0
     while pixel < length
-
       # If the pixel is partly transparent, make it completely transparent, else make it completely black
       if data[pixel * 4 + 3] < alphaLimit
         data[pixel * 4] = 0 # Red
