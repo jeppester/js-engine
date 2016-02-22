@@ -82,98 +82,40 @@ c = class WebGLRenderer
 
       for room in rooms
         # Draw rooms
-        @renderTree room, camera.wm
+        @renderRoom room, camera.wm
     return
 
-  renderTree: (room, wm)->
-    list = []
+  renderRoom: (room, wm)->
+    list = room.renderList ?= []
+    wm = room.wm ?= new Float32Array 9
+    Helpers.MatrixCalculation.setLocalMatrix wm, room
 
-    @createRenderList list, room, wm
-    @createMaskRenderList list, room, wm if engine.drawMasks
-    @createBoundingBoxRenderList list, room, wm if engine.drawBoundingBoxes
-
+    @updateRenderList list, room, new Uint16Array [0]
     @processRenderList list
     return
 
-  createRenderList: (list, object, wm)->
+  updateRenderList: (list, object, counter)->
     return unless object.isVisible()
 
-    # Create world matrix for object center
-    object.wm ?= new Float32Array 9
-    Helpers.MatrixCalculation.setLocalMatrix object.wm, object
-    Helpers.MatrixCalculation.multiply object.wm, wm
-
-    switch object.renderType
-      when "sprite", "textblock"
-        program = @programs.texture
-        renderFunction = program.renderSprite
-      when "line"
-        program = @programs.color
-        renderFunction = program.renderLine
-      when "rectangle"
-        program = @programs.color
-        renderFunction = program.renderRectangle
-      when "circle"
-        program = @programs.color
-        renderFunction = program.renderCircle
-      else
-        program = null
-
-    list.push program, renderFunction, object if program
-
-    if object.children
-      @createRenderList list, child, object.wm for child in object.children
-    return
-
-  createMaskRenderList: (list, object, wm)->
-    return unless object.isVisible()
-
-    # Create world matrix for object center
-    object.wm ?= new Float32Array 9
-    Helpers.MatrixCalculation.setLocalMatrix object.wm, object
-    Helpers.MatrixCalculation.multiply object.wm, wm
-
-    switch object.renderType
-      when "sprite"
-        program = @programs.texture
-        renderFunction = program.renderMask
-      else
-        program = null
-
-    list.push program, renderFunction, object if program
-
-    if object.children
-      @createMaskRenderList list, child, object.wm for child in object.children
-    return
-
-  createBoundingBoxRenderList: (list, object, wm)->
-    return unless object.isVisible()
-
-    # Create world matrix for object center
-    object.wm ?= new Float32Array 9
-    Helpers.MatrixCalculation.setLocalMatrix object.wm, object
-    Helpers.MatrixCalculation.multiply object.wm, wm
-
-    switch object.renderType
-      when "sprite"
-        program = @programs.color
-        renderFunction = program.renderBoundingBox
-      else
-        program = null
-
-    list.push program, renderFunction, object if program
-
-    if object.children
-      @createBoundingBoxRenderList list, child, object.wm for child in object.children
-    return
+    unless object.children
+      # Only update the list if necessary
+      last = list[counter[0]]
+      unless object == last
+        if last == undefined
+          list.push object
+        else
+          list.splice count, undefined, object
+      counter[0] += 1
+    else
+      for child in object.children
+        @updateRenderList list, child, counter
 
   processRenderList: (list)->
     gl = @gl
-    i = 0
-    while i < list.length
-      program = list[i]
-      renderFunction = list[i + 1]
-      object = list[i + 2]
+    for object in list
+      object.wm ?= new Float32Array 9
+      Helpers.MatrixCalculation.setLocalMatrix object.wm, object
+      Helpers.MatrixCalculation.multiply object.wm, object.parent.wm
 
       wmWithOffset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
       Helpers.MatrixCalculation.multiply wmWithOffset, object.wm
@@ -183,10 +125,27 @@ c = class WebGLRenderer
         @currentAlpha = object.opacity
         gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
 
-      @setProgram program
-      renderFunction.call program, gl, object, wmWithOffset
-
-      i += 3
+      switch object.renderType
+        when "sprite"
+          program = @programs.texture
+          @setProgram program
+          program.renderSprite gl, object, wmWithOffset
+        when "textblock"
+          program = @programs.texture
+          @setProgram program
+          program.renderTextBlock gl, object, wmWithOffset
+        when "line"
+          program = @setProgram program
+          @setProgram program
+          program.renderLine gl, object, wmWithOffset
+        when "rectangle"
+          program = @programs.color
+          @setProgram @programs.color
+          program.renderRectangle gl, object, wmWithOffset
+        when "circle"
+          program = @programs.color
+          @setProgram program
+          program.renderCircle gl, object, wmWithOffset
 
     @currentProgram?.flushBuffers? gl
     return

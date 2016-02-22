@@ -8,7 +8,7 @@ Mixins =
   Texture: require '../mixins/texture'
 
 Views =
-  Container: require './container'
+  Child: require './child'
 
 ###
 The constructor for the TextBlock class.
@@ -46,7 +46,7 @@ composite: 'source-over',
 offset: new Vector(0, 0)
 }</code>
 ###
-c = class TextBlock extends Views.Container
+c = class TextBlock extends Views.Child
   # Mix in Child
   Helpers.Mixin.mixin @, Mixins.Animatable
   Helpers.Mixin.mixin @, Mixins.Texture

@@ -8,7 +8,7 @@ Mixins =
   Texture: require '../mixins/texture'
 
 Views =
-  Container: require './container'
+  Child: require './child'
 
 ###
 The constructor for Sprite objects.
@@ -44,7 +44,7 @@ composite: 'source-over',
 offset: new Math.Vector('center', 'center')
 }</code>
 ###
-c = class Sprite extends Views.Container
+c = class Sprite extends Views.Child
   # Mix in animatable
   Helpers.Mixin.mixin @, Mixins.Animatable
   Helpers.Mixin.mixin @, Mixins.Texture

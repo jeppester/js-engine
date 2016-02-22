@@ -6085,7 +6085,7 @@ c = WebGLRenderer = (function() {
   };
 
   function WebGLRenderer(canvas) {
-    var context, j, len, options, ref;
+    var context, i, len, options, ref;
     this.canvas = canvas;
     this.currentAlpha = void 0;
     this.currentResolution.width = 0;
@@ -6097,8 +6097,8 @@ c = WebGLRenderer = (function() {
       alpha: false
     };
     ref = ["webgl", "experimental-webgl"];
-    for (j = 0, len = ref.length; j < len; j++) {
-      context = ref[j];
+    for (i = 0, len = ref.length; i < len; i++) {
+      context = ref[i];
       this.gl = this.canvas.getContext(context, options);
       if (this.gl) {
         break;
@@ -6132,10 +6132,10 @@ c = WebGLRenderer = (function() {
   };
 
   WebGLRenderer.prototype.render = function(cameras) {
-    var camera, cr, gl, h, j, k, len, len1, pr, room, rooms, w;
+    var camera, cr, gl, h, i, j, len, len1, pr, room, rooms, w;
     gl = this.gl;
-    for (j = 0, len = cameras.length; j < len; j++) {
-      camera = cameras[j];
+    for (i = 0, len = cameras.length; i < len; i++) {
+      camera = cameras[i];
       cr = camera.captureRegion;
       pr = camera.projectionRegion;
       w = cr.width;
@@ -6153,137 +6153,58 @@ c = WebGLRenderer = (function() {
       Helpers.MatrixCalculation.setTranslation(camera.wm, -cr.x, -cr.y);
       gl.viewport(pr.x, pr.y, pr.width, pr.height);
       rooms = [engine.masterRoom, camera.room];
-      for (k = 0, len1 = rooms.length; k < len1; k++) {
-        room = rooms[k];
-        this.renderTree(room, camera.wm);
+      for (j = 0, len1 = rooms.length; j < len1; j++) {
+        room = rooms[j];
+        this.renderRoom(room, camera.wm);
       }
     }
   };
 
-  WebGLRenderer.prototype.renderTree = function(room, wm) {
+  WebGLRenderer.prototype.renderRoom = function(room, wm) {
     var list;
-    list = [];
-    this.createRenderList(list, room, wm);
-    if (engine.drawMasks) {
-      this.createMaskRenderList(list, room, wm);
-    }
-    if (engine.drawBoundingBoxes) {
-      this.createBoundingBoxRenderList(list, room, wm);
-    }
+    list = room.renderList != null ? room.renderList : room.renderList = [];
+    wm = room.wm != null ? room.wm : room.wm = new Float32Array(9);
+    Helpers.MatrixCalculation.setLocalMatrix(wm, room);
+    this.updateRenderList(list, room, new Uint16Array([0]));
     this.processRenderList(list);
   };
 
-  WebGLRenderer.prototype.createRenderList = function(list, object, wm) {
-    var child, j, len, program, ref, renderFunction;
+  WebGLRenderer.prototype.updateRenderList = function(list, object, counter) {
+    var child, i, last, len, ref, results;
     if (!object.isVisible()) {
       return;
     }
-    if (object.wm == null) {
-      object.wm = new Float32Array(9);
-    }
-    Helpers.MatrixCalculation.setLocalMatrix(object.wm, object);
-    Helpers.MatrixCalculation.multiply(object.wm, wm);
-    switch (object.renderType) {
-      case "sprite":
-      case "textblock":
-        program = this.programs.texture;
-        renderFunction = program.renderSprite;
-        break;
-      case "line":
-        program = this.programs.color;
-        renderFunction = program.renderLine;
-        break;
-      case "rectangle":
-        program = this.programs.color;
-        renderFunction = program.renderRectangle;
-        break;
-      case "circle":
-        program = this.programs.color;
-        renderFunction = program.renderCircle;
-        break;
-      default:
-        program = null;
-    }
-    if (program) {
-      list.push(program, renderFunction, object);
-    }
-    if (object.children) {
-      ref = object.children;
-      for (j = 0, len = ref.length; j < len; j++) {
-        child = ref[j];
-        this.createRenderList(list, child, object.wm);
+    if (!object.children) {
+      last = list[counter[0]];
+      if (object !== last) {
+        if (last === void 0) {
+          list.push(object);
+        } else {
+          list.splice(count, void 0, object);
+        }
       }
-    }
-  };
-
-  WebGLRenderer.prototype.createMaskRenderList = function(list, object, wm) {
-    var child, j, len, program, ref, renderFunction;
-    if (!object.isVisible()) {
-      return;
-    }
-    if (object.wm == null) {
-      object.wm = new Float32Array(9);
-    }
-    Helpers.MatrixCalculation.setLocalMatrix(object.wm, object);
-    Helpers.MatrixCalculation.multiply(object.wm, wm);
-    switch (object.renderType) {
-      case "sprite":
-        program = this.programs.texture;
-        renderFunction = program.renderMask;
-        break;
-      default:
-        program = null;
-    }
-    if (program) {
-      list.push(program, renderFunction, object);
-    }
-    if (object.children) {
+      return counter[0] += 1;
+    } else {
       ref = object.children;
-      for (j = 0, len = ref.length; j < len; j++) {
-        child = ref[j];
-        this.createMaskRenderList(list, child, object.wm);
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        child = ref[i];
+        results.push(this.updateRenderList(list, child, counter));
       }
-    }
-  };
-
-  WebGLRenderer.prototype.createBoundingBoxRenderList = function(list, object, wm) {
-    var child, j, len, program, ref, renderFunction;
-    if (!object.isVisible()) {
-      return;
-    }
-    if (object.wm == null) {
-      object.wm = new Float32Array(9);
-    }
-    Helpers.MatrixCalculation.setLocalMatrix(object.wm, object);
-    Helpers.MatrixCalculation.multiply(object.wm, wm);
-    switch (object.renderType) {
-      case "sprite":
-        program = this.programs.color;
-        renderFunction = program.renderBoundingBox;
-        break;
-      default:
-        program = null;
-    }
-    if (program) {
-      list.push(program, renderFunction, object);
-    }
-    if (object.children) {
-      ref = object.children;
-      for (j = 0, len = ref.length; j < len; j++) {
-        child = ref[j];
-        this.createBoundingBoxRenderList(list, child, object.wm);
-      }
+      return results;
     }
   };
 
   WebGLRenderer.prototype.processRenderList = function(list) {
-    var gl, i, object, program, ref, renderFunction, wmWithOffset;
+    var gl, i, len, object, program, ref, wmWithOffset;
     gl = this.gl;
-    i = 0;
-    while (i < list.length) {
-      program = list[i];
-      renderFunction = list[i + 1];
-      object = list[i + 2];
+    for (i = 0, len = list.length; i < len; i++) {
+      object = list[i];
+      if (object.wm == null) {
+        object.wm = new Float32Array(9);
+      }
+      Helpers.MatrixCalculation.setLocalMatrix(object.wm, object);
+      Helpers.MatrixCalculation.multiply(object.wm, object.parent.wm);
       wmWithOffset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
       Helpers.MatrixCalculation.multiply(wmWithOffset, object.wm);
       if (this.currentAlpha !== object.opacity) {
@@ -6292,9 +6213,32 @@ c = WebGLRenderer = (function() {
           gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
         }
       }
-      this.setProgram(program);
-      renderFunction.call(program, gl, object, wmWithOffset);
-      i += 3;
+      switch (object.renderType) {
+        case "sprite":
+          program = this.programs.texture;
+          this.setProgram(program);
+          program.renderSprite(gl, object, wmWithOffset);
+          break;
+        case "textblock":
+          program = this.programs.texture;
+          this.setProgram(program);
+          program.renderTextBlock(gl, object, wmWithOffset);
+          break;
+        case "line":
+          program = this.setProgram(program);
+          this.setProgram(program);
+          program.renderLine(gl, object, wmWithOffset);
+          break;
+        case "rectangle":
+          program = this.programs.color;
+          this.setProgram(this.programs.color);
+          program.renderRectangle(gl, object, wmWithOffset);
+          break;
+        case "circle":
+          program = this.programs.color;
+          this.setProgram(program);
+          program.renderCircle(gl, object, wmWithOffset);
+      }
     }
     if ((ref = this.currentProgram) != null) {
       if (typeof ref.flushBuffers === "function") {
@@ -6554,10 +6498,6 @@ c = WebGLTextureShaderProgram = (function() {
   };
 
   WebGLTextureShaderProgram.prototype.renderSprite = function(gl, object, wm) {
-    if (object.renderType === "textblock" && this.textureCache[object.texture.lastCacheKey]) {
-      gl.deleteTexture(this.textureCache[object.texture.lastCacheKey]);
-      this.textureCache[object.texture.lastCacheKey] = null;
-    }
     this.setSpriteTexture(gl, object);
     this.bufferPosition(object.clipWidth, object.clipHeight, wm);
     if (object.imageLength === 1) {
@@ -6566,6 +6506,14 @@ c = WebGLTextureShaderProgram = (function() {
       this.bufferAnimatedTexCoord(object);
     }
     this.positionsCount += 12;
+  };
+
+  WebGLTextureShaderProgram.prototype.renderTextBlock = function(gl, object, wm) {
+    if (this.textureCache[object.texture.lastCacheKey]) {
+      gl.deleteTexture(this.textureCache[object.texture.lastCacheKey]);
+      this.textureCache[object.texture.lastCacheKey] = null;
+    }
+    return this.renderSprite(gl, object, wm);
   };
 
   WebGLTextureShaderProgram.prototype.setSpriteTexture = function(gl, object) {
@@ -8767,7 +8715,7 @@ Mixins = {
 };
 
 Views = {
-  Container: require('./container')
+  Child: require('./child')
 };
 
 
@@ -8956,7 +8904,7 @@ c = Sprite = (function(superClass) {
 
   return Sprite;
 
-})(Views.Container);
+})(Views.Child);
 
 module.exports.prototype = Object.create(c.prototype);
 
@@ -8966,7 +8914,7 @@ Globals = require('../engine/globals');
 
 
 
-},{"../engine/globals":4,"../helpers/mixin":15,"../mixins/animatable":20,"../mixins/texture":21,"./container":31}],37:[function(require,module,exports){
+},{"../engine/globals":4,"../helpers/mixin":15,"../mixins/animatable":20,"../mixins/texture":21,"./child":28}],37:[function(require,module,exports){
 var Geometry, Globals, Helpers, Mixins, TextBlock, Views, c,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -8985,7 +8933,7 @@ Mixins = {
 };
 
 Views = {
-  Container: require('./container')
+  Child: require('./child')
 };
 
 
@@ -9221,7 +9169,7 @@ c = TextBlock = (function(superClass) {
 
   return TextBlock;
 
-})(Views.Container);
+})(Views.Child);
 
 module.exports.prototype = Object.create(c.prototype);
 
@@ -9235,4 +9183,4 @@ Globals = require('../engine/globals');
 
 
 
-},{"../engine/globals":4,"../geometry/vector":12,"../helpers/mixin":15,"../mixins/animatable":20,"../mixins/texture":21,"./container":31}]},{},[1]);
+},{"../engine/globals":4,"../geometry/vector":12,"../helpers/mixin":15,"../mixins/animatable":20,"../mixins/texture":21,"./child":28}]},{},[1]);

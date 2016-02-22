@@ -96,10 +96,6 @@ c = class WebGLTextureShaderProgram
 
   # Draw functions
   renderSprite: (gl, object, wm) ->
-    if object.renderType == "textblock" && @textureCache[object.texture.lastCacheKey]
-      gl.deleteTexture @textureCache[object.texture.lastCacheKey]
-      @textureCache[object.texture.lastCacheKey] = null
-
     # Fetch/update texture
     @setSpriteTexture gl, object
 
@@ -114,6 +110,12 @@ c = class WebGLTextureShaderProgram
 
     @positionsCount += 12
     return
+
+  renderTextBlock: (gl, object, wm)->
+    if @textureCache[object.texture.lastCacheKey]
+      gl.deleteTexture @textureCache[object.texture.lastCacheKey]
+      @textureCache[object.texture.lastCacheKey] = null
+    @renderSprite gl, object, wm
 
   setSpriteTexture: (gl, object)->
     texture = object.texture
@@ -258,7 +260,6 @@ c = class WebGLTextureShaderProgram
     if @positionsCount
       texture = @getGLTexture(gl, @currentTexture)
       gl.bindTexture gl.TEXTURE_2D, texture
-      # gl.bindTexture gl.TEXTURE_2D, @getGLTexture(gl, @currentTexture)
 
       if @positionsCount < @batchSize / 2
         gl.bindBuffer gl.ARRAY_BUFFER, @texCoordBuffer
