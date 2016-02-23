@@ -4,7 +4,7 @@ c = class WebGLTextureShaderProgram
   textureCache: {}
   maskCache: {}
   locations: {}
-  currentTexture: null
+  currentTexture: document.createElement 'img'
   texCoordBuffer: null
   positionBuffer: null
   vertex: null
@@ -93,6 +93,7 @@ c = class WebGLTextureShaderProgram
     gl.bindBuffer gl.ARRAY_BUFFER, @positionBuffer
     gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
     gl.enableVertexAttribArray @locations.a_position
+    return
 
   # Draw functions
   renderSprite: (gl, object, wm) ->
@@ -116,6 +117,7 @@ c = class WebGLTextureShaderProgram
       gl.deleteTexture @textureCache[object.texture.lastCacheKey]
       @textureCache[object.texture.lastCacheKey] = null
     @renderSprite gl, object, wm
+    return
 
   setSpriteTexture: (gl, object)->
     texture = object.texture
@@ -145,7 +147,7 @@ c = class WebGLTextureShaderProgram
     return
 
   setTexture: (gl, texture)->
-    if @positionsCount == @batchSize || @currentTexture != texture
+    if @positionsCount == @batchSize || @currentTexture.cacheKey != texture.cacheKey
       # Set a rectangle the same size as the image
       @flushBuffers gl
       @currentTexture = texture
