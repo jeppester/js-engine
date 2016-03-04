@@ -413,6 +413,9 @@ c = window.Engine = class Engine
     @canvas.style.width = w + "px"
     return
 
+  perFrameSpeed: (speed)->
+    speed * @gameTimeIncrease / 1000
+
   ###
   Function for converting between speed units
 
@@ -423,9 +426,14 @@ c = window.Engine = class Engine
   ###
   convertSpeed: (speed, from, to) ->
     throw new Error("Missing argument: speed") if speed is undefined #dev
-    return new @constructor.Vector(@convertSpeed(speed.x, from, to), @convertSpeed(speed.y, from, to)) if speed instanceof @constructor.Geometry.Vector
-    from = (if from isnt undefined then from else module.exports::constructor.Globals.SPEED_PIXELS_PER_SECOND)
-    to = (if to isnt undefined then to else module.exports::constructor.Globals.SPEED_PIXELS_PER_FRAME)
+    if speed instanceof @constructor.Geometry.Vector
+      return new @constructor.Vector(
+        @convertSpeed speed.x, from, to
+        @convertSpeed speed.y, from, to
+      )
+
+    from ?= module.exports::constructor.Globals.SPEED_PIXELS_PER_SECOND
+    to ?= module.exports::constructor.Globals.SPEED_PIXELS_PER_FRAME
 
     # Convert all formats to pixels per frame
     switch from

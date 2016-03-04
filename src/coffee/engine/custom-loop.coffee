@@ -17,8 +17,12 @@ A loop also has it's own time that is stopped whenever the loop is not executed.
 ###
 c = class CustomLoop
   constructor: (framesPerExecution, maskFunction) ->
-    @framesPerExecution = (if framesPerExecution is undefined then 1 else framesPerExecution)
-    @maskFunction = (if maskFunction is undefined then -> true else maskFunction)
+    @framesPerExecution = framesPerExecution? || 1
+    @maskFunction = maskFunction? || -> true
+
+    # Operations
+    @operationsQueue = []
+    @operations = []
 
     # Attached functions
     @functionsQueue = []
@@ -33,9 +37,78 @@ c = class CustomLoop
 
     # Time tracking
     @lastFrame = window.engine.frames
-    @last = (if window.engine.now then window.engine.now else new Date().getTime())
     @time = 0
-    @execTime = 0
+
+  ###
+  Attaches a function to the loop.
+
+  @param {Object} caller The object to run the function as
+  @param {function} func The function to run on each execution of the custom loop
+  ###
+  attachOperation: (name, func)->
+    throw new Error("Argument func must be of type function") if typeof func isnt "function" #dev
+    @operationsQueue.push
+      name: name
+      objects: []
+      operation: func
+    return
+
+  hasOperation: (name, func)->
+    for exec in @operations
+      return true if (!name || exec.name == name) && (!func || exec.operation == func)
+
+    for exec in @operationsQueue
+      return true if (!name || exec.name == name) && (!func || exec.operation == func)
+    return false
+
+  ###
+  Detaches a function from the loop. If the same function is attached multiple times (which is never a good idea), only the first occurrence is detached.
+
+  @param {Object} caller The object the function was run as
+  @param {function} func The function to detach from the loop
+  @return {boolean} Whether or not the function was found and detached
+  ###
+  detachOperation: (name, func) ->
+    # Search activities and remove function
+    for exec in @operations
+      if (!name || exec.name == name) && (!func || exec.operation == func)
+        @operations.splice i, 1
+        return true
+
+    # Search activities queue and remove function
+    for exec in @operationsQueue
+      if (!name || exec.name == name) && (!func || exec.operation == func)
+        @operationsQueue.splice i, 1
+        return true
+    false
+
+  subscribeToOperation: (name, object)->
+    for exec in @operations
+      if !name || exec.name == name
+        exec.objects.push object
+        return true
+
+    for exec in @operationsQueue
+      if !name || exec.name == name
+        exec.objects.push object
+        return true
+    false
+
+  unsubscribeFromOperation: (name, object)->
+    for exec in @operations
+      if !name || exec.name == name
+        i = name.exec.objects.indexOf object
+        if i != -1
+          exec.objects.splice i, 1
+          return true
+
+    for exec in @operationsQueue
+      if !name || exec.name == name
+        i = name.exec.objects.indexOf object
+        if i != -1
+          exec.objects.splice i, 1
+          return true
+    false
 
   ###
   Attaches a function to the loop.
@@ -53,18 +126,6 @@ c = class CustomLoop
 
     return
 
-
-  ###
-  Queues a function for being added to the executed functions. The queue works as a buffer which prevent functions, that have just been added, from being executed before the next frame.
-
-  @private
-  ###
-  addFunctionsQueue: ->
-    @functions = @functions.concat(@functionsQueue)
-    @functionsQueue = []
-    return
-
-
   ###
   Detaches a function from the loop. If the same function is attached multiple times (which is never a good idea), only the first occurrence is detached.
 
@@ -77,78 +138,17 @@ c = class CustomLoop
     throw new Error("Missing argument: func") if func is undefined #dev
 
     # Search activities and remove function
-    i = 0
-    while i < @functions.length
-      a = @functions[i]
-      if a.object is caller and a.activity is func
+    for exec in @functions
+      if (!caller || exec.object == caller) && (!func || exec.activity == func)
         @functions.splice i, 1
         return true
-      i++
 
     # Search activities queue and remove function
-    i = 0
-    while i < @functionsQueue.length
-      a = @functionsQueue[i]
-      if a.object is caller and a.activity is func
+    for exec in @functionsQueue
+      if (!caller || exec.object == caller) && (!func || exec.activity == func)
         @functionsQueue.splice i, 1
         return true
-      i++
     false
-
-
-  ###
-  Detaches all occurrences of a specific function, no matter the caller.
-
-  @param {function} func The function to detach from the loop
-  @return {function[]} An array of detached functions
-  ###
-  detachFunctionsByFunction: (func) ->
-    throw new Error("Missing argument: func") if func is undefined #dev
-    removeArray = []
-
-    # Search activities and remove function
-    i = @functions.length
-    while i--
-      if func is @functions[i].func
-        removeArray.push @functions.splice(i, 1)
-
-    # Search activities queue and remove function
-    i = @functionsQueue.length
-    while i--
-      if func is @functionsQueue[i].func
-        removeArray.push @functionsQueue.splice(i, 1)
-
-    if removeArray.length
-      removeArray
-    else
-      false
-
-  ###
-  Detaches all attached functions with a specific caller
-
-  @param {Object} caller The object the function was run as
-  @return {function[]} An array of detached functions
-  ###
-  detachFunctionsByCaller: (caller) ->
-    throw new Error("Missing argument: caller") if caller is undefined #dev
-    removeArray = []
-
-    # From activities
-    i = @functions.length
-    while i--
-      if caller is @functions[i].object
-        removeArray.push @functions.splice(i, 1)
-
-    # From activities queue
-    i = @functionsQueue.length
-    while i--
-      if caller is @functionsQueue[i].object
-        removeArray.push @functionsQueue.splice(i, 1)
-    if removeArray.length
-      removeArray
-    else
-      false
-
 
   ###
   Schedules a function to be run after a given amount of time in the loop.
@@ -169,18 +169,6 @@ c = class CustomLoop
 
     return
 
-
-  ###
-  Adds the current executions queue to the list of planned executions. Automatically called at the end of each frame
-
-  @private
-  ###
-  addExecutionsQueue: ->
-    @executions = @executions.concat(@executionsQueue)
-    @executionsQueue = []
-    return
-
-
   ###
   Unschedules a single scheduled execution. If multiple similar executions exists, only the first will be unscheduled.
 
@@ -191,80 +179,19 @@ c = class CustomLoop
   unschedule: (caller, func) ->
     throw new Error("Missing argument: caller") if caller is undefined #dev
     throw new Error("Missing argument: function") if func is undefined #dev
-    i = undefined
-    exec = undefined
 
-    # Remove from executions
-    i = 0
-    while i < @executions.length
-      exec = @executions[i]
-      if caller is exec.caller and (exec.func is func or exec.func.toString() is func)
+    # Search activities and remove function
+    for exec in @executions
+      if (!caller || exec.object == caller) && (!func || exec.activity == func)
         @executions.splice i, 1
         return true
-      i++
 
-    # Remove from executions queue
-    i = 0
-    while i < @executionsQueue.length
-      exec = @executionsQueue[i]
-      if caller is exec.caller and (exec.func is func or exec.func.toString() is func)
+    # Search activities queue and remove function
+    for exec in @executionsQueue
+      if (!caller || exec.object == caller) && (!func || exec.activity == func)
         @executionsQueue.splice i, 1
         return true
-      i++
     false
-
-
-  ###
-  Unschedule all scheduled executions of a specific function, no matter the caller.
-
-  @param {function} func The function to unschedule all executions of
-  @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
-  ###
-  unscheduleByFunction: (func) ->
-    throw new Error("Missing argument: func") if func is undefined #dev
-    unscheduledArray = undefined
-    i = undefined
-    exec = undefined
-    unscheduledArray = []
-    i = @executions.length
-    while i--
-      exec = @executions[i]
-      unscheduledArray.push @executions.splice(i, 1) if func is exec.func
-    i = @executionsQueue.length
-    while i--
-      exec = @executionsQueue[i]
-      unscheduledArray.push @executionsQueue.splice(i, 1) if func is exec.func
-    if unscheduledArray.length
-      unscheduledArray
-    else
-      false
-
-
-  ###
-  Unschedule all executions scheduled with a specific caller
-
-  @param {object} caller The caller
-  @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
-  ###
-  unscheduleByCaller: (caller) ->
-    throw new Error("Missing argument: caller") if caller is undefined #dev
-    unscheduledArray = undefined
-    i = undefined
-    exec = undefined
-    unscheduledArray = []
-    i = @executions.length
-    while i--
-      exec = @executions[i]
-      unscheduledArray.push @executions.splice(i, 1) if caller is exec.caller
-    i = @executionsQueue.length
-    while i--
-      exec = @executionsQueue[i]
-      unscheduledArray.push @executionsQueue.splice(i, 1) if caller is exec.caller
-    if unscheduledArray.length
-      unscheduledArray
-    else
-      false
-
 
   ###
   Unschedules all scheduled executions
@@ -272,7 +199,6 @@ c = class CustomLoop
   @return {function[]} An array of all the unscheduled functions
   ###
   unscheduleAll: ->
-    removeArray = undefined
     removeArray = [].concat(@executions, @executionsQueue)
     @executions = []
     @executionsQueue = []
@@ -287,12 +213,6 @@ c = class CustomLoop
   ###
   addAnimation: (animation) ->
     throw new Error("Missing argument: animation") if animation is undefined #dev
-    anim = undefined
-    propList = undefined
-    currentAnimations = undefined
-    i = undefined
-    cur = undefined
-    propName = undefined
     anim = animation
     anim.start = @time
 
@@ -315,7 +235,6 @@ c = class CustomLoop
   @param {Mixin.Animatable} object The object to stop all animations of
   ###
   removeAnimationsOfObject: (object) ->
-    i = undefined
     i = @animations.length
     while i--
       if object is @animations[i].obj
@@ -353,15 +272,15 @@ c = class CustomLoop
       # Execute onStep-callback if any
       a.onStep and a.onStep()
       animId--
+    return
 
   ###
   Executes the custom loop. This will execute all the functions that have been added to the loop, and checks all scheduled executions to see if they should fire.
   This function will automatically be executed, if the loop has been added to the current room, or the engine's masterRoom
   ###
   execute: ->
-    timer = new Date().getTime()
-    return if not @maskFunction() or engine.frames % @framesPerExecution
-    @time += engine.gameTimeIncrease if engine.frames - @lastFrame is @framesPerExecution
+    return if engine.frames % @framesPerExecution || !@maskFunction()
+    @time += engine.gameTimeIncrease if engine.frames - @lastFrame == @framesPerExecution
     @lastFrame = engine.frames
     @last = engine.now
 
@@ -371,28 +290,33 @@ c = class CustomLoop
     # Execute scheduled executions
     i = @executions.length
     while i--
-      continue if i >= @executions.length
       exec = @executions[i]
       if @time >= exec.execTime
         exec.func.call exec.caller
         @executions.splice i, 1
+        i--
+
+    # Execute operations
+    for exec in @operations
+      throw new Error("Trying to exec non-existent attached function") unless exec.operation #dev
+      exec.operation exec.objects
 
     # Execute attached functions
-    i = 0
-    while i < @functions.length
-      exec = @functions[i]
-      #dev
+    for exec in @functions
       throw new Error("Trying to exec non-existent attached function") unless exec.activity #dev
-      #dev
       exec.activity.call exec.object
-      i++
+
+    # Add queued operations
+    @operations = @operations.concat(@operationsQueue)
+    @operationsQueue = []
 
     # Add queued attached functions
-    @addFunctionsQueue()
+    @functions = @functions.concat(@functionsQueue)
+    @functionsQueue = []
 
     # Add queued executions
-    @addExecutionsQueue()
-    @execTime = (new Date().getTime()) - timer
+    @executions = @executions.concat(@executionsQueue)
+    @executionsQueue = []
     return
 
 module.exports:: = Object.create c::

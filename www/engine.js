@@ -394,6 +394,10 @@ c = window.Engine = Engine = (function() {
     this.canvas.style.width = w + "px";
   };
 
+  Engine.prototype.perFrameSpeed = function(speed) {
+    return speed * this.gameTimeIncrease / 1000;
+  };
+
 
   /*
   Function for converting between speed units
@@ -411,8 +415,12 @@ c = window.Engine = Engine = (function() {
     if (speed instanceof this.constructor.Geometry.Vector) {
       return new this.constructor.Vector(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
     }
-    from = (from !== void 0 ? from : module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND);
-    to = (to !== void 0 ? to : module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_FRAME);
+    if (from == null) {
+      from = module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND;
+    }
+    if (to == null) {
+      to = module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_FRAME;
+    }
     switch (from) {
       case module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND:
         speed = speed * this.gameTimeIncrease / 1000;
@@ -924,20 +932,136 @@ A loop also has it's own time that is stopped whenever the loop is not executed.
 
 c = CustomLoop = (function() {
   function CustomLoop(framesPerExecution, maskFunction) {
-    this.framesPerExecution = (framesPerExecution === void 0 ? 1 : framesPerExecution);
-    this.maskFunction = (maskFunction === void 0 ? function() {
+    this.framesPerExecution = (framesPerExecution != null) || 1;
+    this.maskFunction = (maskFunction != null) || function() {
       return true;
-    } : maskFunction);
+    };
+    this.operationsQueue = [];
+    this.operations = [];
     this.functionsQueue = [];
     this.functions = [];
     this.executionsQueue = [];
     this.executions = [];
     this.animations = [];
     this.lastFrame = window.engine.frames;
-    this.last = (window.engine.now ? window.engine.now : new Date().getTime());
     this.time = 0;
-    this.execTime = 0;
   }
+
+
+  /*
+  Attaches a function to the loop.
+  
+  @param {Object} caller The object to run the function as
+  @param {function} func The function to run on each execution of the custom loop
+   */
+
+  CustomLoop.prototype.attachOperation = function(name, func) {
+    if (typeof func !== "function") {
+      throw new Error("Argument func must be of type function");
+    }
+    this.operationsQueue.push({
+      name: name,
+      objects: [],
+      operation: func
+    });
+  };
+
+  CustomLoop.prototype.hasOperation = function(name, func) {
+    var exec, j, k, len, len1, ref, ref1;
+    ref = this.operations;
+    for (j = 0, len = ref.length; j < len; j++) {
+      exec = ref[j];
+      if ((!name || exec.name === name) && (!func || exec.operation === func)) {
+        return true;
+      }
+    }
+    ref1 = this.operationsQueue;
+    for (k = 0, len1 = ref1.length; k < len1; k++) {
+      exec = ref1[k];
+      if ((!name || exec.name === name) && (!func || exec.operation === func)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+
+  /*
+  Detaches a function from the loop. If the same function is attached multiple times (which is never a good idea), only the first occurrence is detached.
+  
+  @param {Object} caller The object the function was run as
+  @param {function} func The function to detach from the loop
+  @return {boolean} Whether or not the function was found and detached
+   */
+
+  CustomLoop.prototype.detachOperation = function(name, func) {
+    var exec, j, k, len, len1, ref, ref1;
+    ref = this.operations;
+    for (j = 0, len = ref.length; j < len; j++) {
+      exec = ref[j];
+      if ((!name || exec.name === name) && (!func || exec.operation === func)) {
+        this.operations.splice(i, 1);
+        return true;
+      }
+    }
+    ref1 = this.operationsQueue;
+    for (k = 0, len1 = ref1.length; k < len1; k++) {
+      exec = ref1[k];
+      if ((!name || exec.name === name) && (!func || exec.operation === func)) {
+        this.operationsQueue.splice(i, 1);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  CustomLoop.prototype.subscribeToOperation = function(name, object) {
+    var exec, j, k, len, len1, ref, ref1;
+    ref = this.operations;
+    for (j = 0, len = ref.length; j < len; j++) {
+      exec = ref[j];
+      if (!name || exec.name === name) {
+        exec.objects.push(object);
+        return true;
+      }
+    }
+    ref1 = this.operationsQueue;
+    for (k = 0, len1 = ref1.length; k < len1; k++) {
+      exec = ref1[k];
+      if (!name || exec.name === name) {
+        exec.objects.push(object);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  CustomLoop.prototype.unsubscribeFromOperation = function(name, object) {
+    var exec, i, j, k, len, len1, ref, ref1;
+    ref = this.operations;
+    for (j = 0, len = ref.length; j < len; j++) {
+      exec = ref[j];
+      if (!name || exec.name === name) {
+        i = name.exec.objects.indexOf(object);
+        if (i !== -1) {
+          exec.objects.splice(i, 1);
+          return true;
+        }
+      }
+    }
+    ref1 = this.operationsQueue;
+    for (k = 0, len1 = ref1.length; k < len1; k++) {
+      exec = ref1[k];
+      if (!name || exec.name === name) {
+        i = name.exec.objects.indexOf(object);
+        if (i !== -1) {
+          exec.objects.splice(i, 1);
+          return true;
+        }
+      }
+    }
+    return false;
+  };
 
 
   /*
@@ -965,18 +1089,6 @@ c = CustomLoop = (function() {
 
 
   /*
-  Queues a function for being added to the executed functions. The queue works as a buffer which prevent functions, that have just been added, from being executed before the next frame.
-  
-  @private
-   */
-
-  CustomLoop.prototype.addFunctionsQueue = function() {
-    this.functions = this.functions.concat(this.functionsQueue);
-    this.functionsQueue = [];
-  };
-
-
-  /*
   Detaches a function from the loop. If the same function is attached multiple times (which is never a good idea), only the first occurrence is detached.
   
   @param {Object} caller The object the function was run as
@@ -985,98 +1097,30 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.detachFunction = function(caller, func) {
-    var a, i;
+    var exec, j, k, len, len1, ref, ref1;
     if (caller === void 0) {
       throw new Error("Missing argument: caller");
     }
     if (func === void 0) {
       throw new Error("Missing argument: func");
     }
-    i = 0;
-    while (i < this.functions.length) {
-      a = this.functions[i];
-      if (a.object === caller && a.activity === func) {
+    ref = this.functions;
+    for (j = 0, len = ref.length; j < len; j++) {
+      exec = ref[j];
+      if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.functions.splice(i, 1);
         return true;
       }
-      i++;
     }
-    i = 0;
-    while (i < this.functionsQueue.length) {
-      a = this.functionsQueue[i];
-      if (a.object === caller && a.activity === func) {
+    ref1 = this.functionsQueue;
+    for (k = 0, len1 = ref1.length; k < len1; k++) {
+      exec = ref1[k];
+      if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.functionsQueue.splice(i, 1);
         return true;
       }
-      i++;
     }
     return false;
-  };
-
-
-  /*
-  Detaches all occurrences of a specific function, no matter the caller.
-  
-  @param {function} func The function to detach from the loop
-  @return {function[]} An array of detached functions
-   */
-
-  CustomLoop.prototype.detachFunctionsByFunction = function(func) {
-    var i, removeArray;
-    if (func === void 0) {
-      throw new Error("Missing argument: func");
-    }
-    removeArray = [];
-    i = this.functions.length;
-    while (i--) {
-      if (func === this.functions[i].func) {
-        removeArray.push(this.functions.splice(i, 1));
-      }
-    }
-    i = this.functionsQueue.length;
-    while (i--) {
-      if (func === this.functionsQueue[i].func) {
-        removeArray.push(this.functionsQueue.splice(i, 1));
-      }
-    }
-    if (removeArray.length) {
-      return removeArray;
-    } else {
-      return false;
-    }
-  };
-
-
-  /*
-  Detaches all attached functions with a specific caller
-  
-  @param {Object} caller The object the function was run as
-  @return {function[]} An array of detached functions
-   */
-
-  CustomLoop.prototype.detachFunctionsByCaller = function(caller) {
-    var i, removeArray;
-    if (caller === void 0) {
-      throw new Error("Missing argument: caller");
-    }
-    removeArray = [];
-    i = this.functions.length;
-    while (i--) {
-      if (caller === this.functions[i].object) {
-        removeArray.push(this.functions.splice(i, 1));
-      }
-    }
-    i = this.functionsQueue.length;
-    while (i--) {
-      if (caller === this.functionsQueue[i].object) {
-        removeArray.push(this.functionsQueue.splice(i, 1));
-      }
-    }
-    if (removeArray.length) {
-      return removeArray;
-    } else {
-      return false;
-    }
   };
 
 
@@ -1108,18 +1152,6 @@ c = CustomLoop = (function() {
 
 
   /*
-  Adds the current executions queue to the list of planned executions. Automatically called at the end of each frame
-  
-  @private
-   */
-
-  CustomLoop.prototype.addExecutionsQueue = function() {
-    this.executions = this.executions.concat(this.executionsQueue);
-    this.executionsQueue = [];
-  };
-
-
-  /*
   Unschedules a single scheduled execution. If multiple similar executions exists, only the first will be unscheduled.
   
   @param {function} func The function to unschedule an execution of
@@ -1128,110 +1160,30 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.unschedule = function(caller, func) {
-    var exec, i;
+    var exec, j, k, len, len1, ref, ref1;
     if (caller === void 0) {
       throw new Error("Missing argument: caller");
     }
     if (func === void 0) {
       throw new Error("Missing argument: function");
     }
-    i = void 0;
-    exec = void 0;
-    i = 0;
-    while (i < this.executions.length) {
-      exec = this.executions[i];
-      if (caller === exec.caller && (exec.func === func || exec.func.toString() === func)) {
+    ref = this.executions;
+    for (j = 0, len = ref.length; j < len; j++) {
+      exec = ref[j];
+      if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.executions.splice(i, 1);
         return true;
       }
-      i++;
     }
-    i = 0;
-    while (i < this.executionsQueue.length) {
-      exec = this.executionsQueue[i];
-      if (caller === exec.caller && (exec.func === func || exec.func.toString() === func)) {
+    ref1 = this.executionsQueue;
+    for (k = 0, len1 = ref1.length; k < len1; k++) {
+      exec = ref1[k];
+      if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.executionsQueue.splice(i, 1);
         return true;
       }
-      i++;
     }
     return false;
-  };
-
-
-  /*
-  Unschedule all scheduled executions of a specific function, no matter the caller.
-  
-  @param {function} func The function to unschedule all executions of
-  @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
-   */
-
-  CustomLoop.prototype.unscheduleByFunction = function(func) {
-    var exec, i, unscheduledArray;
-    if (func === void 0) {
-      throw new Error("Missing argument: func");
-    }
-    unscheduledArray = void 0;
-    i = void 0;
-    exec = void 0;
-    unscheduledArray = [];
-    i = this.executions.length;
-    while (i--) {
-      exec = this.executions[i];
-      if (func === exec.func) {
-        unscheduledArray.push(this.executions.splice(i, 1));
-      }
-    }
-    i = this.executionsQueue.length;
-    while (i--) {
-      exec = this.executionsQueue[i];
-      if (func === exec.func) {
-        unscheduledArray.push(this.executionsQueue.splice(i, 1));
-      }
-    }
-    if (unscheduledArray.length) {
-      return unscheduledArray;
-    } else {
-      return false;
-    }
-  };
-
-
-  /*
-  Unschedule all executions scheduled with a specific caller
-  
-  @param {object} caller The caller
-  @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
-   */
-
-  CustomLoop.prototype.unscheduleByCaller = function(caller) {
-    var exec, i, unscheduledArray;
-    if (caller === void 0) {
-      throw new Error("Missing argument: caller");
-    }
-    unscheduledArray = void 0;
-    i = void 0;
-    exec = void 0;
-    unscheduledArray = [];
-    i = this.executions.length;
-    while (i--) {
-      exec = this.executions[i];
-      if (caller === exec.caller) {
-        unscheduledArray.push(this.executions.splice(i, 1));
-      }
-    }
-    i = this.executionsQueue.length;
-    while (i--) {
-      exec = this.executionsQueue[i];
-      if (caller === exec.caller) {
-        unscheduledArray.push(this.executionsQueue.splice(i, 1));
-      }
-    }
-    if (unscheduledArray.length) {
-      return unscheduledArray;
-    } else {
-      return false;
-    }
   };
 
 
@@ -1243,7 +1195,6 @@ c = CustomLoop = (function() {
 
   CustomLoop.prototype.unscheduleAll = function() {
     var removeArray;
-    removeArray = void 0;
     removeArray = [].concat(this.executions, this.executionsQueue);
     this.executions = [];
     this.executionsQueue = [];
@@ -1263,12 +1214,6 @@ c = CustomLoop = (function() {
     if (animation === void 0) {
       throw new Error("Missing argument: animation");
     }
-    anim = void 0;
-    propList = void 0;
-    currentAnimations = void 0;
-    i = void 0;
-    cur = void 0;
-    propName = void 0;
     anim = animation;
     anim.start = this.time;
     propList = Object.keys(anim.prop);
@@ -1297,7 +1242,6 @@ c = CustomLoop = (function() {
 
   CustomLoop.prototype.removeAnimationsOfObject = function(object) {
     var i;
-    i = void 0;
     i = this.animations.length;
     while (i--) {
       if (object === this.animations[i].obj) {
@@ -1314,9 +1258,8 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.updateAnimations = function() {
-    var a, animId, propId, results, t;
+    var a, animId, propId, t;
     animId = this.animations.length - 1;
-    results = [];
     while (animId > -1) {
       a = this.animations[animId];
       if (a === void 0) {
@@ -1339,9 +1282,8 @@ c = CustomLoop = (function() {
         }
       }
       a.onStep && a.onStep();
-      results.push(animId--);
+      animId--;
     }
-    return results;
   };
 
 
@@ -1351,9 +1293,8 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.execute = function() {
-    var exec, i, timer;
-    timer = new Date().getTime();
-    if (!this.maskFunction() || engine.frames % this.framesPerExecution) {
+    var exec, i, j, k, len, len1, ref, ref1;
+    if (engine.frames % this.framesPerExecution || !this.maskFunction()) {
       return;
     }
     if (engine.frames - this.lastFrame === this.framesPerExecution) {
@@ -1364,27 +1305,35 @@ c = CustomLoop = (function() {
     this.updateAnimations();
     i = this.executions.length;
     while (i--) {
-      if (i >= this.executions.length) {
-        continue;
-      }
       exec = this.executions[i];
       if (this.time >= exec.execTime) {
         exec.func.call(exec.caller);
         this.executions.splice(i, 1);
+        i--;
       }
     }
-    i = 0;
-    while (i < this.functions.length) {
-      exec = this.functions[i];
+    ref = this.operations;
+    for (j = 0, len = ref.length; j < len; j++) {
+      exec = ref[j];
+      if (!exec.operation) {
+        throw new Error("Trying to exec non-existent attached function");
+      }
+      exec.operation(exec.objects);
+    }
+    ref1 = this.functions;
+    for (k = 0, len1 = ref1.length; k < len1; k++) {
+      exec = ref1[k];
       if (!exec.activity) {
         throw new Error("Trying to exec non-existent attached function");
       }
       exec.activity.call(exec.object);
-      i++;
     }
-    this.addFunctionsQueue();
-    this.addExecutionsQueue();
-    this.execTime = (new Date().getTime()) - timer;
+    this.operations = this.operations.concat(this.operationsQueue);
+    this.operationsQueue = [];
+    this.functions = this.functions.concat(this.functionsQueue);
+    this.functionsQueue = [];
+    this.executions = this.executions.concat(this.executionsQueue);
+    this.executionsQueue = [];
   };
 
   return CustomLoop;
@@ -8097,25 +8046,41 @@ c = GameObject = (function(superClass) {
       throw new Error("Missing argument: y");
     }
     GameObject.__super__.constructor.call(this, source, x, y, direction, additionalProperties);
-    this.loop = (this.loop ? this.loop : engine.defaultActivityLoop);
-    this.loop.attachFunction(this, this.updatePosition);
-    this.speed = (this.speed ? this.speed : new Geometry.Vector(0, 0));
+    if (this.loop == null) {
+      this.loop = engine.defaultActivityLoop;
+    }
+    if (!this.loop.hasOperation('basic-transforms')) {
+      this.loop.attachOperation('basic-transforms', this.constructor.basicTransformsOperation);
+    }
+    this.loop.subscribeToOperation('basic-transforms', this);
+    if (this.speed == null) {
+      this.speed = new Geometry.Vector(0, 0);
+    }
+    if (this.rotationSpeed == null) {
+      this.rotationSpeed = 0;
+    }
     this.alive = true;
     return;
   }
 
-
-  /*
-  Adds the game object's speed vector to its current position. This function is automatically run in each frame.
-  
-  @private
-   */
-
-  GameObject.prototype.updatePosition = function() {
-    if (this.alive) {
-      this.x += engine.convertSpeed(this.speed.x);
-      this.y += engine.convertSpeed(this.speed.y);
+  GameObject.basicTransformsOperation = function(objects) {
+    var i, len, object, results;
+    results = [];
+    for (i = 0, len = objects.length; i < len; i++) {
+      object = objects[i];
+      if (object.alive) {
+        object.x += engine.perFrameSpeed(object.speed.x);
+        object.y += engine.perFrameSpeed(object.speed.y);
+        if (object.rotationSpeed) {
+          results.push(object.direction += engine.perFrameSpeed(object.rotationSpeed));
+        } else {
+          results.push(void 0);
+        }
+      } else {
+        results.push(void 0);
+      }
     }
+    return results;
   };
 
   return GameObject;
