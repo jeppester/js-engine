@@ -12,6 +12,15 @@ Main = (function() {
     this.posX = 0;
     this.posY = 0;
     this.rotation = 0;
+    engine.defaultActivityLoop.attachOperation('rotation-transform', function(objects) {
+      var i, len, object, results;
+      results = [];
+      for (i = 0, len = objects.length; i < len; i++) {
+        object = objects[i];
+        results.push(object.direction += engine.perFrameSpeed(object.rotationSpeed));
+      }
+      return results;
+    });
     setTimeout(((function(_this) {
       return function() {
         return _this.startTest();
@@ -20,12 +29,12 @@ Main = (function() {
   }
 
   Main.prototype.getSearch = function() {
-    var j, len, name, part, parts, ref, s, search, value;
+    var i, len, name, part, parts, ref, s, search, value;
     s = window.location.search.replace(/^\?/, '');
     parts = s.split('&');
     search = {};
-    for (j = 0, len = parts.length; j < len; j++) {
-      part = parts[j];
+    for (i = 0, len = parts.length; i < len; i++) {
+      part = parts[i];
       ref = part.split('='), name = ref[0], value = ref[1];
       search[name] = value;
     }
@@ -47,7 +56,7 @@ Main = (function() {
 
   Main.prototype.endTest = function() {
     var average, fps, frames, objects;
-    objects = Object.keys(engine.objectIndex).length - 2;
+    objects = this.count;
     frames = engine.frames - this.startFrames;
     fps = (engine.frames - this.startFrames) / 10;
     this.lastFive.push(frames);
@@ -63,28 +72,46 @@ Main = (function() {
   };
 
   Main.prototype.addObjects = function(count) {
-    var col, cols, i, j, ref, results, row, rows, sprite, x, xInt, y, yInt;
+    var arm, arms, container, direction, dist, i, nextContainer, object, outerContainer, ref, results, sprite, subCount;
     if (count == null) {
       count = 10;
     }
-    cols = rows = Math.max(Math.sqrt(count));
-    col = 0;
-    row = 0;
-    xInt = engine.canvasResX / cols;
-    yInt = engine.canvasResY / rows;
+    arms = 20;
+    subCount = Math.floor(count / arms);
+    outerContainer = new Engine.Views.Container();
+    outerContainer.x = engine.canvasResX / 2;
+    outerContainer.y = engine.canvasResY / 2;
+    outerContainer.rotationSpeed = Math.PI / 4;
+    outerContainer.widthScale = .85;
+    engine.defaultActivityLoop.subscribeToOperation('rotation-transform', outerContainer);
+    engine.currentRoom.addChildren(outerContainer);
+    sprite = new Engine.Views.Sprite('rock', 0, 0);
+    outerContainer.addChildren(sprite);
+    this.count = 1;
     results = [];
-    for (i = j = 0, ref = count; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-      x = col * xInt;
-      y = row * yInt;
-      sprite = new Engine.Views.Sprite('rock', x, y);
-      engine.currentRoom.addChildren(sprite);
-      ++row;
-      if (row > rows) {
-        row = 0;
-        results.push(++col);
-      } else {
-        results.push(void 0);
-      }
+    for (arm = i = 0, ref = arms; 0 <= ref ? i < ref : i > ref; arm = 0 <= ref ? ++i : --i) {
+      dist = 150;
+      direction = Math.PI * 2 / arms * arm;
+      nextContainer = outerContainer;
+      results.push((function() {
+        var j, ref1, results1;
+        results1 = [];
+        for (object = j = 0, ref1 = subCount; 0 <= ref1 ? j < ref1 : j > ref1; object = 0 <= ref1 ? ++j : --j) {
+          container = new Engine.Views.Container();
+          container.x = Math.cos(direction) * dist;
+          container.y = Math.sin(direction) * dist;
+          container.widthScale = nextContainer.widthScale;
+          container.rotationSpeed = nextContainer.rotationSpeed;
+          engine.defaultActivityLoop.subscribeToOperation('rotation-transform', container);
+          nextContainer.addChildren(container);
+          sprite = new Engine.Views.Sprite('rock', 0, 0);
+          this.count++;
+          container.addChildren(sprite);
+          dist *= .9;
+          results1.push(nextContainer = container);
+        }
+        return results1;
+      }).call(this));
     }
     return results;
   };
