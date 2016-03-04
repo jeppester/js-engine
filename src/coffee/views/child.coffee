@@ -1,3 +1,4 @@
+
 module.exports = -> module.exports::constructor.apply @, arguments
 
 # Mixins and parent class at top

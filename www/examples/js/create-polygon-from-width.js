@@ -11,7 +11,7 @@ CreatePolygonFromWidth = (function() {
   }
 
   CreatePolygonFromWidth.prototype.onLoaded = function() {
-    var i, line, polygons, t, tests, _i;
+    var i, j, line, polygons, ref, t, tests;
     polygons = [];
     line = new Engine.Geometry.Line().setFromCoordinates(10, 10, 590, 310);
     polygons.push(new Engine.Views.Polygon(line.createPolygonFromWidth(10).getPoints(), "#88F"));
@@ -36,7 +36,7 @@ CreatePolygonFromWidth = (function() {
     engine.currentRoom.addChildren.apply(engine.currentRoom, polygons);
     tests = 10000;
     t = new Date();
-    for (i = _i = 0; 0 <= tests ? _i < tests : _i > tests; i = 0 <= tests ? ++_i : --_i) {
+    for (i = j = 0, ref = tests; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
       line.createPolygonFromWidth(10);
     }
     return console.log("createPolygonFromWidth (tests/sec): " + ~~(tests / (new Date() - t)) * 1000);

@@ -87,8 +87,10 @@ c = class WebGLRenderer
 
   renderRoom: (room, wm)->
     list = room.renderList ?= []
-    wm = room.wm ?= new Float32Array 9
-    Helpers.MatrixCalculation.setLocalMatrix wm, room
+    unless room.parent
+      room.parent = new View.Child()
+      room.parent.wm = new Float32Array [1, 0, 0, 0, 1, 0, 0, 0, 1]
+      room.parent.changed = false
 
     @updateRenderList list, room, new Uint16Array [0]
     @processRenderList list
@@ -97,16 +99,16 @@ c = class WebGLRenderer
   updateRenderList: (list, object, counter)->
     return unless object.isVisible()
 
-    unless object.children
-      # Only update the list if necessary
-      last = list[counter[0]]
-      unless object == last
-        if last == undefined
-          list.push object
-        else
-          list.splice count, undefined, object
-      counter[0] += 1
-    else
+    # Only update the list if necessary
+    last = list[counter[0]]
+    unless object == last
+      if last == undefined
+        list.push object
+      else
+        list.splice count, undefined, object
+    counter[0] += 1
+
+    if object.children
       for child in object.children
         @updateRenderList list, child, counter
 
@@ -114,11 +116,11 @@ c = class WebGLRenderer
     gl = @gl
     for object in list
       object.wm ?= new Float32Array 9
+
       Helpers.MatrixCalculation.setLocalMatrix object.wm, object
       Helpers.MatrixCalculation.multiply object.wm, object.parent.wm
-
-      wmWithOffset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
-      Helpers.MatrixCalculation.multiply wmWithOffset, object.wm
+      offset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
+      Helpers.MatrixCalculation.reverseMultiply object.wm, offset
 
       # Set object alpha (because alpha is used by ALL rendered objects)
       if @currentAlpha != object.opacity
@@ -129,23 +131,23 @@ c = class WebGLRenderer
         when "sprite"
           program = @programs.texture
           @setProgram program
-          program.renderSprite gl, object, wmWithOffset
+          program.renderSprite gl, object, object.wm
         when "textblock"
           program = @programs.texture
           @setProgram program
-          program.renderTextBlock gl, object, wmWithOffset
+          program.renderTextBlock gl, object, object.wm
         when "line"
           program = @setProgram program
           @setProgram program
-          program.renderLine gl, object, wmWithOffset
+          program.renderLine gl, object, object.wm
         when "rectangle"
           program = @programs.color
           @setProgram @programs.color
-          program.renderRectangle gl, object, wmWithOffset
+          program.renderRectangle gl, object, object.wm
         when "circle"
           program = @programs.color
           @setProgram program
-          program.renderCircle gl, object, wmWithOffset
+          program.renderCircle gl, object, object.wm
 
     @currentProgram?.flushBuffers? gl
     return
@@ -158,3 +160,6 @@ ColorShaderProgram = require './webgl/color-shader-program'
 
 Helpers =
   MatrixCalculation: require '../helpers/matrix-calculation'
+
+View =
+  Child: require '../views/child'
