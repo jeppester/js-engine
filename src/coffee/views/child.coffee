@@ -133,7 +133,7 @@ c = class Child
   ###
   isVisible: ->
     # If sprites size has been modified to zero, do nothing
-    not (@size is 0 or @widthScale is 0 or @heightScale is 0)
+    @size != 0 && @widthScale != 0 && @heightScale != 0
 
 module.exports:: = Object.create c::
 module.exports::constructor = c

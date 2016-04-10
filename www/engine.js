@@ -7076,7 +7076,7 @@ c = Child = (function() {
    */
 
   Child.prototype.isVisible = function() {
-    return !(this.size === 0 || this.widthScale === 0 || this.heightScale === 0);
+    return this.size !== 0 && this.widthScale !== 0 && this.heightScale !== 0;
   };
 
   return Child;
