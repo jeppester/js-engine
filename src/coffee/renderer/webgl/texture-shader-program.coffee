@@ -1,24 +1,20 @@
 module.exports = -> module.exports::constructor.apply @, arguments
+coordsBufferLength = 4 * 6 * 20000
+# 4 points per vertex (x, y + texture coords)
+# 6 vertices per object (two triangles)
+# 1000 objects per draw (maybe we can increase this)
 
 c = class WebGLTextureShaderProgram
   textureCache: {}
   maskCache: {}
   locations: {}
   currentTexture: document.createElement 'img'
-  texCoordBuffer: null
-  positionBuffer: null
   vertex: null
   program: null
-  batchSize: 2400
-  positionsCount: 0
-  positions: new Float32Array 2400
-  texCoords: new Float32Array 2400
-  points: [
-    new Float32Array(2)
-    new Float32Array(2)
-    new Float32Array(2)
-    new Float32Array(2)
-  ]
+  coordsCount: 0
+  coords: new Float32Array coordsBufferLength
+  coordsBuffer: null
+  cornerCoords: new Float32Array 8
 
   constructor: (gl) ->
     # Init program
@@ -78,21 +74,17 @@ c = class WebGLTextureShaderProgram
     return
 
   initBuffers: (gl) ->
-    # Texture coordinate buffer
-    @texCoordBuffer = gl.createBuffer()
-
-    # Position buffer
-    @positionBuffer = gl.createBuffer()
+    # Coordinate buffer for both vertex and texture coordinates
+    @coordsBuffer = gl.createBuffer()
     return
 
   onSet: (gl)->
-    gl.bindBuffer gl.ARRAY_BUFFER, @texCoordBuffer
-    gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
-    gl.enableVertexAttribArray @locations.a_texCoord
-
-    gl.bindBuffer gl.ARRAY_BUFFER, @positionBuffer
-    gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
+    floatSize = @coords.BYTES_PER_ELEMENT
+    gl.bindBuffer gl.ARRAY_BUFFER, @coordsBuffer
+    gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 4 * floatSize, 0
     gl.enableVertexAttribArray @locations.a_position
+    gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 4 * floatSize, 2 * floatSize
+    gl.enableVertexAttribArray @locations.a_texCoord
     return
 
   # Draw functions
@@ -100,16 +92,16 @@ c = class WebGLTextureShaderProgram
     # Fetch/update texture
     @setSpriteTexture gl, object
 
+    # Update corners cache with transformed object corners
+    @setTransformedCorners object.clipWidth, object.clipHeight, wm
+
     # Buffer position
-    @bufferPosition object.clipWidth, object.clipHeight, wm
-
-    # Buffer texture coordinates
     if object.imageLength == 1
-      @bufferTexCoord()
+      @bufferRectangle()
     else
-      @bufferAnimatedTexCoord object
+      @bufferAnimatedRectangle object
 
-    @positionsCount += 12
+    @coordsCount += 24
     return
 
   renderTextBlock: (gl, object, wm)->
@@ -129,16 +121,16 @@ c = class WebGLTextureShaderProgram
     # Fetch/update texture
     @setMaskTexture gl, object
 
+    # Update corners cache with transformed object corners
+    @setTransformedCorners object.clipWidth, object.clipHeight, wm
+
     # Buffer position
-    @bufferPosition object.clipWidth, object.clipHeight, wm
-
-    # Buffer texture coordinates
     if object.imageLength == 1
-      @bufferTexCoord()
+      @bufferRectangle()
     else
-      @bufferAnimatedTexCoord object
+      @bufferAnimatedRectangle object
 
-    @positionsCount += 12
+    @coordsCount += 24
     return
 
   setMaskTexture: (gl, object)->
@@ -147,90 +139,113 @@ c = class WebGLTextureShaderProgram
     return
 
   setTexture: (gl, texture)->
-    if @positionsCount == @batchSize || @currentTexture.cacheKey != texture.cacheKey
+    if @coordsCount == @coords.length || @currentTexture.cacheKey != texture.cacheKey
       # Set a rectangle the same size as the image
       @flushBuffers gl
       @currentTexture = texture
     return
 
+  setTransformedCorners: (width, height, wm)->
+    # Unreduced matrix equation:
+    # x = x * wm[0] + y * wm[3] + wm[6]
+    # y = x * wm[1] + y * wm[4] + wm[7]
 
-  bufferPosition: (width, height, wm)->
-    @points[0][0] = 0
-    @points[0][1] = 0
-    @points[1][0] = width
-    @points[1][1] = 0
-    @points[2][0] = 0
-    @points[2][1] = height
-    @points[3][0] = width
-    @points[3][1] = height
-    Helpers.MatrixCalculation.transformCoord @points[0], wm
-    Helpers.MatrixCalculation.transformCoord @points[1], wm
-    Helpers.MatrixCalculation.transformCoord @points[2], wm
-    Helpers.MatrixCalculation.transformCoord @points[3], wm
+    # Top left
+    @cornerCoords[0] = wm[6] # x = 0, y = 0
+    @cornerCoords[1] = wm[7] # x = 0, y = 0
 
-    @positions[@positionsCount]      = @points[0][0]
-    @positions[@positionsCount + 1]  = @points[0][1]
+    # Top right
+    @cornerCoords[2] = width * wm[0] + wm[6] # y = 0
+    @cornerCoords[3] = width * wm[1] + wm[7] # y = 0
 
-    @positions[@positionsCount + 2]  = @points[1][0]
-    @positions[@positionsCount + 3]  = @points[1][1]
+    # Bottom left
+    @cornerCoords[4] = height * wm[3] + wm[6] # x = 0
+    @cornerCoords[5] = height * wm[4] + wm[7] # x = 0
 
-    @positions[@positionsCount + 4]  = @points[2][0]
-    @positions[@positionsCount + 5]  = @points[2][1]
+    # Bottom right
+    @cornerCoords[6] = width * wm[0] + height * wm[3] + wm[6]
+    @cornerCoords[7] = width * wm[1] + height * wm[4] + wm[7]
 
-    @positions[@positionsCount + 6]  = @points[2][0]
-    @positions[@positionsCount + 7]  = @points[2][1]
+  bufferRectangle: ->
+    # Point 1
+    @coords[@coordsCount]     = @cornerCoords[0]
+    @coords[@coordsCount + 1] = @cornerCoords[1]
+    @coords[@coordsCount + 2] = 0.0
+    @coords[@coordsCount + 3] = 0.0
 
-    @positions[@positionsCount + 8]  = @points[1][0]
-    @positions[@positionsCount + 9]  = @points[1][1]
+    # Point 2
+    @coords[@coordsCount + 4] = @cornerCoords[2]
+    @coords[@coordsCount + 5] = @cornerCoords[3]
+    @coords[@coordsCount + 6] = 1.0
+    @coords[@coordsCount + 7] = 0.0
 
-    @positions[@positionsCount + 10] = @points[3][0]
-    @positions[@positionsCount + 11] = @points[3][1]
+    # Point 3
+    @coords[@coordsCount + 8]  = @cornerCoords[4]
+    @coords[@coordsCount + 9]  = @cornerCoords[5]
+    @coords[@coordsCount + 10] = 0.0
+    @coords[@coordsCount + 11] = 1.0
+
+    # Point 4
+    @coords[@coordsCount + 12] = @cornerCoords[4]
+    @coords[@coordsCount + 13] = @cornerCoords[5]
+    @coords[@coordsCount + 14] = 0.0
+    @coords[@coordsCount + 15] = 1.0
+
+    # Point 5
+    @coords[@coordsCount + 16] = @cornerCoords[2]
+    @coords[@coordsCount + 17] = @cornerCoords[3]
+    @coords[@coordsCount + 18] = 1.0
+    @coords[@coordsCount + 19] = 0.0
+
+    # Point 6
+    @coords[@coordsCount + 20] = @cornerCoords[6]
+    @coords[@coordsCount + 21] = @cornerCoords[7]
+    @coords[@coordsCount + 22] = 1.0
+    @coords[@coordsCount + 23] = 1.0
     return
 
-  bufferTexCoord: ->
-    @texCoords[@positionsCount]      = 0.0
-    @texCoords[@positionsCount + 1]  = 0.0
-
-    @texCoords[@positionsCount + 2]  = 1.0
-    @texCoords[@positionsCount + 3]  = 0.0
-
-    @texCoords[@positionsCount + 4]  = 0.0
-    @texCoords[@positionsCount + 5]  = 1.0
-
-    @texCoords[@positionsCount + 6]  = 0.0
-    @texCoords[@positionsCount + 7]  = 1.0
-
-    @texCoords[@positionsCount + 8]  = 1.0
-    @texCoords[@positionsCount + 9]  = 0.0
-
-    @texCoords[@positionsCount + 10] = 1.0
-    @texCoords[@positionsCount + 11] = 1.0
-    return
-
-  bufferAnimatedTexCoord: (object)->
+  bufferAnimatedRectangle: (object)->
     object.updateSubImage()
     x1 = (object.clipWidth + object.texture.spacing) * object.imageNumber
     x2 = x1 + object.clipWidth
     x1 /= object.texture.width
     x2 /= object.texture.width
 
-    @texCoords[@positionsCount]      = x1
-    @texCoords[@positionsCount + 1]  = 0.0
+    # Point 1
+    @coords[@coordsCount]     = @cornerCoords[0]
+    @coords[@coordsCount + 1] = @cornerCoords[1]
+    @coords[@coordsCount + 2] = x1
+    @coords[@coordsCount + 3] = 0.0
 
-    @texCoords[@positionsCount + 2]  = x2
-    @texCoords[@positionsCount + 3]  = 0.0
+    # Point 2
+    @coords[@coordsCount + 4] = @cornerCoords[2]
+    @coords[@coordsCount + 5] = @cornerCoords[3]
+    @coords[@coordsCount + 6] = x2
+    @coords[@coordsCount + 7] = 0.0
 
-    @texCoords[@positionsCount + 4]  = x1
-    @texCoords[@positionsCount + 5]  = 1.0
+    # Point 3
+    @coords[@coordsCount + 8]  = @cornerCoords[4]
+    @coords[@coordsCount + 9]  = @cornerCoords[5]
+    @coords[@coordsCount + 10] = x1
+    @coords[@coordsCount + 11] = 1.0
 
-    @texCoords[@positionsCount + 6]  = x1
-    @texCoords[@positionsCount + 7]  = 1.0
+    # Point 4
+    @coords[@coordsCount + 12] = @cornerCoords[4]
+    @coords[@coordsCount + 13] = @cornerCoords[5]
+    @coords[@coordsCount + 14] = x1
+    @coords[@coordsCount + 15] = 1.0
 
-    @texCoords[@positionsCount + 8]  = x2
-    @texCoords[@positionsCount + 9]  = 0.0
+    # Point 5
+    @coords[@coordsCount + 16] = @cornerCoords[2]
+    @coords[@coordsCount + 17] = @cornerCoords[3]
+    @coords[@coordsCount + 18] = x2
+    @coords[@coordsCount + 19] = 0.0
 
-    @texCoords[@positionsCount + 10] = x2
-    @texCoords[@positionsCount + 11] = 1.0
+    # Point 6
+    @coords[@coordsCount + 20] = @cornerCoords[6]
+    @coords[@coordsCount + 21] = @cornerCoords[7]
+    @coords[@coordsCount + 22] = x2
+    @coords[@coordsCount + 23] = 1.0
     return
 
   getGLTexture: (gl, texture) ->
@@ -259,25 +274,17 @@ c = class WebGLTextureShaderProgram
     texture
 
   flushBuffers: (gl)->
-    if @positionsCount
+    if @coordsCount
       texture = @getGLTexture(gl, @currentTexture)
       gl.bindTexture gl.TEXTURE_2D, texture
 
-      if @positionsCount < @batchSize / 2
-        gl.bindBuffer gl.ARRAY_BUFFER, @texCoordBuffer
-        gl.bufferData gl.ARRAY_BUFFER, @texCoords.slice(0, @positionsCount), gl.DYNAMIC_DRAW
-
-        gl.bindBuffer gl.ARRAY_BUFFER, @positionBuffer
-        gl.bufferData gl.ARRAY_BUFFER, @positions.slice(0, @positionsCount), gl.DYNAMIC_DRAW
+      if @coordsCount < @coords.length
+        gl.bufferData gl.ARRAY_BUFFER, @coords.slice(0, @coordsCount), gl.DYNAMIC_DRAW
       else
-        gl.bindBuffer gl.ARRAY_BUFFER, @texCoordBuffer
-        gl.bufferData gl.ARRAY_BUFFER, @texCoords, gl.DYNAMIC_DRAW
+        gl.bufferData gl.ARRAY_BUFFER, @coords, gl.DYNAMIC_DRAW
 
-        gl.bindBuffer gl.ARRAY_BUFFER, @positionBuffer
-        gl.bufferData gl.ARRAY_BUFFER, @positions, gl.DYNAMIC_DRAW
-
-      gl.drawArrays gl.TRIANGLES, 0, @positionsCount / 2
-      @positionsCount = 0
+      gl.drawArrays gl.TRIANGLES, 0, @coordsCount / 4
+      @coordsCount = 0
     return
 
 module.exports:: = Object.create c::

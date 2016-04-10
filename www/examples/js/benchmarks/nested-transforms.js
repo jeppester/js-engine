@@ -13,13 +13,13 @@ Main = (function() {
     this.posY = 0;
     this.rotation = 0;
     engine.defaultActivityLoop.attachOperation('rotation-transform', function(objects) {
-      var i, len, object, results;
-      results = [];
-      for (i = 0, len = objects.length; i < len; i++) {
-        object = objects[i];
-        results.push(object.direction += engine.perFrameSpeed(object.rotationSpeed));
+      var object, _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = objects.length; _i < _len; _i++) {
+        object = objects[_i];
+        _results.push(object.direction += engine.perFrameSpeed(object.rotationSpeed));
       }
-      return results;
+      return _results;
     });
     setTimeout(((function(_this) {
       return function() {
@@ -29,13 +29,13 @@ Main = (function() {
   }
 
   Main.prototype.getSearch = function() {
-    var i, len, name, part, parts, ref, s, search, value;
+    var name, part, parts, s, search, value, _i, _len, _ref;
     s = window.location.search.replace(/^\?/, '');
     parts = s.split('&');
     search = {};
-    for (i = 0, len = parts.length; i < len; i++) {
-      part = parts[i];
-      ref = part.split('='), name = ref[0], value = ref[1];
+    for (_i = 0, _len = parts.length; _i < _len; _i++) {
+      part = parts[_i];
+      _ref = part.split('='), name = _ref[0], value = _ref[1];
       search[name] = value;
     }
     return search;
@@ -72,7 +72,7 @@ Main = (function() {
   };
 
   Main.prototype.addObjects = function(count) {
-    var arm, arms, container, direction, dist, i, nextContainer, object, outerContainer, ref, results, sprite, subCount;
+    var arm, arms, container, direction, dist, nextContainer, object, outerContainer, sprite, subCount, _i, _results;
     if (count == null) {
       count = 10;
     }
@@ -88,15 +88,15 @@ Main = (function() {
     sprite = new Engine.Views.Sprite('rock', 0, 0);
     outerContainer.addChildren(sprite);
     this.count = 1;
-    results = [];
-    for (arm = i = 0, ref = arms; 0 <= ref ? i < ref : i > ref; arm = 0 <= ref ? ++i : --i) {
+    _results = [];
+    for (arm = _i = 0; 0 <= arms ? _i < arms : _i > arms; arm = 0 <= arms ? ++_i : --_i) {
       dist = 150;
       direction = Math.PI * 2 / arms * arm;
       nextContainer = outerContainer;
-      results.push((function() {
-        var j, ref1, results1;
-        results1 = [];
-        for (object = j = 0, ref1 = subCount; 0 <= ref1 ? j < ref1 : j > ref1; object = 0 <= ref1 ? ++j : --j) {
+      _results.push((function() {
+        var _j, _results1;
+        _results1 = [];
+        for (object = _j = 0; 0 <= subCount ? _j < subCount : _j > subCount; object = 0 <= subCount ? ++_j : --_j) {
           container = new Engine.Views.Container();
           container.x = Math.cos(direction) * dist;
           container.y = Math.sin(direction) * dist;
@@ -108,12 +108,12 @@ Main = (function() {
           this.count++;
           container.addChildren(sprite);
           dist *= .9;
-          results1.push(nextContainer = container);
+          _results1.push(nextContainer = container);
         }
-        return results1;
+        return _results1;
       }).call(this));
     }
-    return results;
+    return _results;
   };
 
   return Main;

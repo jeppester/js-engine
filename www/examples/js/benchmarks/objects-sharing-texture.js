@@ -20,13 +20,13 @@ Main = (function() {
   }
 
   Main.prototype.getSearch = function() {
-    var j, len, name, part, parts, ref, s, search, value;
+    var name, part, parts, s, search, value, _i, _len, _ref;
     s = window.location.search.replace(/^\?/, '');
     parts = s.split('&');
     search = {};
-    for (j = 0, len = parts.length; j < len; j++) {
-      part = parts[j];
-      ref = part.split('='), name = ref[0], value = ref[1];
+    for (_i = 0, _len = parts.length; _i < _len; _i++) {
+      part = parts[_i];
+      _ref = part.split('='), name = _ref[0], value = _ref[1];
       search[name] = value;
     }
     return search;
@@ -63,7 +63,7 @@ Main = (function() {
   };
 
   Main.prototype.addObjects = function(count) {
-    var col, cols, i, j, ref, results, row, rows, sprite, x, xInt, y, yInt;
+    var col, cols, i, row, rows, sprite, x, xInt, y, yInt, _i, _results;
     if (count == null) {
       count = 10;
     }
@@ -72,8 +72,8 @@ Main = (function() {
     row = 0;
     xInt = engine.canvasResX / cols;
     yInt = engine.canvasResY / rows;
-    results = [];
-    for (i = j = 0, ref = count; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+    _results = [];
+    for (i = _i = 0; 0 <= count ? _i < count : _i > count; i = 0 <= count ? ++_i : --_i) {
       x = col * xInt;
       y = row * yInt;
       sprite = new Engine.Views.Sprite('rock', x, y);
@@ -81,12 +81,12 @@ Main = (function() {
       ++row;
       if (row > rows) {
         row = 0;
-        results.push(++col);
+        _results.push(++col);
       } else {
-        results.push(void 0);
+        _results.push(void 0);
       }
     }
-    return results;
+    return _results;
   };
 
   return Main;
