@@ -6375,7 +6375,7 @@ module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
 };
 
-coordsBufferLength = 4 * 6 * 20000;
+coordsBufferLength = 5 * 6 * 20000;
 
 c = WebGLTextureShaderProgram = (function() {
   WebGLTextureShaderProgram.prototype.textureCache = {};
@@ -6406,25 +6406,33 @@ c = WebGLTextureShaderProgram = (function() {
   }
 
   WebGLTextureShaderProgram.prototype.initShaders = function(gl) {
-    var fragmentCode, fragmentShader, vertexCode, vertexShader;
-    vertexCode = "attribute vec2 a_position; attribute vec2 a_texCoord; uniform vec2 u_resolution; varying vec2 v_texCoord; void main() { vec2 clipSpace = a_position / u_resolution * 2.0 - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); v_texCoord = a_texCoord; }";
+    var compiled, fragmentCode, fragmentShader, vertexCode, vertexShader;
+    vertexCode = "attribute vec2 a_position; attribute vec2 a_texCoord; attribute float a_opacity; uniform vec2 u_resolution; varying vec2 v_texCoord; varying float v_opacity; void main() { vec2 clipSpace = a_position / u_resolution * 2.0 - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); v_texCoord = a_texCoord; v_opacity = a_opacity; }";
     vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexCode);
     gl.compileShader(vertexShader);
     gl.attachShader(this.program, vertexShader);
-    fragmentCode = "precision mediump float; uniform sampler2D u_image; varying vec2 v_texCoord; uniform float u_alpha; void main() { vec4 textureColor = texture2D(u_image, v_texCoord); gl_FragColor = vec4(textureColor.rgb, textureColor.a * u_alpha); }";
+    compiled = gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS);
+    if (!compiled) {
+      console.error(gl.getShaderInfoLog(vertexShader));
+    }
+    fragmentCode = "precision mediump float; uniform sampler2D u_image; varying vec2 v_texCoord; varying float v_opacity; void main() { vec4 textureColor = texture2D(u_image, v_texCoord); gl_FragColor = vec4(textureColor.rgb, textureColor.a * v_opacity); }";
     fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentCode);
     gl.compileShader(fragmentShader);
+    compiled = gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS);
+    if (!compiled) {
+      console.error(gl.getShaderInfoLog(fragmentShader));
+    }
     gl.attachShader(this.program, fragmentShader);
     gl.linkProgram(this.program);
   };
 
   WebGLTextureShaderProgram.prototype.bindLocations = function(gl) {
-    this.locations.a_texCoord = gl.getAttribLocation(this.program, "a_texCoord");
     this.locations.a_position = gl.getAttribLocation(this.program, "a_position");
+    this.locations.a_texCoord = gl.getAttribLocation(this.program, "a_texCoord");
+    this.locations.a_opacity = gl.getAttribLocation(this.program, "a_opacity");
     this.locations.u_resolution = gl.getUniformLocation(this.program, "u_resolution");
-    this.locations.u_alpha = gl.getUniformLocation(this.program, "u_alpha");
   };
 
   WebGLTextureShaderProgram.prototype.initBuffers = function(gl) {
@@ -6435,22 +6443,25 @@ c = WebGLTextureShaderProgram = (function() {
     var floatSize;
     floatSize = this.coords.BYTES_PER_ELEMENT;
     gl.bindBuffer(gl.ARRAY_BUFFER, this.coordsBuffer);
-    gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 4 * floatSize, 0);
+    gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 5 * floatSize, 0);
     gl.enableVertexAttribArray(this.locations.a_position);
-    gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 4 * floatSize, 2 * floatSize);
+    gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 5 * floatSize, 2 * floatSize);
     gl.enableVertexAttribArray(this.locations.a_texCoord);
+    gl.vertexAttribPointer(this.locations.a_opacity, 1, gl.FLOAT, false, 5 * floatSize, 4 * floatSize);
+    gl.enableVertexAttribArray(this.locations.a_opacity);
   };
 
   WebGLTextureShaderProgram.prototype.renderSprite = function(gl, object, wm) {
     this.setSpriteTexture(gl, object);
     this.setTransformedCorners(object.clipWidth, object.clipHeight, wm);
+    this.bufferOpacity(object.opacity);
     this.bufferRectangle();
     if (object.imageLength === 1) {
       this.bufferTexture();
     } else {
       this.bufferAnimatedTexture(object);
     }
-    this.coordsCount += 24;
+    this.coordsCount += 30;
   };
 
   WebGLTextureShaderProgram.prototype.renderTextBlock = function(gl, object, wm) {
@@ -6470,13 +6481,14 @@ c = WebGLTextureShaderProgram = (function() {
   WebGLTextureShaderProgram.prototype.renderMask = function(gl, object, wm) {
     this.setMaskTexture(gl, object);
     this.setTransformedCorners(object.clipWidth, object.clipHeight, wm);
+    this.bufferOpacity(1);
     this.bufferRectangle();
     if (object.imageLength === 1) {
       this.bufferTexture();
     } else {
       this.bufferAnimatedTexture(object);
     }
-    this.coordsCount += 24;
+    this.coordsCount += 30;
   };
 
   WebGLTextureShaderProgram.prototype.setMaskTexture = function(gl, object) {
@@ -6503,34 +6515,43 @@ c = WebGLTextureShaderProgram = (function() {
     return this.cornerCoords[7] = width * wm[1] + height * wm[4] + wm[7];
   };
 
+  WebGLTextureShaderProgram.prototype.bufferOpacity = function(opacity) {
+    this.coords[this.coordsCount + 4] = opacity;
+    this.coords[this.coordsCount + 9] = opacity;
+    this.coords[this.coordsCount + 14] = opacity;
+    this.coords[this.coordsCount + 19] = opacity;
+    this.coords[this.coordsCount + 24] = opacity;
+    return this.coords[this.coordsCount + 29] = opacity;
+  };
+
   WebGLTextureShaderProgram.prototype.bufferRectangle = function() {
     this.coords[this.coordsCount] = this.cornerCoords[0];
     this.coords[this.coordsCount + 1] = this.cornerCoords[1];
-    this.coords[this.coordsCount + 4] = this.cornerCoords[2];
-    this.coords[this.coordsCount + 5] = this.cornerCoords[3];
-    this.coords[this.coordsCount + 8] = this.cornerCoords[4];
-    this.coords[this.coordsCount + 9] = this.cornerCoords[5];
-    this.coords[this.coordsCount + 12] = this.cornerCoords[4];
-    this.coords[this.coordsCount + 13] = this.cornerCoords[5];
-    this.coords[this.coordsCount + 16] = this.cornerCoords[2];
-    this.coords[this.coordsCount + 17] = this.cornerCoords[3];
-    this.coords[this.coordsCount + 20] = this.cornerCoords[6];
-    this.coords[this.coordsCount + 21] = this.cornerCoords[7];
+    this.coords[this.coordsCount + 5] = this.cornerCoords[2];
+    this.coords[this.coordsCount + 6] = this.cornerCoords[3];
+    this.coords[this.coordsCount + 10] = this.cornerCoords[4];
+    this.coords[this.coordsCount + 11] = this.cornerCoords[5];
+    this.coords[this.coordsCount + 15] = this.cornerCoords[4];
+    this.coords[this.coordsCount + 16] = this.cornerCoords[5];
+    this.coords[this.coordsCount + 20] = this.cornerCoords[2];
+    this.coords[this.coordsCount + 21] = this.cornerCoords[3];
+    this.coords[this.coordsCount + 25] = this.cornerCoords[6];
+    this.coords[this.coordsCount + 26] = this.cornerCoords[7];
   };
 
   WebGLTextureShaderProgram.prototype.bufferTexture = function() {
     this.coords[this.coordsCount + 2] = 0.0;
     this.coords[this.coordsCount + 3] = 0.0;
-    this.coords[this.coordsCount + 6] = 1.0;
-    this.coords[this.coordsCount + 7] = 0.0;
-    this.coords[this.coordsCount + 10] = 0.0;
-    this.coords[this.coordsCount + 11] = 1.0;
-    this.coords[this.coordsCount + 14] = 0.0;
-    this.coords[this.coordsCount + 15] = 1.0;
+    this.coords[this.coordsCount + 7] = 1.0;
+    this.coords[this.coordsCount + 8] = 0.0;
+    this.coords[this.coordsCount + 12] = 0.0;
+    this.coords[this.coordsCount + 13] = 1.0;
+    this.coords[this.coordsCount + 17] = 0.0;
     this.coords[this.coordsCount + 18] = 1.0;
-    this.coords[this.coordsCount + 19] = 0.0;
     this.coords[this.coordsCount + 22] = 1.0;
-    this.coords[this.coordsCount + 23] = 1.0;
+    this.coords[this.coordsCount + 23] = 0.0;
+    this.coords[this.coordsCount + 27] = 1.0;
+    this.coords[this.coordsCount + 28] = 1.0;
   };
 
   WebGLTextureShaderProgram.prototype.bufferAnimatedTexture = function(object) {
@@ -6542,16 +6563,16 @@ c = WebGLTextureShaderProgram = (function() {
     x2 /= object.texture.width;
     this.coords[this.coordsCount + 2] = x1;
     this.coords[this.coordsCount + 3] = 0.0;
-    this.coords[this.coordsCount + 6] = x2;
-    this.coords[this.coordsCount + 7] = 0.0;
-    this.coords[this.coordsCount + 10] = x1;
-    this.coords[this.coordsCount + 11] = 1.0;
-    this.coords[this.coordsCount + 14] = x1;
-    this.coords[this.coordsCount + 15] = 1.0;
-    this.coords[this.coordsCount + 18] = x2;
-    this.coords[this.coordsCount + 19] = 0.0;
+    this.coords[this.coordsCount + 7] = x2;
+    this.coords[this.coordsCount + 8] = 0.0;
+    this.coords[this.coordsCount + 12] = x1;
+    this.coords[this.coordsCount + 13] = 1.0;
+    this.coords[this.coordsCount + 17] = x1;
+    this.coords[this.coordsCount + 18] = 1.0;
     this.coords[this.coordsCount + 22] = x2;
-    this.coords[this.coordsCount + 23] = 1.0;
+    this.coords[this.coordsCount + 23] = 0.0;
+    this.coords[this.coordsCount + 27] = x2;
+    this.coords[this.coordsCount + 28] = 1.0;
   };
 
   WebGLTextureShaderProgram.prototype.getGLTexture = function(gl, texture) {
@@ -6580,7 +6601,7 @@ c = WebGLTextureShaderProgram = (function() {
       texture = this.getGLTexture(gl, this.currentTexture);
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.bufferData(gl.ARRAY_BUFFER, this.coords, gl.DYNAMIC_DRAW);
-      gl.drawArrays(gl.TRIANGLES, 0, this.coordsCount / 4);
+      gl.drawArrays(gl.TRIANGLES, 0, this.coordsCount / 5);
       this.coordsCount = 0;
     }
   };

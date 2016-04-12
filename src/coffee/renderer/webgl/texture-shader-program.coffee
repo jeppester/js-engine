@@ -1,6 +1,6 @@
 module.exports = -> module.exports::constructor.apply @, arguments
-coordsBufferLength = 4 * 6 * 20000
-# 4 points per vertex (x, y + texture coords)
+coordsBufferLength = 5 * 6 * 20000
+# 5 points per vertex (x, y + texture coords + opacity)
 # 6 vertices per object (two triangles)
 # 1000 objects per draw (maybe we can increase this)
 
@@ -28,10 +28,12 @@ c = class WebGLTextureShaderProgram
     vertexCode = "
       attribute vec2 a_position;
       attribute vec2 a_texCoord;
+      attribute float a_opacity;
 
       uniform vec2 u_resolution;
 
       varying vec2 v_texCoord;
+      varying float v_opacity;
 
       void main() {
         vec2 clipSpace = a_position / u_resolution * 2.0 - 1.0;
@@ -39,6 +41,7 @@ c = class WebGLTextureShaderProgram
         gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
 
         v_texCoord = a_texCoord;
+        v_opacity = a_opacity;
       }
     "
     vertexShader = gl.createShader(gl.VERTEX_SHADER)
@@ -46,31 +49,44 @@ c = class WebGLTextureShaderProgram
     gl.compileShader vertexShader
     gl.attachShader @program, vertexShader
 
+    # Check the compile status
+    compiled = gl.getShaderParameter vertexShader, gl.COMPILE_STATUS
+    unless compiled
+      #  Something went wrong during compilation; get the error
+      console.error gl.getShaderInfoLog vertexShader
+
     # Fragment shader
     fragmentCode = "
       precision mediump float;
 
       uniform sampler2D u_image;
       varying vec2 v_texCoord;
-      uniform float u_alpha;
+      varying float v_opacity;
 
       void main() {
         vec4 textureColor = texture2D(u_image, v_texCoord);
-        gl_FragColor = vec4(textureColor.rgb, textureColor.a * u_alpha);
+        gl_FragColor = vec4(textureColor.rgb, textureColor.a * v_opacity);
       }
     "
     fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
     gl.shaderSource fragmentShader, fragmentCode
     gl.compileShader fragmentShader
+
+    # Check the compile status
+    compiled = gl.getShaderParameter fragmentShader, gl.COMPILE_STATUS
+    unless compiled
+      #  Something went wrong during compilation; get the error
+      console.error gl.getShaderInfoLog fragmentShader
+
     gl.attachShader @program, fragmentShader
     gl.linkProgram @program
     return
 
   bindLocations: (gl) ->
-    @locations.a_texCoord   = gl.getAttribLocation @program, "a_texCoord"
     @locations.a_position   = gl.getAttribLocation @program, "a_position"
+    @locations.a_texCoord   = gl.getAttribLocation @program, "a_texCoord"
+    @locations.a_opacity    = gl.getAttribLocation @program, "a_opacity"
     @locations.u_resolution = gl.getUniformLocation @program, "u_resolution"
-    @locations.u_alpha      = gl.getUniformLocation @program, "u_alpha"
     return
 
   initBuffers: (gl) ->
@@ -81,10 +97,12 @@ c = class WebGLTextureShaderProgram
   onSet: (gl)->
     floatSize = @coords.BYTES_PER_ELEMENT
     gl.bindBuffer gl.ARRAY_BUFFER, @coordsBuffer
-    gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 4 * floatSize, 0
+    gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 5 * floatSize, 0
     gl.enableVertexAttribArray @locations.a_position
-    gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 4 * floatSize, 2 * floatSize
+    gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 5 * floatSize, 2 * floatSize
     gl.enableVertexAttribArray @locations.a_texCoord
+    gl.vertexAttribPointer @locations.a_opacity, 1, gl.FLOAT, false, 5 * floatSize, 4 * floatSize
+    gl.enableVertexAttribArray @locations.a_opacity
     return
 
   # Draw functions
@@ -96,13 +114,14 @@ c = class WebGLTextureShaderProgram
     @setTransformedCorners object.clipWidth, object.clipHeight, wm
 
     # Buffer position
+    @bufferOpacity object.opacity
     @bufferRectangle()
     if object.imageLength == 1
       @bufferTexture()
     else
       @bufferAnimatedTexture object
 
-    @coordsCount += 24
+    @coordsCount += 30
     return
 
   renderTextBlock: (gl, object, wm)->
@@ -126,13 +145,14 @@ c = class WebGLTextureShaderProgram
     @setTransformedCorners object.clipWidth, object.clipHeight, wm
 
     # Buffer position
+    @bufferOpacity 1
     @bufferRectangle()
     if object.imageLength == 1
       @bufferTexture()
     else
       @bufferAnimatedTexture object
 
-    @coordsCount += 24
+    @coordsCount += 30
     return
 
   setMaskTexture: (gl, object)->
@@ -168,30 +188,38 @@ c = class WebGLTextureShaderProgram
     @cornerCoords[6] = width * wm[0] + height * wm[3] + wm[6]
     @cornerCoords[7] = width * wm[1] + height * wm[4] + wm[7]
 
+  bufferOpacity: (opacity)->
+    @coords[@coordsCount + 4] = opacity
+    @coords[@coordsCount + 9] = opacity
+    @coords[@coordsCount + 14] = opacity
+    @coords[@coordsCount + 19] = opacity
+    @coords[@coordsCount + 24] = opacity
+    @coords[@coordsCount + 29] = opacity
+
   bufferRectangle: ->
     # Point 1
     @coords[@coordsCount]     = @cornerCoords[0]
     @coords[@coordsCount + 1] = @cornerCoords[1]
 
     # Point 2
-    @coords[@coordsCount + 4] = @cornerCoords[2]
-    @coords[@coordsCount + 5] = @cornerCoords[3]
+    @coords[@coordsCount + 5] = @cornerCoords[2]
+    @coords[@coordsCount + 6] = @cornerCoords[3]
 
     # Point 3
-    @coords[@coordsCount + 8]  = @cornerCoords[4]
-    @coords[@coordsCount + 9]  = @cornerCoords[5]
+    @coords[@coordsCount + 10]  = @cornerCoords[4]
+    @coords[@coordsCount + 11]  = @cornerCoords[5]
 
     # Point 4
-    @coords[@coordsCount + 12] = @cornerCoords[4]
-    @coords[@coordsCount + 13] = @cornerCoords[5]
+    @coords[@coordsCount + 15] = @cornerCoords[4]
+    @coords[@coordsCount + 16] = @cornerCoords[5]
 
     # Point 5
-    @coords[@coordsCount + 16] = @cornerCoords[2]
-    @coords[@coordsCount + 17] = @cornerCoords[3]
+    @coords[@coordsCount + 20] = @cornerCoords[2]
+    @coords[@coordsCount + 21] = @cornerCoords[3]
 
     # Point 6
-    @coords[@coordsCount + 20] = @cornerCoords[6]
-    @coords[@coordsCount + 21] = @cornerCoords[7]
+    @coords[@coordsCount + 25] = @cornerCoords[6]
+    @coords[@coordsCount + 26] = @cornerCoords[7]
     return
 
   bufferTexture: ->
@@ -200,24 +228,24 @@ c = class WebGLTextureShaderProgram
     @coords[@coordsCount + 3] = 0.0
 
     # Point 2
-    @coords[@coordsCount + 6] = 1.0
-    @coords[@coordsCount + 7] = 0.0
+    @coords[@coordsCount + 7] = 1.0
+    @coords[@coordsCount + 8] = 0.0
 
     # Point 3
-    @coords[@coordsCount + 10] = 0.0
-    @coords[@coordsCount + 11] = 1.0
+    @coords[@coordsCount + 12] = 0.0
+    @coords[@coordsCount + 13] = 1.0
 
     # Point 4
-    @coords[@coordsCount + 14] = 0.0
-    @coords[@coordsCount + 15] = 1.0
+    @coords[@coordsCount + 17] = 0.0
+    @coords[@coordsCount + 18] = 1.0
 
     # Point 5
-    @coords[@coordsCount + 18] = 1.0
-    @coords[@coordsCount + 19] = 0.0
+    @coords[@coordsCount + 22] = 1.0
+    @coords[@coordsCount + 23] = 0.0
 
     # Point 6
-    @coords[@coordsCount + 22] = 1.0
-    @coords[@coordsCount + 23] = 1.0
+    @coords[@coordsCount + 27] = 1.0
+    @coords[@coordsCount + 28] = 1.0
     return
 
   bufferAnimatedTexture: (object)->
@@ -232,24 +260,24 @@ c = class WebGLTextureShaderProgram
     @coords[@coordsCount + 3] = 0.0
 
     # Point 2
-    @coords[@coordsCount + 6] = x2
-    @coords[@coordsCount + 7] = 0.0
+    @coords[@coordsCount + 7] = x2
+    @coords[@coordsCount + 8] = 0.0
 
     # Point 3
-    @coords[@coordsCount + 10] = x1
-    @coords[@coordsCount + 11] = 1.0
+    @coords[@coordsCount + 12] = x1
+    @coords[@coordsCount + 13] = 1.0
 
     # Point 4
-    @coords[@coordsCount + 14] = x1
-    @coords[@coordsCount + 15] = 1.0
+    @coords[@coordsCount + 17] = x1
+    @coords[@coordsCount + 18] = 1.0
 
     # Point 5
-    @coords[@coordsCount + 18] = x2
-    @coords[@coordsCount + 19] = 0.0
+    @coords[@coordsCount + 22] = x2
+    @coords[@coordsCount + 23] = 0.0
 
     # Point 6
-    @coords[@coordsCount + 22] = x2
-    @coords[@coordsCount + 23] = 1.0
+    @coords[@coordsCount + 27] = x2
+    @coords[@coordsCount + 28] = 1.0
     return
 
   getGLTexture: (gl, texture) ->
@@ -282,7 +310,7 @@ c = class WebGLTextureShaderProgram
       texture = @getGLTexture(gl, @currentTexture)
       gl.bindTexture gl.TEXTURE_2D, texture
       gl.bufferData gl.ARRAY_BUFFER, @coords, gl.DYNAMIC_DRAW
-      gl.drawArrays gl.TRIANGLES, 0, @coordsCount / 4
+      gl.drawArrays gl.TRIANGLES, 0, @coordsCount / 5
       @coordsCount = 0
     return
 
