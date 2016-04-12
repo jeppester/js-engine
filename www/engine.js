@@ -6444,10 +6444,11 @@ c = WebGLTextureShaderProgram = (function() {
   WebGLTextureShaderProgram.prototype.renderSprite = function(gl, object, wm) {
     this.setSpriteTexture(gl, object);
     this.setTransformedCorners(object.clipWidth, object.clipHeight, wm);
+    this.bufferRectangle();
     if (object.imageLength === 1) {
-      this.bufferRectangle();
+      this.bufferTexture();
     } else {
-      this.bufferAnimatedRectangle(object);
+      this.bufferAnimatedTexture(object);
     }
     this.coordsCount += 24;
   };
@@ -6469,10 +6470,11 @@ c = WebGLTextureShaderProgram = (function() {
   WebGLTextureShaderProgram.prototype.renderMask = function(gl, object, wm) {
     this.setMaskTexture(gl, object);
     this.setTransformedCorners(object.clipWidth, object.clipHeight, wm);
+    this.bufferRectangle();
     if (object.imageLength === 1) {
-      this.bufferRectangle();
+      this.bufferTexture();
     } else {
-      this.bufferAnimatedRectangle(object);
+      this.bufferAnimatedTexture(object);
     }
     this.coordsCount += 24;
   };
@@ -6504,59 +6506,50 @@ c = WebGLTextureShaderProgram = (function() {
   WebGLTextureShaderProgram.prototype.bufferRectangle = function() {
     this.coords[this.coordsCount] = this.cornerCoords[0];
     this.coords[this.coordsCount + 1] = this.cornerCoords[1];
-    this.coords[this.coordsCount + 2] = 0.0;
-    this.coords[this.coordsCount + 3] = 0.0;
     this.coords[this.coordsCount + 4] = this.cornerCoords[2];
     this.coords[this.coordsCount + 5] = this.cornerCoords[3];
-    this.coords[this.coordsCount + 6] = 1.0;
-    this.coords[this.coordsCount + 7] = 0.0;
     this.coords[this.coordsCount + 8] = this.cornerCoords[4];
     this.coords[this.coordsCount + 9] = this.cornerCoords[5];
-    this.coords[this.coordsCount + 10] = 0.0;
-    this.coords[this.coordsCount + 11] = 1.0;
     this.coords[this.coordsCount + 12] = this.cornerCoords[4];
     this.coords[this.coordsCount + 13] = this.cornerCoords[5];
-    this.coords[this.coordsCount + 14] = 0.0;
-    this.coords[this.coordsCount + 15] = 1.0;
     this.coords[this.coordsCount + 16] = this.cornerCoords[2];
     this.coords[this.coordsCount + 17] = this.cornerCoords[3];
-    this.coords[this.coordsCount + 18] = 1.0;
-    this.coords[this.coordsCount + 19] = 0.0;
     this.coords[this.coordsCount + 20] = this.cornerCoords[6];
     this.coords[this.coordsCount + 21] = this.cornerCoords[7];
+  };
+
+  WebGLTextureShaderProgram.prototype.bufferTexture = function() {
+    this.coords[this.coordsCount + 2] = 0.0;
+    this.coords[this.coordsCount + 3] = 0.0;
+    this.coords[this.coordsCount + 6] = 1.0;
+    this.coords[this.coordsCount + 7] = 0.0;
+    this.coords[this.coordsCount + 10] = 0.0;
+    this.coords[this.coordsCount + 11] = 1.0;
+    this.coords[this.coordsCount + 14] = 0.0;
+    this.coords[this.coordsCount + 15] = 1.0;
+    this.coords[this.coordsCount + 18] = 1.0;
+    this.coords[this.coordsCount + 19] = 0.0;
     this.coords[this.coordsCount + 22] = 1.0;
     this.coords[this.coordsCount + 23] = 1.0;
   };
 
-  WebGLTextureShaderProgram.prototype.bufferAnimatedRectangle = function(object) {
+  WebGLTextureShaderProgram.prototype.bufferAnimatedTexture = function(object) {
     var x1, x2;
     object.updateSubImage();
     x1 = (object.clipWidth + object.texture.spacing) * object.imageNumber;
     x2 = x1 + object.clipWidth;
     x1 /= object.texture.width;
     x2 /= object.texture.width;
-    this.coords[this.coordsCount] = this.cornerCoords[0];
-    this.coords[this.coordsCount + 1] = this.cornerCoords[1];
     this.coords[this.coordsCount + 2] = x1;
     this.coords[this.coordsCount + 3] = 0.0;
-    this.coords[this.coordsCount + 4] = this.cornerCoords[2];
-    this.coords[this.coordsCount + 5] = this.cornerCoords[3];
     this.coords[this.coordsCount + 6] = x2;
     this.coords[this.coordsCount + 7] = 0.0;
-    this.coords[this.coordsCount + 8] = this.cornerCoords[4];
-    this.coords[this.coordsCount + 9] = this.cornerCoords[5];
     this.coords[this.coordsCount + 10] = x1;
     this.coords[this.coordsCount + 11] = 1.0;
-    this.coords[this.coordsCount + 12] = this.cornerCoords[4];
-    this.coords[this.coordsCount + 13] = this.cornerCoords[5];
     this.coords[this.coordsCount + 14] = x1;
     this.coords[this.coordsCount + 15] = 1.0;
-    this.coords[this.coordsCount + 16] = this.cornerCoords[2];
-    this.coords[this.coordsCount + 17] = this.cornerCoords[3];
     this.coords[this.coordsCount + 18] = x2;
     this.coords[this.coordsCount + 19] = 0.0;
-    this.coords[this.coordsCount + 20] = this.cornerCoords[6];
-    this.coords[this.coordsCount + 21] = this.cornerCoords[7];
     this.coords[this.coordsCount + 22] = x2;
     this.coords[this.coordsCount + 23] = 1.0;
   };
@@ -6586,11 +6579,7 @@ c = WebGLTextureShaderProgram = (function() {
     if (this.coordsCount) {
       texture = this.getGLTexture(gl, this.currentTexture);
       gl.bindTexture(gl.TEXTURE_2D, texture);
-      if (this.coordsCount < this.coords.length) {
-        gl.bufferData(gl.ARRAY_BUFFER, this.coords.slice(0, this.coordsCount), gl.DYNAMIC_DRAW);
-      } else {
-        gl.bufferData(gl.ARRAY_BUFFER, this.coords, gl.DYNAMIC_DRAW);
-      }
+      gl.bufferData(gl.ARRAY_BUFFER, this.coords, gl.DYNAMIC_DRAW);
       gl.drawArrays(gl.TRIANGLES, 0, this.coordsCount / 4);
       this.coordsCount = 0;
     }

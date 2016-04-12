@@ -96,10 +96,11 @@ c = class WebGLTextureShaderProgram
     @setTransformedCorners object.clipWidth, object.clipHeight, wm
 
     # Buffer position
+    @bufferRectangle()
     if object.imageLength == 1
-      @bufferRectangle()
+      @bufferTexture()
     else
-      @bufferAnimatedRectangle object
+      @bufferAnimatedTexture object
 
     @coordsCount += 24
     return
@@ -125,10 +126,11 @@ c = class WebGLTextureShaderProgram
     @setTransformedCorners object.clipWidth, object.clipHeight, wm
 
     # Buffer position
+    @bufferRectangle()
     if object.imageLength == 1
-      @bufferRectangle()
+      @bufferTexture()
     else
-      @bufferAnimatedRectangle object
+      @bufferAnimatedTexture object
 
     @coordsCount += 24
     return
@@ -170,41 +172,55 @@ c = class WebGLTextureShaderProgram
     # Point 1
     @coords[@coordsCount]     = @cornerCoords[0]
     @coords[@coordsCount + 1] = @cornerCoords[1]
-    @coords[@coordsCount + 2] = 0.0
-    @coords[@coordsCount + 3] = 0.0
 
     # Point 2
     @coords[@coordsCount + 4] = @cornerCoords[2]
     @coords[@coordsCount + 5] = @cornerCoords[3]
-    @coords[@coordsCount + 6] = 1.0
-    @coords[@coordsCount + 7] = 0.0
 
     # Point 3
     @coords[@coordsCount + 8]  = @cornerCoords[4]
     @coords[@coordsCount + 9]  = @cornerCoords[5]
-    @coords[@coordsCount + 10] = 0.0
-    @coords[@coordsCount + 11] = 1.0
 
     # Point 4
     @coords[@coordsCount + 12] = @cornerCoords[4]
     @coords[@coordsCount + 13] = @cornerCoords[5]
-    @coords[@coordsCount + 14] = 0.0
-    @coords[@coordsCount + 15] = 1.0
 
     # Point 5
     @coords[@coordsCount + 16] = @cornerCoords[2]
     @coords[@coordsCount + 17] = @cornerCoords[3]
-    @coords[@coordsCount + 18] = 1.0
-    @coords[@coordsCount + 19] = 0.0
 
     # Point 6
     @coords[@coordsCount + 20] = @cornerCoords[6]
     @coords[@coordsCount + 21] = @cornerCoords[7]
+    return
+
+  bufferTexture: ->
+    # Point 1
+    @coords[@coordsCount + 2] = 0.0
+    @coords[@coordsCount + 3] = 0.0
+
+    # Point 2
+    @coords[@coordsCount + 6] = 1.0
+    @coords[@coordsCount + 7] = 0.0
+
+    # Point 3
+    @coords[@coordsCount + 10] = 0.0
+    @coords[@coordsCount + 11] = 1.0
+
+    # Point 4
+    @coords[@coordsCount + 14] = 0.0
+    @coords[@coordsCount + 15] = 1.0
+
+    # Point 5
+    @coords[@coordsCount + 18] = 1.0
+    @coords[@coordsCount + 19] = 0.0
+
+    # Point 6
     @coords[@coordsCount + 22] = 1.0
     @coords[@coordsCount + 23] = 1.0
     return
 
-  bufferAnimatedRectangle: (object)->
+  bufferAnimatedTexture: (object)->
     object.updateSubImage()
     x1 = (object.clipWidth + object.texture.spacing) * object.imageNumber
     x2 = x1 + object.clipWidth
@@ -212,38 +228,26 @@ c = class WebGLTextureShaderProgram
     x2 /= object.texture.width
 
     # Point 1
-    @coords[@coordsCount]     = @cornerCoords[0]
-    @coords[@coordsCount + 1] = @cornerCoords[1]
     @coords[@coordsCount + 2] = x1
     @coords[@coordsCount + 3] = 0.0
 
     # Point 2
-    @coords[@coordsCount + 4] = @cornerCoords[2]
-    @coords[@coordsCount + 5] = @cornerCoords[3]
     @coords[@coordsCount + 6] = x2
     @coords[@coordsCount + 7] = 0.0
 
     # Point 3
-    @coords[@coordsCount + 8]  = @cornerCoords[4]
-    @coords[@coordsCount + 9]  = @cornerCoords[5]
     @coords[@coordsCount + 10] = x1
     @coords[@coordsCount + 11] = 1.0
 
     # Point 4
-    @coords[@coordsCount + 12] = @cornerCoords[4]
-    @coords[@coordsCount + 13] = @cornerCoords[5]
     @coords[@coordsCount + 14] = x1
     @coords[@coordsCount + 15] = 1.0
 
     # Point 5
-    @coords[@coordsCount + 16] = @cornerCoords[2]
-    @coords[@coordsCount + 17] = @cornerCoords[3]
     @coords[@coordsCount + 18] = x2
     @coords[@coordsCount + 19] = 0.0
 
     # Point 6
-    @coords[@coordsCount + 20] = @cornerCoords[6]
-    @coords[@coordsCount + 21] = @cornerCoords[7]
     @coords[@coordsCount + 22] = x2
     @coords[@coordsCount + 23] = 1.0
     return
@@ -277,12 +281,7 @@ c = class WebGLTextureShaderProgram
     if @coordsCount
       texture = @getGLTexture(gl, @currentTexture)
       gl.bindTexture gl.TEXTURE_2D, texture
-
-      if @coordsCount < @coords.length
-        gl.bufferData gl.ARRAY_BUFFER, @coords.slice(0, @coordsCount), gl.DYNAMIC_DRAW
-      else
-        gl.bufferData gl.ARRAY_BUFFER, @coords, gl.DYNAMIC_DRAW
-
+      gl.bufferData gl.ARRAY_BUFFER, @coords, gl.DYNAMIC_DRAW
       gl.drawArrays gl.TRIANGLES, 0, @coordsCount / 4
       @coordsCount = 0
     return
