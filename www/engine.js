@@ -6407,7 +6407,7 @@ c = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.initShaders = function(gl) {
     var compiled, fragmentCode, fragmentShader, vertexCode, vertexShader;
-    vertexCode = "attribute vec2 a_position; attribute vec2 a_texCoord; attribute float a_opacity; uniform vec2 u_resolution; varying vec2 v_texCoord; varying float v_opacity; void main() { vec2 clipSpace = a_position / u_resolution * 2.0 - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); v_texCoord = a_texCoord; v_opacity = a_opacity; }";
+    vertexCode = "attribute vec2 a_position; attribute vec2 a_texCoord; attribute float a_opacity; uniform vec2 u_resolution; varying vec2 v_texCoord; varying float v_opacity; void main() { vec2 clipSpace = a_position / u_resolution * 2.0 - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0.0, 1.0); v_texCoord = a_texCoord; v_opacity = a_opacity; }";
     vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexCode);
     gl.compileShader(vertexShader);
