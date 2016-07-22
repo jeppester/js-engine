@@ -1,7 +1,5 @@
 extends ../examples.jade
-
-block title
-  title Sound effects
-
-block example
-  script(type="text/javascript", src="js/sounds.js")
+block variables
+  - var engine_path_prefix = '../'
+  - var title = 'Sound effects'
+  - var game_source = 'js/sounds.js'

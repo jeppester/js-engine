@@ -44,7 +44,7 @@ The default options are:
 "cachedSoundCopies": 5, // How many times sounds should be duplicated to allow multiple playbacks
 "canvasResX": 800, // The horizontal resolution to set for the game's main canvas
 "canvasResY": 600, // The vertical resolution to set for the game's main canvas
-"defaultCollisionResolution": 6, // Res. of collision checking, by default every 6th px is checked
+"defaultCollisionResolution": 1, // Res. of collision checking, by default every 6th px is checked
 "disableRightClick": true, // If right clicks inside the arena should be disabled
 "disableWebGL": false, // If WebGL rendering should be disabled
 "preventDefaultKeyboard": false, // Whether or not preventDefault should be called for keyboard events
@@ -58,7 +58,7 @@ The default options are:
 "pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
 "resetCursorOnEachFrame": true // Whether or not the mouse cursor should be reset on each frame
 "soundsMuted": false, // If all sound effects should be initially muted
-"themesPath": "themes", // The path to the themes-directory
+"themesPath": "assets", // The path to the themes-directory
 "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
 ###
@@ -181,7 +181,7 @@ c = window.Engine = class Engine
     @disableTouchScroll = true
     @resetCursorOnEachFrame = true
     @cameras = []
-    @defaultCollisionResolution = 6
+    @defaultCollisionResolution = 1
     @redrawObjects = []
     @enableRedrawRegions = false
     @disableWebGL = false
@@ -229,7 +229,7 @@ c = window.Engine = class Engine
 
     # Set style for arena
     @arena.style.position = "absolute"
-    @arena.style.backgroundColor = "#000"
+    @arena.style.backgroundColor = @backgroundColor
     @arena.style.userSelect = "none"
     @arena.style.webkitUserSelect = "none"
     @arena.style.MozUserSelect = "none"
@@ -413,6 +413,9 @@ c = window.Engine = class Engine
     @canvas.style.width = w + "px"
     return
 
+  perFrameSpeed: (speed)->
+    speed * @gameTimeIncrease / 1000
+
   ###
   Function for converting between speed units
 
@@ -423,9 +426,14 @@ c = window.Engine = class Engine
   ###
   convertSpeed: (speed, from, to) ->
     throw new Error("Missing argument: speed") if speed is undefined #dev
-    return new @constructor.Vector(@convertSpeed(speed.x, from, to), @convertSpeed(speed.y, from, to)) if speed instanceof @constructor.Geometry.Vector
-    from = (if from isnt undefined then from else module.exports::constructor.Globals.SPEED_PIXELS_PER_SECOND)
-    to = (if to isnt undefined then to else module.exports::constructor.Globals.SPEED_PIXELS_PER_FRAME)
+    if speed instanceof @constructor.Geometry.Vector
+      return new @constructor.Vector(
+        @convertSpeed speed.x, from, to
+        @convertSpeed speed.y, from, to
+      )
+
+    from ?= module.exports::constructor.Globals.SPEED_PIXELS_PER_SECOND
+    to ?= module.exports::constructor.Globals.SPEED_PIXELS_PER_FRAME
 
     # Convert all formats to pixels per frame
     switch from

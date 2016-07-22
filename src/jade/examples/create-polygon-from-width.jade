@@ -1,7 +1,5 @@
 extends ../examples.jade
-
-block title
-  title Create polygon from width
-
-block example
-  script(type="text/javascript", src="js/create-polygon-from-width.js")
+block variables
+  - var engine_path_prefix = '../'
+  - var title = 'Create polygon from width'
+  - var game_source = 'js/create-polygon-from-width.js'

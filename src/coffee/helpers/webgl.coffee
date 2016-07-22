@@ -1,4 +1,6 @@
 module.exports = WebGLHelper =
+  planeCache: new Float32Array 12
+
   colorFromCSSString: (string) ->
     if string.length is 4
       a = string.substr(1, 1)
@@ -14,15 +16,21 @@ module.exports = WebGLHelper =
     x2 = x + width
     y1 = y
     y2 = y + height
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
-      x1, y1
-      x2, y1
-      x1, y2
-      x1, y2
-      x2, y1
-      x2, y2
-    ]), gl.STATIC_DRAW
-    return
+
+    p = @planeCache
+    p[0] = x1
+    p[1] = y1
+    p[2] = x2
+    p[3] = y1
+    p[4] = x1
+    p[5] = y2
+    p[6] = x1
+    p[7] = y2
+    p[8] = x2
+    p[9] = y1
+    p[10] = x2
+    p[11] = y2
+    gl.bufferData gl.ARRAY_BUFFER, p, gl.STATIC_DRAW
 
   # Produces bufferdata for TRIANGLES
   setPlaneOutline: (gl, x, y, width, height, outlineWidth) ->

@@ -1,3 +1,4 @@
+
 module.exports = -> module.exports::constructor.apply @, arguments
 
 # Mixins and parent class at top
@@ -9,13 +10,8 @@ Geometry =
 @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
 ###
 c = class Child
+  renderType: null
   constructor: ->
-    @renderType = ""
-    @initWithoutRedrawRegions()
-    engine.registerObject this
-    return
-
-  initWithoutRedrawRegions: ->
     @x = 0
     @y = 0
     @opacity = 1
@@ -23,158 +19,13 @@ c = class Child
     @size = 1
     @widthScale = 1
     @heightScale = 1
-    hidden = offset: new Geometry.Vector()
-
-    Object.defineProperty @, "offset",
-      get: ->
-        hidden.offset
-
-      set: (value) ->
-        if typeof value is "string"
-          @offsetGlobal = value
-          hidden.offset = @parseOffsetGlobal(value)
-        else
-          @offsetGlobal = false
-          hidden.offset = value
-        value
+    @offset = new Geometry.Vector()
+    engine.registerObject this
     return
 
-  initWithRedrawRegions: ->
-    @hasChanged = false
-
-    # Define hidden vars
-    hidden = undefined
-    hidden =
-      x: 0
-      y: 0
-      opacity: 1
-      direction: 0
-      size: 1
-      widthScale: 1
-      heightScale: 1
-      offset: undefined
-      parentObject: this
-
-    # Define getter/setters for hidden vars
-    Object.defineProperty this, "x",
-      get: ->
-        hidden.x
-
-      set: (value) ->
-        if hidden.x isnt value
-          hidden.x = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "y",
-      get: ->
-        hidden.y
-
-      set: (value) ->
-        if hidden.y isnt value
-          hidden.y = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "opacity",
-      get: ->
-        hidden.opacity
-
-      set: (value) ->
-        if hidden.opacity isnt value
-          hidden.opacity = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "direction",
-      get: ->
-        hidden.direction
-
-      set: (value) ->
-        if hidden.direction isnt value
-          hidden.direction = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "size",
-      get: ->
-        hidden.size
-
-      set: (value) ->
-        if hidden.size isnt value
-          hidden.size = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "widthScale",
-      get: ->
-        hidden.widthScale
-
-      set: (value) ->
-        if hidden.widthScale isnt value
-          hidden.widthScale = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "heightScale",
-      get: ->
-        hidden.heightScale
-
-      set: (value) ->
-        if hidden.heightScale isnt value
-          hidden.heightScale = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "offset",
-      get: ->
-        hidden.offset
-
-      set: (value) ->
-        if hidden.offset isnt value
-          hidden.offset = value
-          off_ =
-            x: value.x
-            y: value.y
-
-
-          # Put getters and setters on points values
-          Object.defineProperty hidden.offset, "x",
-            get: ->
-              off_.x
-
-            set: (value) ->
-              if off_.x isnt value
-                off_.x = value
-                hidden.parentObject.onAfterChange()
-              return
-
-
-          # Put getters and setters on points values
-          Object.defineProperty hidden.offset, "y",
-            get: ->
-              off_.y
-
-            set: (value) ->
-              if off_.y isnt value
-                off_.y = value
-                hidden.parentObject.onAfterChange()
-              return
-
-          @onAfterChange()
-        return
-
-    @offset = new Vector()
-    return
-
-  onAfterChange: ->
-    if not @hasChanged and @isDrawn()
-      @lastRedrawRegion = @currentRedrawRegion
-      @currentRedrawRegion = (if @getCombinedRedrawRegion then @getCombinedRedrawRegion() else @getRedrawRegion())
-      if @currentRedrawRegion
-        engine.redrawObjects.push this
-        @hasChanged = true
-    return
+  offsetFromGlobal: (offset)->
+    @offsetGlobal = offset
+    @offset = @parseOffsetGlobal offset
 
   ###
   Parses an offset global into an actual Vector offset
@@ -184,7 +35,7 @@ c = class Child
   @return {Vector} A parsed version of the offset global
   ###
   parseOffsetGlobal: (offset) ->
-    new Geometry.Vector()
+    throw new Error 'Offset globals are not supported for this class'
 
   ###
   Checks if the child object is inside a room that is currently visible
@@ -282,7 +133,7 @@ c = class Child
   ###
   isVisible: ->
     # If sprites size has been modified to zero, do nothing
-    not (@size is 0 or @widthScale is 0 or @heightScale is 0)
+    @size != 0 && @widthScale != 0 && @heightScale != 0
 
 module.exports:: = Object.create c::
 module.exports::constructor = c

@@ -30,6 +30,7 @@ class CollisionObject extends Engine.Views.GameObject
 
     # Down
     @speed.y += engine.convertSpeed 100 if engine.keyboard.isDown @downKey
+    return
 
   collisionCheck: ->
     if collision = @collidesWith window.rocks, true, true
@@ -66,6 +67,8 @@ class CollisionObject extends Engine.Views.GameObject
     if @y > engine.canvasResY - 16
       @y = engine.canvasResY - 16
       @speed.y = -@speed.y
+
+    return
 
 # create main class
 class CollisionTest
@@ -113,8 +116,11 @@ new Engine
   # Set themes to load
   themes: ['example']
 
-  # Set background color
+  # Set arena background-color
   backgroundColor: "#222"
+
+  # Disable webgl using "canvas" search param
+  disableWebGL: /canvas/.test window.location.search
 
   # Set resolution of the game
   canvasResX: 600

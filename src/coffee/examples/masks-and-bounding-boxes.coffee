@@ -6,7 +6,7 @@ class MasksAndBBoxes
     # Hide loader overlay
     engine.loader.hideOverlay()
 
-    object = new Engine.Views.GameObject(
+    object = engine.currentRoom.create.GameObject(
       'character' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       50 # x-position
       50 # y-position
@@ -21,36 +21,45 @@ class MasksAndBBoxes
       )
     object.animation()
 
-    object2 = new Engine.Views.GameObject(
+    object2 = engine.currentRoom.create.GameObject(
       'rock' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       16 # x-position
       50 # y-position
       0 # Direction (in radians)
     )
     object.checkCollision = ->
-      if @collidesWith object2
-        text.string = 'Collides'
+      if @boundingBoxCollidesWith object2
+        text1.set string: 'COLLISION'
       else
-        text.string = ''
+        text1.set string: 'no collision'
 
-    text = new Engine.Views.TextBlock '', 6, 4, 80, {color: '#FFF'}
+      if @collidesWith object2
+        text2.set string: 'COLLISION'
+      else
+        text2.set string: 'no collision'
+
+    text1 = engine.currentRoom.create.TextBlock '', 6, 4, 80, {color: '#4F4'}
+    text2 = engine.currentRoom.create.TextBlock '', 6, 78, 80, {color: '#000'}
 
     engine.currentRoom.loops.eachFrame.attachFunction object, object.checkCollision
-    engine.currentRoom.addChildren object, object2, text
 
 new Engine
-	# Set main class
-	gameClass: MasksAndBBoxes
+  # Set main class
+  gameClass: MasksAndBBoxes
 
-	# Set themes to load
-	themes: ['example']
+  # Set themes to load
+  themes: ['example']
 
-	#disableWebGL: true
+  # Set background color
+  backgroundColor: '#888'
 
-	# Enable debugging of collision checks
-	drawBoundingBoxes: true
-	drawMasks: true
+  # Disable webgl using "canvas" search param
+  disableWebGL: /canvas/.test window.location.search
 
-	# Set resolution of the game
-	canvasResX: 100
-	canvasResY: 100
+  # Enable debugging of collision checks
+  drawBoundingBoxes: true
+  drawMasks: true
+
+  # Set resolution of the game
+  canvasResX: 100
+  canvasResY: 100

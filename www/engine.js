@@ -50,7 +50,7 @@ The default options are:
 "cachedSoundCopies": 5, // How many times sounds should be duplicated to allow multiple playbacks
 "canvasResX": 800, // The horizontal resolution to set for the game's main canvas
 "canvasResY": 600, // The vertical resolution to set for the game's main canvas
-"defaultCollisionResolution": 6, // Res. of collision checking, by default every 6th px is checked
+"defaultCollisionResolution": 1, // Res. of collision checking, by default every 6th px is checked
 "disableRightClick": true, // If right clicks inside the arena should be disabled
 "disableWebGL": false, // If WebGL rendering should be disabled
 "preventDefaultKeyboard": false, // Whether or not preventDefault should be called for keyboard events
@@ -64,7 +64,7 @@ The default options are:
 "pauseOnBlur": true, // If the engine should pause when the browser window loses its focus
 "resetCursorOnEachFrame": true // Whether or not the mouse cursor should be reset on each frame
 "soundsMuted": false, // If all sound effects should be initially muted
-"themesPath": "themes", // The path to the themes-directory
+"themesPath": "assets", // The path to the themes-directory
 "enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
  */
@@ -206,7 +206,7 @@ c = window.Engine = Engine = (function() {
     this.disableTouchScroll = true;
     this.resetCursorOnEachFrame = true;
     this.cameras = [];
-    this.defaultCollisionResolution = 6;
+    this.defaultCollisionResolution = 1;
     this.redrawObjects = [];
     this.enableRedrawRegions = false;
     this.disableWebGL = false;
@@ -226,7 +226,7 @@ c = window.Engine = Engine = (function() {
       throw new Error('Game class missing');
     }
     this.arena.style.position = "absolute";
-    this.arena.style.backgroundColor = "#000";
+    this.arena.style.backgroundColor = this.backgroundColor;
     this.arena.style.userSelect = "none";
     this.arena.style.webkitUserSelect = "none";
     this.arena.style.MozUserSelect = "none";
@@ -394,6 +394,10 @@ c = window.Engine = Engine = (function() {
     this.canvas.style.width = w + "px";
   };
 
+  Engine.prototype.perFrameSpeed = function(speed) {
+    return speed * this.gameTimeIncrease / 1000;
+  };
+
 
   /*
   Function for converting between speed units
@@ -411,8 +415,12 @@ c = window.Engine = Engine = (function() {
     if (speed instanceof this.constructor.Geometry.Vector) {
       return new this.constructor.Vector(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
     }
-    from = (from !== void 0 ? from : module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND);
-    to = (to !== void 0 ? to : module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_FRAME);
+    if (from == null) {
+      from = module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND;
+    }
+    if (to == null) {
+      to = module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_FRAME;
+    }
     switch (from) {
       case module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND:
         speed = speed * this.gameTimeIncrease / 1000;
@@ -845,7 +853,7 @@ module.exports.prototype.constructor = c;
 
 
 
-},{"./engine/camera":2,"./engine/custom-loop":3,"./engine/globals":4,"./engine/loader":5,"./engine/object-creator":6,"./engine/room":7,"./geometry/circle":8,"./geometry/line":9,"./geometry/polygon":10,"./geometry/rectangle":11,"./geometry/vector":12,"./helpers/matrix-calculation":14,"./helpers/mixin":15,"./helpers/room-transition":16,"./helpers/webgl":17,"./input/keyboard":18,"./input/pointer":19,"./mixins/animatable":20,"./renderer/canvas":21,"./renderer/webgl":22,"./sounds/effect":25,"./sounds/music":26,"./views/child":27,"./views/circle":28,"./views/collidable":29,"./views/container":30,"./views/game-object":31,"./views/line":32,"./views/polygon":33,"./views/rectangle":34,"./views/sprite":35,"./views/text-block":36}],2:[function(require,module,exports){
+},{"./engine/camera":2,"./engine/custom-loop":3,"./engine/globals":4,"./engine/loader":5,"./engine/object-creator":6,"./engine/room":7,"./geometry/circle":8,"./geometry/line":9,"./geometry/polygon":10,"./geometry/rectangle":11,"./geometry/vector":12,"./helpers/matrix-calculation":14,"./helpers/mixin":15,"./helpers/room-transition":16,"./helpers/webgl":17,"./input/keyboard":18,"./input/pointer":19,"./mixins/animatable":20,"./renderer/canvas":22,"./renderer/webgl":23,"./sounds/effect":26,"./sounds/music":27,"./views/child":28,"./views/circle":29,"./views/collidable":30,"./views/container":31,"./views/game-object":32,"./views/line":33,"./views/polygon":34,"./views/rectangle":35,"./views/sprite":36,"./views/text-block":37}],2:[function(require,module,exports){
 var Camera, Geometry, c;
 
 module.exports = function() {
@@ -924,20 +932,136 @@ A loop also has it's own time that is stopped whenever the loop is not executed.
 
 c = CustomLoop = (function() {
   function CustomLoop(framesPerExecution, maskFunction) {
-    this.framesPerExecution = (framesPerExecution === void 0 ? 1 : framesPerExecution);
-    this.maskFunction = (maskFunction === void 0 ? function() {
+    this.framesPerExecution = (framesPerExecution != null) || 1;
+    this.maskFunction = (maskFunction != null) || function() {
       return true;
-    } : maskFunction);
+    };
+    this.operationsQueue = [];
+    this.operations = [];
     this.functionsQueue = [];
     this.functions = [];
     this.executionsQueue = [];
     this.executions = [];
     this.animations = [];
     this.lastFrame = window.engine.frames;
-    this.last = (window.engine.now ? window.engine.now : new Date().getTime());
     this.time = 0;
-    this.execTime = 0;
   }
+
+
+  /*
+  Attaches a function to the loop.
+  
+  @param {Object} caller The object to run the function as
+  @param {function} func The function to run on each execution of the custom loop
+   */
+
+  CustomLoop.prototype.attachOperation = function(name, func) {
+    if (typeof func !== "function") {
+      throw new Error("Argument func must be of type function");
+    }
+    this.operationsQueue.push({
+      name: name,
+      objects: [],
+      operation: func
+    });
+  };
+
+  CustomLoop.prototype.hasOperation = function(name, func) {
+    var exec, _i, _j, _len, _len1, _ref, _ref1;
+    _ref = this.operations;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      exec = _ref[_i];
+      if ((!name || exec.name === name) && (!func || exec.operation === func)) {
+        return true;
+      }
+    }
+    _ref1 = this.operationsQueue;
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      exec = _ref1[_j];
+      if ((!name || exec.name === name) && (!func || exec.operation === func)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+
+  /*
+  Detaches a function from the loop. If the same function is attached multiple times (which is never a good idea), only the first occurrence is detached.
+  
+  @param {Object} caller The object the function was run as
+  @param {function} func The function to detach from the loop
+  @return {boolean} Whether or not the function was found and detached
+   */
+
+  CustomLoop.prototype.detachOperation = function(name, func) {
+    var exec, _i, _j, _len, _len1, _ref, _ref1;
+    _ref = this.operations;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      exec = _ref[_i];
+      if ((!name || exec.name === name) && (!func || exec.operation === func)) {
+        this.operations.splice(i, 1);
+        return true;
+      }
+    }
+    _ref1 = this.operationsQueue;
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      exec = _ref1[_j];
+      if ((!name || exec.name === name) && (!func || exec.operation === func)) {
+        this.operationsQueue.splice(i, 1);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  CustomLoop.prototype.subscribeToOperation = function(name, object) {
+    var exec, _i, _j, _len, _len1, _ref, _ref1;
+    _ref = this.operations;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      exec = _ref[_i];
+      if (!name || exec.name === name) {
+        exec.objects.push(object);
+        return true;
+      }
+    }
+    _ref1 = this.operationsQueue;
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      exec = _ref1[_j];
+      if (!name || exec.name === name) {
+        exec.objects.push(object);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  CustomLoop.prototype.unsubscribeFromOperation = function(name, object) {
+    var exec, i, _i, _j, _len, _len1, _ref, _ref1;
+    _ref = this.operations;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      exec = _ref[_i];
+      if (!name || exec.name === name) {
+        i = name.exec.objects.indexOf(object);
+        if (i !== -1) {
+          exec.objects.splice(i, 1);
+          return true;
+        }
+      }
+    }
+    _ref1 = this.operationsQueue;
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      exec = _ref1[_j];
+      if (!name || exec.name === name) {
+        i = name.exec.objects.indexOf(object);
+        if (i !== -1) {
+          exec.objects.splice(i, 1);
+          return true;
+        }
+      }
+    }
+    return false;
+  };
 
 
   /*
@@ -965,18 +1089,6 @@ c = CustomLoop = (function() {
 
 
   /*
-  Queues a function for being added to the executed functions. The queue works as a buffer which prevent functions, that have just been added, from being executed before the next frame.
-  
-  @private
-   */
-
-  CustomLoop.prototype.addFunctionsQueue = function() {
-    this.functions = this.functions.concat(this.functionsQueue);
-    this.functionsQueue = [];
-  };
-
-
-  /*
   Detaches a function from the loop. If the same function is attached multiple times (which is never a good idea), only the first occurrence is detached.
   
   @param {Object} caller The object the function was run as
@@ -985,98 +1097,30 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.detachFunction = function(caller, func) {
-    var a, i;
+    var exec, _i, _j, _len, _len1, _ref, _ref1;
     if (caller === void 0) {
       throw new Error("Missing argument: caller");
     }
     if (func === void 0) {
       throw new Error("Missing argument: func");
     }
-    i = 0;
-    while (i < this.functions.length) {
-      a = this.functions[i];
-      if (a.object === caller && a.activity === func) {
+    _ref = this.functions;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      exec = _ref[_i];
+      if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.functions.splice(i, 1);
         return true;
       }
-      i++;
     }
-    i = 0;
-    while (i < this.functionsQueue.length) {
-      a = this.functionsQueue[i];
-      if (a.object === caller && a.activity === func) {
+    _ref1 = this.functionsQueue;
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      exec = _ref1[_j];
+      if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.functionsQueue.splice(i, 1);
         return true;
       }
-      i++;
     }
     return false;
-  };
-
-
-  /*
-  Detaches all occurrences of a specific function, no matter the caller.
-  
-  @param {function} func The function to detach from the loop
-  @return {function[]} An array of detached functions
-   */
-
-  CustomLoop.prototype.detachFunctionsByFunction = function(func) {
-    var i, removeArray;
-    if (func === void 0) {
-      throw new Error("Missing argument: func");
-    }
-    removeArray = [];
-    i = this.functions.length;
-    while (i--) {
-      if (func === this.functions[i].func) {
-        removeArray.push(this.functions.splice(i, 1));
-      }
-    }
-    i = this.functionsQueue.length;
-    while (i--) {
-      if (func === this.functionsQueue[i].func) {
-        removeArray.push(this.functionsQueue.splice(i, 1));
-      }
-    }
-    if (removeArray.length) {
-      return removeArray;
-    } else {
-      return false;
-    }
-  };
-
-
-  /*
-  Detaches all attached functions with a specific caller
-  
-  @param {Object} caller The object the function was run as
-  @return {function[]} An array of detached functions
-   */
-
-  CustomLoop.prototype.detachFunctionsByCaller = function(caller) {
-    var i, removeArray;
-    if (caller === void 0) {
-      throw new Error("Missing argument: caller");
-    }
-    removeArray = [];
-    i = this.functions.length;
-    while (i--) {
-      if (caller === this.functions[i].object) {
-        removeArray.push(this.functions.splice(i, 1));
-      }
-    }
-    i = this.functionsQueue.length;
-    while (i--) {
-      if (caller === this.functionsQueue[i].object) {
-        removeArray.push(this.functionsQueue.splice(i, 1));
-      }
-    }
-    if (removeArray.length) {
-      return removeArray;
-    } else {
-      return false;
-    }
   };
 
 
@@ -1108,18 +1152,6 @@ c = CustomLoop = (function() {
 
 
   /*
-  Adds the current executions queue to the list of planned executions. Automatically called at the end of each frame
-  
-  @private
-   */
-
-  CustomLoop.prototype.addExecutionsQueue = function() {
-    this.executions = this.executions.concat(this.executionsQueue);
-    this.executionsQueue = [];
-  };
-
-
-  /*
   Unschedules a single scheduled execution. If multiple similar executions exists, only the first will be unscheduled.
   
   @param {function} func The function to unschedule an execution of
@@ -1128,110 +1160,30 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.unschedule = function(caller, func) {
-    var exec, i;
+    var exec, _i, _j, _len, _len1, _ref, _ref1;
     if (caller === void 0) {
       throw new Error("Missing argument: caller");
     }
     if (func === void 0) {
       throw new Error("Missing argument: function");
     }
-    i = void 0;
-    exec = void 0;
-    i = 0;
-    while (i < this.executions.length) {
-      exec = this.executions[i];
-      if (caller === exec.caller && (exec.func === func || exec.func.toString() === func)) {
+    _ref = this.executions;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      exec = _ref[_i];
+      if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.executions.splice(i, 1);
         return true;
       }
-      i++;
     }
-    i = 0;
-    while (i < this.executionsQueue.length) {
-      exec = this.executionsQueue[i];
-      if (caller === exec.caller && (exec.func === func || exec.func.toString() === func)) {
+    _ref1 = this.executionsQueue;
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      exec = _ref1[_j];
+      if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.executionsQueue.splice(i, 1);
         return true;
       }
-      i++;
     }
     return false;
-  };
-
-
-  /*
-  Unschedule all scheduled executions of a specific function, no matter the caller.
-  
-  @param {function} func The function to unschedule all executions of
-  @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
-   */
-
-  CustomLoop.prototype.unscheduleByFunction = function(func) {
-    var exec, i, unscheduledArray;
-    if (func === void 0) {
-      throw new Error("Missing argument: func");
-    }
-    unscheduledArray = void 0;
-    i = void 0;
-    exec = void 0;
-    unscheduledArray = [];
-    i = this.executions.length;
-    while (i--) {
-      exec = this.executions[i];
-      if (func === exec.func) {
-        unscheduledArray.push(this.executions.splice(i, 1));
-      }
-    }
-    i = this.executionsQueue.length;
-    while (i--) {
-      exec = this.executionsQueue[i];
-      if (func === exec.func) {
-        unscheduledArray.push(this.executionsQueue.splice(i, 1));
-      }
-    }
-    if (unscheduledArray.length) {
-      return unscheduledArray;
-    } else {
-      return false;
-    }
-  };
-
-
-  /*
-  Unschedule all executions scheduled with a specific caller
-  
-  @param {object} caller The caller
-  @return {boolean|function[]} False if no functions has been unscheduled, otherwise an array containing the unscheduled functions
-   */
-
-  CustomLoop.prototype.unscheduleByCaller = function(caller) {
-    var exec, i, unscheduledArray;
-    if (caller === void 0) {
-      throw new Error("Missing argument: caller");
-    }
-    unscheduledArray = void 0;
-    i = void 0;
-    exec = void 0;
-    unscheduledArray = [];
-    i = this.executions.length;
-    while (i--) {
-      exec = this.executions[i];
-      if (caller === exec.caller) {
-        unscheduledArray.push(this.executions.splice(i, 1));
-      }
-    }
-    i = this.executionsQueue.length;
-    while (i--) {
-      exec = this.executionsQueue[i];
-      if (caller === exec.caller) {
-        unscheduledArray.push(this.executionsQueue.splice(i, 1));
-      }
-    }
-    if (unscheduledArray.length) {
-      return unscheduledArray;
-    } else {
-      return false;
-    }
   };
 
 
@@ -1243,7 +1195,6 @@ c = CustomLoop = (function() {
 
   CustomLoop.prototype.unscheduleAll = function() {
     var removeArray;
-    removeArray = void 0;
     removeArray = [].concat(this.executions, this.executionsQueue);
     this.executions = [];
     this.executionsQueue = [];
@@ -1263,12 +1214,6 @@ c = CustomLoop = (function() {
     if (animation === void 0) {
       throw new Error("Missing argument: animation");
     }
-    anim = void 0;
-    propList = void 0;
-    currentAnimations = void 0;
-    i = void 0;
-    cur = void 0;
-    propName = void 0;
     anim = animation;
     anim.start = this.time;
     propList = Object.keys(anim.prop);
@@ -1297,7 +1242,6 @@ c = CustomLoop = (function() {
 
   CustomLoop.prototype.removeAnimationsOfObject = function(object) {
     var i;
-    i = void 0;
     i = this.animations.length;
     while (i--) {
       if (object === this.animations[i].obj) {
@@ -1314,9 +1258,8 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.updateAnimations = function() {
-    var a, animId, propId, t, _results;
+    var a, animId, propId, t;
     animId = this.animations.length - 1;
-    _results = [];
     while (animId > -1) {
       a = this.animations[animId];
       if (a === void 0) {
@@ -1339,9 +1282,8 @@ c = CustomLoop = (function() {
         }
       }
       a.onStep && a.onStep();
-      _results.push(animId--);
+      animId--;
     }
-    return _results;
   };
 
 
@@ -1351,9 +1293,8 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.execute = function() {
-    var exec, i, timer;
-    timer = new Date().getTime();
-    if (!this.maskFunction() || engine.frames % this.framesPerExecution) {
+    var exec, i, _i, _j, _len, _len1, _ref, _ref1;
+    if (engine.frames % this.framesPerExecution || !this.maskFunction()) {
       return;
     }
     if (engine.frames - this.lastFrame === this.framesPerExecution) {
@@ -1364,27 +1305,35 @@ c = CustomLoop = (function() {
     this.updateAnimations();
     i = this.executions.length;
     while (i--) {
-      if (i >= this.executions.length) {
-        continue;
-      }
       exec = this.executions[i];
       if (this.time >= exec.execTime) {
         exec.func.call(exec.caller);
         this.executions.splice(i, 1);
+        i--;
       }
     }
-    i = 0;
-    while (i < this.functions.length) {
-      exec = this.functions[i];
+    _ref = this.operations;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      exec = _ref[_i];
+      if (!exec.operation) {
+        throw new Error("Trying to exec non-existent attached function");
+      }
+      exec.operation(exec.objects);
+    }
+    _ref1 = this.functions;
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      exec = _ref1[_j];
       if (!exec.activity) {
         throw new Error("Trying to exec non-existent attached function");
       }
       exec.activity.call(exec.object);
-      i++;
     }
-    this.addFunctionsQueue();
-    this.addExecutionsQueue();
-    this.execTime = (new Date().getTime()) - timer;
+    this.operations = this.operations.concat(this.operationsQueue);
+    this.operationsQueue = [];
+    this.functions = this.functions.concat(this.functionsQueue);
+    this.functionsQueue = [];
+    this.executions = this.executions.concat(this.executionsQueue);
+    this.executionsQueue = [];
   };
 
   return CustomLoop;
@@ -1460,15 +1409,15 @@ module.exports = {
   MOUSE_TOUCH_ANY: 100,
   SPEED_PIXELS_PER_SECOND: 1,
   SPEED_PIXELS_PER_FRAME: 2,
-  OFFSET_TOP_LEFT: "tl",
-  OFFSET_TOP_CENTER: "tc",
-  OFFSET_TOP_RIGHT: "tr",
-  OFFSET_MIDDLE_LEFT: "ml",
-  OFFSET_MIDDLE_CENTER: "mc",
-  OFFSET_MIDDLE_RIGHT: "mr",
-  OFFSET_BOTTOM_LEFT: "bl",
-  OFFSET_BOTTOM_CENTER: "bc",
-  OFFSET_BOTTOM_RIGHT: "br",
+  OFFSET_TOP_LEFT: 0x100,
+  OFFSET_TOP_CENTER: 0x80,
+  OFFSET_TOP_RIGHT: 0x40,
+  OFFSET_MIDDLE_LEFT: 0x20,
+  OFFSET_MIDDLE_CENTER: 0x10,
+  OFFSET_MIDDLE_RIGHT: 0x8,
+  OFFSET_BOTTOM_LEFT: 0x4,
+  OFFSET_BOTTOM_CENTER: 0x2,
+  OFFSET_BOTTOM_RIGHT: 0x1,
   ALIGNMENT_LEFT: "left",
   ALIGNMENT_CENTER: "center",
   ALIGNMENT_RIGHT: "right",
@@ -1510,6 +1459,7 @@ This loader object will also create a load overlay (the overlay saying "jsEngine
 
 c = Loader = (function() {
   function Loader() {
+    var name, value, _ref;
     this.images = {};
     this.loaded = {
       classes: []
@@ -1528,7 +1478,20 @@ c = Loader = (function() {
       }
     };
     this.loadOverlay = document.createElement("div");
-    this.loadOverlay.setAttribute("style", "border: 0;position: absolute;top: 0;left: 0;width: 100%;height: 100%;z-index: 100;opacity: 1;");
+    _ref = {
+      border: 0,
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      zIndex: 100,
+      opacity: 1
+    };
+    for (name in _ref) {
+      value = _ref[name];
+      this.loadOverlay.style[name] = value;
+    }
     this.loadOverlay.className = "load-overlay";
     this.loadOverlay.innerHTML = "<div class=\"load-overlay-text\">" + engine.loadText + "</div>";
     engine.arena.appendChild(this.loadOverlay);
@@ -1669,9 +1632,6 @@ c = Loader = (function() {
     if (themeName === void 0) {
       throw new Error("Missing argument: themeName");
     }
-    if (resource.indexOf("/") !== -1) {
-      resource = resource.replace(/\//g, ".");
-    }
     res = this.themes[themeName][typeString][resource];
     if (res === void 0) {
       i = 0;
@@ -1782,32 +1742,6 @@ c = Loader = (function() {
 
 
   /*
-  Loads JavaScript classes from files. The loaded classes' names must follow the following format: [ClassName].js
-  
-  @param {string[]} paths An array of paths to JavaScripts - containing classes - which should be loaded
-  @return {boolean} True, when the classes has been loaded without any errors
-   */
-
-  Loader.prototype.loadClasses = function(paths) {
-    var i, objectName;
-    if (paths === void 0) {
-      throw new Error("Missing argument: paths");
-    }
-    for (i in paths) {
-      if (paths.hasOwnProperty(i)) {
-        objectName = paths[i].match(/(\w*)\.\w+$/)[1];
-        if (window[objectName]) {
-          continue;
-        }
-        engine.loadFiles(paths[i]);
-        this.loaded.classes[objectName] = paths[i];
-      }
-    }
-    return true;
-  };
-
-
-  /*
   Reloads all classes. This function is very useful for applying code changes without having to refresh the browser, usually it has to be run multiple times though, to force the browser not to just load the files from its cache.
    */
 
@@ -1830,7 +1764,7 @@ c = Loader = (function() {
    */
 
   Loader.prototype.loadThemes = function(themeNames, callback) {
-    var codeString, i, name, req, total;
+    var i, name, req, _results;
     if (themeNames === void 0) {
       throw new Error("Missing argument: themeNames");
     }
@@ -1838,45 +1772,42 @@ c = Loader = (function() {
       this.onthemesloaded = callback;
     }
     i = 0;
+    _results = [];
     while (i < themeNames.length) {
       name = themeNames[i];
       if (this.themes[name]) {
         continue;
       }
       req = new XMLHttpRequest();
-      req.open("GET", engine.themesPath + "/" + name + "/theme.js", false);
+      req.open("GET", engine.themesPath + "/" + name + "/theme.js");
       req.send();
-      if (req.status === 404) {
-        console.log("Theme not found: " + name);
-        continue;
-      }
-      codeString = req.responseText + "\n//# sourceURL=/" + engine.themesPath + "/" + name + "/theme.js";
-      eval("theme = " + codeString);
-      if (theme.inherit.length) {
-        this.loadThemes(theme.inherit);
-      }
-      theme.inherit.push("External");
-      this.themes[name] = theme;
-      theme.resourcesCount = 0;
-      theme.resourcesLoaded = 0;
-      theme.masks = {};
-      theme.textures = {};
-      this.loadResources(theme, theme.images, "images");
-      this.loadResources(theme, theme.sfx, "sfx");
-      this.loadResources(theme, theme.music, "music");
-      i++;
+      req.addEventListener('error', (function(_this) {
+        return function() {
+          throw new Error("Theme not found: " + name);
+        };
+      })(this));
+      req.addEventListener('load', (function(_this) {
+        return function() {
+          var codeString;
+          codeString = req.responseText + "\n//# sourceURL=/" + engine.themesPath + "/" + name + "/theme.js";
+          eval("theme = " + codeString);
+          if (theme.inherit.length) {
+            _this.loadThemes(theme.inherit);
+          }
+          theme.inherit.push("External");
+          _this.themes[name] = theme;
+          theme.resourcesCount = 0;
+          theme.resourcesLoaded = 0;
+          theme.masks = {};
+          theme.textures = {};
+          _this.loadResources(theme, theme.images, "images");
+          _this.loadResources(theme, theme.sfx, "sfx");
+          return _this.loadResources(theme, theme.music, "music");
+        };
+      })(this));
+      _results.push(i++);
     }
-    total = 0;
-    for (i in this.themes) {
-      if (this.themes.hasOwnProperty(i)) {
-        total += this.themes[i].resourcesCount;
-      }
-    }
-    if (total === 0) {
-      if (this.onthemesloaded) {
-        this.onthemesloaded();
-      }
-    }
+    return _results;
   };
 
 
@@ -1916,11 +1847,12 @@ c = Loader = (function() {
         switch (typeString) {
           case "images":
             res = new Image();
+            res.cacheKey = "" + theme.name + "/" + path;
             format = object[path].match(/(png|jpg|jpeg|svg)/);
             if (format) {
               format = format[0];
             }
-            res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, "/") + "." + format;
+            res.src = engine.themesPath + "/" + theme.name + "/images/" + path + "." + format;
             images = object[path].match(/; *(\d+) *images?/);
             if (images) {
               res.imageLength = parseInt(images[1], 10);
@@ -1946,10 +1878,10 @@ c = Loader = (function() {
               i++;
             }
             if (!format) {
-              console.log("Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/"));
+              console.log("Sound was not available in a supported format: " + theme.name + "/sfx/" + path);
               continue;
             }
-            res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, "/") + "." + format);
+            res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path + "." + format);
             theme.sfx[path] = new Sounds.Effect(res);
             if (engine.preloadSounds) {
               res.setAttribute("preload", "auto");
@@ -1967,9 +1899,9 @@ c = Loader = (function() {
               i++;
             }
             if (!format) {
-              throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/"));
+              throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path);
             }
-            res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, "/") + "." + format);
+            res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path + "." + format);
             theme.music[path] = new Sounds.Music(res);
             if (engine.preloadSounds) {
               res.setAttribute("preload", "auto");
@@ -1978,7 +1910,7 @@ c = Loader = (function() {
             }
         }
         res.setAttribute("data-theme", theme.name);
-        res.setAttribute("data-resourceString", path.replace(/\./g, "/"));
+        res.setAttribute("data-resourceString", path);
       }
     }
   };
@@ -2076,6 +2008,7 @@ c = Loader = (function() {
     canvas.width = image.width;
     canvas.height = image.height;
     canvas.imageLength = image.imageLength;
+    canvas.cacheKey = "mask:" + image.cacheKey;
     ctx = canvas.getContext("2d");
     if (image === false) {
       throw new Error("Trying to create mask for non-existing resource: " + resourceString);
@@ -2116,7 +2049,7 @@ c = Loader = (function() {
       pixel++;
     }
     ctx.putImageData(bitmap, 0, 0);
-    canvas.bBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon();
+    canvas.boundingBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon();
     return canvas;
   };
 
@@ -2167,7 +2100,7 @@ Geometry = {
 
 
 
-},{"../geometry/rectangle":11,"../sounds/effect":25,"../sounds/music":26}],6:[function(require,module,exports){
+},{"../geometry/rectangle":11,"../sounds/effect":26,"../sounds/music":27}],6:[function(require,module,exports){
 var ObjectCreator, Views, c,
   __slice = [].slice;
 
@@ -2268,7 +2201,7 @@ Views = {
 
 
 
-},{"../views/circle":28,"../views/collidable":29,"../views/container":30,"../views/game-object":31,"../views/line":32,"../views/polygon":33,"../views/rectangle":34,"../views/sprite":35,"../views/text-block":36}],7:[function(require,module,exports){
+},{"../views/circle":29,"../views/collidable":30,"../views/container":31,"../views/game-object":32,"../views/line":33,"../views/polygon":34,"../views/rectangle":35,"../views/sprite":36,"../views/text-block":37}],7:[function(require,module,exports){
 var CustomLoop, Room, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2412,7 +2345,7 @@ CustomLoop = require('./custom-loop');
 
 
 
-},{"../views/container":30,"./custom-loop":3}],8:[function(require,module,exports){
+},{"../views/container":31,"./custom-loop":3}],8:[function(require,module,exports){
 var Circle, Geometry, Helpers, Mixins, c;
 
 module.exports = function() {
@@ -4142,118 +4075,94 @@ module.exports = {
 var MatrixCalculationHelper;
 
 module.exports = MatrixCalculationHelper = {
-  calculateLocalMatrix: function(object) {
-    var position, rotation, scale;
-    scale = void 0;
-    rotation = void 0;
-    position = void 0;
-    scale = this.makeScale(object.widthScale * object.size, object.heightScale * object.size);
-    rotation = this.makeRotation(-object.direction);
-    position = this.makeTranslation(object.x, object.y);
-    return this.matrixMultiplyArray([scale, rotation, position]);
+  operationMatrix: new Float32Array(9),
+  tempLocalMatrix: new Float32Array(9),
+  setLocalMatrix: function(matrix, object) {
+    this.setScale(matrix, object.widthScale * object.size, object.heightScale * object.size);
+    this.multiply(matrix, this.getRotation(-object.direction));
+    this.multiply(matrix, this.getTranslation(object.x, object.y));
   },
-  calculateInverseLocalMatrix: function(object) {
-    var position, rotation, scale;
-    scale = void 0;
-    rotation = void 0;
-    position = void 0;
-    scale = this.makeScale(1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size));
-    rotation = this.makeRotation(object.direction);
-    position = this.makeTranslation(-object.x, -object.y);
-    return this.matrixMultiplyArray([position, rotation, scale]);
+  getLocalMatrix: function(object) {
+    this.setLocalMatrix(this.tempLocalMatrix, object);
+    return this.tempLocalMatrix;
   },
-  makeIdentity: function() {
-    return [1, 0, 0, 0, 1, 0, 0, 0, 1];
+  setInverseLocalMatrix: function(matrix, object) {
+    this.setTranslation(matrix, -object.x, -object.y);
+    this.multiply(matrix, this.getRotation(object.direction));
+    this.multiply(matrix, this.getScale(1 / (object.widthScale * object.size), 1 / (object.heightScale * object.size)));
   },
-  makeTranslation: function(tx, ty) {
-    return [1, 0, 0, 0, 1, 0, tx, ty, 1];
+  getInverseLocalMatrix: function(object) {
+    this.setInverseLocalMatrix(this.tempLocalMatrix, object);
+    return this.tempLocalMatrix;
   },
-  makeRotation: function(direction) {
+  setIdentity: function(matrix) {
+    matrix[0] = 1;
+    matrix[1] = 0;
+    matrix[2] = 0;
+    matrix[3] = 0;
+    matrix[4] = 1;
+    matrix[5] = 0;
+    matrix[6] = 0;
+    matrix[7] = 0;
+    matrix[8] = 1;
+    return matrix;
+  },
+  getIdentity: function() {
+    return this.setIdentity(this.operationMatrix);
+  },
+  setRotation: function(matrix, direction) {
     var c, s;
     c = Math.cos(direction);
     s = Math.sin(direction);
-    return [c, -s, 0, s, c, 0, 0, 0, 1];
+    matrix[0] = c;
+    matrix[1] = -s;
+    matrix[2] = 0;
+    matrix[3] = s;
+    matrix[4] = c;
+    matrix[5] = 0;
+    matrix[6] = 0;
+    matrix[7] = 0;
+    matrix[8] = 1;
+    return matrix;
   },
-  makeScale: function(sx, sy) {
-    return [sx, 0, 0, 0, sy, 0, 0, 0, 1];
+  getRotation: function(direction) {
+    return this.setRotation(this.operationMatrix, direction);
   },
-  matrixDeterminant: function(matrix) {
-    var a, b, c, d, e, f, g, h, i;
-    a = matrix[0 * 3 + 0];
-    b = matrix[0 * 3 + 1];
-    c = matrix[0 * 3 + 2];
-    d = matrix[1 * 3 + 0];
-    e = matrix[1 * 3 + 1];
-    f = matrix[1 * 3 + 2];
-    g = matrix[2 * 3 + 0];
-    h = matrix[2 * 3 + 1];
-    i = matrix[2 * 3 + 2];
-    return a * (e * i - f * h) - b * (i * d - f * g) + c * (d * h - e * g);
+  setTranslation: function(matrix, tx, ty) {
+    matrix[0] = 1;
+    matrix[1] = 0;
+    matrix[2] = 0;
+    matrix[3] = 0;
+    matrix[4] = 1;
+    matrix[5] = 0;
+    matrix[6] = tx;
+    matrix[7] = ty;
+    matrix[8] = 1;
+    return matrix;
   },
-  matrixInverse: function(matrix) {
-    var A, B, C, D, E, F, G, H, I, a, b, c, d, det, e, f, g, h, i;
-    det = this.matrixDeterminant(matrix);
-    if (det === 0) {
-      return false;
-    }
-    a = matrix[0 * 3 + 0];
-    b = matrix[0 * 3 + 1];
-    c = matrix[0 * 3 + 2];
-    d = matrix[1 * 3 + 0];
-    e = matrix[1 * 3 + 1];
-    f = matrix[1 * 3 + 2];
-    g = matrix[2 * 3 + 0];
-    h = matrix[2 * 3 + 1];
-    i = matrix[2 * 3 + 2];
-    A = e * i - f * h;
-    B = -(d * i - f * g);
-    C = d * h - e * g;
-    D = -(b * i - c * h);
-    E = a * i - c * g;
-    F = -(a * h - b * g);
-    G = b * f - c * e;
-    H = -(a * f - c * d);
-    I = a * e - b * d;
-    return this.matrixMultiplyNumber([A, D, G, B, E, H, C, F, I], 1 / det);
+  getTranslation: function(tx, ty) {
+    return this.setTranslation(this.operationMatrix, tx, ty);
   },
-  getNewMatrix: function(matrix) {
-    var A, B, C, D, E, F, G, H, I, a, b, c, d, e, f, g, h, i;
-    a = matrix[0 * 3 + 0];
-    b = matrix[0 * 3 + 1];
-    c = matrix[0 * 3 + 2];
-    d = matrix[1 * 3 + 0];
-    e = matrix[1 * 3 + 1];
-    f = matrix[1 * 3 + 2];
-    g = matrix[2 * 3 + 0];
-    h = matrix[2 * 3 + 1];
-    i = matrix[2 * 3 + 2];
-    A = e * i - f * h;
-    B = -(d * i - f * g);
-    C = d * h - e * g;
-    D = -(b * i - c * h);
-    E = a * i - c * g;
-    F = -(a * h - b * g);
-    G = b * f - c * e;
-    H = -(a * f - c * d);
-    I = a * e - b * d;
-    return [A, D, G, B, E, H, C, F, I];
+  setScale: function(matrix, sx, sy) {
+    matrix[0] = sx;
+    matrix[1] = 0;
+    matrix[2] = 0;
+    matrix[3] = 0;
+    matrix[4] = sy;
+    matrix[5] = 0;
+    matrix[6] = 0;
+    matrix[7] = 0;
+    matrix[8] = 1;
+    return matrix;
   },
-  matrixMultiplyNumber: function(matrix, factor) {
-    var a, b, c, d, e, f, g, h, i, s;
-    a = matrix[0 * 3 + 0];
-    b = matrix[0 * 3 + 1];
-    c = matrix[0 * 3 + 2];
-    d = matrix[1 * 3 + 0];
-    e = matrix[1 * 3 + 1];
-    f = matrix[1 * 3 + 2];
-    g = matrix[2 * 3 + 0];
-    h = matrix[2 * 3 + 1];
-    i = matrix[2 * 3 + 2];
-    s = factor;
-    return [a * s, b * s, c * s, d * s, e * s, f * s, g * s, h * s, i * s];
+  getScale: function(sx, sy) {
+    return this.setScale(this.operationMatrix, sx, sy);
   },
-  matrixMultiply: function(a, b) {
+  multiply: function(a, b) {
     var a1, a2, b1, b2, c1, c2, d1, d2, e1, e2, f1, f2, g1, g2, h1, h2, i1, i2;
+    if (a === b) {
+      throw new Error('Multiplying matrix with itself');
+    }
     a1 = a[0 * 3 + 0];
     b1 = a[0 * 3 + 1];
     c1 = a[0 * 3 + 2];
@@ -4272,18 +4181,48 @@ module.exports = MatrixCalculationHelper = {
     g2 = b[2 * 3 + 0];
     h2 = b[2 * 3 + 1];
     i2 = b[2 * 3 + 2];
-    return [a1 * a2 + b1 * d2 + c1 * g2, a1 * b2 + b1 * e2 + c1 * h2, a1 * c2 + b1 * f2 + c1 * i2, d1 * a2 + e1 * d2 + f1 * g2, d1 * b2 + e1 * e2 + f1 * h2, d1 * c2 + e1 * f2 + f1 * i2, g1 * a2 + h1 * d2 + i1 * g2, g1 * b2 + h1 * e2 + i1 * h2, g1 * c2 + h1 * f2 + i1 * i2];
+    a[0] = a1 * a2 + b1 * d2 + c1 * g2;
+    a[1] = a1 * b2 + b1 * e2 + c1 * h2;
+    a[2] = a1 * c2 + b1 * f2 + c1 * i2;
+    a[3] = d1 * a2 + e1 * d2 + f1 * g2;
+    a[4] = d1 * b2 + e1 * e2 + f1 * h2;
+    a[5] = d1 * c2 + e1 * f2 + f1 * i2;
+    a[6] = g1 * a2 + h1 * d2 + i1 * g2;
+    a[7] = g1 * b2 + h1 * e2 + i1 * h2;
+    a[8] = g1 * c2 + h1 * f2 + i1 * i2;
   },
-  matrixMultiplyArray: function(matrices) {
-    var i, len, r;
-    r = matrices[0];
-    len = matrices.length;
-    i = 1;
-    while (i < len) {
-      r = this.matrixMultiply(r, matrices[i]);
-      i++;
+  reverseMultiply: function(b, a) {
+    var a1, a2, b1, b2, c1, c2, d1, d2, e1, e2, f1, f2, g1, g2, h1, h2, i1, i2;
+    if (a === b) {
+      throw new Error('Multiplying matrix with itself');
     }
-    return r;
+    a1 = a[0 * 3 + 0];
+    b1 = a[0 * 3 + 1];
+    c1 = a[0 * 3 + 2];
+    d1 = a[1 * 3 + 0];
+    e1 = a[1 * 3 + 1];
+    f1 = a[1 * 3 + 2];
+    g1 = a[2 * 3 + 0];
+    h1 = a[2 * 3 + 1];
+    i1 = a[2 * 3 + 2];
+    a2 = b[0 * 3 + 0];
+    b2 = b[0 * 3 + 1];
+    c2 = b[0 * 3 + 2];
+    d2 = b[1 * 3 + 0];
+    e2 = b[1 * 3 + 1];
+    f2 = b[1 * 3 + 2];
+    g2 = b[2 * 3 + 0];
+    h2 = b[2 * 3 + 1];
+    i2 = b[2 * 3 + 2];
+    b[0] = a1 * a2 + b1 * d2 + c1 * g2;
+    b[1] = a1 * b2 + b1 * e2 + c1 * h2;
+    b[2] = a1 * c2 + b1 * f2 + c1 * i2;
+    b[3] = d1 * a2 + e1 * d2 + f1 * g2;
+    b[4] = d1 * b2 + e1 * e2 + f1 * h2;
+    b[5] = d1 * c2 + e1 * f2 + f1 * i2;
+    b[6] = g1 * a2 + h1 * d2 + i1 * g2;
+    b[7] = g1 * b2 + h1 * e2 + i1 * h2;
+    b[8] = g1 * c2 + h1 * f2 + i1 * i2;
   }
 };
 
@@ -4619,6 +4558,7 @@ Camera = require('../engine/camera');
 var WebGLHelper;
 
 module.exports = WebGLHelper = {
+  planeCache: new Float32Array(12),
   colorFromCSSString: function(string) {
     var a, b, c;
     if (string.length === 4) {
@@ -4631,12 +4571,25 @@ module.exports = WebGLHelper = {
     }
   },
   setPlane: function(gl, x, y, width, height) {
-    var x1, x2, y1, y2;
+    var p, x1, x2, y1, y2;
     x1 = x;
     x2 = x + width;
     y1 = y;
     y2 = y + height;
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]), gl.STATIC_DRAW);
+    p = this.planeCache;
+    p[0] = x1;
+    p[1] = y1;
+    p[2] = x2;
+    p[3] = y1;
+    p[4] = x1;
+    p[5] = y2;
+    p[6] = x1;
+    p[7] = y2;
+    p[8] = x2;
+    p[9] = y1;
+    p[10] = x2;
+    p[11] = y2;
+    return gl.bufferData(gl.ARRAY_BUFFER, p, gl.STATIC_DRAW);
   },
   setPlaneOutline: function(gl, x, y, width, height, outlineWidth) {
     var ix1, ix2, iy1, iy2, ox1, ox2, oy1, oy2;
@@ -5730,6 +5683,96 @@ Globals = require('../engine/globals');
 
 
 },{"../engine/globals":4}],21:[function(require,module,exports){
+var Geometry, Globals, Texture, c;
+
+module.exports = function() {
+  return module.exports.prototype.constructor.apply(this, arguments);
+};
+
+c = Texture = (function() {
+  function Texture() {}
+
+
+  /*
+  Parses an offset global into an actual Math.Vector offset that fits the object's texture
+  
+  @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
+  @return {Math.Vector} The offset vector the offset global corresponds to for the object
+   */
+
+  Texture.prototype.parseOffsetGlobal = function(offset) {
+    var bottom, center, left, middle, ret, right, top;
+    ret = new Geometry.Vector();
+    left = Globals.OFFSET_TOP_LEFT | Globals.OFFSET_MIDDLE_LEFT | Globals.OFFSET_BOTTOM_LEFT;
+    center = Globals.OFFSET_TOP_CENTER | Globals.OFFSET_MIDDLE_CENTER | Globals.OFFSET_BOTTOM_CENTER;
+    right = Globals.OFFSET_TOP_RIGHT | Globals.OFFSET_MIDDLE_RIGHT | Globals.OFFSET_BOTTOM_RIGHT;
+    if (offset & left) {
+      ret.x = 0;
+    } else if (offset & center) {
+      ret.x = this.clipWidth / 2;
+    } else if (offset & right) {
+      ret.x = this.clipWidth;
+    }
+    top = Globals.OFFSET_TOP_LEFT | Globals.OFFSET_TOP_CENTER | Globals.OFFSET_TOP_RIGHT;
+    middle = Globals.OFFSET_MIDDLE_LEFT | Globals.OFFSET_MIDDLE_CENTER | Globals.OFFSET_MIDDLE_RIGHT;
+    bottom = Globals.OFFSET_BOTTOM_LEFT | Globals.OFFSET_BOTTOM_CENTER | Globals.OFFSET_BOTTOM_RIGHT;
+    if (offset & top) {
+      ret.y = 0;
+    } else if (offset & middle) {
+      ret.y = this.clipHeight / 2;
+    } else if (offset & bottom) {
+      ret.y = this.clipHeight;
+    }
+    return ret;
+  };
+
+
+  /*
+  Calculates the region which the object will fill out when redrawn.
+  
+  @private
+  @return {Rectangle} The bounding rectangle of the object
+   */
+
+  Texture.prototype.getRedrawRegion = function() {
+    var box, i, parent, parents;
+    box = new Geometry.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight).getPolygon();
+    parents = this.getParents();
+    parents.unshift(this);
+    i = 0;
+    while (i < parents.length) {
+      parent = parents[i];
+      box.scale(parent.size * parent.widthScale, parent.size * parent.heightScale);
+      box.rotate(parent.direction);
+      box.move(parent.x, parent.y);
+      i++;
+    }
+    box = box.getBoundingRectangle();
+    box.x = Math.floor(box.x);
+    box.y = Math.floor(box.y);
+    box.width = Math.ceil(box.width + 1);
+    box.height = Math.ceil(box.height + 1);
+    return box;
+  };
+
+  return Texture;
+
+})();
+
+module.exports.prototype = Object.create(c.prototype);
+
+module.exports.prototype.constructor = c;
+
+Geometry = {
+  Vector: require('../geometry/vector'),
+  Rectangle: require('../geometry/rectangle')
+};
+
+Globals = require('../engine/globals');
+
+
+
+},{"../engine/globals":4,"../geometry/rectangle":11,"../geometry/vector":12}],22:[function(require,module,exports){
 var CanvasRenderer, Helpers, c;
 
 module.exports = function() {
@@ -5744,7 +5787,7 @@ c = CanvasRenderer = (function() {
   }
 
   CanvasRenderer.prototype.render = function(cameras) {
-    var camera, camerasLength, h, i, ii, rooms, roomsLength, w, wm, wmS, wmT;
+    var camera, camerasLength, h, i, ii, rooms, roomsLength, sx, sy, w;
     camerasLength = cameras.length;
     c = this.context;
     c.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -5754,14 +5797,16 @@ c = CanvasRenderer = (function() {
       c.save();
       w = camera.captureRegion.width;
       h = camera.captureRegion.height;
-      wmT = Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
-      if (camera.captureRegion.width !== 0 && camera.captureRegion.height !== 0) {
-        wmS = Helpers.MatrixCalculation.makeScale(camera.projectionRegion.width / camera.captureRegion.width, camera.projectionRegion.height / camera.captureRegion.height);
-      } else {
-        wmS = Helpers.MatrixCalculation.makeIdentity();
+      if (camera.wm == null) {
+        camera.wm = new Float32Array(9);
       }
-      wm = Helpers.MatrixCalculation.matrixMultiply(wmT, wmS);
-      wm = Helpers.MatrixCalculation.matrixMultiply(wm, Helpers.MatrixCalculation.makeTranslation(camera.projectionRegion.x, camera.projectionRegion.y));
+      Helpers.MatrixCalculation.setTranslation(camera.wm, -camera.captureRegion.x, -camera.captureRegion.y);
+      if (camera.captureRegion.width !== 0 && camera.captureRegion.height !== 0) {
+        sx = camera.projectionRegion.width / camera.captureRegion.width;
+        sy = camera.projectionRegion.height / camera.captureRegion.height;
+        Helpers.MatrixCalculation.multiply(camera.wm, Helpers.MatrixCalculation.getScale(sx, sy));
+      }
+      Helpers.MatrixCalculation.multiply(camera.wm, Helpers.MatrixCalculation.getTranslation(camera.projectionRegion.x, camera.projectionRegion.y));
       c.beginPath();
       c.moveTo(camera.projectionRegion.x, camera.projectionRegion.y);
       c.lineTo(camera.projectionRegion.x + camera.projectionRegion.width, camera.projectionRegion.y);
@@ -5773,7 +5818,7 @@ c = CanvasRenderer = (function() {
       roomsLength = rooms.length;
       ii = 0;
       while (ii < roomsLength) {
-        this.renderTree(rooms[ii], wm);
+        this.renderTree(rooms[ii], camera.wm);
         ii++;
       }
       c.restore();
@@ -5782,20 +5827,34 @@ c = CanvasRenderer = (function() {
   };
 
   CanvasRenderer.prototype.renderTree = function(object, wm) {
-    var i, len, localWm, offset;
-    localWm = Helpers.MatrixCalculation.matrixMultiplyArray([Helpers.MatrixCalculation.calculateLocalMatrix(object), wm]);
+    var i, len, wmWithOffset, _results;
+    if (object.wm == null) {
+      object.wm = new Float32Array(9);
+    }
+    Helpers.MatrixCalculation.setLocalMatrix(object.wm, object);
+    Helpers.MatrixCalculation.multiply(object.wm, wm);
     if (!object.isVisible()) {
       return;
     }
     if (object.renderType !== "") {
-      offset = Helpers.MatrixCalculation.matrixMultiply(Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y), localWm);
-      this.context.setTransform(offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]);
+      wmWithOffset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
+      Helpers.MatrixCalculation.multiply(wmWithOffset, object.wm);
+      this.context.setTransform(wmWithOffset[0], wmWithOffset[1], wmWithOffset[3], wmWithOffset[4], wmWithOffset[6], wmWithOffset[7]);
       this.context.globalAlpha = object.opacity;
     }
     switch (object.renderType) {
       case "textblock":
-      case "sprite":
         this.renderSprite(object);
+        break;
+      case "sprite":
+        object.updateSubImage();
+        this.renderSprite(object);
+        if (engine.drawMasks) {
+          this.renderMask(object);
+        }
+        if (engine.drawBoundingBoxes) {
+          this.renderBoundingBox(object);
+        }
         break;
       case "circle":
         this.renderCircle(object);
@@ -5812,37 +5871,18 @@ c = CanvasRenderer = (function() {
     if (object.children) {
       len = object.children.length;
       i = 0;
+      _results = [];
       while (i < len) {
-        this.renderTree(object.children[i], localWm);
-        i++;
+        this.renderTree(object.children[i], object.wm);
+        _results.push(i++);
       }
+      return _results;
     }
   };
 
   CanvasRenderer.prototype.renderSprite = function(object) {
-    if (object.imageLength !== 1 && object.animationSpeed !== 0) {
-      if (engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed) {
-        object.imageNumber = object.imageNumber + (object.animationSpeed > 0 ? 1 : -1);
-        object.animationLastSwitch = engine.gameTime;
-        if (object.imageNumber === object.imageLength) {
-          object.imageNumber = (object.animationLoops ? 0 : object.imageLength - 1);
-        } else {
-          if (object.imageNumber === -1) {
-            object.imageNumber = (object.animationLoops ? object.imageLength - 1 : 0);
-          }
-        }
-      }
-    }
-    this.context.drawImage(object.bm, (object.clipWidth + object.bm.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight);
+    this.context.drawImage(object.texture, (object.clipWidth + object.texture.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight);
   };
-
-
-  /*
-  Draws a Circle object on the canvas (if added as a child of a View)
-  @private
-  @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Circle
-  @param {Math.Vector} drawOffset A vector defining the offset with which to draw the object
-   */
 
   CanvasRenderer.prototype.renderCircle = function(object) {
     c = this.context;
@@ -5857,14 +5897,6 @@ c = CanvasRenderer = (function() {
       c.stroke();
     }
   };
-
-
-  /*
-  Draws a Polygon object on the canvas (if added as a child of a View)
-  @private
-  @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Polygon
-  @param {Vector} drawOffset A vector defining the offset with which to draw the object
-   */
 
   CanvasRenderer.prototype.renderPolygon = function(object) {
     var i, len;
@@ -5898,13 +5930,6 @@ c = CanvasRenderer = (function() {
     }
   };
 
-
-  /*
-  Draws a Line object on the canvas (if added as a child of a View)
-  @private
-  @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Line
-   */
-
   CanvasRenderer.prototype.renderLine = function(object) {
     c = this.context;
     c.strokeStyle = object.strokeStyle;
@@ -5916,14 +5941,6 @@ c = CanvasRenderer = (function() {
     c.lineCap = object.lineCap;
     c.stroke();
   };
-
-
-  /*
-  Draws a Rectangle object on the canvas (if added as a child of a View)
-  @private
-  @param {CanvasRenderingContext2D} c A canvas 2D context on which to draw the Rectangle
-  @param {Vector} cameraOffset A vector defining the offset with which to draw the object
-   */
 
   CanvasRenderer.prototype.renderRectangle = function(object) {
     c = this.context;
@@ -5942,6 +5959,44 @@ c = CanvasRenderer = (function() {
     }
   };
 
+  CanvasRenderer.prototype.renderMask = function(object) {
+    var mask;
+    mask = engine.loader.getMask(object.source, object.getTheme());
+    if (object.imageLength !== 1 && object.animationSpeed !== 0) {
+      if (engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed) {
+        object.imageNumber = object.imageNumber + (object.animationSpeed > 0 ? 1 : -1);
+        object.animationLastSwitch = engine.gameTime;
+        if (object.imageNumber === object.imageLength) {
+          object.imageNumber = (object.animationLoops ? 0 : object.imageLength - 1);
+        } else {
+          if (object.imageNumber === -1) {
+            object.imageNumber = (object.animationLoops ? object.imageLength - 1 : 0);
+          }
+        }
+      }
+    }
+    return this.context.drawImage(mask, (object.clipWidth + object.texture.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight);
+  };
+
+  CanvasRenderer.prototype.renderBoundingBox = function(object) {
+    var box, mask, point, _i, _len, _ref;
+    mask = engine.loader.getMask(object.source, object.getTheme());
+    box = mask.boundingBox;
+    c = this.context;
+    c.strokeStyle = '#0F0';
+    c.setLineDash([]);
+    c.beginPath();
+    _ref = box.points;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      point = _ref[_i];
+      c.lineTo(point.x, point.y);
+    }
+    c.lineWidth = 1;
+    c.globalAlpha = 1;
+    c.closePath();
+    return c.stroke();
+  };
+
   return CanvasRenderer;
 
 })();
@@ -5956,122 +6011,182 @@ Helpers = {
 
 
 
-},{"../helpers/matrix-calculation":14}],22:[function(require,module,exports){
-var ColorShaderProgram, Helpers, TextureShaderProgram, WebGLRenderer, c;
+},{"../helpers/matrix-calculation":14}],23:[function(require,module,exports){
+var ColorShaderProgram, Helpers, TextureShaderProgram, View, WebGLRenderer, c;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
 };
 
 c = WebGLRenderer = (function() {
+  WebGLRenderer.prototype.currentAlpha = null;
+
+  WebGLRenderer.prototype.currentResolution = {
+    width: 0,
+    height: 0
+  };
+
   function WebGLRenderer(canvas) {
-    var gl, options;
+    var context, options, _i, _len, _ref;
     this.canvas = canvas;
-    this.cache = {
-      currentAlpha: void 0,
-      currentResolution: {
-        width: 0,
-        height: 0
-      }
-    };
+    this.currentAlpha = void 0;
+    this.currentResolution.width = 0;
+    this.currentResolution.height = 0;
     this.programs = {};
     this.currentProgram = false;
     options = {
       premultipliedAlpha: false,
       alpha: false
     };
-    this.gl = this.canvas.getContext("webgl", options) || this.canvas.getContext("experimental-webgl", options);
-    gl = this.gl;
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.enable(gl.BLEND);
+    _ref = ["webgl", "experimental-webgl"];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      context = _ref[_i];
+      this.gl = this.canvas.getContext(context, options);
+      if (this.gl) {
+        break;
+      }
+    }
+    this.gl.pixelStorei(this.gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+    this.gl.enable(this.gl.BLEND);
     this.programs = {
-      texture: new TextureShaderProgram(gl),
-      color: new ColorShaderProgram(gl)
+      texture: new TextureShaderProgram(this.gl),
+      color: new ColorShaderProgram(this.gl)
     };
-    return;
   }
 
   WebGLRenderer.prototype.setProgram = function(program) {
-    var gl;
+    var gl, l, _base, _base1;
     if (this.currentProgram !== program) {
-      gl = void 0;
       gl = this.gl;
+      if (typeof (_base = this.currentProgram).flushBuffers === "function") {
+        _base.flushBuffers(gl);
+      }
       this.currentProgram = program;
       gl.useProgram(program.program);
-      program.onSet(gl);
-      gl.uniform2f(program.locations.u_resolution, this.cache.currentResolution.width, this.cache.currentResolution.height);
-      gl.uniform1f(this.currentProgram.locations.u_alpha, this.cache.currentAlpha);
+      if (typeof (_base1 = this.currentProgram).onSet === "function") {
+        _base1.onSet(gl);
+      }
+      l = program.locations;
+      gl.uniform2f(l.u_resolution, this.currentResolution.width, this.currentResolution.height);
+      gl.uniform1f(l.u_alpha, this.currentAlpha);
     }
   };
 
   WebGLRenderer.prototype.render = function(cameras) {
-    var camera, camerasLength, gl, h, i, ii, rooms, roomsLength, w, wm;
+    var camera, cr, gl, h, pr, room, rooms, w, _i, _j, _len, _len1;
     gl = this.gl;
-    camerasLength = cameras.length;
-    i = 0;
-    while (i < camerasLength) {
-      camera = cameras[i];
-      w = camera.captureRegion.width;
-      h = camera.captureRegion.height;
-      if (this.cache.currentResolution.width !== w || this.cache.currentResolution.height !== h) {
-        this.cache.currentResolution.width = w;
-        this.cache.currentResolution.height = h;
+    for (_i = 0, _len = cameras.length; _i < _len; _i++) {
+      camera = cameras[_i];
+      cr = camera.captureRegion;
+      pr = camera.projectionRegion;
+      w = cr.width;
+      h = cr.height;
+      if (this.currentResolution.width !== w || this.currentResolution.height !== h) {
+        this.currentResolution.width = w;
+        this.currentResolution.height = h;
         if (this.currentProgram) {
           gl.uniform2f(this.currentProgram.locations.u_resolution, w, h);
         }
       }
-      wm = Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y);
-      gl.viewport(camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height);
-      rooms = [engine.masterRoom, camera.room];
-      roomsLength = rooms.length;
-      ii = 0;
-      while (ii < roomsLength) {
-        this.renderTree(rooms[ii], wm);
-        ii++;
+      if (camera.wm == null) {
+        camera.wm = new Float32Array(9);
       }
-      i++;
+      Helpers.MatrixCalculation.setTranslation(camera.wm, -cr.x, -cr.y);
+      gl.viewport(pr.x, pr.y, pr.width, pr.height);
+      rooms = [engine.masterRoom, camera.room];
+      for (_j = 0, _len1 = rooms.length; _j < _len1; _j++) {
+        room = rooms[_j];
+        this.renderRoom(room, camera.wm);
+      }
     }
   };
 
-  WebGLRenderer.prototype.renderTree = function(object, wm) {
-    var gl, i, len, localWm, offset;
-    gl = this.gl;
-    localWm = Helpers.MatrixCalculation.matrixMultiplyArray([Helpers.MatrixCalculation.calculateLocalMatrix(object), wm]);
-    offset = Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y);
+  WebGLRenderer.prototype.renderRoom = function(room, wm) {
+    var list;
+    list = room.renderList != null ? room.renderList : room.renderList = [];
+    if (!room.parent) {
+      room.parent = new View.Child();
+      room.parent.wm = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+      room.parent.changed = false;
+    }
+    this.updateRenderList(list, room, new Uint16Array([0]));
+    this.processRenderList(list);
+  };
+
+  WebGLRenderer.prototype.updateRenderList = function(list, object, counter) {
+    var child, last, _i, _len, _ref, _results;
     if (!object.isVisible()) {
       return;
     }
-    if (this.cache.currentAlpha !== object.opacity) {
-      this.cache.currentAlpha = object.opacity;
-      if (this.currentProgram) {
-        gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
+    last = list[counter[0]];
+    if (object !== last) {
+      if (last === void 0) {
+        list.push(object);
+      } else {
+        list.splice(count, void 0, object);
       }
     }
-    switch (object.renderType) {
-      case "textblock":
-      case "sprite":
-        this.setProgram(this.programs.texture);
-        this.currentProgram.renderSprite(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
-        break;
-      case "line":
-        this.setProgram(this.programs.color);
-        this.currentProgram.renderLine(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
-        break;
-      case "rectangle":
-        this.setProgram(this.programs.color);
-        this.currentProgram.renderRectangle(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
-        break;
-      case "circle":
-        this.setProgram(this.programs.color);
-        this.currentProgram.renderCircle(gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm));
-    }
+    counter[0] += 1;
     if (object.children) {
-      len = object.children.length;
-      i = 0;
-      while (i < len) {
-        this.renderTree(object.children[i], localWm);
-        i++;
+      _ref = object.children;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        child = _ref[_i];
+        _results.push(this.updateRenderList(list, child, counter));
+      }
+      return _results;
+    }
+  };
+
+  WebGLRenderer.prototype.processRenderList = function(list) {
+    var gl, object, offset, program, _i, _len, _ref;
+    gl = this.gl;
+    for (_i = 0, _len = list.length; _i < _len; _i++) {
+      object = list[_i];
+      if (object.wm == null) {
+        object.wm = new Float32Array(9);
+      }
+      Helpers.MatrixCalculation.setLocalMatrix(object.wm, object);
+      Helpers.MatrixCalculation.multiply(object.wm, object.parent.wm);
+      offset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
+      Helpers.MatrixCalculation.reverseMultiply(object.wm, offset);
+      if (this.currentAlpha !== object.opacity) {
+        this.currentAlpha = object.opacity;
+        if (this.currentProgram) {
+          gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
+        }
+      }
+      switch (object.renderType) {
+        case "sprite":
+          program = this.programs.texture;
+          this.setProgram(program);
+          program.renderSprite(gl, object, object.wm);
+          break;
+        case "textblock":
+          program = this.programs.texture;
+          this.setProgram(program);
+          program.renderTextBlock(gl, object, object.wm);
+          break;
+        case "line":
+          program = this.setProgram(program);
+          this.setProgram(program);
+          program.renderLine(gl, object, object.wm);
+          break;
+        case "rectangle":
+          program = this.programs.color;
+          this.setProgram(this.programs.color);
+          program.renderRectangle(gl, object, object.wm);
+          break;
+        case "circle":
+          program = this.programs.color;
+          this.setProgram(program);
+          program.renderCircle(gl, object, object.wm);
+      }
+    }
+    if ((_ref = this.currentProgram) != null) {
+      if (typeof _ref.flushBuffers === "function") {
+        _ref.flushBuffers(gl);
       }
     }
   };
@@ -6092,10 +6207,14 @@ Helpers = {
   MatrixCalculation: require('../helpers/matrix-calculation')
 };
 
+View = {
+  Child: require('../views/child')
+};
 
 
-},{"../helpers/matrix-calculation":14,"./webgl/color-shader-program":23,"./webgl/texture-shader-program":24}],23:[function(require,module,exports){
-var Helpers, WebGLColorShaderProgram, c;
+
+},{"../helpers/matrix-calculation":14,"../views/child":28,"./webgl/color-shader-program":24,"./webgl/texture-shader-program":25}],24:[function(require,module,exports){
+var Geometry, Helpers, WebGLColorShaderProgram, c;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
@@ -6155,14 +6274,7 @@ c = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderLine = function(gl, object, wm) {
-    var a, b, color, coords, l, len;
-    l = void 0;
-    len = void 0;
-    coords = void 0;
-    color = void 0;
-    a = void 0;
-    b = void 0;
-    c = void 0;
+    var a, b, color, coords, l;
     l = this.locations;
     if (object.strokeStyle === "transparent") {
       return;
@@ -6199,10 +6311,7 @@ c = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderCircle = function(gl, object, wm) {
-    var l, perimeter, segmentsCount;
-    l = void 0;
-    perimeter = void 0;
-    segmentsCount = void 0;
+    var l, segmentsCount;
     l = this.locations;
     gl.uniformMatrix3fv(l.u_matrix, false, wm);
     if (object.radius < 10) {
@@ -6226,6 +6335,21 @@ c = WebGLColorShaderProgram = (function() {
     }
   };
 
+  WebGLColorShaderProgram.prototype.renderBoundingBox = function(gl, object, wm) {
+    var box, height, l, mask, width, x, y;
+    l = this.locations;
+    mask = engine.loader.getMask(object.source, object.getTheme());
+    box = mask.boundingBox;
+    x = box.points[0].x;
+    y = box.points[0].y;
+    width = box.points[2].x - x;
+    height = box.points[2].y - y;
+    gl.uniformMatrix3fv(l.u_matrix, false, wm);
+    gl.uniform1i(l.u_color, Helpers.WebGL.colorFromCSSString('#0F0'));
+    Helpers.WebGL.setPlaneOutline(gl, x, y, width, height, 1);
+    return gl.drawArrays(gl.TRIANGLES, 0, 24);
+  };
+
   return WebGLColorShaderProgram;
 
 })();
@@ -6238,140 +6362,225 @@ Helpers = {
   WebGL: require('../../helpers/webgl')
 };
 
+Geometry = {
+  Line: require('../../geometry/line')
+};
 
 
-},{"../../helpers/webgl":17}],24:[function(require,module,exports){
-var Helpers, WebGLTextureShaderProgram, c;
+
+},{"../../geometry/line":9,"../../helpers/webgl":17}],25:[function(require,module,exports){
+var Helpers, WebGLTextureShaderProgram, c, coordsBufferLength;
 
 module.exports = function() {
   return module.exports.prototype.constructor.apply(this, arguments);
 };
 
+coordsBufferLength = 5 * 6 * 20000;
+
 c = WebGLTextureShaderProgram = (function() {
+  WebGLTextureShaderProgram.prototype.textureCache = {};
+
+  WebGLTextureShaderProgram.prototype.maskCache = {};
+
+  WebGLTextureShaderProgram.prototype.locations = {};
+
+  WebGLTextureShaderProgram.prototype.currentTexture = document.createElement('img');
+
+  WebGLTextureShaderProgram.prototype.vertex = null;
+
+  WebGLTextureShaderProgram.prototype.program = null;
+
+  WebGLTextureShaderProgram.prototype.coordsCount = 0;
+
+  WebGLTextureShaderProgram.prototype.coords = new Float32Array(coordsBufferLength);
+
+  WebGLTextureShaderProgram.prototype.coordsBuffer = null;
+
+  WebGLTextureShaderProgram.prototype.cornerCoords = new Float32Array(8);
+
   function WebGLTextureShaderProgram(gl) {
-    this.cache = {
-      regularTextCoordBuffer: false,
-      animatedTextCoordBuffer: false,
-      rectangleCornerBuffer: false,
-      currentBuffer: false,
-      currentTexture: void 0,
-      textures: {}
-    };
     this.program = gl.createProgram();
     this.initShaders(gl);
     this.bindLocations(gl);
     this.initBuffers(gl);
-    return;
   }
 
   WebGLTextureShaderProgram.prototype.initShaders = function(gl) {
-    var fragmentCode, fragmentShader, vertexCode, vertexShader;
-    vertexCode = void 0;
-    fragmentCode = void 0;
-    vertexShader = void 0;
-    fragmentShader = void 0;
-    vertexCode = "attribute vec2 a_position; attribute vec2 a_texCoord; uniform vec2 u_resolution; uniform mat3 u_matrix; varying vec2 v_texCoord; void main() { vec2 position = (u_matrix * vec3(a_position, 1)).xy; vec2 zeroToOne = position / u_resolution; vec2 zeroToTwo = zeroToOne * 2.0; vec2 clipSpace = zeroToTwo - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); v_texCoord = a_texCoord; }";
+    var compiled, fragmentCode, fragmentShader, vertexCode, vertexShader;
+    vertexCode = "attribute vec2 a_position; attribute vec2 a_texCoord; attribute float a_opacity; uniform vec2 u_resolution; varying vec2 v_texCoord; varying float v_opacity; void main() { vec2 clipSpace = a_position / u_resolution * 2.0 - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0.0, 1.0); v_texCoord = a_texCoord; v_opacity = a_opacity; }";
     vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexCode);
     gl.compileShader(vertexShader);
     gl.attachShader(this.program, vertexShader);
-    fragmentCode = "precision mediump float; uniform sampler2D u_image; varying vec2 v_texCoord; uniform float u_alpha; void main() { vec4 textureColor = texture2D(u_image, v_texCoord); gl_FragColor = vec4(textureColor.rgb, textureColor.a * u_alpha); }";
+    compiled = gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS);
+    if (!compiled) {
+      console.error(gl.getShaderInfoLog(vertexShader));
+    }
+    fragmentCode = "precision mediump float; uniform sampler2D u_image; varying vec2 v_texCoord; varying float v_opacity; void main() { vec4 textureColor = texture2D(u_image, v_texCoord); gl_FragColor = vec4(textureColor.rgb, textureColor.a * v_opacity); }";
     fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentCode);
     gl.compileShader(fragmentShader);
+    compiled = gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS);
+    if (!compiled) {
+      console.error(gl.getShaderInfoLog(fragmentShader));
+    }
     gl.attachShader(this.program, fragmentShader);
     gl.linkProgram(this.program);
   };
 
   WebGLTextureShaderProgram.prototype.bindLocations = function(gl) {
-    this.locations = {
-      a_texCoord: gl.getAttribLocation(this.program, "a_texCoord"),
-      a_position: gl.getAttribLocation(this.program, "a_position"),
-      u_resolution: gl.getUniformLocation(this.program, "u_resolution"),
-      u_matrix: gl.getUniformLocation(this.program, "u_matrix"),
-      u_alpha: gl.getUniformLocation(this.program, "u_alpha")
-    };
+    this.locations.a_position = gl.getAttribLocation(this.program, "a_position");
+    this.locations.a_texCoord = gl.getAttribLocation(this.program, "a_texCoord");
+    this.locations.a_opacity = gl.getAttribLocation(this.program, "a_opacity");
+    this.locations.u_resolution = gl.getUniformLocation(this.program, "u_resolution");
   };
 
   WebGLTextureShaderProgram.prototype.initBuffers = function(gl) {
-    this.cache.regularTextCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.regularTextCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]), gl.STATIC_DRAW);
-    this.cache.animatedTextCoordBuffer = gl.createBuffer();
-    this.cache.rectangleCornerBuffer = gl.createBuffer();
-  };
-
-  WebGLTextureShaderProgram.prototype.setRegularTextCoordBuffer = function(gl) {
-    if (this.cache.currentBuffer !== this.cache.regularTextCoordBuffer) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.regularTextCoordBuffer);
-      gl.enableVertexAttribArray(this.locations.a_texCoord);
-      gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
-      this.cache.currentBuffer = this.cache.regularTextCoordBuffer;
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
-    }
-  };
-
-  WebGLTextureShaderProgram.prototype.setAnimatedTextCoordBuffer = function(gl, object) {
-    var x1, x2, y1, y2;
-    x1 = (object.clipWidth + object.bm.spacing) * object.imageNumber;
-    x2 = x1 + object.clipWidth;
-    x1 /= object.bm.width;
-    x2 /= object.bm.width;
-    y1 = 0;
-    y2 = 1;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.animatedTextCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(this.locations.a_texCoord);
-    gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 0, 0);
-    this.cache.currentBuffer = this.cache.animatedTextCoordBuffer;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
+    this.coordsBuffer = gl.createBuffer();
   };
 
   WebGLTextureShaderProgram.prototype.onSet = function(gl) {
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.cache.rectangleCornerBuffer);
+    var floatSize;
+    floatSize = this.coords.BYTES_PER_ELEMENT;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.coordsBuffer);
+    gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 5 * floatSize, 0);
     gl.enableVertexAttribArray(this.locations.a_position);
-    gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(this.locations.a_texCoord, 2, gl.FLOAT, false, 5 * floatSize, 2 * floatSize);
+    gl.enableVertexAttribArray(this.locations.a_texCoord);
+    gl.vertexAttribPointer(this.locations.a_opacity, 1, gl.FLOAT, false, 5 * floatSize, 4 * floatSize);
+    gl.enableVertexAttribArray(this.locations.a_opacity);
   };
 
   WebGLTextureShaderProgram.prototype.renderSprite = function(gl, object, wm) {
-    var l, t;
-    l = this.locations;
-    if (object.renderType === "textblock" && this.cache.textures[object.bm.oldSrc]) {
-      delete this.cache.textures[object.bm.oldSrc];
+    this.setSpriteTexture(gl, object);
+    this.setTransformedCorners(object.clipWidth, object.clipHeight, wm);
+    this.bufferOpacity(object.opacity);
+    this.bufferRectangle();
+    if (object.imageLength === 1) {
+      this.bufferTexture();
+    } else {
+      this.bufferAnimatedTexture(object);
     }
-    t = this.getSpriteTexture(gl, object);
-    if (this.cache.currentTexture !== t) {
-      this.cache.currentTexture = t;
-      if (object.imageLength === 1) {
-        this.setRegularTextCoordBuffer(gl);
-      } else {
-        if (engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed) {
-          object.imageNumber = object.imageNumber + (object.animationSpeed > 0 ? 1 : -1);
-          object.animationLastSwitch = engine.gameTime;
-          if (object.imageNumber === object.imageLength) {
-            object.imageNumber = (object.animationLoops ? 0 : object.imageLength - 1);
-          } else {
-            if (object.imageNumber === -1) {
-              object.imageNumber = (object.animationLoops ? object.imageLength - 1 : 0);
-            }
-          }
-        }
-        this.setAnimatedTextCoordBuffer(gl, object);
-      }
-      gl.bindTexture(gl.TEXTURE_2D, t);
-      Helpers.WebGL.setPlane(gl, 0, 0, object.clipWidth, object.clipHeight);
-    }
-    gl.uniformMatrix3fv(l.u_matrix, false, wm);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    this.coordsCount += 30;
   };
 
-  WebGLTextureShaderProgram.prototype.getSpriteTexture = function(gl, object) {
-    return this.cache.textures[object.bm.src] || this.createSpriteTexture(gl, object.bm);
+  WebGLTextureShaderProgram.prototype.renderTextBlock = function(gl, object, wm) {
+    if (this.textureCache[object.texture.lastCacheKey]) {
+      gl.deleteTexture(this.textureCache[object.texture.lastCacheKey]);
+      this.textureCache[object.texture.lastCacheKey] = null;
+    }
+    this.renderSprite(gl, object, wm);
   };
 
-  WebGLTextureShaderProgram.prototype.createSpriteTexture = function(gl, image) {
+  WebGLTextureShaderProgram.prototype.setSpriteTexture = function(gl, object) {
     var texture;
-    texture = void 0;
+    texture = object.texture;
+    this.setTexture(gl, texture);
+  };
+
+  WebGLTextureShaderProgram.prototype.renderMask = function(gl, object, wm) {
+    this.setMaskTexture(gl, object);
+    this.setTransformedCorners(object.clipWidth, object.clipHeight, wm);
+    this.bufferOpacity(1);
+    this.bufferRectangle();
+    if (object.imageLength === 1) {
+      this.bufferTexture();
+    } else {
+      this.bufferAnimatedTexture(object);
+    }
+    this.coordsCount += 30;
+  };
+
+  WebGLTextureShaderProgram.prototype.setMaskTexture = function(gl, object) {
+    var texture;
+    texture = engine.loader.getMask(object.source, object.getTheme());
+    this.setTexture(gl, texture);
+  };
+
+  WebGLTextureShaderProgram.prototype.setTexture = function(gl, texture) {
+    if (this.coordsCount === this.coords.length || this.currentTexture.cacheKey !== texture.cacheKey) {
+      this.flushBuffers(gl);
+      this.currentTexture = texture;
+    }
+  };
+
+  WebGLTextureShaderProgram.prototype.setTransformedCorners = function(width, height, wm) {
+    this.cornerCoords[0] = wm[6];
+    this.cornerCoords[1] = wm[7];
+    this.cornerCoords[2] = width * wm[0] + wm[6];
+    this.cornerCoords[3] = width * wm[1] + wm[7];
+    this.cornerCoords[4] = height * wm[3] + wm[6];
+    this.cornerCoords[5] = height * wm[4] + wm[7];
+    this.cornerCoords[6] = width * wm[0] + height * wm[3] + wm[6];
+    return this.cornerCoords[7] = width * wm[1] + height * wm[4] + wm[7];
+  };
+
+  WebGLTextureShaderProgram.prototype.bufferOpacity = function(opacity) {
+    this.coords[this.coordsCount + 4] = opacity;
+    this.coords[this.coordsCount + 9] = opacity;
+    this.coords[this.coordsCount + 14] = opacity;
+    this.coords[this.coordsCount + 19] = opacity;
+    this.coords[this.coordsCount + 24] = opacity;
+    return this.coords[this.coordsCount + 29] = opacity;
+  };
+
+  WebGLTextureShaderProgram.prototype.bufferRectangle = function() {
+    this.coords[this.coordsCount] = this.cornerCoords[0];
+    this.coords[this.coordsCount + 1] = this.cornerCoords[1];
+    this.coords[this.coordsCount + 5] = this.cornerCoords[2];
+    this.coords[this.coordsCount + 6] = this.cornerCoords[3];
+    this.coords[this.coordsCount + 10] = this.cornerCoords[4];
+    this.coords[this.coordsCount + 11] = this.cornerCoords[5];
+    this.coords[this.coordsCount + 15] = this.cornerCoords[4];
+    this.coords[this.coordsCount + 16] = this.cornerCoords[5];
+    this.coords[this.coordsCount + 20] = this.cornerCoords[2];
+    this.coords[this.coordsCount + 21] = this.cornerCoords[3];
+    this.coords[this.coordsCount + 25] = this.cornerCoords[6];
+    this.coords[this.coordsCount + 26] = this.cornerCoords[7];
+  };
+
+  WebGLTextureShaderProgram.prototype.bufferTexture = function() {
+    this.coords[this.coordsCount + 2] = 0.0;
+    this.coords[this.coordsCount + 3] = 0.0;
+    this.coords[this.coordsCount + 7] = 1.0;
+    this.coords[this.coordsCount + 8] = 0.0;
+    this.coords[this.coordsCount + 12] = 0.0;
+    this.coords[this.coordsCount + 13] = 1.0;
+    this.coords[this.coordsCount + 17] = 0.0;
+    this.coords[this.coordsCount + 18] = 1.0;
+    this.coords[this.coordsCount + 22] = 1.0;
+    this.coords[this.coordsCount + 23] = 0.0;
+    this.coords[this.coordsCount + 27] = 1.0;
+    this.coords[this.coordsCount + 28] = 1.0;
+  };
+
+  WebGLTextureShaderProgram.prototype.bufferAnimatedTexture = function(object) {
+    var x1, x2;
+    object.updateSubImage();
+    x1 = (object.clipWidth + object.texture.spacing) * object.imageNumber;
+    x2 = x1 + object.clipWidth;
+    x1 /= object.texture.width;
+    x2 /= object.texture.width;
+    this.coords[this.coordsCount + 2] = x1;
+    this.coords[this.coordsCount + 3] = 0.0;
+    this.coords[this.coordsCount + 7] = x2;
+    this.coords[this.coordsCount + 8] = 0.0;
+    this.coords[this.coordsCount + 12] = x1;
+    this.coords[this.coordsCount + 13] = 1.0;
+    this.coords[this.coordsCount + 17] = x1;
+    this.coords[this.coordsCount + 18] = 1.0;
+    this.coords[this.coordsCount + 22] = x2;
+    this.coords[this.coordsCount + 23] = 0.0;
+    this.coords[this.coordsCount + 27] = x2;
+    this.coords[this.coordsCount + 28] = 1.0;
+  };
+
+  WebGLTextureShaderProgram.prototype.getGLTexture = function(gl, texture) {
+    return this.textureCache[texture.cacheKey] || (this.textureCache[texture.cacheKey] = this.createGLTexture(gl, texture));
+  };
+
+  WebGLTextureShaderProgram.prototype.createGLTexture = function(gl, image) {
+    var texture;
     texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
@@ -6383,9 +6592,18 @@ c = WebGLTextureShaderProgram = (function() {
     } else {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     }
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    this.cache.textures[image.src] = texture;
     return texture;
+  };
+
+  WebGLTextureShaderProgram.prototype.flushBuffers = function(gl) {
+    var texture;
+    if (this.coordsCount) {
+      texture = this.getGLTexture(gl, this.currentTexture);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.bufferData(gl.ARRAY_BUFFER, this.coords, gl.DYNAMIC_DRAW);
+      gl.drawArrays(gl.TRIANGLES, 0, this.coordsCount / 5);
+      this.coordsCount = 0;
+    }
   };
 
   return WebGLTextureShaderProgram;
@@ -6397,12 +6615,13 @@ module.exports.prototype = Object.create(c.prototype);
 module.exports.prototype.constructor = c;
 
 Helpers = {
-  WebGL: require('../../helpers/webgl')
+  WebGL: require('../../helpers/webgl'),
+  MatrixCalculation: require('../../helpers/matrix-calculation')
 };
 
 
 
-},{"../../helpers/webgl":17}],25:[function(require,module,exports){
+},{"../../helpers/matrix-calculation":14,"../../helpers/webgl":17}],26:[function(require,module,exports){
 var Effect, c;
 
 module.exports = function() {
@@ -6568,7 +6787,7 @@ module.exports.prototype.constructor = c;
 
 
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var Music, c;
 
 module.exports = function() {
@@ -6682,7 +6901,7 @@ module.exports.prototype.constructor = c;
 
 
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var Child, Geometry, Room, c;
 
 module.exports = function() {
@@ -6700,15 +6919,9 @@ Geometry = {
  */
 
 c = Child = (function() {
-  function Child() {
-    this.renderType = "";
-    this.initWithoutRedrawRegions();
-    engine.registerObject(this);
-    return;
-  }
+  Child.prototype.renderType = null;
 
-  Child.prototype.initWithoutRedrawRegions = function() {
-    var hidden;
+  function Child() {
     this.x = 0;
     this.y = 0;
     this.opacity = 1;
@@ -6716,168 +6929,14 @@ c = Child = (function() {
     this.size = 1;
     this.widthScale = 1;
     this.heightScale = 1;
-    hidden = {
-      offset: new Geometry.Vector()
-    };
-    Object.defineProperty(this, "offset", {
-      get: function() {
-        return hidden.offset;
-      },
-      set: function(value) {
-        if (typeof value === "string") {
-          this.offsetGlobal = value;
-          hidden.offset = this.parseOffsetGlobal(value);
-        } else {
-          this.offsetGlobal = false;
-          hidden.offset = value;
-        }
-        return value;
-      }
-    });
-  };
+    this.offset = new Geometry.Vector();
+    engine.registerObject(this);
+    return;
+  }
 
-  Child.prototype.initWithRedrawRegions = function() {
-    var hidden;
-    this.hasChanged = false;
-    hidden = void 0;
-    hidden = {
-      x: 0,
-      y: 0,
-      opacity: 1,
-      direction: 0,
-      size: 1,
-      widthScale: 1,
-      heightScale: 1,
-      offset: void 0,
-      parentObject: this
-    };
-    Object.defineProperty(this, "x", {
-      get: function() {
-        return hidden.x;
-      },
-      set: function(value) {
-        if (hidden.x !== value) {
-          hidden.x = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "y", {
-      get: function() {
-        return hidden.y;
-      },
-      set: function(value) {
-        if (hidden.y !== value) {
-          hidden.y = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "opacity", {
-      get: function() {
-        return hidden.opacity;
-      },
-      set: function(value) {
-        if (hidden.opacity !== value) {
-          hidden.opacity = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "direction", {
-      get: function() {
-        return hidden.direction;
-      },
-      set: function(value) {
-        if (hidden.direction !== value) {
-          hidden.direction = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "size", {
-      get: function() {
-        return hidden.size;
-      },
-      set: function(value) {
-        if (hidden.size !== value) {
-          hidden.size = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "widthScale", {
-      get: function() {
-        return hidden.widthScale;
-      },
-      set: function(value) {
-        if (hidden.widthScale !== value) {
-          hidden.widthScale = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "heightScale", {
-      get: function() {
-        return hidden.heightScale;
-      },
-      set: function(value) {
-        if (hidden.heightScale !== value) {
-          hidden.heightScale = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "offset", {
-      get: function() {
-        return hidden.offset;
-      },
-      set: function(value) {
-        var off_;
-        if (hidden.offset !== value) {
-          hidden.offset = value;
-          off_ = {
-            x: value.x,
-            y: value.y
-          };
-          Object.defineProperty(hidden.offset, "x", {
-            get: function() {
-              return off_.x;
-            },
-            set: function(value) {
-              if (off_.x !== value) {
-                off_.x = value;
-                hidden.parentObject.onAfterChange();
-              }
-            }
-          });
-          Object.defineProperty(hidden.offset, "y", {
-            get: function() {
-              return off_.y;
-            },
-            set: function(value) {
-              if (off_.y !== value) {
-                off_.y = value;
-                hidden.parentObject.onAfterChange();
-              }
-            }
-          });
-          this.onAfterChange();
-        }
-      }
-    });
-    this.offset = new Vector();
-  };
-
-  Child.prototype.onAfterChange = function() {
-    if (!this.hasChanged && this.isDrawn()) {
-      this.lastRedrawRegion = this.currentRedrawRegion;
-      this.currentRedrawRegion = (this.getCombinedRedrawRegion ? this.getCombinedRedrawRegion() : this.getRedrawRegion());
-      if (this.currentRedrawRegion) {
-        engine.redrawObjects.push(this);
-        this.hasChanged = true;
-      }
-    }
+  Child.prototype.offsetFromGlobal = function(offset) {
+    this.offsetGlobal = offset;
+    return this.offset = this.parseOffsetGlobal(offset);
   };
 
 
@@ -6890,7 +6949,7 @@ c = Child = (function() {
    */
 
   Child.prototype.parseOffsetGlobal = function(offset) {
-    return new Geometry.Vector();
+    throw new Error('Offset globals are not supported for this class');
   };
 
 
@@ -7027,7 +7086,7 @@ c = Child = (function() {
    */
 
   Child.prototype.isVisible = function() {
-    return !(this.size === 0 || this.widthScale === 0 || this.heightScale === 0);
+    return this.size !== 0 && this.widthScale !== 0 && this.heightScale !== 0;
   };
 
   return Child;
@@ -7042,7 +7101,7 @@ Room = require('../engine/room');
 
 
 
-},{"../engine/room":7,"../geometry/vector":12}],28:[function(require,module,exports){
+},{"../engine/room":7,"../geometry/vector":12}],29:[function(require,module,exports){
 var Circle, Geometry, Helpers, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7203,7 +7262,7 @@ Geometry.Rectangle = require('../geometry/rectangle');
 
 
 
-},{"../geometry/circle":8,"../geometry/rectangle":11,"../helpers/mixin":15,"./child":27}],29:[function(require,module,exports){
+},{"../geometry/circle":8,"../geometry/rectangle":11,"../helpers/mixin":15,"./child":28}],30:[function(require,module,exports){
 var Collidable, Geometry, Helpers, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7382,7 +7441,7 @@ c = Collidable = (function(_super) {
 
   Collidable.prototype.getTransformedBoundingBox = function() {
     var box, i, parent, parents;
-    box = this.mask.bBox.copy().move(-this.offset.x, -this.offset.y);
+    box = this.mask.boundingBox.copy().move(-this.offset.x, -this.offset.y);
     parents = this.getParents();
     parents.unshift(this);
     i = 0;
@@ -7487,7 +7546,7 @@ c = Collidable = (function(_super) {
   };
 
   Collidable.prototype.createCollisionBitmap = function(objects) {
-    var calc, canvas, i, ii, lm, mask, obj, offset, parents, wm;
+    var calc, canvas, mask, obj, parent, parents, _i, _j, _k, _len, _len1, _len2;
     mask = this.mask;
     calc = Helpers.MatrixCalculation;
     canvas = document.createElement("canvas");
@@ -7499,41 +7558,39 @@ c = Collidable = (function(_super) {
     c.fillRect(0, 0, canvas.width, canvas.height);
     parents = this.getParents();
     parents.unshift(this);
-    wm = calc.makeIdentity();
-    wm = calc.matrixMultiply(calc.makeTranslation(this.offset.x, this.offset.y), wm);
-    i = 0;
-    while (i < parents.length) {
-      wm = calc.matrixMultiply(calc.calculateInverseLocalMatrix(parents[i]), wm);
-      i++;
+    if (this.wm == null) {
+      this.wm = new Float32Array(9);
     }
-    if (wm === false) {
-      throw new Error("Trying to detect collision for invisble object");
+    calc.setTranslation(this.wm, this.offset.x, this.offset.y);
+    for (_i = 0, _len = parents.length; _i < _len; _i++) {
+      parent = parents[_i];
+      calc.reverseMultiply(this.wm, calc.getInverseLocalMatrix(parent));
     }
-    i = 0;
-    while (i < objects.length) {
-      obj = objects[i];
+    for (_j = 0, _len1 = objects.length; _j < _len1; _j++) {
+      obj = objects[_j];
       if (obj === this) {
-        continue;
+        throw new Error("Objects are not allowed to check for collisions with themselves");
       }
-      lm = calc.makeIdentity();
+      if (obj.wm == null) {
+        obj.wm = new Float32Array(9);
+      }
+      calc.setIdentity(obj.wm);
       parents = obj.getParents();
       parents.reverse();
       parents.push(obj);
-      ii = 0;
-      while (ii < parents.length) {
-        lm = calc.matrixMultiply(calc.calculateLocalMatrix(parents[ii]), lm);
-        ii++;
+      for (_k = 0, _len2 = parents.length; _k < _len2; _k++) {
+        parent = parents[_k];
+        calc.reverseMultiply(obj.wm, calc.getLocalMatrix(parent));
       }
-      offset = calc.matrixMultiply(lm, wm);
-      offset = calc.matrixMultiply(calc.makeTranslation(-obj.offset.x, -obj.offset.y), offset);
-      c.setTransform(offset[0], offset[1], offset[3], offset[4], offset[6], offset[7]);
-      c.drawImage(obj.mask, (obj.clipWidth + obj.bm.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight);
-      i++;
+      calc.multiply(obj.wm, this.wm);
+      calc.reverseMultiply(obj.wm, calc.getTranslation(-obj.offset.x, -obj.offset.y));
+      c.setTransform(obj.wm[0], obj.wm[1], obj.wm[3], obj.wm[4], obj.wm[6], obj.wm[7]);
+      c.drawImage(obj.mask, (obj.clipWidth + obj.texture.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight);
     }
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.globalAlpha = 0.5;
     c.fillRect(0, 0, canvas.width, canvas.height);
-    c.drawImage(mask, (this.clipWidth + this.bm.spacing) * this.imageNumber, 0, this.clipWidth, this.clipHeight, 0, 0, this.clipWidth, this.clipHeight);
+    c.drawImage(mask, (this.clipWidth + this.texture.spacing) * this.imageNumber, 0, this.clipWidth, this.clipHeight, 0, 0, this.clipWidth, this.clipHeight);
     return c.getImageData(0, 0, canvas.width, canvas.height);
   };
 
@@ -7555,7 +7612,7 @@ Geometry = {
 
 
 
-},{"../geometry/vector":12,"../helpers/matrix-calculation":14,"./sprite":35}],30:[function(require,module,exports){
+},{"../geometry/vector":12,"../helpers/matrix-calculation":14,"./sprite":36}],31:[function(require,module,exports){
 var Container, ObjectCreator, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -7930,7 +7987,7 @@ ObjectCreator = require('../engine/object-creator');
 
 
 
-},{"../engine/object-creator":6,"./child":27}],31:[function(require,module,exports){
+},{"../engine/object-creator":6,"./child":28}],32:[function(require,module,exports){
 var GameObject, Geometry, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7990,25 +8047,41 @@ c = GameObject = (function(_super) {
       throw new Error("Missing argument: y");
     }
     GameObject.__super__.constructor.call(this, source, x, y, direction, additionalProperties);
-    this.loop = (this.loop ? this.loop : engine.defaultActivityLoop);
-    this.loop.attachFunction(this, this.updatePosition);
-    this.speed = (this.speed ? this.speed : new Geometry.Vector(0, 0));
+    if (this.loop == null) {
+      this.loop = engine.defaultActivityLoop;
+    }
+    if (!this.loop.hasOperation('basic-transforms')) {
+      this.loop.attachOperation('basic-transforms', this.constructor.basicTransformsOperation);
+    }
+    this.loop.subscribeToOperation('basic-transforms', this);
+    if (this.speed == null) {
+      this.speed = new Geometry.Vector(0, 0);
+    }
+    if (this.rotationSpeed == null) {
+      this.rotationSpeed = 0;
+    }
     this.alive = true;
     return;
   }
 
-
-  /*
-  Adds the game object's speed vector to its current position. This function is automatically run in each frame.
-  
-  @private
-   */
-
-  GameObject.prototype.updatePosition = function() {
-    if (this.alive) {
-      this.x += engine.convertSpeed(this.speed.x);
-      this.y += engine.convertSpeed(this.speed.y);
+  GameObject.basicTransformsOperation = function(objects) {
+    var object, _i, _len, _results;
+    _results = [];
+    for (_i = 0, _len = objects.length; _i < _len; _i++) {
+      object = objects[_i];
+      if (object.alive) {
+        object.x += engine.perFrameSpeed(object.speed.x);
+        object.y += engine.perFrameSpeed(object.speed.y);
+        if (object.rotationSpeed) {
+          _results.push(object.direction += engine.perFrameSpeed(object.rotationSpeed));
+        } else {
+          _results.push(void 0);
+        }
+      } else {
+        _results.push(void 0);
+      }
     }
+    return _results;
   };
 
   return GameObject;
@@ -8025,7 +8098,7 @@ Geometry = {
 
 
 
-},{"../geometry/vector":12,"./collidable":29}],32:[function(require,module,exports){
+},{"../geometry/vector":12,"./collidable":30}],33:[function(require,module,exports){
 var Geometry, Helpers, Line, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -8268,7 +8341,7 @@ Geometry.Vector = require('../geometry/vector');
 
 
 
-},{"../geometry/line":9,"../geometry/vector":12,"../helpers/mixin":15,"./child":27}],33:[function(require,module,exports){
+},{"../geometry/line":9,"../geometry/vector":12,"../helpers/mixin":15,"./child":28}],34:[function(require,module,exports){
 var Geometry, Helpers, Polygon, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -8357,7 +8430,7 @@ module.exports.prototype.constructor = c;
 
 
 
-},{"../geometry/polygon":10,"../helpers/mixin":15,"./child":27}],34:[function(require,module,exports){
+},{"../geometry/polygon":10,"../helpers/mixin":15,"./child":28}],35:[function(require,module,exports){
 var Geometry, Helpers, Rectangle, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -8595,8 +8668,8 @@ module.exports.prototype.constructor = c;
 
 
 
-},{"../geometry/rectangle":11,"../helpers/mixin":15,"./child":27}],35:[function(require,module,exports){
-var Geometry, Globals, Helpers, Mixins, Sprite, Views, c,
+},{"../geometry/rectangle":11,"../helpers/mixin":15,"./child":28}],36:[function(require,module,exports){
+var Globals, Helpers, Mixins, Sprite, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -8609,11 +8682,12 @@ Helpers = {
 };
 
 Mixins = {
-  Animatable: require('../mixins/animatable')
+  Animatable: require('../mixins/animatable'),
+  Texture: require('../mixins/texture')
 };
 
 Views = {
-  Container: require('./container')
+  Child: require('./child')
 };
 
 
@@ -8657,15 +8731,18 @@ c = Sprite = (function(_super) {
 
   Helpers.Mixin.mixin(Sprite, Mixins.Animatable);
 
+  Helpers.Mixin.mixin(Sprite, Mixins.Texture);
+
+  Sprite.prototype.renderType = "sprite";
+
   function Sprite(source, x, y, direction, additionalProperties) {
     var offset;
     if (source === void 0) {
       throw new Error("Missing argument: source");
     }
     Sprite.__super__.constructor.call(this);
-    this.renderType = "sprite";
-    this.x = (x !== void 0 ? x : 0);
-    this.y = (y !== void 0 ? y : 0);
+    this.x = x || 0;
+    this.y = y || 0;
     this.source = source;
     this.direction = (direction !== void 0 ? direction : 0);
     this.imageNumber = 0;
@@ -8697,54 +8774,22 @@ c = Sprite = (function(_super) {
         return value;
       }
     });
-    offset = Globals.OFFSET_MIDDLE_CENTER;
     if (additionalProperties && additionalProperties.offset) {
-      offset = additionalProperties.offset;
-      delete additionalProperties.offset;
+      if (typeof additionalProperties.offset === 'number') {
+        offset = additionalProperties.offset;
+        additionalProperties.offset = void 0;
+      }
+    } else {
+      offset = Globals.OFFSET_MIDDLE_CENTER;
     }
     Helpers.Mixin["import"](this, additionalProperties);
     if (!this.refreshSource()) {
       throw new Error("Sprite source was not successfully loaded: " + source);
     }
-    this.offset = offset;
-    if (engine.avoidSubPixelRendering) {
-      this.offset.x = Math.round(this.offset.x);
-      this.offset.y = Math.round(this.offset.y);
+    if (offset) {
+      this.offsetFromGlobal(offset);
     }
-    return;
   }
-
-
-  /*
-  Parses an offset global into an actual Math.Vector offset that fits the instance
-  
-  @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
-  @return {Math.Vector} The offset vector the offset global corresponds to for the instance
-   */
-
-  Sprite.prototype.parseOffsetGlobal = function(offset) {
-    var ret;
-    ret = new Geometry.Vector();
-    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
-      ret.x = 0;
-    } else if ([Globals.OFFSET_TOP_CENTER, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
-      ret.x = this.bm.width / this.imageLength / 2;
-    } else {
-      if ([Globals.OFFSET_TOP_RIGHT, Globals.OFFSET_MIDDLE_RIGHT, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-        ret.x = this.bm.width / this.imageLength;
-      }
-    }
-    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_TOP_CENTER, Globals.OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
-      ret.y = 0;
-    } else if ([Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
-      ret.y = this.bm.height / 2;
-    } else {
-      if ([Globals.OFFSET_BOTTOM_LEFT, Globals.OFFSET_BOTTOM_CENTER, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-        ret.y = this.bm.height;
-      }
-    }
-    return ret;
-  };
 
 
   /*
@@ -8755,8 +8800,6 @@ c = Sprite = (function(_super) {
 
   Sprite.prototype.getTheme = function() {
     var parent, theme;
-    parent = void 0;
-    theme = void 0;
     theme = this.theme;
     parent = this;
     while (theme === void 0) {
@@ -8788,15 +8831,15 @@ c = Sprite = (function(_super) {
   Sprite.prototype.refreshSource = function() {
     var theme;
     theme = this.getTheme();
-    this.bm = engine.loader.getImage(this.source, theme);
-    this.imageLength = this.bm.imageLength;
+    this.texture = engine.loader.getImage(this.source, theme);
+    this.imageLength = this.texture.imageLength;
     this.imageNumber = Math.min(this.imageLength - 1, this.imageNumber);
-    this.clipWidth = Math.floor(this.bm.width / this.imageLength);
-    this.clipHeight = this.bm.height;
+    this.clipWidth = Math.floor(this.texture.width / this.imageLength);
+    this.clipHeight = this.texture.height;
     if (this.offsetGlobal) {
-      this.offset = this.offsetGlobal;
+      this.offsetFromGlobal(this.offsetGlobal);
     }
-    return this.bm;
+    return this.texture;
   };
 
 
@@ -8817,57 +8860,33 @@ c = Sprite = (function(_super) {
     this.refreshSource();
   };
 
-
-  /*
-  Calculates the region which the sprite will fill out when redrawn.
-  
-  @private
-  @return {Rectangle} The bounding rectangle of the sprite's redraw
-   */
-
-  Sprite.prototype.getRedrawRegion = function() {
-    var box, i, parent, parents;
-    box = void 0;
-    parents = void 0;
-    parent = void 0;
-    i = void 0;
-    box = new Geometry.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight).getPolygon();
-    parents = this.getParents();
-    parents.unshift(this);
-    i = 0;
-    while (i < parents.length) {
-      parent = parents[i];
-      box.scale(parent.size * parent.widthScale, parent.size * parent.heightScale);
-      box.rotate(parent.direction);
-      box.move(parent.x, parent.y);
-      i++;
+  Sprite.prototype.updateSubImage = function() {
+    if (this.animationSpeed !== 0 && engine.gameTime - this.animationLastSwitch > 1000 / this.animationSpeed) {
+      this.imageNumber = this.imageNumber + (this.animationSpeed > 0 ? 1 : -1);
+      this.animationLastSwitch = engine.gameTime;
+      if (this.imageNumber === this.imageLength) {
+        this.imageNumber = (this.animationLoops ? 0 : this.imageLength - 1);
+      } else {
+        if (this.imageNumber === -1) {
+          this.imageNumber = (this.animationLoops ? this.imageLength - 1 : 0);
+        }
+      }
     }
-    box = box.getBoundingRectangle();
-    box.x = Math.floor(box.x);
-    box.y = Math.floor(box.y);
-    box.width = Math.ceil(box.width + 1);
-    box.height = Math.ceil(box.height + 1);
-    return box;
   };
 
   return Sprite;
 
-})(Views.Container);
+})(Views.Child);
 
 module.exports.prototype = Object.create(c.prototype);
 
 module.exports.prototype.constructor = c;
 
-Geometry = {
-  Vector: require('../geometry/vector'),
-  Rectangle: require('../geometry/rectangle')
-};
-
 Globals = require('../engine/globals');
 
 
 
-},{"../engine/globals":4,"../geometry/rectangle":11,"../geometry/vector":12,"../helpers/mixin":15,"../mixins/animatable":20,"./container":30}],36:[function(require,module,exports){
+},{"../engine/globals":4,"../helpers/mixin":15,"../mixins/animatable":20,"../mixins/texture":21,"./child":28}],37:[function(require,module,exports){
 var Geometry, Globals, Helpers, Mixins, TextBlock, Views, c,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -8881,158 +8900,84 @@ Helpers = {
 };
 
 Mixins = {
-  Animatable: require('../mixins/animatable')
+  Animatable: require('../mixins/animatable'),
+  Texture: require('../mixins/texture')
 };
 
 Views = {
-  Container: require('./container')
+  Child: require('./child')
 };
+
+
+/*
+The constructor for the TextBlock class.
+
+@name View.TextBlock
+@class A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
+@augments Mixin.Animatable
+@augments View.Container
+
+@property {string} font A css string representing the font of the text block
+@property {number} width The width of the text block
+@property {number} height The height of the text block
+@property {string} alignment The text alignment of the text block, possible values are: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT
+@property {string} color A css string representing the text's color
+@property {Vector} offset The offset with which the sprite will be drawn (to its position)
+@property {number} direction The direction of the sprite (in radians)
+@property {number} size A size modifier which modifies both the width and the height of the sprite
+@property {number} widthScale A size modifier which modifies the width of the sprite
+@property {number} heightScale A size modifier which modifies the height of the object
+@property {number} opacity The opacity of the sprite
+
+@param {string} string The string to display inside the TextBlock
+@param {number} [x=0] The x-position of the object in the game arena, in pixels
+@param {number} [y=0] The y-position of the object in the game arena, in pixels
+@param {number} [width=200] The width of the text block, in pixels. When the text reaches the width, it will break into a new line
+@param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
+The default is:<code>
+{
+font: 'normal 14px Verdana',
+color: '#000',
+alignment: ALIGNMENT_LEFT,
+size: 1,
+opacity: 1,
+composite: 'source-over',
+offset: new Vector(0, 0)
+}</code>
+ */
 
 c = TextBlock = (function(_super) {
   __extends(TextBlock, _super);
 
   Helpers.Mixin.mixin(TextBlock, Mixins.Animatable);
 
+  Helpers.Mixin.mixin(TextBlock, Mixins.Texture);
 
-  /*
-  The constructor for the TextBlock class.
-  
-  @name View.TextBlock
-  @class A block of text with a limited width. If the width is reached by the text, the text will break into multiple lines.
-  @augments Mixin.Animatable
-  @augments View.Container
-  
-  @property {string} font A css string representing the font of the text block
-  @property {number} width The width of the text block
-  @property {number} height The height of the text block
-  @property {string} alignment The text alignment of the text block, possible values are: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT
-  @property {string} color A css string representing the text's color
-  @property {Vector} offset The offset with which the sprite will be drawn (to its position)
-  @property {number} direction The direction of the sprite (in radians)
-  @property {number} size A size modifier which modifies both the width and the height of the sprite
-  @property {number} widthScale A size modifier which modifies the width of the sprite
-  @property {number} heightScale A size modifier which modifies the height of the object
-  @property {number} opacity The opacity of the sprite
-  
-  @param {string} string The string to display inside the TextBlock
-  @param {number} [x=0] The x-position of the object in the game arena, in pixels
-  @param {number} [y=0] The y-position of the object in the game arena, in pixels
-  @param {number} [width=200] The width of the text block, in pixels. When the text reaches the width, it will break into a new line
-  @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
-  The default is:<code>
-  {
-  font: 'normal 14px Verdana',
-  color: '#000',
-  alignment: ALIGNMENT_LEFT,
-  size: 1,
-  opacity: 1,
-  composite: 'source-over',
-  offset: new Vector(0, 0)
-  }</code>
-   */
+  TextBlock.prototype.renderType = "textblock";
 
   function TextBlock(string, x, y, width, additionalProperties) {
-    var hidden, offset;
+    var offset;
     if (string === void 0) {
       throw new Error("Missing argument: string");
     }
     TextBlock.__super__.constructor.call(this);
-    this.renderType = "textblock";
-    this.x = (x !== void 0 ? x : 0);
-    this.y = (y !== void 0 ? y : 0);
+    this.x = x || 0;
+    this.y = y || 0;
     this.imageLength = 1;
     this.imageNumber = 0;
-    this.clipWidth = parseInt(width, 10) || 200;
+    this.clipWidth = width || 200;
     this.lines = [];
     this.lineWidth = [];
-    this.bm = document.createElement("canvas");
-    this.bmCtx = this.bm.getContext("2d");
-    this.bm.width = this.clipWidth;
-    this.bm.height = 10;
-    this.bm.spacing = 0;
-    hidden = {
-      string: "",
-      font: "normal 14px Verdana",
-      alignment: "left",
-      color: "#000000",
-      lineHeight: 0
-    };
-    Object.defineProperty(this, "string", {
-      get: function() {
-        return hidden.string;
-      },
-      set: function(value) {
-        hidden.string = (typeof value === "string" ? value : value.toString());
-        this.stringToLines();
-        this.cacheRendering();
-        engine.enableRedrawRegions && this.onAfterChange();
-        return value;
-      }
-    });
-    Object.defineProperty(this, "font", {
-      get: function() {
-        return hidden.font;
-      },
-      set: function(value) {
-        if (typeof value !== "string") {
-          throw new Error("font should be of type: string");
-        }
-        if (value === hidden.font) {
-          return value;
-        }
-        hidden.font = value;
-        this.stringToLines();
-        this.cacheRendering();
-        engine.enableRedrawRegions && this.onAfterChange();
-        return value;
-      }
-    });
-    Object.defineProperty(this, "alignment", {
-      get: function() {
-        return hidden.alignment;
-      },
-      set: function(value) {
-        if (["left", "center", "right"].indexOf(value) === -1) {
-          throw new Error("alignment should be one of the following: ALIGNMENT_LEFT, ALIGNMENT_CENTER, ALIGNMENT_RIGHT");
-        }
-        if (value === hidden.alignment) {
-          return value;
-        }
-        hidden.alignment = value;
-        this.cacheRendering();
-        engine.enableRedrawRegions && this.onAfterChange();
-        return value;
-      }
-    });
-    Object.defineProperty(this, "color", {
-      get: function() {
-        return hidden.color;
-      },
-      set: function(value) {
-        if (!/#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})/.test(value)) {
-          throw new Error("color should be a CSS color string");
-        }
-        if (value === hidden.color) {
-          return value;
-        }
-        hidden.color = value;
-        this.cacheRendering();
-        engine.enableRedrawRegions && this.onAfterChange();
-        return value;
-      }
-    });
-    Object.defineProperty(this, "lineHeight", {
-      get: function() {
-        return hidden.lineHeight;
-      },
-      set: function(value) {
-        hidden.lineHeight = (typeof value !== "number" ? value : parseFloat(value));
-        this.calculateCanvasHeight();
-        this.cacheRendering();
-        engine.enableRedrawRegions && this.onAfterChange();
-        return value;
-      }
-    });
+    this.texture = document.createElement("canvas");
+    this.textureCtx = this.texture.getContext("2d");
+    this.texture.width = this.clipWidth;
+    this.texture.height = 10;
+    this.texture.spacing = 0;
+    this.string = string || '';
+    this.font = "normal 14px Verdana";
+    this.alignment = "left";
+    this.color = "#000000";
+    this.lineHeight = 0;
     Object.defineProperty(this, "width", {
       get: function() {
         return Math.abs(this.clipWidth * this.size * this.widthScale);
@@ -9056,52 +9001,21 @@ c = TextBlock = (function(_super) {
       }
     });
     this.lineHeight = (additionalProperties && additionalProperties.lineHeight ? additionalProperties.lineHeight : this.font.match(/[0.0-9]+/) * 1.25);
-    offset = Globals.OFFSET_TOP_LEFT;
     if (additionalProperties && additionalProperties.offset) {
-      offset = additionalProperties.offset;
-      delete additionalProperties.offset;
+      if (typeof additionalProperties.offset === 'number') {
+        offset = additionalProperties.offset;
+        additionalProperties.offset = void 0;
+      }
+    } else {
+      offset = Globals.OFFSET_TOP_LEFT;
     }
     Helpers.Mixin["import"](this, additionalProperties);
-    this.string = string;
-    this.offset = offset;
-    if (engine.avoidSubPixelRendering) {
-      this.offset.x = Math.round(this.offset.x);
-      this.offset.y = Math.round(this.offset.y);
+    if (offset) {
+      this.offsetFromGlobal(offset);
     }
+    this.updateCache();
     return;
   }
-
-
-  /*
-  Parses an offset global into an actual Vector offset that fits the instance
-  
-  @param  {number} offset Offset global (OFFSET_TOP_LEFT, etc.)
-  @return {Vector} The offset vector the offset global corresponds to for the instance
-   */
-
-  TextBlock.prototype.parseOffsetGlobal = function(offset) {
-    var ret;
-    ret = new Geometry.Vector();
-    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_BOTTOM_LEFT].indexOf(offset) !== -1) {
-      ret.x = 0;
-    } else if ([Globals.OFFSET_TOP_CENTER, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_BOTTOM_CENTER].indexOf(offset) !== -1) {
-      ret.x = this.clipWidth / 2;
-    } else {
-      if ([Globals.OFFSET_TOP_RIGHT, Globals.OFFSET_MIDDLE_RIGHT, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-        ret.x = this.clipWidth;
-      }
-    }
-    if ([Globals.OFFSET_TOP_LEFT, Globals.OFFSET_TOP_CENTER, Globals.OFFSET_TOP_RIGHT].indexOf(offset) !== -1) {
-      ret.y = 0;
-    } else if ([Globals.OFFSET_MIDDLE_LEFT, Globals.OFFSET_MIDDLE_CENTER, Globals.OFFSET_MIDDLE_RIGHT].indexOf(offset) !== -1) {
-      ret.y = this.clipHeight / 2;
-    } else {
-      if ([Globals.OFFSET_BOTTOM_LEFT, Globals.OFFSET_BOTTOM_CENTER, Globals.OFFSET_BOTTOM_RIGHT].indexOf(offset) !== -1) {
-        ret.y = this.clipHeight;
-      }
-    }
-    return ret;
-  };
 
 
   /*
@@ -9112,13 +9026,6 @@ c = TextBlock = (function(_super) {
 
   TextBlock.prototype.stringToLines = function() {
     var line, lt, paragraphs, pid, wid, word, words;
-    lt = void 0;
-    line = void 0;
-    paragraphs = void 0;
-    pid = void 0;
-    words = void 0;
-    wid = void 0;
-    word = void 0;
     lt = document.createElement("span");
     lt.style.font = this.font;
     lt.style.visibility = "hidden";
@@ -9162,8 +9069,8 @@ c = TextBlock = (function(_super) {
    */
 
   TextBlock.prototype.calculateCanvasHeight = function() {
-    this.bm.height = (this.lines.length - 1) * this.lineHeight + this.font.match(/[0.0-9]+/) * 1.25;
-    this.clipHeight = this.bm.height;
+    this.texture.height = (this.lines.length - 1) * this.lineHeight + this.font.match(/[0.0-9]+/) * 1.25;
+    this.clipHeight = this.texture.height;
   };
 
 
@@ -9173,13 +9080,18 @@ c = TextBlock = (function(_super) {
   @private
    */
 
-  TextBlock.prototype.cacheRendering = function() {
-    var i, xOffset;
-    xOffset = void 0;
-    i = void 0;
-    this.bmCtx.clearRect(0, 0, this.bm.width, this.bm.height);
-    this.bmCtx.font = this.font;
-    this.bmCtx.fillStyle = this.color;
+  TextBlock.prototype.updateCache = function() {
+    var cacheKey, i, xOffset;
+    cacheKey = this.createCacheKey();
+    if (cacheKey === this.texture.cacheKey) {
+      return;
+    }
+    this.texture.lastCacheKey = this.texture.cacheKey;
+    this.texture.cacheKey = cacheKey;
+    this.stringToLines();
+    this.textureCtx.clearRect(0, 0, this.texture.width, this.texture.height);
+    this.textureCtx.font = this.font;
+    this.textureCtx.fillStyle = this.color;
     i = 0;
     while (i < this.lines.length) {
       xOffset = 0;
@@ -9194,21 +9106,27 @@ c = TextBlock = (function(_super) {
           xOffset = (this.clipWidth - this.lineWidth[i]) / 2;
       }
       if (this.lines[i]) {
-        this.bmCtx.fillText(this.lines[i], xOffset, this.lineHeight * i + this.font.match(/[0.0-9]+/) * 1);
+        this.textureCtx.fillText(this.lines[i], xOffset, this.lineHeight * i + this.font.match(/[0.0-9]+/) * 1);
       }
       i++;
     }
-    this.createHash();
   };
 
-  TextBlock.prototype.createHash = function() {
-    var self;
-    self = void 0;
-    self = this;
-    this.bm.oldSrc = this.bm.src;
-    this.bm.src = ["string", "font", "alignment", "color", "lineHeight", "clipWidth"].map(function(property) {
-      return self[property];
-    }).join("-|-");
+  TextBlock.prototype.set = function(settings) {
+    var name, value;
+    for (name in settings) {
+      value = settings[name];
+      this[name] = value;
+    }
+    this.updateCache();
+  };
+
+  TextBlock.prototype.createCacheKey = function() {
+    return ["string", "font", "alignment", "color", "lineHeight", "clipWidth"].map((function(_this) {
+      return function(property) {
+        return _this[property];
+      };
+    })(this)).join("-|-");
   };
 
 
@@ -9221,32 +9139,9 @@ c = TextBlock = (function(_super) {
     return !(this.size === 0 || this.widthScale === 0 || this.heightScale === 0 || /^\s*$/.test(this.string));
   };
 
-
-  /*
-  Calculates a bounding non-rotated rectangle that the text block will fill when drawn.
-  
-  @private
-  @return {Rectangle} The bounding rectangle of the text block when drawn.
-   */
-
-  TextBlock.prototype.getRedrawRegion = function() {
-    var ret;
-    ret = void 0;
-    ret = new Math.Rectangle(-this.offset.x, -this.offset.y, this.clipWidth, this.clipHeight);
-    ret = ret.getPolygon();
-    ret = ret.scale(this.size * this.widthScale, this.size * this.heightScale);
-    ret = ret.rotate(this.direction);
-    ret = ret.getBoundingRectangle().add(this.getRoomPosition());
-    ret.x = Math.floor(ret.x - 1);
-    ret.y = Math.floor(ret.y - 1);
-    ret.width = Math.ceil(ret.width + 2);
-    ret.height = Math.ceil(ret.height + 2);
-    return ret;
-  };
-
   return TextBlock;
 
-})(Views.Container);
+})(Views.Child);
 
 module.exports.prototype = Object.create(c.prototype);
 
@@ -9260,4 +9155,4 @@ Globals = require('../engine/globals');
 
 
 
-},{"../engine/globals":4,"../geometry/vector":12,"../helpers/mixin":15,"../mixins/animatable":20,"./container":30}]},{},[1]);
+},{"../engine/globals":4,"../geometry/vector":12,"../helpers/mixin":15,"../mixins/animatable":20,"../mixins/texture":21,"./child":28}]},{},[1]);

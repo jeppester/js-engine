@@ -42,23 +42,24 @@ c = class GameObject extends Views.Collidable
     super source, x, y, direction, additionalProperties
 
     # Add object to right loop
-    @loop = (if @loop then @loop else engine.defaultActivityLoop)
-    @loop.attachFunction this, @updatePosition
-    @speed = (if @speed then @speed else new Geometry.Vector(0, 0))
+    @loop ?= engine.defaultActivityLoop
+
+    unless @loop.hasOperation 'basic-transforms'
+      @loop.attachOperation 'basic-transforms', @constructor.basicTransformsOperation
+
+    @loop.subscribeToOperation 'basic-transforms', @
+    @speed ?= new Geometry.Vector 0, 0
+    @rotationSpeed ?= 0
     @alive = true
     return
 
-  ###
-  Adds the game object's speed vector to its current position. This function is automatically run in each frame.
-
-  @private
-  ###
-  updatePosition: ->
-    # If the object is "alive", add its speed vector to its position
-    if @alive
-      @x += engine.convertSpeed(@speed.x)
-      @y += engine.convertSpeed(@speed.y)
-    return
+  @basicTransformsOperation: (objects)->
+    for object in objects
+      # If the object is "alive", add its speed vector to its position
+      if object.alive
+        object.x += engine.perFrameSpeed object.speed.x
+        object.y += engine.perFrameSpeed object.speed.y
+        object.direction += engine.perFrameSpeed object.rotationSpeed if object.rotationSpeed
 
 module.exports:: = Object.create c::
 module.exports::constructor = c

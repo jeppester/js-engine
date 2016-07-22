@@ -47,10 +47,11 @@ class GeometricObjectCollision
     @circle.move dx, dy
 
     # Update text fields
-    @text2.string = "Distance to line: #{Math.round @circle.getDistance(@line)}#{if @circle.intersects @line then ' (intersects)' else ''}"
-    @text3.string = "Distance to polygon: #{Math.round @circle.getDistance(@polygon)}#{if @circle.intersects @polygon then ' (intersects)' else ''}"
-    @text4.string = "Distance to circle: #{Math.round @circle.getDistance(@circle2)}#{if @circle.intersects @circle2 then ' (intersects)' else ''}"
-    @text5.string = "Distance to rectangle: #{Math.round @circle.getDistance(@rectangle)}#{if @circle.intersects @rectangle then ' (intersects)' else ''}"
+    @text2.set string: "Distance to line: #{Math.round @circle.getDistance(@line)}#{if @circle.intersects @line then ' (intersects)' else ''}"
+    @text3.set string: "Distance to polygon: #{Math.round @circle.getDistance(@polygon)}#{if @circle.intersects @polygon then ' (intersects)' else ''}"
+    @text4.set string: "Distance to circle: #{Math.round @circle.getDistance(@circle2)}#{if @circle.intersects @circle2 then ' (intersects)' else ''}"
+    @text5.set string: "Distance to rectangle: #{Math.round @circle.getDistance(@rectangle)}#{if @circle.intersects @rectangle then ' (intersects)' else ''}"
+    return
 
 new Engine
   # Set game-class path (Look at this file to start programming your game)
@@ -59,7 +60,8 @@ new Engine
   # Set themes to load
   themes: ['example']
 
-  #disableWebGL: true
+  # Disable webgl using "canvas" search param
+  disableWebGL: /canvas/.test window.location.search
 
   # Set resolution of the game
   canvasResX: 600

@@ -17,12 +17,12 @@ RoomTransitions = (function() {
     room = new Engine.Room('room3');
     room.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#00F'));
     for (i = _k = 0; _k < 10; i = ++_k) {
-      room.addChildren(new Engine.Views.Sprite('folder.star2', 100 + Math.random() * 400, 100 + Math.random() * 200));
+      room.addChildren(new Engine.Views.Sprite('folder/star2', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
     room = new Engine.Room('room4');
     room.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#FFF'));
     for (i = _l = 0; _l < 20; i = ++_l) {
-      room.addChildren(new Engine.Views.Sprite('folder.star3', 100 + Math.random() * 400, 100 + Math.random() * 200));
+      room.addChildren(new Engine.Views.Sprite('folder/star3', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
     engine.loader.hideOverlay((function(_this) {
       return function() {
@@ -64,6 +64,7 @@ RoomTransitions = (function() {
 new Engine({
   gameClass: RoomTransitions,
   themes: ['example'],
+  disableWebGL: /canvas/.test(window.location.search),
   canvasResX: 600,
   canvasResY: 400
 });

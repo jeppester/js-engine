@@ -28,9 +28,21 @@ c = class Loader
 
     # Make load overlay
     @loadOverlay = document.createElement("div")
-    @loadOverlay.setAttribute "style", "border: 0;position: absolute;top: 0;left: 0;width: 100%;height: 100%;z-index: 100;opacity: 1;"
+    for name, value of {
+      border: 0
+      position: 'absolute'
+      top: 0
+      left: 0
+      width: '100%'
+      height: '100%'
+      zIndex: 100
+      opacity: 1
+    }
+      @loadOverlay.style[name] = value
     @loadOverlay.className = "load-overlay"
-    @loadOverlay.innerHTML = """<div class="load-overlay-text">#{engine.loadText}</div>"""
+    @loadOverlay.innerHTML = """
+      <div class="load-overlay-text">#{engine.loadText}</div>
+    """
     engine.arena.appendChild @loadOverlay
     return
 
@@ -64,7 +76,6 @@ c = class Loader
     @fade()
     return
 
-
   ###
   Fetches an image from the Loader. This function will automatically be called by objects that implements the Sprite object.
 
@@ -76,7 +87,6 @@ c = class Loader
     throw new Error("Missing argument: resource") if resource is undefined #dev
     themeName = (if themeName isnt undefined then themeName else engine.defaultTheme)
     @getResource resource, "images", themeName
-
 
   ###
   Fetches a sound from the Loader.
@@ -141,7 +151,6 @@ c = class Loader
     throw new Error("Missing argument: resource") if resource is undefined #dev
     throw new Error("Missing argument: typeString") if typeString is undefined #dev
     throw new Error("Missing argument: themeName") if themeName is undefined #dev
-    resource = resource.replace(/\//g, ".") if resource.indexOf("/") isnt -1
     res = @themes[themeName][typeString][resource]
 
     # Search for the resource in inherited themes
@@ -181,7 +190,8 @@ c = class Loader
     i = 0
     while i < @themes[engine.defaultTheme].inherit.length
       inheritTheme = @themes[@themes[engine.defaultTheme].inherit[i]]
-      loopThrough inheritTheme.images if inheritTheme isnt undefined and inheritTheme.images isnt undefined
+      if inheritTheme isnt undefined and inheritTheme.images isnt undefined
+        loopThrough inheritTheme.images
       i++
     sourceStrings
 
@@ -197,7 +207,8 @@ c = class Loader
       if @themes.hasOwnProperty(themeName)
         theme = @themes[themeName]
         for resourceString of theme.sfx
-          res.push theme.sfx[resourceString] if theme.sfx.hasOwnProperty(resourceString)
+          if theme.sfx.hasOwnProperty(resourceString)
+            res.push theme.sfx[resourceString]
     res
 
 
@@ -212,28 +223,9 @@ c = class Loader
       if @themes.hasOwnProperty(themeName)
         theme = @themes[themeName]
         for resourceString of theme.music
-          res.push theme.music[resourceString] if theme.music.hasOwnProperty(resourceString)
+          if theme.music.hasOwnProperty(resourceString)
+            res.push theme.music[resourceString]
     res
-
-
-  ###
-  Loads JavaScript classes from files. The loaded classes' names must follow the following format: [ClassName].js
-
-  @param {string[]} paths An array of paths to JavaScripts - containing classes - which should be loaded
-  @return {boolean} True, when the classes has been loaded without any errors
-  ###
-  loadClasses: (paths) ->
-    throw new Error("Missing argument: paths") if paths is undefined #dev
-    for i of paths
-      if paths.hasOwnProperty(i)
-
-        # Check that the object is not already loaded
-        objectName = paths[i].match(/(\w*)\.\w+$/)[1]
-        continue if window[objectName]
-        engine.loadFiles paths[i]
-        @loaded.classes[objectName] = paths[i]
-    true
-
 
   ###
   Reloads all classes. This function is very useful for applying code changes without having to refresh the browser, usually it has to be run multiple times though, to force the browser not to just load the files from its cache.
@@ -252,7 +244,8 @@ c = class Loader
   @param {function} callback A callback function to run when all the themes has been loaded
   ###
   loadThemes: (themeNames, callback) ->
-    throw new Error("Missing argument: themeNames") if themeNames is undefined #dev
+    if themeNames is undefined #dev
+      throw new Error "Missing argument: themeNames"
     @onthemesloaded = callback if callback isnt undefined
     i = 0
     while i < themeNames.length
@@ -263,44 +256,35 @@ c = class Loader
 
       # Fetch theme details
       req = new XMLHttpRequest()
-      req.open "GET", engine.themesPath + "/" + name + "/theme.js", false
+      req.open "GET", engine.themesPath + "/" + name + "/theme.js"
       req.send()
 
-      # Check that the theme is actually there
-      if req.status is 404
-        console.log "Theme not found: " + name
-        continue
+      req.addEventListener 'error', =>
+        throw new Error "Theme not found: " + name
 
-      # Get theme details
-      codeString = req.responseText + "\n//# sourceURL=/" + engine.themesPath + "/" + name + "/theme.js"
-      eval "theme = " + codeString
+      req.addEventListener 'load', =>
+        # Get theme details
+        codeString = req.responseText + "\n//# sourceURL=/" + engine.themesPath + "/" + name + "/theme.js"
+        eval "theme = " + codeString
 
-      # Load inherited themes
-      @loadThemes theme.inherit if theme.inherit.length
+        # Load inherited themes
+        @loadThemes theme.inherit if theme.inherit.length
 
-      # Always inherit "External" theme
-      theme.inherit.push "External"
+        # Always inherit "External" theme
+        theme.inherit.push "External"
 
-      # Create new theme
-      @themes[name] = theme
-      theme.resourcesCount = 0
-      theme.resourcesLoaded = 0
-      theme.masks = {}
-      theme.textures = {}
+        # Create new theme
+        @themes[name] = theme
+        theme.resourcesCount = 0
+        theme.resourcesLoaded = 0
+        theme.masks = {}
+        theme.textures = {}
 
-      # Load all images
-      @loadResources theme, theme.images, "images"
-      @loadResources theme, theme.sfx, "sfx"
-      @loadResources theme, theme.music, "music"
+        # Load all images
+        @loadResources theme, theme.images, "images"
+        @loadResources theme, theme.sfx, "sfx"
+        @loadResources theme, theme.music, "music"
       i++
-
-    # Check if the theme was empty, if so, run callback
-    total = 0
-    for i of @themes
-      total += @themes[i].resourcesCount if @themes.hasOwnProperty(i)
-    @onthemesloaded() if @onthemesloaded if total is 0
-    return
-
 
   ###
   Loads resources to a theme. This function is used by loadThemes for caching the theme resources.
@@ -327,13 +311,14 @@ c = class Loader
         switch typeString
           when "images"
             res = new Image()
+            res.cacheKey = "#{theme.name}/#{path}"
 
             # Get image format
             format = object[path].match(/(png|jpg|jpeg|svg)/)
             format = format[0] if format
 
             # Start loading iage
-            res.src = engine.themesPath + "/" + theme.name + "/images/" + path.replace(/\./g, "/") + "." + format
+            res.src = engine.themesPath + "/" + theme.name + "/images/" + path + "." + format
 
             # Find out if the image is a sprite
             images = object[path].match(/; *(\d+) *images?/)
@@ -357,9 +342,9 @@ c = class Loader
               format = engine.host.supportedAudio[i] if object[path].search(engine.host.supportedAudio[i]) isnt -1
               i++
             unless format
-              console.log "Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/")
+              console.log "Sound was not available in a supported format: " + theme.name + "/sfx/" + path
               continue
-            res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path.replace(/\./g, "/") + "." + format)
+            res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path + "." + format)
             theme.sfx[path] = new Sounds.Effect(res)
             if engine.preloadSounds
               res.setAttribute "preload", "auto"
@@ -371,15 +356,15 @@ c = class Loader
             while i < engine.host.supportedAudio.length
               format = engine.host.supportedAudio[i] if object[path].search(engine.host.supportedAudio[i]) isnt -1
               i++
-            throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path.replace(/\./g, "/")) unless format #dev
-            res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path.replace(/\./g, "/") + "." + format)
+            throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path) unless format #dev
+            res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path + "." + format)
             theme.music[path] = new Sounds.Music(res)
             if engine.preloadSounds
               res.setAttribute "preload", "auto"
               res.addEventListener "canplaythrough", onload, false
               theme.resourcesCount++
         res.setAttribute "data-theme", theme.name
-        res.setAttribute "data-resourceString", path.replace(/\./g, "/")
+        res.setAttribute "data-resourceString", path
     return
 
 
@@ -455,6 +440,7 @@ c = class Loader
     canvas.width = image.width
     canvas.height = image.height
     canvas.imageLength = image.imageLength
+    canvas.cacheKey = "mask:" + image.cacheKey
     ctx = canvas.getContext("2d")
     #dev
     throw new Error("Trying to create mask for non-existing resource: " + resourceString) if image is false #dev
@@ -469,7 +455,6 @@ c = class Loader
     right = 0
     pixel = 0
     while pixel < length
-
       # If the pixel is partly transparent, make it completely transparent, else make it completely black
       if data[pixel * 4 + 3] < alphaLimit
         data[pixel * 4] = 0 # Red
@@ -493,7 +478,7 @@ c = class Loader
         right = Math.max(x + 1, right)
       pixel++
     ctx.putImageData bitmap, 0, 0
-    canvas.bBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon()
+    canvas.boundingBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon()
     canvas
 
 

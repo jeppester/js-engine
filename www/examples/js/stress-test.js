@@ -24,12 +24,16 @@ StressTest = (function() {
   }
 
   StressTest.prototype.onLoaded = function() {
-    return this.addObjects(2000);
+    return this.addObjects(4000);
   };
 
   StressTest.prototype.updateFPS = function() {
-    this.fpsCounter.string = 'FPS: ' + engine.fps;
-    return this.objectCounter.string = 'Objects: ' + (Object.keys(engine.objectIndex).length - 2);
+    this.fpsCounter.set({
+      string: 'FPS: ' + engine.fps
+    });
+    return this.objectCounter.set({
+      string: 'Objects: ' + (Object.keys(engine.objectIndex).length - 6)
+    });
   };
 
   StressTest.prototype.addObjects = function(count) {
@@ -95,6 +99,7 @@ new Engine({
   gameClass: StressTest,
   themes: ['example'],
   backgroundColor: "#000",
+  disableWebGL: /canvas/.test(window.location.search),
   pauseOnBlur: false,
   canvasResX: 600,
   canvasResY: 400

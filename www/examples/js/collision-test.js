@@ -25,7 +25,7 @@ CollisionObject = (function(_super) {
       this.speed.y -= engine.convertSpeed(100);
     }
     if (engine.keyboard.isDown(this.downKey)) {
-      return this.speed.y += engine.convertSpeed(100);
+      this.speed.y += engine.convertSpeed(100);
     }
   };
 
@@ -64,7 +64,7 @@ CollisionObject = (function(_super) {
     }
     if (this.y > engine.canvasResY - 16) {
       this.y = engine.canvasResY - 16;
-      return this.speed.y = -this.speed.y;
+      this.speed.y = -this.speed.y;
     }
   };
 
@@ -111,6 +111,7 @@ new Engine({
   gameClass: CollisionTest,
   themes: ['example'],
   backgroundColor: "#222",
+  disableWebGL: /canvas/.test(window.location.search),
   canvasResX: 600,
   canvasResY: 400
 });

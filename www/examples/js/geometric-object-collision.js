@@ -46,10 +46,18 @@ GeometricObjectCollision = (function() {
       dy = engine.convertSpeed(200);
     }
     this.circle.move(dx, dy);
-    this.text2.string = "Distance to line: " + (Math.round(this.circle.getDistance(this.line))) + (this.circle.intersects(this.line) ? ' (intersects)' : '');
-    this.text3.string = "Distance to polygon: " + (Math.round(this.circle.getDistance(this.polygon))) + (this.circle.intersects(this.polygon) ? ' (intersects)' : '');
-    this.text4.string = "Distance to circle: " + (Math.round(this.circle.getDistance(this.circle2))) + (this.circle.intersects(this.circle2) ? ' (intersects)' : '');
-    return this.text5.string = "Distance to rectangle: " + (Math.round(this.circle.getDistance(this.rectangle))) + (this.circle.intersects(this.rectangle) ? ' (intersects)' : '');
+    this.text2.set({
+      string: "Distance to line: " + (Math.round(this.circle.getDistance(this.line))) + (this.circle.intersects(this.line) ? ' (intersects)' : '')
+    });
+    this.text3.set({
+      string: "Distance to polygon: " + (Math.round(this.circle.getDistance(this.polygon))) + (this.circle.intersects(this.polygon) ? ' (intersects)' : '')
+    });
+    this.text4.set({
+      string: "Distance to circle: " + (Math.round(this.circle.getDistance(this.circle2))) + (this.circle.intersects(this.circle2) ? ' (intersects)' : '')
+    });
+    this.text5.set({
+      string: "Distance to rectangle: " + (Math.round(this.circle.getDistance(this.rectangle))) + (this.circle.intersects(this.rectangle) ? ' (intersects)' : '')
+    });
   };
 
   return GeometricObjectCollision;
@@ -59,6 +67,7 @@ GeometricObjectCollision = (function() {
 new Engine({
   gameClass: GeometricObjectCollision,
   themes: ['example'],
+  disableWebGL: /canvas/.test(window.location.search),
   canvasResX: 600,
   canvasResY: 400
 });

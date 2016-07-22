@@ -3,7 +3,6 @@ var Main;
 
 Main = (function() {
   function Main() {
-    console.log('yay!');
     window.text = engine.currentRoom.create.TextBlock('PRESS SPACE TO PLAY A SOUND EFFECT', 100, 140, 400, {
       color: '#4F4',
       alignment: 'center'
@@ -51,6 +50,7 @@ Main = (function() {
 new Engine({
   gameClass: Main,
   themes: ['example'],
+  disableWebGL: /canvas/.test(window.location.search),
   backgroundColor: "#000",
   pauseOnBlur: false,
   canvasResX: 600,

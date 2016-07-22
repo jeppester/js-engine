@@ -106,9 +106,12 @@ new Engine
 
   # Set themes to load
   themes: ['example']
-
+  
   # Set arena background-color
   backgroundColor: "#000"
+
+  # Disable webgl using "canvas" search param
+  disableWebGL: /canvas/.test window.location.search
 
   # Set resolution of the game
   canvasResX: 600

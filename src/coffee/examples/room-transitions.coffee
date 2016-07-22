@@ -16,13 +16,13 @@ class RoomTransitions
     room = new Engine.Room 'room3'
     room.addChildren new Engine.Views.Rectangle(0, 0, 600, 400, '#00F')
     for i in [0...10]
-      room.addChildren new Engine.Views.Sprite('folder.star2', 100 + Math.random() * 400, 100 + Math.random() * 200)
+      room.addChildren new Engine.Views.Sprite('folder/star2', 100 + Math.random() * 400, 100 + Math.random() * 200)
 
     # Create fourth room
     room = new Engine.Room 'room4'
     room.addChildren new Engine.Views.Rectangle(0, 0, 600, 400, '#FFF')
     for i in [0...20]
-      room.addChildren new Engine.Views.Sprite('folder.star3', 100 + Math.random() * 400, 100 + Math.random() * 200)
+      room.addChildren new Engine.Views.Sprite('folder/star3', 100 + Math.random() * 400, 100 + Math.random() * 200)
 
     # Hide loader overlay
     engine.loader.hideOverlay =>
@@ -41,14 +41,15 @@ class RoomTransitions
         engine.goToRoom 'room1', Engine.Globals.ROOM_TRANSITION_SQUEEZE_SLIDE, {duration: 1000, from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]}
 
 new Engine
-	# Set main class to load
-	gameClass: RoomTransitions
+  # Set main class to load
+  gameClass: RoomTransitions
 
-	# Set themes to load
-	themes: ['example']
+  # Set themes to load
+  themes: ['example']
 
-	# disableWebGL: true,
+  # Disable webgl using "canvas" search param
+  disableWebGL: /canvas/.test window.location.search
 
-	# Set resolution of the game
-	canvasResX: 600
-	canvasResY: 400
+  # Set resolution of the game
+  canvasResX: 600
+  canvasResY: 400

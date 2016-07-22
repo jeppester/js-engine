@@ -15,20 +15,20 @@ class StressTest
     engine.currentRoom.loops.eachFrame.attachFunction @, @controls
 
   onLoaded: ->
-    @addObjects 2000
+    @addObjects 4000
 
   updateFPS: ->
-    @fpsCounter.string = 'FPS: ' + engine.fps;
-    @objectCounter.string = 'Objects: ' + (Object.keys(engine.objectIndex).length - 2);
+    @fpsCounter.set string: 'FPS: ' + engine.fps
+    @objectCounter.set string: 'Objects: ' + (Object.keys(engine.objectIndex).length - 6)
 
   addObjects: (count = 10)->
     for i in [0...count]
       sprite = new Engine.Views.GameObject(
-          'rock'
-          Math.random() * 600
-          Math.random() * 400
-          Math.random() * Math.PI * 2
-          {speed: new Engine.Geometry.Vector(-5 + Math.random() * 10, -5 + Math.random() * 10)}
+        'rock'
+        Math.random() * 600
+        Math.random() * 400
+        Math.random() * Math.PI * 2
+        {speed: new Engine.Geometry.Vector(-5 + Math.random() * 10, -5 + Math.random() * 10)}
       )
       sprite.checkBounce = ->
         if @x < 0
@@ -63,21 +63,21 @@ class StressTest
     @removeObjects() if engine.keyboard.isDown Engine.Globals.KEY_DOWN
 
 new Engine
-	# Set game-class path (Look at this file to start programming your game)
-	gameClass: StressTest
+  # Set game-class path (Look at this file to start programming your game)
+  gameClass: StressTest
 
-	# Set themes to load
-	themes: ['example']
+  # Set themes to load
+  themes: ['example']
 
-	# Disable webgl (to compare performance)
-	#disableWebGL: true
+  # Set arena background-color
+  backgroundColor: "#000"
 
-	# Set arena background-color
-	backgroundColor: "#000"
+  # Disable webgl using "canvas" search param
+  disableWebGL: /canvas/.test window.location.search
 
-	# Disable pause on blur (so that JavaScript profiling can be done easier)
-	pauseOnBlur: false
+  # Disable pause on blur (so that JavaScript profiling can be done easier)
+  pauseOnBlur: false
 
-	# Set resolution of the game
-	canvasResX: 600
-	canvasResY: 400
+  # Set resolution of the game
+  canvasResX: 600
+  canvasResY: 400

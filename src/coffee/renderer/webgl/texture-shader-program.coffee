@@ -1,47 +1,47 @@
 module.exports = -> module.exports::constructor.apply @, arguments
+coordsBufferLength = 5 * 6 * 20000
+# 5 points per vertex (x, y + texture coords + opacity)
+# 6 vertices per object (two triangles)
+# 1000 objects per draw (maybe we can increase this)
 
 c = class WebGLTextureShaderProgram
+  textureCache: {}
+  maskCache: {}
+  locations: {}
+  currentTexture: document.createElement 'img'
+  vertex: null
+  program: null
+  coordsCount: 0
+  coords: new Float32Array coordsBufferLength
+  coordsBuffer: null
+  cornerCoords: new Float32Array 8
+
   constructor: (gl) ->
     # Init program
-    @cache =
-      regularTextCoordBuffer: false
-      animatedTextCoordBuffer: false
-      rectangleCornerBuffer: false
-      currentBuffer: false
-      currentTexture: undefined
-      textures: {}
-
     @program = gl.createProgram()
     @initShaders gl
     @bindLocations gl
     @initBuffers gl
-    return
 
   initShaders: (gl) ->
-    vertexCode = undefined
-    fragmentCode = undefined
-    vertexShader = undefined
-    fragmentShader = undefined
-
     # Vertex shader
     vertexCode = "
       attribute vec2 a_position;
       attribute vec2 a_texCoord;
+      attribute float a_opacity;
 
       uniform vec2 u_resolution;
-      uniform mat3 u_matrix;
 
       varying vec2 v_texCoord;
+      varying float v_opacity;
 
       void main() {
-        vec2 position = (u_matrix * vec3(a_position, 1)).xy;
-        vec2 zeroToOne = position / u_resolution;
-        vec2 zeroToTwo = zeroToOne * 2.0;
-        vec2 clipSpace = zeroToTwo - 1.0;
+        vec2 clipSpace = a_position / u_resolution * 2.0 - 1.0;
 
-        gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+        gl_Position = vec4(clipSpace * vec2(1, -1), 0.0, 1.0);
 
         v_texCoord = a_texCoord;
+        v_opacity = a_opacity;
       }
     "
     vertexShader = gl.createShader(gl.VERTEX_SHADER)
@@ -49,150 +49,243 @@ c = class WebGLTextureShaderProgram
     gl.compileShader vertexShader
     gl.attachShader @program, vertexShader
 
+    # Check the compile status
+    compiled = gl.getShaderParameter vertexShader, gl.COMPILE_STATUS
+    unless compiled
+      #  Something went wrong during compilation; get the error
+      console.error gl.getShaderInfoLog vertexShader
+
     # Fragment shader
     fragmentCode = "
       precision mediump float;
 
       uniform sampler2D u_image;
       varying vec2 v_texCoord;
-      uniform float u_alpha;
+      varying float v_opacity;
 
       void main() {
         vec4 textureColor = texture2D(u_image, v_texCoord);
-        gl_FragColor = vec4(textureColor.rgb, textureColor.a * u_alpha);
+        gl_FragColor = vec4(textureColor.rgb, textureColor.a * v_opacity);
       }
     "
     fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
     gl.shaderSource fragmentShader, fragmentCode
     gl.compileShader fragmentShader
+
+    # Check the compile status
+    compiled = gl.getShaderParameter fragmentShader, gl.COMPILE_STATUS
+    unless compiled
+      #  Something went wrong during compilation; get the error
+      console.error gl.getShaderInfoLog fragmentShader
+
     gl.attachShader @program, fragmentShader
     gl.linkProgram @program
     return
 
   bindLocations: (gl) ->
-    @locations =
-      a_texCoord: gl.getAttribLocation(@program, "a_texCoord")
-      a_position: gl.getAttribLocation(@program, "a_position")
-      u_resolution: gl.getUniformLocation(@program, "u_resolution")
-      u_matrix: gl.getUniformLocation(@program, "u_matrix")
-      u_alpha: gl.getUniformLocation(@program, "u_alpha")
-
+    @locations.a_position   = gl.getAttribLocation @program, "a_position"
+    @locations.a_texCoord   = gl.getAttribLocation @program, "a_texCoord"
+    @locations.a_opacity    = gl.getAttribLocation @program, "a_opacity"
+    @locations.u_resolution = gl.getUniformLocation @program, "u_resolution"
     return
 
   initBuffers: (gl) ->
-    # Regular texture coordinate buffer (the coordinates are always the same)
-    @cache.regularTextCoordBuffer = gl.createBuffer()
-    gl.bindBuffer gl.ARRAY_BUFFER, @cache.regularTextCoordBuffer
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
-      0.0, 0.0, 1.0, 0.0
-      0.0, 1.0, 0.0, 1.0
-      1.0, 0.0, 1.0, 1.0
-    ]), gl.STATIC_DRAW
-
-    # Animated texture coordinate (the coordinates will be unique for each draw)
-    @cache.animatedTextCoordBuffer = gl.createBuffer()
-
-    # Rectangle corner buffer
-    @cache.rectangleCornerBuffer = gl.createBuffer()
+    # Coordinate buffer for both vertex and texture coordinates
+    @coordsBuffer = gl.createBuffer()
     return
 
-  # Use the same texture coordinate buffer for all non-animated sprites
-  setRegularTextCoordBuffer: (gl) ->
-    # Enable the texture coord buffer
-    if @cache.currentBuffer isnt @cache.regularTextCoordBuffer
-      gl.bindBuffer gl.ARRAY_BUFFER, @cache.regularTextCoordBuffer
-      gl.enableVertexAttribArray @locations.a_texCoord
-      gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
-      @cache.currentBuffer = @cache.regularTextCoordBuffer
-
-      # Bind rectangle corner buffer again (when needed instead of all the time)
-      gl.bindBuffer gl.ARRAY_BUFFER, @cache.rectangleCornerBuffer
-    return
-
-  # Set a texture coordinate buffer for a specific animated object
-  setAnimatedTextCoordBuffer: (gl, object) ->
-    x1 = (object.clipWidth + object.bm.spacing) * object.imageNumber
-    x2 = x1 + object.clipWidth
-    x1 /= object.bm.width
-    x2 /= object.bm.width
-    y1 = 0
-    y2 = 1
-
-    # Enable the texture coord buffer
-    gl.bindBuffer gl.ARRAY_BUFFER, @cache.animatedTextCoordBuffer
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
-      x1
-      y1
-      x2
-      y1
-      x1
-      y2
-      x1
-      y2
-      x2
-      y1
-      x2
-      y2
-    ]), gl.STATIC_DRAW
-    gl.enableVertexAttribArray @locations.a_texCoord
-    gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 0, 0
-    @cache.currentBuffer = @cache.animatedTextCoordBuffer
-
-    # Bind rectangle corner buffer again (when needed instead of all the time)
-    gl.bindBuffer gl.ARRAY_BUFFER, @cache.rectangleCornerBuffer
-    return
-
-  # When returning to the program reset the buffer
-  onSet: (gl) ->
-    gl.bindBuffer gl.ARRAY_BUFFER, @cache.rectangleCornerBuffer
+  onSet: (gl)->
+    floatSize = @coords.BYTES_PER_ELEMENT
+    gl.bindBuffer gl.ARRAY_BUFFER, @coordsBuffer
+    gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 5 * floatSize, 0
     gl.enableVertexAttribArray @locations.a_position
-    gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
+    gl.vertexAttribPointer @locations.a_texCoord, 2, gl.FLOAT, false, 5 * floatSize, 2 * floatSize
+    gl.enableVertexAttribArray @locations.a_texCoord
+    gl.vertexAttribPointer @locations.a_opacity, 1, gl.FLOAT, false, 5 * floatSize, 4 * floatSize
+    gl.enableVertexAttribArray @locations.a_opacity
     return
 
   # Draw functions
   renderSprite: (gl, object, wm) ->
-    l = @locations
-    delete @cache.textures[object.bm.oldSrc] if object.renderType is "textblock" and @cache.textures[object.bm.oldSrc]
+    # Fetch/update texture
+    @setSpriteTexture gl, object
 
-    # Bind the texture (if it is not already the binded)
-    t = @getSpriteTexture(gl, object)
-    if @cache.currentTexture isnt t
-      @cache.currentTexture = t
+    # Update corners cache with transformed object corners
+    @setTransformedCorners object.clipWidth, object.clipHeight, wm
 
-      # Set the correct texture coordinate buffer
-      if object.imageLength is 1
-        @setRegularTextCoordBuffer gl
-      else
+    # Buffer position
+    @bufferOpacity object.opacity
+    @bufferRectangle()
+    if object.imageLength == 1
+      @bufferTexture()
+    else
+      @bufferAnimatedTexture object
 
-        # Set the right sub image
-        if engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed
-          object.imageNumber = object.imageNumber + ((if object.animationSpeed > 0 then 1 else -1))
-          object.animationLastSwitch = engine.gameTime
-          if object.imageNumber is object.imageLength
-            object.imageNumber = (if object.animationLoops then 0 else object.imageLength - 1)
-          else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
-
-        # Set create and set texture coordinate buffer for the object
-        @setAnimatedTextCoordBuffer gl, object
-
-      # Set a rectangle the same size as the image
-      gl.bindTexture gl.TEXTURE_2D, t
-      Helpers.WebGL.setPlane gl, 0, 0, object.clipWidth, object.clipHeight
-
-    # Set matrix
-    gl.uniformMatrix3fv l.u_matrix, false, wm
-
-    # Draw the rectangle.
-    gl.drawArrays gl.TRIANGLES, 0, 6
+    @coordsCount += 30
     return
 
-  getSpriteTexture: (gl, object) ->
-    @cache.textures[object.bm.src] or @createSpriteTexture(gl, object.bm)
+  renderTextBlock: (gl, object, wm)->
+    if @textureCache[object.texture.lastCacheKey]
+      gl.deleteTexture @textureCache[object.texture.lastCacheKey]
+      @textureCache[object.texture.lastCacheKey] = null
+    @renderSprite gl, object, wm
+    return
 
-  createSpriteTexture: (gl, image) ->
-    texture = undefined
+  setSpriteTexture: (gl, object)->
+    texture = object.texture
+    @setTexture gl, texture
+    return
 
-    # Create a texture.
+  # Draw functions
+  renderMask: (gl, object, wm) ->
+    # Fetch/update texture
+    @setMaskTexture gl, object
+
+    # Update corners cache with transformed object corners
+    @setTransformedCorners object.clipWidth, object.clipHeight, wm
+
+    # Buffer position
+    @bufferOpacity 1
+    @bufferRectangle()
+    if object.imageLength == 1
+      @bufferTexture()
+    else
+      @bufferAnimatedTexture object
+
+    @coordsCount += 30
+    return
+
+  setMaskTexture: (gl, object)->
+    texture = engine.loader.getMask(object.source, object.getTheme())
+    @setTexture gl, texture
+    return
+
+  setTexture: (gl, texture)->
+    if @coordsCount == @coords.length || @currentTexture.cacheKey != texture.cacheKey
+      # Set a rectangle the same size as the image
+      @flushBuffers gl
+      @currentTexture = texture
+    return
+
+  setTransformedCorners: (width, height, wm)->
+    # Unreduced matrix equation:
+    # x = x * wm[0] + y * wm[3] + wm[6]
+    # y = x * wm[1] + y * wm[4] + wm[7]
+
+    # Top left
+    @cornerCoords[0] = wm[6] # x = 0, y = 0
+    @cornerCoords[1] = wm[7] # x = 0, y = 0
+
+    # Top right
+    @cornerCoords[2] = width * wm[0] + wm[6] # y = 0
+    @cornerCoords[3] = width * wm[1] + wm[7] # y = 0
+
+    # Bottom left
+    @cornerCoords[4] = height * wm[3] + wm[6] # x = 0
+    @cornerCoords[5] = height * wm[4] + wm[7] # x = 0
+
+    # Bottom right
+    @cornerCoords[6] = width * wm[0] + height * wm[3] + wm[6]
+    @cornerCoords[7] = width * wm[1] + height * wm[4] + wm[7]
+
+  bufferOpacity: (opacity)->
+    @coords[@coordsCount + 4] = opacity
+    @coords[@coordsCount + 9] = opacity
+    @coords[@coordsCount + 14] = opacity
+    @coords[@coordsCount + 19] = opacity
+    @coords[@coordsCount + 24] = opacity
+    @coords[@coordsCount + 29] = opacity
+
+  bufferRectangle: ->
+    # Point 1
+    @coords[@coordsCount]     = @cornerCoords[0]
+    @coords[@coordsCount + 1] = @cornerCoords[1]
+
+    # Point 2
+    @coords[@coordsCount + 5] = @cornerCoords[2]
+    @coords[@coordsCount + 6] = @cornerCoords[3]
+
+    # Point 3
+    @coords[@coordsCount + 10]  = @cornerCoords[4]
+    @coords[@coordsCount + 11]  = @cornerCoords[5]
+
+    # Point 4
+    @coords[@coordsCount + 15] = @cornerCoords[4]
+    @coords[@coordsCount + 16] = @cornerCoords[5]
+
+    # Point 5
+    @coords[@coordsCount + 20] = @cornerCoords[2]
+    @coords[@coordsCount + 21] = @cornerCoords[3]
+
+    # Point 6
+    @coords[@coordsCount + 25] = @cornerCoords[6]
+    @coords[@coordsCount + 26] = @cornerCoords[7]
+    return
+
+  bufferTexture: ->
+    # Point 1
+    @coords[@coordsCount + 2] = 0.0
+    @coords[@coordsCount + 3] = 0.0
+
+    # Point 2
+    @coords[@coordsCount + 7] = 1.0
+    @coords[@coordsCount + 8] = 0.0
+
+    # Point 3
+    @coords[@coordsCount + 12] = 0.0
+    @coords[@coordsCount + 13] = 1.0
+
+    # Point 4
+    @coords[@coordsCount + 17] = 0.0
+    @coords[@coordsCount + 18] = 1.0
+
+    # Point 5
+    @coords[@coordsCount + 22] = 1.0
+    @coords[@coordsCount + 23] = 0.0
+
+    # Point 6
+    @coords[@coordsCount + 27] = 1.0
+    @coords[@coordsCount + 28] = 1.0
+    return
+
+  bufferAnimatedTexture: (object)->
+    object.updateSubImage()
+    x1 = (object.clipWidth + object.texture.spacing) * object.imageNumber
+    x2 = x1 + object.clipWidth
+    x1 /= object.texture.width
+    x2 /= object.texture.width
+
+    # Point 1
+    @coords[@coordsCount + 2] = x1
+    @coords[@coordsCount + 3] = 0.0
+
+    # Point 2
+    @coords[@coordsCount + 7] = x2
+    @coords[@coordsCount + 8] = 0.0
+
+    # Point 3
+    @coords[@coordsCount + 12] = x1
+    @coords[@coordsCount + 13] = 1.0
+
+    # Point 4
+    @coords[@coordsCount + 17] = x1
+    @coords[@coordsCount + 18] = 1.0
+
+    # Point 5
+    @coords[@coordsCount + 22] = x2
+    @coords[@coordsCount + 23] = 0.0
+
+    # Point 6
+    @coords[@coordsCount + 27] = x2
+    @coords[@coordsCount + 28] = 1.0
+    return
+
+  getGLTexture: (gl, texture) ->
+    @textureCache[texture.cacheKey] ||
+    @textureCache[texture.cacheKey] = @createGLTexture gl, texture
+
+  createGLTexture: (gl, image) ->
+    # Create a texture
     texture = gl.createTexture()
 
     # Bind the texture
@@ -210,12 +303,20 @@ c = class WebGLTextureShaderProgram
     else
       # gl.NEAREST is better for drawing a part of an image
       gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST
-    gl.bindTexture gl.TEXTURE_2D, null
-    @cache.textures[image.src] = texture
     texture
+
+  flushBuffers: (gl)->
+    if @coordsCount
+      texture = @getGLTexture(gl, @currentTexture)
+      gl.bindTexture gl.TEXTURE_2D, texture
+      gl.bufferData gl.ARRAY_BUFFER, @coords, gl.DYNAMIC_DRAW
+      gl.drawArrays gl.TRIANGLES, 0, @coordsCount / 5
+      @coordsCount = 0
+    return
 
 module.exports:: = Object.create c::
 module.exports::constructor = c
 
 Helpers =
-  WebGL: require '../../helpers/webgl'
+  WebGL:             require '../../helpers/webgl'
+  MatrixCalculation: require '../../helpers/matrix-calculation'

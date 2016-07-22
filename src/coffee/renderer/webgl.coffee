@@ -1,13 +1,16 @@
 module.exports = -> module.exports::constructor.apply @, arguments
 
 c = class WebGLRenderer
+  currentAlpha: null
+  currentResolution:
+    width: 0
+    height: 0
+
   constructor: (@canvas) ->
     # Cache variables
-    @cache =
-      currentAlpha: undefined
-      currentResolution:
-        width: 0
-        height: 0
+    @currentAlpha = undefined
+    @currentResolution.width = 0
+    @currentResolution.height = 0
 
     @programs = {}
     @currentProgram = false
@@ -17,111 +20,136 @@ c = class WebGLRenderer
       premultipliedAlpha: false
       alpha: false
 
-    @gl = @canvas.getContext("webgl", options) or @canvas.getContext("experimental-webgl", options)
-    gl = @gl
+    for context in ["webgl", "experimental-webgl"]
+      @gl = @canvas.getContext context, options
+      break if @gl
 
     # Optimize options
-    gl.pixelStorei gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false
+    @gl.pixelStorei @gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false
 
     # Set default blending
-    gl.blendFunc gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA
-    gl.enable gl.BLEND
+    @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+    @gl.enable @gl.BLEND
 
     # Init shader programs
     @programs =
-      texture: new TextureShaderProgram(gl)
-      color: new ColorShaderProgram(gl)
-
-    return
+      texture: new TextureShaderProgram @gl
+      color: new ColorShaderProgram @gl
 
   setProgram: (program) ->
-    if @currentProgram isnt program
-      gl = undefined
+    unless @currentProgram == program
       gl = @gl
+
+      # Flush old program
+      @currentProgram.flushBuffers? gl
 
       # Set program
       @currentProgram = program
       gl.useProgram program.program
+      @currentProgram.onSet? gl
 
       # Bind stuff
-      program.onSet gl
+      l = program.locations
 
       # Set current resolution var
-      gl.uniform2f program.locations.u_resolution, @cache.currentResolution.width, @cache.currentResolution.height
+      gl.uniform2f l.u_resolution, @currentResolution.width, @currentResolution.height
 
       # Set current alpha
-      gl.uniform1f @currentProgram.locations.u_alpha, @cache.currentAlpha
+      gl.uniform1f l.u_alpha, @currentAlpha
     return
 
   render: (cameras) ->
     gl = @gl
-    camerasLength = cameras.length
-    i = 0
-    while i < camerasLength
-      camera = cameras[i]
+    for camera in cameras
+      cr = camera.captureRegion
+      pr = camera.projectionRegion
 
       # Setup camera resolution
-      w = camera.captureRegion.width
-      h = camera.captureRegion.height
-      if @cache.currentResolution.width isnt w or @cache.currentResolution.height isnt h
-        @cache.currentResolution.width = w
-        @cache.currentResolution.height = h
+      w = cr.width
+      h = cr.height
+      if @currentResolution.width isnt w or @currentResolution.height isnt h
+        @currentResolution.width = w
+        @currentResolution.height = h
         gl.uniform2f @currentProgram.locations.u_resolution, w, h if @currentProgram
 
       # Set camera position
-      wm = Helpers.MatrixCalculation.makeTranslation(-camera.captureRegion.x, -camera.captureRegion.y)
+      camera.wm ?= new Float32Array 9
+      Helpers.MatrixCalculation.setTranslation(camera.wm, -cr.x, -cr.y)
 
       # Set camera projection viewport
-      gl.viewport camera.projectionRegion.x, camera.projectionRegion.y, camera.projectionRegion.width, camera.projectionRegion.height
-      rooms = [
-        engine.masterRoom
-        camera.room
-      ]
-      roomsLength = rooms.length
-      ii = 0
-      while ii < roomsLength
+      gl.viewport pr.x, pr.y, pr.width, pr.height
+      rooms = [ engine.masterRoom, camera.room ]
+
+      for room in rooms
         # Draw rooms
-        @renderTree rooms[ii], wm
-        ii++
-      i++
+        @renderRoom room, camera.wm
     return
 
-  renderTree: (object, wm) ->
-    gl = @gl
-    localWm = Helpers.MatrixCalculation.matrixMultiplyArray([
-      Helpers.MatrixCalculation.calculateLocalMatrix(object)
-      wm
-    ])
-    offset = Helpers.MatrixCalculation.makeTranslation(-object.offset.x, -object.offset.y)
+  renderRoom: (room, wm)->
+    list = room.renderList ?= []
+    unless room.parent
+      room.parent = new View.Child()
+      room.parent.wm = new Float32Array [1, 0, 0, 0, 1, 0, 0, 0, 1]
+      room.parent.changed = false
+
+    @updateRenderList list, room, new Uint16Array [0]
+    @processRenderList list
+    return
+
+  updateRenderList: (list, object, counter)->
     return unless object.isVisible()
 
-    # Set object alpha (because alpha is used by ALL rendered objects)
-    if @cache.currentAlpha isnt object.opacity
-      @cache.currentAlpha = object.opacity
-      gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
-    switch object.renderType
+    # Only update the list if necessary
+    last = list[counter[0]]
+    unless object == last
+      if last == undefined
+        list.push object
+      else
+        list.splice count, undefined, object
+    counter[0] += 1
 
-      # Texture based objects
-      when "textblock", "sprite"
-        @setProgram @programs.texture
-        @currentProgram.renderSprite gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
-
-      # Geometric objects
-      when "line"
-        @setProgram @programs.color
-        @currentProgram.renderLine gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
-      when "rectangle"
-        @setProgram @programs.color
-        @currentProgram.renderRectangle gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
-      when "circle"
-        @setProgram @programs.color
-        @currentProgram.renderCircle gl, object, Helpers.MatrixCalculation.matrixMultiply(offset, localWm)
     if object.children
-      len = object.children.length
-      i = 0
-      while i < len
-        @renderTree object.children[i], localWm
-        i++
+      for child in object.children
+        @updateRenderList list, child, counter
+
+  processRenderList: (list)->
+    gl = @gl
+    for object in list
+      object.wm ?= new Float32Array 9
+
+      Helpers.MatrixCalculation.setLocalMatrix object.wm, object
+      Helpers.MatrixCalculation.multiply object.wm, object.parent.wm
+      offset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
+      Helpers.MatrixCalculation.reverseMultiply object.wm, offset
+
+      # Set object alpha (because alpha is used by ALL rendered objects)
+      if @currentAlpha != object.opacity
+        @currentAlpha = object.opacity
+        gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
+
+      switch object.renderType
+        when "sprite"
+          program = @programs.texture
+          @setProgram program
+          program.renderSprite gl, object, object.wm
+        when "textblock"
+          program = @programs.texture
+          @setProgram program
+          program.renderTextBlock gl, object, object.wm
+        when "line"
+          program = @setProgram program
+          @setProgram program
+          program.renderLine gl, object, object.wm
+        when "rectangle"
+          program = @programs.color
+          @setProgram @programs.color
+          program.renderRectangle gl, object, object.wm
+        when "circle"
+          program = @programs.color
+          @setProgram program
+          program.renderCircle gl, object, object.wm
+
+    @currentProgram?.flushBuffers? gl
     return
 
 module.exports:: = Object.create c::
@@ -132,3 +160,6 @@ ColorShaderProgram = require './webgl/color-shader-program'
 
 Helpers =
   MatrixCalculation: require '../helpers/matrix-calculation'
+
+View =
+  Child: require '../views/child'
