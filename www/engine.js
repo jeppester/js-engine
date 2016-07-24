@@ -795,7 +795,7 @@ c = window.Engine = Engine = (function() {
    */
 
   Engine.prototype.purge = function(obj) {
-    var len, loop_, name, room, roomId;
+    var customLoop, len, name, room, _i, _len, _ref, _ref1;
     if (obj === void 0) {
       throw new Error("Cannot purge object: " + obj);
     }
@@ -808,18 +808,17 @@ c = window.Engine = Engine = (function() {
         engine.purge(obj.children[len]);
       }
     }
-    roomId = 0;
-    while (roomId < this.roomList.length) {
-      room = this.roomList[roomId];
-      for (name in room.loops) {
-        if (room.loops.hasOwnProperty(name)) {
-          loop_ = room.loops[name];
-          loop_.detachFunctionsByCaller(obj);
-          loop_.unscheduleByCaller(obj);
-          loop_.removeAnimationsOfObject(obj);
-        }
+    _ref = this.roomList;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      room = _ref[_i];
+      _ref1 = room.loops;
+      for (name in _ref1) {
+        customLoop = _ref1[name];
+        customLoop.detachFunction(obj);
+        customLoop.unschedule(obj);
+        customLoop.unsubscribeFromOperation(void 0, obj);
+        customLoop.removeAnimationsOfObject(obj);
       }
-      roomId++;
     }
     if (obj.parent) {
       obj.parent.removeChildren(obj);
@@ -1042,10 +1041,9 @@ c = CustomLoop = (function() {
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       exec = _ref[_i];
       if (!name || exec.name === name) {
-        i = name.exec.objects.indexOf(object);
+        i = exec.objects.indexOf(object);
         if (i !== -1) {
           exec.objects.splice(i, 1);
-          return true;
         }
       }
     }
@@ -1053,10 +1051,9 @@ c = CustomLoop = (function() {
     for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
       exec = _ref1[_j];
       if (!name || exec.name === name) {
-        i = name.exec.objects.indexOf(object);
+        i = exec.objects.indexOf(object);
         if (i !== -1) {
           exec.objects.splice(i, 1);
-          return true;
         }
       }
     }
@@ -1089,7 +1086,7 @@ c = CustomLoop = (function() {
 
 
   /*
-  Detaches a function from the loop. If the same function is attached multiple times (which is never a good idea), only the first occurrence is detached.
+  Detaches a function from the loop. If the same function is attached multiple times all occurrences will be removed
   
   @param {Object} caller The object the function was run as
   @param {function} func The function to detach from the loop
@@ -1097,27 +1094,19 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.detachFunction = function(caller, func) {
-    var exec, _i, _j, _len, _len1, _ref, _ref1;
-    if (caller === void 0) {
-      throw new Error("Missing argument: caller");
-    }
-    if (func === void 0) {
-      throw new Error("Missing argument: func");
-    }
-    _ref = this.functions;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      exec = _ref[_i];
+    var exec, i;
+    i = this.functions.length;
+    while (i--) {
+      exec = this.functions[i];
       if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.functions.splice(i, 1);
-        return true;
       }
     }
-    _ref1 = this.functionsQueue;
-    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-      exec = _ref1[_j];
+    i = this.functionsQueue.length;
+    while (i--) {
+      exec = this.functionsQueue[i];
       if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.functionsQueue.splice(i, 1);
-        return true;
       }
     }
     return false;
@@ -1152,7 +1141,7 @@ c = CustomLoop = (function() {
 
 
   /*
-  Unschedules a single scheduled execution. If multiple similar executions exists, only the first will be unscheduled.
+  Unschedules a single scheduled execution. If multiple similar executions exists they will all be removed.
   
   @param {function} func The function to unschedule an execution of
   @param {Object} caller The object with which the function was to be executed (by default the custom loop itself)
@@ -1160,27 +1149,19 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.unschedule = function(caller, func) {
-    var exec, _i, _j, _len, _len1, _ref, _ref1;
-    if (caller === void 0) {
-      throw new Error("Missing argument: caller");
-    }
-    if (func === void 0) {
-      throw new Error("Missing argument: function");
-    }
-    _ref = this.executions;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      exec = _ref[_i];
+    var exec, i;
+    i = this.executions.length;
+    while (i--) {
+      exec = this.executions[i];
       if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.executions.splice(i, 1);
-        return true;
       }
     }
-    _ref1 = this.executionsQueue;
-    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-      exec = _ref1[_j];
+    i = this.executionsQueue.length;
+    while (i--) {
+      exec = this.executionsQueue[i];
       if ((!caller || exec.object === caller) && (!func || exec.activity === func)) {
         this.executionsQueue.splice(i, 1);
-        return true;
       }
     }
     return false;
@@ -1315,15 +1296,15 @@ c = CustomLoop = (function() {
     _ref = this.operations;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       exec = _ref[_i];
-      if (!exec.operation) {
-        throw new Error("Trying to exec non-existent attached function");
+      if (!(exec && exec.operation)) {
+        throw new Error("Trying to exec non-existent attached operation");
       }
       exec.operation(exec.objects);
     }
     _ref1 = this.functions;
-    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-      exec = _ref1[_j];
-      if (!exec.activity) {
+    for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+      exec = _ref1[i];
+      if (!(exec && exec.activity)) {
         throw new Error("Trying to exec non-existent attached function");
       }
       exec.activity.call(exec.object);
@@ -6124,7 +6105,7 @@ c = WebGLRenderer = (function() {
       if (last === void 0) {
         list.push(object);
       } else {
-        list.splice(count, void 0, object);
+        list.splice(counter[0], void 0, object);
       }
     }
     counter[0] += 1;
@@ -7988,7 +7969,7 @@ ObjectCreator = require('../engine/object-creator');
 
 
 },{"../engine/object-creator":6,"./child":28}],32:[function(require,module,exports){
-var GameObject, Geometry, Views, c,
+var GameObject, Geometry, Views,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -8033,7 +8014,7 @@ speed: new Math.Vector(0, 0)
 </code>
  */
 
-c = GameObject = (function(_super) {
+module.exports = GameObject = (function(_super) {
   __extends(GameObject, _super);
 
   function GameObject(source, x, y, direction, additionalProperties) {
@@ -8050,10 +8031,6 @@ c = GameObject = (function(_super) {
     if (this.loop == null) {
       this.loop = engine.defaultActivityLoop;
     }
-    if (!this.loop.hasOperation('basic-transforms')) {
-      this.loop.attachOperation('basic-transforms', this.constructor.basicTransformsOperation);
-    }
-    this.loop.subscribeToOperation('basic-transforms', this);
     if (this.speed == null) {
       this.speed = new Geometry.Vector(0, 0);
     }
@@ -8087,10 +8064,6 @@ c = GameObject = (function(_super) {
   return GameObject;
 
 })(Views.Collidable);
-
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
 
 Geometry = {
   Vector: require('../geometry/vector')

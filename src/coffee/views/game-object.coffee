@@ -34,7 +34,7 @@ speed: new Math.Vector(0, 0)
 }
 </code>
 ###
-c = class GameObject extends Views.Collidable
+module.exports = class GameObject extends Views.Collidable
   constructor: (source, x, y, direction, additionalProperties) ->
     throw new Error("Missing argument: source") if source is undefined #dev
     throw new Error("Missing argument: x") if x is undefined #dev
@@ -44,10 +44,10 @@ c = class GameObject extends Views.Collidable
     # Add object to right loop
     @loop ?= engine.defaultActivityLoop
 
-    unless @loop.hasOperation 'basic-transforms'
-      @loop.attachOperation 'basic-transforms', @constructor.basicTransformsOperation
-
-    @loop.subscribeToOperation 'basic-transforms', @
+    # unless @loop.hasOperation 'basic-transforms'
+    #   @loop.attachOperation 'basic-transforms', @constructor.basicTransformsOperation
+    #
+    # @loop.subscribeToOperation 'basic-transforms', @
     @speed ?= new Geometry.Vector 0, 0
     @rotationSpeed ?= 0
     @alive = true
@@ -60,9 +60,6 @@ c = class GameObject extends Views.Collidable
         object.x += engine.perFrameSpeed object.speed.x
         object.y += engine.perFrameSpeed object.speed.y
         object.direction += engine.perFrameSpeed object.rotationSpeed if object.rotationSpeed
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Geometry =
   Vector: require '../geometry/vector'

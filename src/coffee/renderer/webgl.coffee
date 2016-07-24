@@ -105,7 +105,7 @@ c = class WebGLRenderer
       if last == undefined
         list.push object
       else
-        list.splice count, undefined, object
+        list.splice counter[0], undefined, object
     counter[0] += 1
 
     if object.children
