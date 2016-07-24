@@ -725,7 +725,6 @@ c = window.Engine = class Engine
 
     # If params is not a string, json-stringify it
     params = "data=" + JSON.stringify(params) if typeof params isnt "string"
-    req = undefined
     req = new XMLHttpRequest()
     if async
       req.onreadystatechange = ->

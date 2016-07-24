@@ -237,7 +237,6 @@ c = class Pointer
   ###
   isReleased: (button) ->
     throw new Error("Missing argument: button") if button is undefined #dev
-    pointers = undefined
     switch @getButtonType(button)
       when "mouse"
         pointers = (if button is Globals.MOUSE_ANY then @mouse.buttons else @mouse.buttons[button])
@@ -493,7 +492,6 @@ c = class Pointer
   setCursor: (cursor) ->
     throw new Error("Missing argument: cursor") if cursor is undefined #dev
     throw new Error("Argument cursor should be of type: string") if typeof cursor isnt "string" #dev
-    resource = undefined
 
     # Check if "cursor" is a resource string
     resource = engine.loader.getImage(cursor)

@@ -8,7 +8,6 @@ Constructor for the Keyboard class
 ###
 c = class Keyboard
   constructor: ->
-    key = undefined
     document.addEventListener "keydown", (event) =>
       @onKeyDown event
       event.preventDefault() if engine.preventDefaultKeyboard
@@ -35,7 +34,6 @@ c = class Keyboard
   @param {KeyboardEvent} event Event object passed by the onkeydown event
   ###
   onKeyDown: (event) ->
-    key = undefined
     throw new Error("Missing argument: event") if event is undefined #dev
     unless @isDown(event.keyCode)
       key = @keys[event.keyCode]
@@ -51,7 +49,6 @@ c = class Keyboard
   @param {KeyboardEvent} event Event object passed by the onkeyup event
   ###
   onKeyUp: (event) ->
-    key = undefined
     throw new Error("Missing argument: event") if event is undefined #dev
     if @isDown(event.keyCode)
       key = @keys[event.keyCode]

@@ -43,7 +43,6 @@ c = class Child
   @return {Boolean} Whether or not the child object is currently in a visible room
   ###
   isInVisibleRoom: ->
-    p = undefined
     p = @getParents().pop()
     p is engine.currentRoom or p is engine.masterRoom
 
@@ -82,8 +81,6 @@ c = class Child
   @return {View.Container[]} A list of all the child's parents
   ###
   getParents: ->
-    parent = undefined
-    parents = undefined
     parents = []
     parent = this
     parents.push parent while (parent = parent.parent) isnt undefined

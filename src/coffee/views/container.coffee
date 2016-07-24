@@ -72,8 +72,6 @@ c = class Container extends Views.Child
   insertBelow: (insertChildren, child) ->
     throw new Error("Missing argument: insertChildren") if insertChildren is undefined #dev
     throw new Error("Missing argument: child") if child is undefined #dev
-    arr = undefined
-    i = undefined
     unless Array::isPrototypeOf(insertChildren)
       arr = []
       arr.push insertChildren
@@ -104,8 +102,6 @@ c = class Container extends Views.Child
   @return {Child[]} Array containing all of the View's children
   ###
   getChildren: ->
-    ret = undefined
-    i = undefined
     ret = []
     i = 0
     while i < @children.length
@@ -121,11 +117,9 @@ c = class Container extends Views.Child
   @param {boolean} [recursive=false] Whether or not the set theme will be applied to children for which a theme has already been set. If this argument is unset, it will default to false
   ###
   setTheme: (themeName, recursive) ->
-    if themeName
-      throw new Error("Trying to set nonexistent theme: " + themeName) if loader.themes[themeName] is undefined #dev
-    else
-      themeName = undefined
-    i = undefined
+    if themeName && loader.themes[themeName] is undefined #dev
+      throw new Error("Trying to set nonexistent theme: " + themeName)
+
     recursive = (if recursive isnt undefined then recursive else false)
     @theme = themeName
     @refreshSource() if @refreshSource
@@ -149,7 +143,6 @@ c = class Container extends Views.Child
   ###
   applyToThisAndChildren: (func) ->
     throw new Error("Missing argument: function") if func is undefined #dev
-    i = undefined
     func.call this
     i = 0
     while i < @children.length
@@ -167,10 +160,6 @@ c = class Container extends Views.Child
   @return {Math.Rectangle} A rectangle representing the region
   ###
   getCombinedRedrawRegion: ->
-    box = undefined
-    addBox = undefined
-    i = undefined
-    child = undefined
     box = @getRedrawRegion() if @getRedrawRegion
     i = 0
     while i < @children.length
@@ -198,9 +187,6 @@ c = class Container extends Views.Child
   ###
   removeChildren: (child1, child2) ->
     throw new Error("This function needs at least one argument") if arguments.length is 0 #dev
-    i = undefined
-    childId = undefined
-    removed = undefined
     removed = []
     i = arguments.length
     while i > -1
@@ -220,7 +206,6 @@ c = class Container extends Views.Child
   ###
   removeAllChildren: (purge) ->
     purge = (if purge isnt undefined then purge else true)
-    rmChild = undefined
     rmChild = @children.splice(0, @children.length)
     rmChild.forEach (c) ->
       c.parent = undefined
@@ -228,59 +213,6 @@ c = class Container extends Views.Child
       return
 
     return
-
-
-  ###
-  Draws all children and grandchildren of an object that inherits the View class. It is usually not necessary to call this function since it is automatically called by the engine's redraw loop.
-
-  @param {CanvasRenderingContext2D} c A canvas' 2d context to draw the children on
-  @param {Math.Rectangle} area A rectangle specifying the area to draw
-  @param {boolean} forceRedraw Whether or not to force a redraw even though draw caching is enabled (this option is actually used when caching the view)
-  ###
-  draw: (c, area, noCache) ->
-    if engine.enableRedrawRegions
-      @drawRedrawRegions c, area
-    else
-      @drawWholeCanvas c, noCache
-    return
-
-  drawWholeCanvas: (c, noCache) ->
-    i = undefined
-    len = undefined
-    child = undefined
-    return unless @isVisible()
-    @transformCanvasContext c
-    if @drawCacheEnabled and not noCache
-      c.drawImage @drawCacheCanvas, 0, 0
-    else
-      if @drawCanvas
-        engine.drawCalls++ #dev
-        @drawCanvas c
-        @drawBoundingBox c if engine.drawBoundingBoxes and @drawBoundingBox #dev
-        @drawMask c if engine.drawMasks and @drawMask #dev
-
-      # Draw children
-      len = @children.length
-      i = 0
-      while i < len
-        child = @children[i]
-        if child.draw
-          child.draw c
-        else if child.isVisible()
-          engine.drawCalls++ #dev
-          child.transformCanvasContext c
-          child.drawCanvas c
-          child.restoreCanvasContext c
-        i++
-    @restoreCanvasContext c
-    return
-
-
-  ###
-  Remove drawCanvas function which was inherited from View
-  ###
-  drawCanvas: undefined
-  getRedrawRegion: undefined
 
 module.exports:: = Object.create c::
 module.exports::constructor = c

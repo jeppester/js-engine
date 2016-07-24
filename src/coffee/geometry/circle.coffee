@@ -138,8 +138,6 @@ c = class Circle
   @return {boolean} True if the Rectangle contains the checked object, false if not
   ###
   contains: (object) ->
-    i = undefined
-    cDist = undefined
     if object instanceof Geometry.Vector
       object.copy().move(-@x, -@y).getLength() < @radius
     else if object instanceof Geometry.Line

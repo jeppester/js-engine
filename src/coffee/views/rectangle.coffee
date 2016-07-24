@@ -185,8 +185,6 @@ c = class Rectangle extends Geometry.Rectangle
   @return {Rectangle} The bounding rectangle of the redraw
   ###
   getRedrawRegion: ->
-    ln = undefined
-
     # Get bounding rectangle
     rect = @copy()
 

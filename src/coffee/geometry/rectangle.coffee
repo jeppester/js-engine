@@ -143,11 +143,6 @@ c = class Rectangle extends Geometry.Vector
   @return {Geometry.Rectangle} The bounding rectangle for the two rectangles
   ###
   getBoundingRectangle: (rectangle) ->
-    x2 = undefined
-    y2 = undefined
-    rx2 = undefined
-    ry2 = undefined
-    crop = undefined
     x2 = @x + @width
     y2 = @y + @height
     rx2 = rectangle.x + rectangle.width

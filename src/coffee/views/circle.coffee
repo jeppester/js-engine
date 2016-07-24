@@ -107,8 +107,6 @@ c = class Circle extends Geometry.Circle
   @return {Math.Rectangle} The bounding rectangle of the redraw
   ###
   getRedrawRegion: ->
-    rect = undefined
-    ln = undefined
     ln = Math.ceil(@lineWidth / 2)
     rect = new Geometry.Rectangle(Math.floor(@x - (@radius + ln + 5)), Math.floor(@y - (@radius + ln + 5)), Math.ceil((@radius + ln + 5) * 2), Math.ceil((@radius + ln + 5) * 2))
     rect.add @parent.getRoomPosition()

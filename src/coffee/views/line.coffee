@@ -52,7 +52,6 @@ c = class Line extends Geometry.Line
   LineInitWithRedrawRegions: (startVector, endVector, strokeStyle, lineWidth, lineCap) ->
 
     # Create getters and setters for line ends
-    hidden = undefined
     hidden =
       strokeStyle: strokeStyle or "#000"
       lineWidth: lineWidth or 1
@@ -98,8 +97,6 @@ c = class Line extends Geometry.Line
       set: (value) ->
         if hidden.a isnt value
           hidden.a = value
-          xHidden = undefined
-          yHidden = undefined
           xHidden = hidden.a.x
           yHidden = hidden.a.y
 
@@ -136,8 +133,6 @@ c = class Line extends Geometry.Line
       set: (value) ->
         if hidden.b isnt value
           hidden.b = value
-          xHidden = undefined
-          yHidden = undefined
           xHidden = hidden.b.x
           yHidden = hidden.b.y
 

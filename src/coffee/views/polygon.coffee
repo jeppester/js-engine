@@ -48,8 +48,6 @@ c = class Polygon extends Geometry.Polygon
   @return {Rectangle} The bounding rectangle of the redraw
   ###
   getRedrawRegion: ->
-    ln = undefined
-
     # Get bounding rectangle
     rect = @getBoundingRectangle()
 

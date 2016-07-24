@@ -149,8 +149,6 @@ c = class Line
   ###
   intersects: (object) ->
     if object instanceof @constructor
-      c1 = undefined
-      c2 = undefined
       c1 = (@b.x - @a.x) * (object.a.y - @b.y) - (object.a.x - @b.x) * (@b.y - @a.y)
       c2 = (@b.x - @a.x) * (object.b.y - @b.y) - (object.b.x - @b.x) * (@b.y - @a.y)
       return false if c1 * c2 > 0
