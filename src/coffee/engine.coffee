@@ -756,16 +756,12 @@ c = window.Engine = class Engine
       engine.purge obj.children[len] while len--
 
     # Delete all references from rooms and their loops
-    roomId = 0
-    while roomId < @roomList.length
-      room = @roomList[roomId]
-      for name of room.loops
-        if room.loops.hasOwnProperty(name)
-          loop_ = room.loops[name]
-          loop_.detachFunctionsByCaller obj
-          loop_.unscheduleByCaller obj
-          loop_.removeAnimationsOfObject obj
-      roomId++
+    for room in @roomList
+      for name, customLoop of room.loops
+        customLoop.detachFunction obj
+        customLoop.unschedule obj
+        customLoop.unsubscribeFromOperation undefined, obj
+        customLoop.removeAnimationsOfObject obj
 
     # Delete from viewlist
     obj.parent.removeChildren obj if obj.parent

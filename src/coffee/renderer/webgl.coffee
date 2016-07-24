@@ -105,7 +105,7 @@ c = class WebGLRenderer
       if last == undefined
         list.push object
       else
-        list.splice count, undefined, object
+        list.splice counter[0], list.length - counter[0], object
     counter[0] += 1
 
     if object.children
@@ -137,7 +137,7 @@ c = class WebGLRenderer
           @setProgram program
           program.renderTextBlock gl, object, object.wm
         when "line"
-          program = @setProgram program
+          program = @programs.color
           @setProgram program
           program.renderLine gl, object, object.wm
         when "rectangle"

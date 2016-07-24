@@ -47,7 +47,7 @@ c = class CustomLoop
   ###
   attachOperation: (name, func)->
     throw new Error("Argument func must be of type function") if typeof func isnt "function" #dev
-    @operationsQueue.push
+    @operationsQueue.unshift
       name: name
       objects: []
       operation: func
@@ -85,29 +85,27 @@ c = class CustomLoop
   subscribeToOperation: (name, object)->
     for exec in @operations
       if !name || exec.name == name
-        exec.objects.push object
+        exec.objects.unshift object
         return true
 
     for exec in @operationsQueue
       if !name || exec.name == name
-        exec.objects.push object
+        exec.objects.unshift object
         return true
     false
 
   unsubscribeFromOperation: (name, object)->
     for exec in @operations
       if !name || exec.name == name
-        i = name.exec.objects.indexOf object
+        i = exec.objects.indexOf object
         if i != -1
           exec.objects.splice i, 1
-          return true
 
     for exec in @operationsQueue
       if !name || exec.name == name
-        i = name.exec.objects.indexOf object
+        i = exec.objects.indexOf object
         if i != -1
           exec.objects.splice i, 1
-          return true
     false
 
   ###
@@ -120,34 +118,33 @@ c = class CustomLoop
     throw new Error("Missing argument: caller") if caller is undefined #dev
     throw new Error("Missing argument: func") if func is undefined #dev
     throw new Error("Argument func must be of type function") if typeof func isnt "function" #dev
-    @functionsQueue.push
+    @functionsQueue.unshift
       object: caller
       activity: func
 
     return
 
   ###
-  Detaches a function from the loop. If the same function is attached multiple times (which is never a good idea), only the first occurrence is detached.
+  Detaches a function from the loop. If the same function is attached multiple times all occurrences will be removed
 
   @param {Object} caller The object the function was run as
   @param {function} func The function to detach from the loop
   @return {boolean} Whether or not the function was found and detached
   ###
   detachFunction: (caller, func) ->
-    throw new Error("Missing argument: caller") if caller is undefined #dev
-    throw new Error("Missing argument: func") if func is undefined #dev
-
     # Search activities and remove function
-    for exec in @functions
+    i = @functions.length
+    while i--
+      exec = @functions[i]
       if (!caller || exec.object == caller) && (!func || exec.activity == func)
         @functions.splice i, 1
-        return true
 
     # Search activities queue and remove function
-    for exec in @functionsQueue
+    i = @functionsQueue.length
+    while i--
+      exec = @functionsQueue[i]
       if (!caller || exec.object == caller) && (!func || exec.activity == func)
         @functionsQueue.splice i, 1
-        return true
     false
 
   ###
@@ -162,7 +159,7 @@ c = class CustomLoop
     throw new Error("Missing argument: caller") if caller is undefined #dev
     throw new Error("Missing argument: function") if func is undefined #dev
     throw new Error("Missing argument: delay") if delay is undefined #dev
-    @executionsQueue.push
+    @executionsQueue.unshift
       func: func
       execTime: @time + delay
       caller: caller
@@ -170,27 +167,26 @@ c = class CustomLoop
     return
 
   ###
-  Unschedules a single scheduled execution. If multiple similar executions exists, only the first will be unscheduled.
+  Unschedules a single scheduled execution. If multiple similar executions exists they will all be removed.
 
   @param {function} func The function to unschedule an execution of
   @param {Object} caller The object with which the function was to be executed (by default the custom loop itself)
   @return {boolean} Whether or not the function was found and unscheduled
   ###
   unschedule: (caller, func) ->
-    throw new Error("Missing argument: caller") if caller is undefined #dev
-    throw new Error("Missing argument: function") if func is undefined #dev
-
     # Search activities and remove function
-    for exec in @executions
+    i = @executions.length
+    while i--
+      exec = @executions[i]
       if (!caller || exec.object == caller) && (!func || exec.activity == func)
         @executions.splice i, 1
-        return true
 
     # Search activities queue and remove function
-    for exec in @executionsQueue
+    i = @executionsQueue.length
+    while i--
+      exec = @executionsQueue[i]
       if (!caller || exec.object == caller) && (!func || exec.activity == func)
         @executionsQueue.splice i, 1
-        return true
     false
 
   ###
@@ -227,7 +223,6 @@ c = class CustomLoop
       i++
     @animations.push anim
     return
-
 
   ###
   Stop all animations of a specific object from the loop
@@ -294,15 +289,20 @@ c = class CustomLoop
       if @time >= exec.execTime
         exec.func.call exec.caller
         @executions.splice i, 1
-        i--
 
     # Execute operations
-    for exec in @operations
-      throw new Error("Trying to exec non-existent attached function") unless exec.operation #dev
+    i = @operations.length
+    while i--
+      exec = @operations[i]
+      continue unless exec
+      throw new Error("Trying to exec non-existent attached operation") unless exec.operation #dev
       exec.operation exec.objects
 
-    # Execute attached functions
-    for exec in @functions
+    # Execute attached functi
+    i = @functions.length
+    while i--
+      exec = @functions[i]
+      continue unless exec
       throw new Error("Trying to exec non-existent attached function") unless exec.activity #dev
       exec.activity.call exec.object
 
