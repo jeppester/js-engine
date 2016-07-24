@@ -277,9 +277,6 @@ c = window.Engine = class Engine
   @private
   ###
   initialize: ->
-    # Make array for containing references to all game objects
-    @objectIndex = {}
-
     # Set variables required by the engine
     @frames = 0
     @last = new Date().getTime()
@@ -658,26 +655,6 @@ c = window.Engine = class Engine
     @autoResizeCanvas() if @autoResize
     return
 
-  ###
-  Registers an object to the engine. This will give the object an id which can be used for accessing it at a later time.
-  Sprites, TextBlock and objects inheriting those objects, are automatically registered when created.
-
-  @param {Object} obj The object to register in the engine
-  @param {string} id A string with the desired id
-  @return {string} The registered id
-  ###
-  registerObject: (obj, id) ->
-    throw new Error("Missing argument: obj") if obj is undefined #dev
-    if id is undefined
-      @currentId++
-      id = "obj" + (@currentId - 1)
-    #dev
-    else throw new Error("Object id already taken: " + id) if @objectIndex[id] isnt undefined #dev
-    #dev
-    @objectIndex[id] = obj
-    obj.id = id
-    id
-
   loadFileContent: (filePath) ->
     req = new XMLHttpRequest()
     req.open "GET", filePath, false
@@ -741,13 +718,12 @@ c = window.Engine = class Engine
     return
 
   ###
-  Removes an object from all engine loops, views, and from the object index
+  Removes an object from all engine containers and timers
 
   param {Object} obj The object to remove
   ###
   purge: (obj) ->
     throw new Error("Cannot purge object: " + obj) if obj is undefined #dev
-    obj = @objectIndex[obj] if typeof obj is "string"
 
     # Purge ALL children
     if obj.children
@@ -764,10 +740,6 @@ c = window.Engine = class Engine
 
     # Delete from viewlist
     obj.parent.removeChildren obj if obj.parent
-
-    # Delete from object index
-    delete @objectIndex[obj.id]
-
     return
 
   ###

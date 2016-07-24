@@ -48,7 +48,7 @@ Main = (function() {
 
   Main.prototype.endTest = function() {
     var average, fps, frames, objects;
-    objects = Object.keys(engine.objectIndex).length - 2;
+    objects = engine.currentRoom.children.length;
     frames = engine.frames - this.startFrames;
     fps = (engine.frames - this.startFrames) / 10;
     this.lastFive.push(frames);

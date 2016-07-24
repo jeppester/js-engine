@@ -268,7 +268,6 @@ c = window.Engine = Engine = (function() {
    */
 
   Engine.prototype.initialize = function() {
-    this.objectIndex = {};
     this.frames = 0;
     this.last = new Date().getTime();
     this.now = this.last;
@@ -677,33 +676,6 @@ c = window.Engine = Engine = (function() {
     }
   };
 
-
-  /*
-  Registers an object to the engine. This will give the object an id which can be used for accessing it at a later time.
-  Sprites, TextBlock and objects inheriting those objects, are automatically registered when created.
-  
-  @param {Object} obj The object to register in the engine
-  @param {string} id A string with the desired id
-  @return {string} The registered id
-   */
-
-  Engine.prototype.registerObject = function(obj, id) {
-    if (obj === void 0) {
-      throw new Error("Missing argument: obj");
-    }
-    if (id === void 0) {
-      this.currentId++;
-      id = "obj" + (this.currentId - 1);
-    } else {
-      if (this.objectIndex[id] !== void 0) {
-        throw new Error("Object id already taken: " + id);
-      }
-    }
-    this.objectIndex[id] = obj;
-    obj.id = id;
-    return id;
-  };
-
   Engine.prototype.loadFileContent = function(filePath) {
     var req;
     req = new XMLHttpRequest();
@@ -788,7 +760,7 @@ c = window.Engine = Engine = (function() {
 
 
   /*
-  Removes an object from all engine loops, views, and from the object index
+  Removes an object from all engine containers and timers
   
   param {Object} obj The object to remove
    */
@@ -797,9 +769,6 @@ c = window.Engine = Engine = (function() {
     var customLoop, j, len, len1, name, ref, ref1, room;
     if (obj === void 0) {
       throw new Error("Cannot purge object: " + obj);
-    }
-    if (typeof obj === "string") {
-      obj = this.objectIndex[obj];
     }
     if (obj.children) {
       len = obj.children.length;
@@ -822,7 +791,6 @@ c = window.Engine = Engine = (function() {
     if (obj.parent) {
       obj.parent.removeChildren(obj);
     }
-    delete this.objectIndex[obj.id];
   };
 
 
@@ -6901,7 +6869,6 @@ c = Child = (function() {
     this.widthScale = 1;
     this.heightScale = 1;
     this.offset = new Geometry.Vector();
-    engine.registerObject(this);
     return;
   }
 

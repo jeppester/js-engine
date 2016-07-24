@@ -20,7 +20,6 @@ c = class Child
     @widthScale = 1
     @heightScale = 1
     @offset = new Geometry.Vector()
-    engine.registerObject this
     return
 
   offsetFromGlobal: (offset)->

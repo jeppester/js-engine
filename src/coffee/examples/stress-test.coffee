@@ -19,7 +19,7 @@ class StressTest
 
   updateFPS: ->
     @fpsCounter.set string: 'FPS: ' + engine.fps
-    @objectCounter.set string: 'Objects: ' + (Object.keys(engine.objectIndex).length - 6)
+    @objectCounter.set string: 'Objects: ' + @objectView.children.length
 
   addObjects: (count = 10)->
     for i in [0...count]

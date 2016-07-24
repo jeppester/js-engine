@@ -24,7 +24,7 @@ class Main
     setTimeout (=> @endTest()), 10000
 
   endTest: ->
-    objects = (Object.keys(engine.objectIndex).length - 2)
+    objects = engine.currentRoom.children.length
     frames = engine.frames - @startFrames
     fps = (engine.frames - @startFrames) / 10
 

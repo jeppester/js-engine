@@ -32,7 +32,7 @@ StressTest = (function() {
       string: 'FPS: ' + engine.fps
     });
     return this.objectCounter.set({
-      string: 'Objects: ' + (Object.keys(engine.objectIndex).length - 6)
+      string: 'Objects: ' + this.objectView.children.length
     });
   };
 
