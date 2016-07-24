@@ -137,7 +137,7 @@ c = class WebGLRenderer
           @setProgram program
           program.renderTextBlock gl, object, object.wm
         when "line"
-          program = @setProgram program
+          program = @programs.color
           @setProgram program
           program.renderLine gl, object, object.wm
         when "rectangle"

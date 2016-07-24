@@ -6155,7 +6155,7 @@ c = WebGLRenderer = (function() {
           program.renderTextBlock(gl, object, object.wm);
           break;
         case "line":
-          program = this.setProgram(program);
+          program = this.programs.color;
           this.setProgram(program);
           program.renderLine(gl, object, object.wm);
           break;
