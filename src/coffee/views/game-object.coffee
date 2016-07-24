@@ -44,10 +44,10 @@ module.exports = class GameObject extends Views.Collidable
     # Add object to right loop
     @loop ?= engine.defaultActivityLoop
 
-    # unless @loop.hasOperation 'basic-transforms'
-    #   @loop.attachOperation 'basic-transforms', @constructor.basicTransformsOperation
-    #
-    # @loop.subscribeToOperation 'basic-transforms', @
+    unless @loop.hasOperation 'basic-transforms'
+      @loop.attachOperation 'basic-transforms', @constructor.basicTransformsOperation
+
+    @loop.subscribeToOperation 'basic-transforms', @
     @speed ?= new Geometry.Vector 0, 0
     @rotationSpeed ?= 0
     @alive = true

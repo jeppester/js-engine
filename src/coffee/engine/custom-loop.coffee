@@ -47,7 +47,7 @@ c = class CustomLoop
   ###
   attachOperation: (name, func)->
     throw new Error("Argument func must be of type function") if typeof func isnt "function" #dev
-    @operationsQueue.push
+    @operationsQueue.unshift
       name: name
       objects: []
       operation: func
@@ -85,12 +85,12 @@ c = class CustomLoop
   subscribeToOperation: (name, object)->
     for exec in @operations
       if !name || exec.name == name
-        exec.objects.push object
+        exec.objects.unshift object
         return true
 
     for exec in @operationsQueue
       if !name || exec.name == name
-        exec.objects.push object
+        exec.objects.unshift object
         return true
     false
 
@@ -118,7 +118,7 @@ c = class CustomLoop
     throw new Error("Missing argument: caller") if caller is undefined #dev
     throw new Error("Missing argument: func") if func is undefined #dev
     throw new Error("Argument func must be of type function") if typeof func isnt "function" #dev
-    @functionsQueue.push
+    @functionsQueue.unshift
       object: caller
       activity: func
 
@@ -159,7 +159,7 @@ c = class CustomLoop
     throw new Error("Missing argument: caller") if caller is undefined #dev
     throw new Error("Missing argument: function") if func is undefined #dev
     throw new Error("Missing argument: delay") if delay is undefined #dev
-    @executionsQueue.push
+    @executionsQueue.unshift
       func: func
       execTime: @time + delay
       caller: caller
@@ -223,7 +223,6 @@ c = class CustomLoop
       i++
     @animations.push anim
     return
-
 
   ###
   Stop all animations of a specific object from the loop
@@ -290,16 +289,21 @@ c = class CustomLoop
       if @time >= exec.execTime
         exec.func.call exec.caller
         @executions.splice i, 1
-        i--
 
     # Execute operations
-    for exec in @operations
-      throw new Error("Trying to exec non-existent attached operation") unless exec && exec.operation #dev
+    i = @operations.length
+    while i--
+      exec = @operations[i]
+      continue unless exec
+      throw new Error("Trying to exec non-existent attached operation") unless exec.operation #dev
       exec.operation exec.objects
 
     # Execute attached functi
-    for exec, i in @functions
-      throw new Error("Trying to exec non-existent attached function") unless exec && exec.activity #dev
+    i = @functions.length
+    while i--
+      exec = @functions[i]
+      continue unless exec
+      throw new Error("Trying to exec non-existent attached function") unless exec.activity #dev
       exec.activity.call exec.object
 
     # Add queued operations

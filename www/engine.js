@@ -958,7 +958,7 @@ c = CustomLoop = (function() {
     if (typeof func !== "function") {
       throw new Error("Argument func must be of type function");
     }
-    this.operationsQueue.push({
+    this.operationsQueue.unshift({
       name: name,
       objects: [],
       operation: func
@@ -1020,7 +1020,7 @@ c = CustomLoop = (function() {
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       exec = _ref[_i];
       if (!name || exec.name === name) {
-        exec.objects.push(object);
+        exec.objects.unshift(object);
         return true;
       }
     }
@@ -1028,7 +1028,7 @@ c = CustomLoop = (function() {
     for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
       exec = _ref1[_j];
       if (!name || exec.name === name) {
-        exec.objects.push(object);
+        exec.objects.unshift(object);
         return true;
       }
     }
@@ -1078,7 +1078,7 @@ c = CustomLoop = (function() {
     if (typeof func !== "function") {
       throw new Error("Argument func must be of type function");
     }
-    this.functionsQueue.push({
+    this.functionsQueue.unshift({
       object: caller,
       activity: func
     });
@@ -1132,7 +1132,7 @@ c = CustomLoop = (function() {
     if (delay === void 0) {
       throw new Error("Missing argument: delay");
     }
-    this.executionsQueue.push({
+    this.executionsQueue.unshift({
       func: func,
       execTime: this.time + delay,
       caller: caller
@@ -1274,7 +1274,7 @@ c = CustomLoop = (function() {
    */
 
   CustomLoop.prototype.execute = function() {
-    var exec, i, _i, _j, _len, _len1, _ref, _ref1;
+    var exec, i;
     if (engine.frames % this.framesPerExecution || !this.maskFunction()) {
       return;
     }
@@ -1290,21 +1290,26 @@ c = CustomLoop = (function() {
       if (this.time >= exec.execTime) {
         exec.func.call(exec.caller);
         this.executions.splice(i, 1);
-        i--;
       }
     }
-    _ref = this.operations;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      exec = _ref[_i];
-      if (!(exec && exec.operation)) {
+    i = this.operations.length;
+    while (i--) {
+      exec = this.operations[i];
+      if (!exec) {
+        continue;
+      }
+      if (!exec.operation) {
         throw new Error("Trying to exec non-existent attached operation");
       }
       exec.operation(exec.objects);
     }
-    _ref1 = this.functions;
-    for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
-      exec = _ref1[i];
-      if (!(exec && exec.activity)) {
+    i = this.functions.length;
+    while (i--) {
+      exec = this.functions[i];
+      if (!exec) {
+        continue;
+      }
+      if (!exec.activity) {
         throw new Error("Trying to exec non-existent attached function");
       }
       exec.activity.call(exec.object);
@@ -8031,6 +8036,10 @@ module.exports = GameObject = (function(_super) {
     if (this.loop == null) {
       this.loop = engine.defaultActivityLoop;
     }
+    if (!this.loop.hasOperation('basic-transforms')) {
+      this.loop.attachOperation('basic-transforms', this.constructor.basicTransformsOperation);
+    }
+    this.loop.subscribeToOperation('basic-transforms', this);
     if (this.speed == null) {
       this.speed = new Geometry.Vector(0, 0);
     }
