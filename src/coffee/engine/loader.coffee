@@ -440,9 +440,9 @@ module.exports = class Loader
     canvas.imageLength = image.imageLength
     canvas.cacheKey = "mask:" + image.cacheKey
     ctx = canvas.getContext("2d")
-    #dev
+
     throw new Error("Trying to create mask for non-existing resource: " + resourceString) if image is false #dev
-    #dev
+
     ctx.drawImage image, 0, 0, image.width, image.height
     bitmap = ctx.getImageData(0, 0, canvas.width, canvas.height)
     data = bitmap.data

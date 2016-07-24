@@ -5811,8 +5811,6 @@ Helpers = {
 var ColorShaderProgram, Helpers, TextureShaderProgram, View, WebGLRenderer;
 
 module.exports = WebGLRenderer = (function() {
-  WebGLRenderer.prototype.currentAlpha = null;
-
   WebGLRenderer.prototype.currentResolution = {
     width: 0,
     height: 0
@@ -5821,7 +5819,6 @@ module.exports = WebGLRenderer = (function() {
   function WebGLRenderer(canvas) {
     var context, i, len, options, ref;
     this.canvas = canvas;
-    this.currentAlpha = void 0;
     this.currentResolution.width = 0;
     this.currentResolution.height = 0;
     this.programs = {};
@@ -5861,7 +5858,6 @@ module.exports = WebGLRenderer = (function() {
       }
       l = program.locations;
       gl.uniform2f(l.u_resolution, this.currentResolution.width, this.currentResolution.height);
-      gl.uniform1f(l.u_alpha, this.currentAlpha);
     }
   };
 
@@ -5896,14 +5892,20 @@ module.exports = WebGLRenderer = (function() {
 
   WebGLRenderer.prototype.renderRoom = function(room, wm) {
     var list;
-    list = room.renderList != null ? room.renderList : room.renderList = [];
     if (!room.parent) {
       room.parent = new View.Child();
       room.parent.wm = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]);
       room.parent.changed = false;
     }
+    list = room.renderList != null ? room.renderList : room.renderList = [];
     this.updateRenderList(list, room, new Uint16Array([0]));
     this.processRenderList(list);
+    if (engine.drawMasks) {
+      this.renderMasks(list);
+    }
+    if (engine.drawBoundingBoxes) {
+      this.renderBoundingBoxes(list);
+    }
   };
 
   WebGLRenderer.prototype.updateRenderList = function(list, object, counter) {
@@ -5932,7 +5934,7 @@ module.exports = WebGLRenderer = (function() {
   };
 
   WebGLRenderer.prototype.processRenderList = function(list) {
-    var gl, i, len, object, offset, program, ref;
+    var base, gl, i, len, object, offset, program;
     gl = this.gl;
     for (i = 0, len = list.length; i < len; i++) {
       object = list[i];
@@ -5943,12 +5945,6 @@ module.exports = WebGLRenderer = (function() {
       Helpers.MatrixCalculation.multiply(object.wm, object.parent.wm);
       offset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
       Helpers.MatrixCalculation.reverseMultiply(object.wm, offset);
-      if (this.currentAlpha !== object.opacity) {
-        this.currentAlpha = object.opacity;
-        if (this.currentProgram) {
-          gl.uniform1f(this.currentProgram.locations.u_alpha, object.opacity);
-        }
-      }
       switch (object.renderType) {
         case "sprite":
           program = this.programs.texture;
@@ -5976,10 +5972,38 @@ module.exports = WebGLRenderer = (function() {
           program.renderCircle(gl, object, object.wm);
       }
     }
-    if ((ref = this.currentProgram) != null) {
-      if (typeof ref.flushBuffers === "function") {
-        ref.flushBuffers(gl);
+    if (typeof (base = this.currentProgram).flushBuffers === "function") {
+      base.flushBuffers(gl);
+    }
+  };
+
+  WebGLRenderer.prototype.renderMasks = function(list) {
+    var base, gl, i, len, object;
+    gl = this.gl;
+    this.setProgram(this.programs.texture);
+    for (i = 0, len = list.length; i < len; i++) {
+      object = list[i];
+      if (object.mask) {
+        this.currentProgram.renderMask(gl, object, object.wm);
       }
+    }
+    if (typeof (base = this.currentProgram).flushBuffers === "function") {
+      base.flushBuffers(gl);
+    }
+  };
+
+  WebGLRenderer.prototype.renderBoundingBoxes = function(list) {
+    var base, gl, i, len, object;
+    gl = this.gl;
+    this.setProgram(this.programs.color);
+    for (i = 0, len = list.length; i < len; i++) {
+      object = list[i];
+      if (object.mask) {
+        this.currentProgram.renderBoundingBox(gl, object, object.wm);
+      }
+    }
+    if (typeof (base = this.currentProgram).flushBuffers === "function") {
+      base.flushBuffers(gl);
     }
   };
 
@@ -6005,6 +6029,8 @@ View = {
 var Helpers, WebGLColorShaderProgram;
 
 module.exports = WebGLColorShaderProgram = (function() {
+  WebGLColorShaderProgram.prototype.currentAlpha = null;
+
   function WebGLColorShaderProgram(gl) {
     this.program = gl.createProgram();
     this.initShaders(gl);
@@ -6057,9 +6083,18 @@ module.exports = WebGLColorShaderProgram = (function() {
     gl.vertexAttribPointer(this.locations.a_position, 2, gl.FLOAT, false, 0, 0);
   };
 
+  WebGLColorShaderProgram.prototype.setAlpha = function(gl, alpha) {
+    if (this.currentAlpha !== alpha) {
+      this.currentAlpha = alpha;
+      gl.uniform1f(this.locations.u_alpha, alpha);
+      return console.log(alpha);
+    }
+  };
+
   WebGLColorShaderProgram.prototype.renderLine = function(gl, object, wm) {
     var a, b, c, color, coords, l;
     l = this.locations;
+    this.setAlpha(gl, object.opacity);
     if (object.strokeStyle === "transparent") {
       return;
     } else if (object.strokeStyle.length === 4) {
@@ -6081,6 +6116,7 @@ module.exports = WebGLColorShaderProgram = (function() {
   WebGLColorShaderProgram.prototype.renderRectangle = function(gl, object, wm) {
     var l;
     l = this.locations;
+    this.setAlpha(gl, object.opacity);
     gl.uniformMatrix3fv(l.u_matrix, false, wm);
     if (object.fillStyle !== "transparent") {
       gl.uniform1i(l.u_color, Helpers.WebGL.colorFromCSSString(object.fillStyle));
@@ -6097,6 +6133,7 @@ module.exports = WebGLColorShaderProgram = (function() {
   WebGLColorShaderProgram.prototype.renderCircle = function(gl, object, wm) {
     var l, segmentsCount;
     l = this.locations;
+    this.setAlpha(gl, object.opacity);
     gl.uniformMatrix3fv(l.u_matrix, false, wm);
     if (object.radius < 10) {
       segmentsCount = 12;
@@ -6122,6 +6159,7 @@ module.exports = WebGLColorShaderProgram = (function() {
   WebGLColorShaderProgram.prototype.renderBoundingBox = function(gl, object, wm) {
     var box, height, l, mask, width, x, y;
     l = this.locations;
+    this.setAlpha(gl, 1);
     mask = engine.loader.getMask(object.source, object.getTheme());
     box = mask.boundingBox;
     x = box.points[0].x;

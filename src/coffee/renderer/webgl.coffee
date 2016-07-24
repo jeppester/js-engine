@@ -1,12 +1,10 @@
 module.exports = class WebGLRenderer
-  currentAlpha: null
   currentResolution:
     width: 0
     height: 0
 
   constructor: (@canvas) ->
     # Cache variables
-    @currentAlpha = undefined
     @currentResolution.width = 0
     @currentResolution.height = 0
 
@@ -51,9 +49,6 @@ module.exports = class WebGLRenderer
 
       # Set current resolution var
       gl.uniform2f l.u_resolution, @currentResolution.width, @currentResolution.height
-
-      # Set current alpha
-      gl.uniform1f l.u_alpha, @currentAlpha
     return
 
   render: (cameras) ->
@@ -84,14 +79,18 @@ module.exports = class WebGLRenderer
     return
 
   renderRoom: (room, wm)->
-    list = room.renderList ?= []
     unless room.parent
       room.parent = new View.Child()
       room.parent.wm = new Float32Array [1, 0, 0, 0, 1, 0, 0, 0, 1]
       room.parent.changed = false
 
+    list = room.renderList ?= []
     @updateRenderList list, room, new Uint16Array [0]
     @processRenderList list
+
+    @renderMasks list if engine.drawMasks
+    @renderBoundingBoxes list if engine.drawBoundingBoxes
+
     return
 
   updateRenderList: (list, object, counter)->
@@ -120,11 +119,6 @@ module.exports = class WebGLRenderer
       offset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
       Helpers.MatrixCalculation.reverseMultiply object.wm, offset
 
-      # Set object alpha (because alpha is used by ALL rendered objects)
-      if @currentAlpha != object.opacity
-        @currentAlpha = object.opacity
-        gl.uniform1f @currentProgram.locations.u_alpha, object.opacity if @currentProgram
-
       switch object.renderType
         when "sprite"
           program = @programs.texture
@@ -147,7 +141,28 @@ module.exports = class WebGLRenderer
           @setProgram program
           program.renderCircle gl, object, object.wm
 
-    @currentProgram?.flushBuffers? gl
+    @currentProgram.flushBuffers? gl
+    return
+
+  # Requires each object's wm to have been updated by processRenderList
+  renderMasks: (list)->
+    gl = @gl
+    @setProgram @programs.texture
+    for object in list
+      @currentProgram.renderMask gl, object, object.wm if object.mask
+
+    @currentProgram.flushBuffers? gl
+    return
+
+  # Requires each object's wm to have been updated by processRenderList
+  renderBoundingBoxes: (list)->
+    gl = @gl
+    @setProgram @programs.color
+    for object in list
+      if object.mask
+        @currentProgram.renderBoundingBox gl, object, object.wm
+
+    @currentProgram.flushBuffers? gl
     return
 
 TextureShaderProgram = require './webgl/texture-shader-program'

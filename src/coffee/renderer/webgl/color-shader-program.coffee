@@ -1,4 +1,6 @@
 module.exports = class WebGLColorShaderProgram
+  currentAlpha: null
+
   constructor: (gl) ->
     @program = gl.createProgram()
     @initShaders gl
@@ -80,9 +82,16 @@ module.exports = class WebGLColorShaderProgram
     gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
     return
 
+  setAlpha: (gl, alpha) ->
+    unless @currentAlpha == alpha
+      @currentAlpha = alpha
+      gl.uniform1f @locations.u_alpha, alpha
+      console.log alpha
+
   # Draw functions
   renderLine: (gl, object, wm) ->
     l = @locations
+    @setAlpha gl, object.opacity
 
     # If the line is transparent, do nothing
     if object.strokeStyle is "transparent"
@@ -112,6 +121,7 @@ module.exports = class WebGLColorShaderProgram
 
   renderRectangle: (gl, object, wm) ->
     l = @locations
+    @setAlpha gl, object.opacity
 
     # Set matrix (it is the same for both fill and stroke)
     gl.uniformMatrix3fv l.u_matrix, false, wm
@@ -141,6 +151,7 @@ module.exports = class WebGLColorShaderProgram
 
   renderCircle: (gl, object, wm) ->
     l = @locations
+    @setAlpha gl, object.opacity
 
     # Set matrix (it is the same for both fill and stroke)
     gl.uniformMatrix3fv l.u_matrix, false, wm
@@ -182,6 +193,8 @@ module.exports = class WebGLColorShaderProgram
 
   renderBoundingBox: (gl, object, wm)->
     l = @locations
+    @setAlpha gl, 1
+
     mask = engine.loader.getMask object.source, object.getTheme()
     box = mask.boundingBox
     x = box.points[0].x
