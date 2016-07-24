@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 Helpers =
   Mixin: require '../helpers/mixin'
 
@@ -44,7 +42,7 @@ composite: 'source-over',
 offset: new Math.Vector('center', 'center')
 }</code>
 ###
-c = class Sprite extends Views.Child
+module.exports = class Sprite extends Views.Child
   # Mix in animatable
   Helpers.Mixin.mixin @, Mixins.Animatable
   Helpers.Mixin.mixin @, Mixins.Texture
@@ -162,8 +160,5 @@ c = class Sprite extends Views.Child
         @imageNumber = (if @animationLoops then 0 else @imageLength - 1)
       else @imageNumber = (if @animationLoops then @imageLength - 1 else 0) if @imageNumber is -1
     return
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Globals = require '../engine/globals'

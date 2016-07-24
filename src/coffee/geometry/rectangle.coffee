@@ -1,14 +1,9 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 # Mixins and parent class at top
 Helpers =
   Mixin: require '../helpers/mixin'
 
 Mixins =
   Animatable: require '../mixins/animatable'
-
-Geometry =
-  Vector: require './vector'
 
 ###
 The constructor for the Rectangle class. Uses the set-function to set the properties of the rectangle.
@@ -27,7 +22,7 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} width The width of the rectangle
 @param {number} height The height of the rectangle
 ###
-c = class Rectangle extends Geometry.Vector
+module.exports = class Rectangle
   # Mix in animatable
   Helpers.Mixin.mixin @, Mixins.Animatable
 
@@ -209,11 +204,13 @@ c = class Rectangle extends Geometry.Vector
   @return {boolean} True if the Rectangle contains the checked object, false if not
   ###
   contains: (object) ->
-
     # If checked object is a vector, line or rectangle, do fast calculation otherwise convert to polygon and do calculation
-    return @contains(new Geometry.Vector(object.x, object.y)) and @contains(new Geometry.Vector(object.x + object.width, object.y + object.height)) if object instanceof @constructor
-    return @contains(object.a) and @contains(object.b) if object instanceof Geometry.Line
-    return (object.x > @x and object.x < @x + @width and object.y > @y and object.y < @y + @height) if object instanceof Geometry.Vector
+    if object instanceof @constructor
+      return @contains(new Geometry.Vector(object.x, object.y)) and @contains(new Geometry.Vector(object.x + object.width, object.y + object.height))
+    else if object instanceof Geometry.Line
+      return @contains(object.a) and @contains(object.b)
+    else if object instanceof Geometry.Vector
+      return (object.x > @x and object.x < @x + @width and object.y > @y and object.y < @y + @height)
     @getPolygon().contains object
 
   ###
@@ -225,10 +222,9 @@ c = class Rectangle extends Geometry.Vector
   intersects: (object) ->
     @getPolygon().intersects object
 
-module.exports:: = Object.create c::
-module.exports::constructor = c
-
 # Classes used in class functions at bottom
-Geometry.Circle = require './circle'
-Geometry.Line = require './line'
-Geometry.Polygon = require './polygon'
+Geometry =
+  Circle: require './circle'
+  Line: require './line'
+  Polygon: require './polygon'
+  Vector: require './vector'

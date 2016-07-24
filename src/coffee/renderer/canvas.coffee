@@ -1,6 +1,4 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
-c = class CanvasRenderer
+module.exports = class CanvasRenderer
   constructor: (@canvas) ->
     @context = @canvas.getContext("2d")
     return
@@ -189,9 +187,6 @@ c = class CanvasRenderer
     c.globalAlpha = 1
     c.closePath()
     c.stroke()
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Helpers =
   MatrixCalculation: require '../helpers/matrix-calculation'

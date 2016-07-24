@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 # Mixins and parent class at top
 Helpers =
   Mixin: require '../helpers/mixin'
@@ -19,7 +17,7 @@ Constructor for the Vector class. Uses set-function to set the vector from x- an
 @param {number} [x=0] The x-value to set for the vector
 @param {number} [y=0] The y-value to set for the vector
 ###
-c = class Vector
+module.exports = class Vector
   Helpers.Mixin.mixin @, Mixins.Animatable
 
   constructor: (x, y) ->
@@ -224,9 +222,6 @@ c = class Vector
     return object.getDistance(this) if object instanceof Geometry.Rectangle
     return object.getDistance(this) if object instanceof Geometry.Polygon
     throw new Error("Argument object should be of type: Vector, Line, Circle, Rectangle or Polygon") #dev
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 # Classes used in class functions at bottom
 Geometry =

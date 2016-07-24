@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 Helpers =
   Mixin: require '../helpers/mixin'
 
@@ -33,24 +31,17 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {string} [strokeStyle = "#000"] The rectangle's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The rectangle's width if added to a view (in px)
 ###
-c = class Rectangle extends Geometry.Rectangle
+module.exports = class Rectangle extends Geometry.Rectangle
   # Mix in Child
   Helpers.Mixin.mixin @, Views.Child
 
-  constructor: (x, y, width = 0, height = 0, fillStyle = "#000", strokeStyle = "#000", lineWidth = 0) ->
+  constructor: (x, y, @width = 0, @height = 0, @fillStyle = "#000", @strokeStyle = "#000", lineWidth = 0) ->
     # "Fake" extend child (to get view.child properties)
     Views.Child::constructor.call this
+    @x = x
+    @y = y
     @renderType = "rectangle"
-    if engine.enableRedrawRegions
-      @RectangleInitWithRedrawRegions x, y, width, height, fillStyle, strokeStyle, lineWidth
-    else
-      @RectangleInitWithoutRedrawRegions x, y, width, height, fillStyle, strokeStyle, lineWidth
-    return
 
-  ###
-  @lends View.Rectangle.prototype
-  ###
-  RectangleInitWithoutRedrawRegions: (@x, @y, @width, @height, @fillStyle, @strokeStyle, lineWidth)->
     hidden =
       lineWidth: lineWidth
     Object.defineProperty @, "lineWidth",
@@ -63,71 +54,6 @@ c = class Rectangle extends Geometry.Rectangle
           @offset = @offsetGlobal if @offsetGlobal
         return
     return
-
-  RectangleInitWithRedrawRegions: (x, y, width, height, fillStyle, strokeStyle, lineWidth) ->
-    hidden =
-      width: width
-      height: height
-      fillStyle: fillStyle
-      strokeStyle: strokeStyle
-      lineWidth: lineWidth
-
-    # Put getters and setters on points values
-    Object.defineProperty this, "width",
-      get: ->
-        hidden.width
-
-      set: (value) ->
-        if hidden.width isnt value
-          hidden.width = value
-          @onAfterChange()
-        return
-
-
-    # Put getters and setters on points values
-    Object.defineProperty this, "height",
-      get: ->
-        hidden.height
-
-      set: (value) ->
-        if hidden.height isnt value
-          hidden.height = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "fillStyle",
-      get: ->
-        hidden.fillStyle
-
-      set: (value) ->
-        if hidden.fillStyle isnt value
-          hidden.fillStyle = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "strokeStyle",
-      get: ->
-        hidden.strokeStyle
-
-      set: (value) ->
-        if hidden.strokeStyle isnt value
-          hidden.strokeStyle = value
-          @onAfterChange()
-        return
-
-    Object.defineProperty this, "lineWidth",
-      get: ->
-        hidden.lineWidth
-
-      set: (value) ->
-        if hidden.lineWidth isnt value
-          hidden.lineWidth = value
-          @onAfterChange()
-        return
-
-    @set x, y, width, height
-    return
-
 
   ###
   Parses an offset global into an actual Math.Vector offset that fits the instance
@@ -176,25 +102,3 @@ c = class Rectangle extends Geometry.Rectangle
       OFFSET_BOTTOM_RIGHT
     ].indexOf(offset) isnt -1
     ret
-
-
-  ###
-  Calculates the region which the object will fill out when redrawn.
-
-  @private
-  @return {Rectangle} The bounding rectangle of the redraw
-  ###
-  getRedrawRegion: ->
-    # Get bounding rectangle
-    rect = @copy()
-
-    # line width
-    ln = Math.ceil(@lineWidth / 2)
-    rect.x -= ln
-    rect.y -= ln
-    rect.width += ln * 2
-    rect.height += ln * 2
-    rect.add @parent.getRoomPosition()
-
-module.exports:: = Object.create c::
-module.exports::constructor = c

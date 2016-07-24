@@ -1,10 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Engine, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
 
 /*
 The constructor for the Engine class.
@@ -65,11 +59,11 @@ The default options are:
 "resetCursorOnEachFrame": true // Whether or not the mouse cursor should be reset on each frame
 "soundsMuted": false, // If all sound effects should be initially muted
 "themesPath": "assets", // The path to the themes-directory
-"enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
  */
+var Engine;
 
-c = window.Engine = Engine = (function() {
+module.exports = window.Engine = Engine = (function() {
   Engine.Helpers = {
     MatrixCalculation: require('./helpers/matrix-calculation'),
     Mixin: require('./helpers/mixin'),
@@ -208,11 +202,10 @@ c = window.Engine = Engine = (function() {
     this.cameras = [];
     this.defaultCollisionResolution = 1;
     this.redrawObjects = [];
-    this.enableRedrawRegions = false;
     this.disableWebGL = false;
     this.soundsMuted = false;
     this.musicMuted = false;
-    copyOpt = ["arena", "autoResize", "autoResizeLimitToResolution", "avoidSubPixelRendering", "backgroundColor", "cachedSoundCopies", "canvasResX", "canvasResY", "defaultCollisionResolution", "disableWebGL", "disableRightClick", "disableTouchScroll", "drawBoundingBoxes", "drawMasks", "enableRedrawRegions", "enginePath", "focusOnLoad", "gameClass", "loadText", "musicMuted", "pauseOnBlur", "preventDefaultKeyboard", "resetCursorOnEachFrame", "soundsMuted", "themesPath"];
+    copyOpt = ["arena", "autoResize", "autoResizeLimitToResolution", "avoidSubPixelRendering", "backgroundColor", "cachedSoundCopies", "canvasResX", "canvasResY", "defaultCollisionResolution", "disableWebGL", "disableRightClick", "disableTouchScroll", "drawBoundingBoxes", "drawMasks", "enginePath", "focusOnLoad", "gameClass", "loadText", "musicMuted", "pauseOnBlur", "preventDefaultKeyboard", "resetCursorOnEachFrame", "soundsMuted", "themesPath"];
     i = 0;
     while (i < copyOpt.length) {
       opt = copyOpt[i];
@@ -252,7 +245,7 @@ c = window.Engine = Engine = (function() {
     Global Loader instance which is created upon engine initialization
     @global
      */
-    this.loader = new module.exports.prototype.constructor.Loader();
+    this.loader = new this.constructor.Loader();
     this.defaultTheme = this.options.themes[0];
     this.loader.onthemesloaded = function() {
       engine.initialize();
@@ -283,14 +276,14 @@ c = window.Engine = Engine = (function() {
     this.currentRoom = new this.constructor.Room("main");
     this.defaultAnimationLoop = this.currentRoom.loops.eachFrame;
     this.defaultActivityLoop = this.currentRoom.loops.eachFrame;
-    this.cameras.push(new this.constructor.Camera(new module.exports.prototype.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY), new module.exports.prototype.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY)));
+    this.cameras.push(new this.constructor.Camera(new this.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY), new this.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY)));
     if (this.disableRightClick) {
       this.arena.oncontextmenu = function() {
         return false;
       };
     }
-    this.keyboard = new module.exports.prototype.constructor.Input.Keyboard();
-    this.pointer = new module.exports.prototype.constructor.Input.Pointer();
+    this.keyboard = new this.constructor.Input.Keyboard();
+    this.pointer = new this.constructor.Input.Pointer();
     if (this.pauseOnBlur) {
       window.addEventListener("blur", function() {
         engine.stopMainLoop();
@@ -326,10 +319,10 @@ c = window.Engine = Engine = (function() {
   Engine.prototype.initRenderer = function() {
     if (!this.disableWebGL && (this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl"))) {
       console.log('Using WebGL renderer');
-      this.renderer = new module.exports.prototype.constructor.Renderers.WebGLRenderer(this.canvas);
+      this.renderer = new this.constructor.Renderers.WebGLRenderer(this.canvas);
     } else {
       console.log('Using canvas renderer');
-      this.renderer = new module.exports.prototype.constructor.Renderers.CanvasRenderer(this.canvas);
+      this.renderer = new this.constructor.Renderers.CanvasRenderer(this.canvas);
     }
   };
 
@@ -415,22 +408,22 @@ c = window.Engine = Engine = (function() {
       return new this.constructor.Vector(this.convertSpeed(speed.x, from, to), this.convertSpeed(speed.y, from, to));
     }
     if (from == null) {
-      from = module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND;
+      from = this.constructor.Globals.SPEED_PIXELS_PER_SECOND;
     }
     if (to == null) {
-      to = module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_FRAME;
+      to = this.constructor.Globals.SPEED_PIXELS_PER_FRAME;
     }
     switch (from) {
-      case module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND:
+      case this.constructor.Globals.SPEED_PIXELS_PER_SECOND:
         speed = speed * this.gameTimeIncrease / 1000;
         break;
-      case module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_FRAME:
+      case this.constructor.Globals.SPEED_PIXELS_PER_FRAME:
         speed;
     }
     switch (to) {
-      case module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_SECOND:
+      case this.constructor.Globals.SPEED_PIXELS_PER_SECOND:
         return speed = speed / this.gameTimeIncrease * 1000;
-      case module.exports.prototype.constructor.Globals.SPEED_PIXELS_PER_FRAME:
+      case this.constructor.Globals.SPEED_PIXELS_PER_FRAME:
         return speed;
     }
   };
@@ -813,19 +806,9 @@ c = window.Engine = Engine = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 
 
 },{"./engine/camera":2,"./engine/custom-loop":3,"./engine/globals":4,"./engine/loader":5,"./engine/object-creator":6,"./engine/room":7,"./geometry/circle":8,"./geometry/line":9,"./geometry/polygon":10,"./geometry/rectangle":11,"./geometry/vector":12,"./helpers/matrix-calculation":14,"./helpers/mixin":15,"./helpers/room-transition":16,"./helpers/webgl":17,"./input/keyboard":18,"./input/pointer":19,"./mixins/animatable":20,"./renderer/canvas":22,"./renderer/webgl":23,"./sounds/effect":26,"./sounds/music":27,"./views/child":28,"./views/circle":29,"./views/collidable":30,"./views/container":31,"./views/game-object":32,"./views/line":33,"./views/polygon":34,"./views/rectangle":35,"./views/sprite":36,"./views/text-block":37}],2:[function(require,module,exports){
-var Camera, Geometry, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
 
 /*
 Constructor for Camera class
@@ -843,8 +826,9 @@ The projection region decides where the captured region will be drawn on the mai
 @param {Math.Rectangle} projectionRegion A rectangle which defines the region on the main canvas where the captured region should be drawn
 @param {Room} room The room to capture from
  */
+var Camera, Geometry;
 
-c = Camera = (function() {
+module.exports = Camera = (function() {
   function Camera(captureRegion, projectionRegion, room) {
     if (!captureRegion instanceof Geometry.Rectangle) {
       throw new Error("Argument captureRegion should be of type: Rectangle");
@@ -862,10 +846,6 @@ c = Camera = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Geometry = {
   Rectangle: require('../geometry/rectangle')
 };
@@ -873,12 +853,6 @@ Geometry = {
 
 
 },{"../geometry/rectangle":11}],3:[function(require,module,exports){
-var CustomLoop, Helpers, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
 
 /*
 @name CustomLoop
@@ -895,8 +869,9 @@ A loop also has it's own time that is stopped whenever the loop is not executed.
 @param {number} [framesPerExecution=1] The number of frames between each execution of the custom loop
 @param {function} [maskFunction=function(){}] A function that will be run before each execution, if the function returns true the execution proceeds as planned, if not, the execution will not be run
  */
+var CustomLoop, Helpers;
 
-c = CustomLoop = (function() {
+module.exports = CustomLoop = (function() {
   function CustomLoop(framesPerExecution, maskFunction) {
     this.framesPerExecution = (framesPerExecution != null) || 1;
     this.maskFunction = (maskFunction != null) || function() {
@@ -1293,10 +1268,6 @@ c = CustomLoop = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Helpers = {
   Easing: require('../helpers/easing')
 };
@@ -1392,12 +1363,6 @@ module.exports = {
 
 
 },{}],5:[function(require,module,exports){
-var Geometry, Loader, Sounds, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
 
 /*
 Constructor for the Loader class.
@@ -1409,8 +1374,9 @@ Therefore, remember to call hideOverlay, when your game is ready to be shown.
 On engine startup a Loader object is instantiated to the global variable "loader".
 This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
  */
+var Geometry, Loader, Sounds;
 
-c = Loader = (function() {
+module.exports = Loader = (function() {
   function Loader() {
     var name, ref, value;
     this.images = {};
@@ -2038,10 +2004,6 @@ c = Loader = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Sounds = {
   Music: require('../sounds/music'),
   Effect: require('../sounds/effect')
@@ -2054,14 +2016,10 @@ Geometry = {
 
 
 },{"../geometry/rectangle":11,"../sounds/effect":26,"../sounds/music":27}],6:[function(require,module,exports){
-var ObjectCreator, Views, c,
+var ObjectCreator, Views,
   slice = [].slice;
 
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
-c = ObjectCreator = (function() {
+module.exports = ObjectCreator = (function() {
   function ObjectCreator(container) {
     this.container = container;
   }
@@ -2136,10 +2094,6 @@ c = ObjectCreator = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Views = {
   Circle: require('../views/circle'),
   Collidable: require('../views/collidable'),
@@ -2155,13 +2109,9 @@ Views = {
 
 
 },{"../views/circle":29,"../views/collidable":30,"../views/container":31,"../views/game-object":32,"../views/line":33,"../views/polygon":34,"../views/rectangle":35,"../views/sprite":36,"../views/text-block":37}],7:[function(require,module,exports){
-var CustomLoop, Room, Views, c,
+var CustomLoop, Room, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
 
 Views = {
   Container: require('../views/container')
@@ -2188,7 +2138,7 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 @param {function} [onLeft=function () {}] A function to run when the room is left
  */
 
-c = Room = (function(superClass) {
+module.exports = Room = (function(superClass) {
   extend(Room, superClass);
 
   function Room(name, onEntered, onLeft) {
@@ -2290,20 +2240,12 @@ c = Room = (function(superClass) {
 
 })(Views.Container);
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 CustomLoop = require('./custom-loop');
 
 
 
 },{"../views/container":31,"./custom-loop":3}],8:[function(require,module,exports){
-var Circle, Geometry, Helpers, Mixins, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
+var Circle, Geometry, Helpers, Mixins;
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -2330,7 +2272,7 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {number} radius The radius for the circle
  */
 
-c = Circle = (function() {
+module.exports = Circle = (function() {
   Helpers.Mixin.mixin(Circle, Mixins.Animatable);
 
   function Circle(x, y, radius) {
@@ -2534,10 +2476,6 @@ c = Circle = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Geometry = {
   Line: require('./line'),
   Rectangle: require('./rectangle'),
@@ -2548,12 +2486,6 @@ Geometry = {
 
 
 },{"../helpers/mixin":15,"../mixins/animatable":20,"./line":9,"./polygon":10,"./rectangle":11,"./vector":12}],9:[function(require,module,exports){
-var Geometry, Line, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
 
 /*
 Constructor for the Line class. Uses setFromVectors to create the line's start and end points
@@ -2568,8 +2500,9 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {Geometry.Vector} startVector A Vector representing the start point of the line
 @param {Geometry.Vector} endVector A Vector representing the end point of the line
  */
+var Geometry, Line;
 
-c = Line = (function() {
+module.exports = Line = (function() {
   function Line(startVector, endVector) {
     startVector = (startVector !== void 0 ? startVector : new Geometry.Vector());
     endVector = (endVector !== void 0 ? endVector : new Geometry.Vector());
@@ -2821,7 +2754,7 @@ c = Line = (function() {
    */
 
   Line.prototype.createPolygonFromWidth = function(width, lineCap) {
-    var a, angle, b, d, i, ort, points, r, segmentRad, startAngle, v;
+    var a, angle, b, c, d, i, ort, points, r, segmentRad, startAngle, v;
     lineCap = lineCap || "butt";
     v = this.a.copy().subtract(this.b);
     v.set(v.y, -v.x);
@@ -2875,10 +2808,6 @@ c = Line = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Geometry = {
   Circle: require('./circle'),
   Rectangle: require('./rectangle'),
@@ -2889,13 +2818,9 @@ Geometry = {
 
 
 },{"./circle":8,"./polygon":10,"./rectangle":11,"./vector":12}],10:[function(require,module,exports){
-var Geometry, Polygon, c;
+var Geometry, Polygon;
 
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
-c = Polygon = (function() {
+module.exports = Polygon = (function() {
 
   /*
   The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
@@ -3300,10 +3225,6 @@ c = Polygon = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Geometry = {
   Circle: require('./circle'),
   Line: require('./line'),
@@ -3314,13 +3235,7 @@ Geometry = {
 
 
 },{"./circle":8,"./line":9,"./rectangle":11,"./vector":12}],11:[function(require,module,exports){
-var Geometry, Helpers, Mixins, Rectangle, c,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
+var Geometry, Helpers, Mixins, Rectangle;
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -3328,10 +3243,6 @@ Helpers = {
 
 Mixins = {
   Animatable: require('../mixins/animatable')
-};
-
-Geometry = {
-  Vector: require('./vector')
 };
 
 
@@ -3353,9 +3264,7 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} height The height of the rectangle
  */
 
-c = Rectangle = (function(superClass) {
-  extend(Rectangle, superClass);
-
+module.exports = Rectangle = (function() {
   Helpers.Mixin.mixin(Rectangle, Mixins.Animatable);
 
   function Rectangle(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
@@ -3591,11 +3500,9 @@ c = Rectangle = (function(superClass) {
   Rectangle.prototype.contains = function(object) {
     if (object instanceof this.constructor) {
       return this.contains(new Geometry.Vector(object.x, object.y)) && this.contains(new Geometry.Vector(object.x + object.width, object.y + object.height));
-    }
-    if (object instanceof Geometry.Line) {
+    } else if (object instanceof Geometry.Line) {
       return this.contains(object.a) && this.contains(object.b);
-    }
-    if (object instanceof Geometry.Vector) {
+    } else if (object instanceof Geometry.Vector) {
       return object.x > this.x && object.x < this.x + this.width && object.y > this.y && object.y < this.y + this.height;
     }
     return this.getPolygon().contains(object);
@@ -3615,26 +3522,19 @@ c = Rectangle = (function(superClass) {
 
   return Rectangle;
 
-})(Geometry.Vector);
+})();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
-Geometry.Circle = require('./circle');
-
-Geometry.Line = require('./line');
-
-Geometry.Polygon = require('./polygon');
+Geometry = {
+  Circle: require('./circle'),
+  Line: require('./line'),
+  Polygon: require('./polygon'),
+  Vector: require('./vector')
+};
 
 
 
 },{"../helpers/mixin":15,"../mixins/animatable":20,"./circle":8,"./line":9,"./polygon":10,"./vector":12}],12:[function(require,module,exports){
-var Geometry, Helpers, Mixins, Vector, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
+var Geometry, Helpers, Mixins, Vector;
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -3658,7 +3558,7 @@ Constructor for the Vector class. Uses set-function to set the vector from x- an
 @param {number} [y=0] The y-value to set for the vector
  */
 
-c = Vector = (function() {
+module.exports = Vector = (function() {
   Helpers.Mixin.mixin(Vector, Mixins.Animatable);
 
   function Vector(x, y) {
@@ -3947,10 +3847,6 @@ c = Vector = (function() {
   return Vector;
 
 })();
-
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
 
 Geometry = {
   Circle: require('./circle'),
@@ -4584,12 +4480,6 @@ module.exports = WebGLHelper = {
 
 
 },{}],18:[function(require,module,exports){
-var Keyboard, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
 
 /*
 Constructor for the Keyboard class
@@ -4597,8 +4487,9 @@ Constructor for the Keyboard class
 @name Input.Keyboard
 @class A class that eases checking of the current state of all keys.
  */
+var Keyboard;
 
-c = Keyboard = (function() {
+module.exports = Keyboard = (function() {
   function Keyboard() {
     var key;
     document.addEventListener("keydown", (function(_this) {
@@ -4726,19 +4617,9 @@ c = Keyboard = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 
 
 },{}],19:[function(require,module,exports){
-var Geometry, Globals, Pointer, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
 
 /*
 Constructor for the Pointer class
@@ -4746,8 +4627,9 @@ Constructor for the Pointer class
 @name Input.Pointer
 @class A class that eases the use of mouse and touch, by providing functions for checking the current state of both.
  */
+var Geometry, Globals, Pointer;
 
-c = Pointer = (function() {
+module.exports = Pointer = (function() {
   function Pointer() {
     var button;
     if (engine.host.hasTouch) {
@@ -5250,10 +5132,10 @@ c = Pointer = (function() {
     while (len--) {
       camera = engine.cameras[len];
       if (camera.projectionRegion.contains(vector) || len === 0) {
-        ret.subtract(camera.projectionRegion);
+        ret.move(-camera.projectionRegion.x, -camera.projectionRegion.y);
         ret.x *= camera.captureRegion.width / camera.projectionRegion.width;
         ret.y *= camera.captureRegion.height / camera.projectionRegion.height;
-        ret.add(camera.captureRegion);
+        ret.move(camera.captureRegion.x, camera.captureRegion.y);
         return ret;
       }
     }
@@ -5393,10 +5275,6 @@ c = Pointer = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Geometry = {
   Vector: require('../geometry/vector')
 };
@@ -5406,13 +5284,9 @@ Globals = require('../engine/globals');
 
 
 },{"../engine/globals":4,"../geometry/vector":12}],20:[function(require,module,exports){
-var Animatable, Globals, c;
+var Animatable, Globals;
 
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
-c = Animatable = (function() {
+module.exports = Animatable = (function() {
   function Animatable() {}
 
 
@@ -5443,7 +5317,7 @@ c = Animatable = (function() {
    */
 
   Animatable.prototype.animate = function(properties, options) {
-    var anim, i, loop_, map, opt;
+    var anim, c, i, loop_, map, opt;
     if (properties === void 0) {
       throw new Error("Missing argument: properties");
     }
@@ -5613,22 +5487,14 @@ c = Animatable = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Globals = require('../engine/globals');
 
 
 
 },{"../engine/globals":4}],21:[function(require,module,exports){
-var Geometry, Globals, Texture, c;
+var Geometry, Globals, Texture;
 
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
-c = Texture = (function() {
+module.exports = Texture = (function() {
   function Texture() {}
 
 
@@ -5698,10 +5564,6 @@ c = Texture = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Geometry = {
   Vector: require('../geometry/vector'),
   Rectangle: require('../geometry/rectangle')
@@ -5712,13 +5574,9 @@ Globals = require('../engine/globals');
 
 
 },{"../engine/globals":4,"../geometry/rectangle":11,"../geometry/vector":12}],22:[function(require,module,exports){
-var CanvasRenderer, Helpers, c;
+var CanvasRenderer, Helpers;
 
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
-c = CanvasRenderer = (function() {
+module.exports = CanvasRenderer = (function() {
   function CanvasRenderer(canvas) {
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
@@ -5726,7 +5584,7 @@ c = CanvasRenderer = (function() {
   }
 
   CanvasRenderer.prototype.render = function(cameras) {
-    var camera, camerasLength, h, i, ii, rooms, roomsLength, sx, sy, w;
+    var c, camera, camerasLength, h, i, ii, rooms, roomsLength, sx, sy, w;
     camerasLength = cameras.length;
     c = this.context;
     c.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -5824,6 +5682,7 @@ c = CanvasRenderer = (function() {
   };
 
   CanvasRenderer.prototype.renderCircle = function(object) {
+    var c;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.fillStyle = object.fillStyle;
@@ -5838,7 +5697,7 @@ c = CanvasRenderer = (function() {
   };
 
   CanvasRenderer.prototype.renderPolygon = function(object) {
-    var i, len;
+    var c, i, len;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.fillStyle = object.fillStyle;
@@ -5870,6 +5729,7 @@ c = CanvasRenderer = (function() {
   };
 
   CanvasRenderer.prototype.renderLine = function(object) {
+    var c;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.globalAlpha = object.opacity;
@@ -5882,6 +5742,7 @@ c = CanvasRenderer = (function() {
   };
 
   CanvasRenderer.prototype.renderRectangle = function(object) {
+    var c;
     c = this.context;
     c.strokeStyle = object.strokeStyle;
     c.fillStyle = object.fillStyle;
@@ -5918,7 +5779,7 @@ c = CanvasRenderer = (function() {
   };
 
   CanvasRenderer.prototype.renderBoundingBox = function(object) {
-    var box, j, len1, mask, point, ref;
+    var box, c, j, len1, mask, point, ref;
     mask = engine.loader.getMask(object.source, object.getTheme());
     box = mask.boundingBox;
     c = this.context;
@@ -5940,10 +5801,6 @@ c = CanvasRenderer = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Helpers = {
   MatrixCalculation: require('../helpers/matrix-calculation')
 };
@@ -5951,13 +5808,9 @@ Helpers = {
 
 
 },{"../helpers/matrix-calculation":14}],23:[function(require,module,exports){
-var ColorShaderProgram, Helpers, TextureShaderProgram, View, WebGLRenderer, c;
+var ColorShaderProgram, Helpers, TextureShaderProgram, View, WebGLRenderer;
 
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
-c = WebGLRenderer = (function() {
+module.exports = WebGLRenderer = (function() {
   WebGLRenderer.prototype.currentAlpha = null;
 
   WebGLRenderer.prototype.currentResolution = {
@@ -6134,10 +5987,6 @@ c = WebGLRenderer = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 TextureShaderProgram = require('./webgl/texture-shader-program');
 
 ColorShaderProgram = require('./webgl/color-shader-program');
@@ -6153,13 +6002,9 @@ View = {
 
 
 },{"../helpers/matrix-calculation":14,"../views/child":28,"./webgl/color-shader-program":24,"./webgl/texture-shader-program":25}],24:[function(require,module,exports){
-var Geometry, Helpers, WebGLColorShaderProgram, c;
+var Helpers, WebGLColorShaderProgram;
 
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
-c = WebGLColorShaderProgram = (function() {
+module.exports = WebGLColorShaderProgram = (function() {
   function WebGLColorShaderProgram(gl) {
     this.program = gl.createProgram();
     this.initShaders(gl);
@@ -6213,7 +6058,7 @@ c = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderLine = function(gl, object, wm) {
-    var a, b, color, coords, l;
+    var a, b, c, color, coords, l;
     l = this.locations;
     if (object.strokeStyle === "transparent") {
       return;
@@ -6293,30 +6138,18 @@ c = WebGLColorShaderProgram = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Helpers = {
   WebGL: require('../../helpers/webgl')
 };
 
-Geometry = {
-  Line: require('../../geometry/line')
-};
 
 
-
-},{"../../geometry/line":9,"../../helpers/webgl":17}],25:[function(require,module,exports){
-var Helpers, WebGLTextureShaderProgram, c, coordsBufferLength;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
+},{"../../helpers/webgl":17}],25:[function(require,module,exports){
+var WebGLTextureShaderProgram, coordsBufferLength;
 
 coordsBufferLength = 5 * 6 * 20000;
 
-c = WebGLTextureShaderProgram = (function() {
+module.exports = WebGLTextureShaderProgram = (function() {
   WebGLTextureShaderProgram.prototype.textureCache = {};
 
   WebGLTextureShaderProgram.prototype.maskCache = {};
@@ -6549,24 +6382,9 @@ c = WebGLTextureShaderProgram = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
-Helpers = {
-  WebGL: require('../../helpers/webgl'),
-  MatrixCalculation: require('../../helpers/matrix-calculation')
-};
 
 
-
-},{"../../helpers/matrix-calculation":14,"../../helpers/webgl":17}],26:[function(require,module,exports){
-var Effect, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
+},{}],26:[function(require,module,exports){
 
 /*
 Constructor for the sound class
@@ -6578,8 +6396,9 @@ Constructor for the sound class
 
 @param {HTMLAudioElement} audioElement The Audio element to use as source for the sound object
  */
+var Effect;
 
-c = Effect = (function() {
+module.exports = Effect = (function() {
   function Effect(audioElement) {
     if (audioElement === void 0) {
       throw new Error("Missing argument: audioElement");
@@ -6720,19 +6539,9 @@ c = Effect = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 
 
 },{}],27:[function(require,module,exports){
-var Music, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
 
 /*
 Constructor for the Music class
@@ -6745,8 +6554,9 @@ Constructor for the Music class
 
 @param {HTMLAudioElement} audioElement The Audio element to use as source for the music object
  */
+var Music;
 
-c = Music = (function() {
+module.exports = Music = (function() {
   function Music(audioElement) {
     if (audioElement === void 0) {
       throw new Error("Missing argument: audioElement");
@@ -6834,30 +6644,17 @@ c = Music = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 
 
 },{}],28:[function(require,module,exports){
-var Child, Geometry, Room, c;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
-
-Geometry = {
-  Vector: require('../geometry/vector')
-};
-
 
 /*
 @name View.Child
 @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
  */
+var Child, Engine, Geometry, Room;
 
-c = Child = (function() {
+module.exports = Child = (function() {
   Child.prototype.renderType = null;
 
   function Child() {
@@ -7028,22 +6825,18 @@ c = Child = (function() {
 
 })();
 
-module.exports.prototype = Object.create(c.prototype);
+Engine = Room = require('../engine/room');
 
-module.exports.prototype.constructor = c;
-
-Room = require('../engine/room');
+Geometry = {
+  Vector: require('../geometry/vector')
+};
 
 
 
 },{"../engine/room":7,"../geometry/vector":12}],29:[function(require,module,exports){
-var Circle, Geometry, Helpers, Views, c,
+var Circle, Geometry, Helpers, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -7081,128 +6874,33 @@ Constructor for Circle class, uses the set function, to set the properties of th
 @param {number} [lineWidth = 1] The circle's width if added to a view (in px)
  */
 
-c = Circle = (function(superClass) {
+module.exports = Circle = (function(superClass) {
   extend(Circle, superClass);
 
   Helpers.Mixin.mixin(Circle, Views.Child);
 
   function Circle(x, y, radius, fillStyle, strokeStyle, lineWidth) {
-    if (fillStyle == null) {
-      fillStyle = "#000";
-    }
-    if (strokeStyle == null) {
-      strokeStyle = "#000";
-    }
-    if (lineWidth == null) {
-      lineWidth = 0;
-    }
+    this.fillStyle = fillStyle != null ? fillStyle : "#000";
+    this.strokeStyle = strokeStyle != null ? strokeStyle : "#000";
+    this.lineWidth = lineWidth != null ? lineWidth : 0;
     Views.Child.prototype.constructor.call(this);
     this.renderType = "circle";
-    if (engine.enableRedrawRegions) {
-      this.CircleInitWithRedrawRegions(x, y, radius, fillStyle, strokeStyle, lineWidth);
-    } else {
-      this.CircleInitWithoutRedrawRegions(x, y, radius, fillStyle, strokeStyle, lineWidth);
-    }
+    this.set(x, y, radius);
     return;
   }
-
-  Circle.prototype.CircleInitWithoutRedrawRegions = function(x, y, radius, fillStyle1, strokeStyle1, lineWidth1) {
-    this.fillStyle = fillStyle1;
-    this.strokeStyle = strokeStyle1;
-    this.lineWidth = lineWidth1;
-    this.set(x, y, radius);
-  };
-
-  Circle.prototype.CircleInitWithRedrawRegions = function(x, y, radius, fillStyle, strokeStyle, lineWidth) {
-    var hidden;
-    hidden = {
-      radius: radius,
-      fillStyle: fillStyle,
-      strokeStyle: strokeStyle,
-      lineWidth: lineWidth
-    };
-    Object.defineProperty(this, "radius", {
-      get: function() {
-        return hidden.radius;
-      },
-      set: function(value) {
-        if (hidden.radius !== value) {
-          hidden.radius = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "fillStyle", {
-      get: function() {
-        return hidden.fillStyle;
-      },
-      set: function(value) {
-        if (hidden.fillStyle !== value) {
-          hidden.fillStyle = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "strokeStyle", {
-      get: function() {
-        return hidden.strokeStyle;
-      },
-      set: function(value) {
-        if (hidden.strokeStyle !== value) {
-          hidden.strokeStyle = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "lineWidth", {
-      get: function() {
-        return hidden.lineWidth;
-      },
-      set: function(value) {
-        if (hidden.lineWidth !== value) {
-          hidden.lineWidth = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    this.set(x, y, radius);
-  };
-
-
-  /*
-  Calculates the region which the object will fill out when redrawn.
-  
-  @private
-  @return {Math.Rectangle} The bounding rectangle of the redraw
-   */
-
-  Circle.prototype.getRedrawRegion = function() {
-    var ln, rect;
-    ln = Math.ceil(this.lineWidth / 2);
-    rect = new Geometry.Rectangle(Math.floor(this.x - (this.radius + ln + 5)), Math.floor(this.y - (this.radius + ln + 5)), Math.ceil((this.radius + ln + 5) * 2), Math.ceil((this.radius + ln + 5) * 2));
-    return rect.add(this.parent.getRoomPosition());
-  };
 
   return Circle;
 
 })(Geometry.Circle);
-
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
 
 Geometry.Rectangle = require('../geometry/rectangle');
 
 
 
 },{"../geometry/circle":8,"../geometry/rectangle":11,"../helpers/mixin":15,"./child":28}],30:[function(require,module,exports){
-var Collidable, Geometry, Helpers, Views, c,
+var Collidable, Geometry, Helpers, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
 
 Views = {
   Sprite: require('./sprite')
@@ -7227,7 +6925,7 @@ Can check both for precise (bitmap-based) collisions and bounding box collisions
 @param {object} [additionalProperties] An object containing key-value pairs that will be set as properties for the created object. Can be used for setting advanced options such as sprite offset and opacity.
  */
 
-c = Collidable = (function(superClass) {
+module.exports = Collidable = (function(superClass) {
   extend(Collidable, superClass);
 
   function Collidable(source, x, y, direction, additionalProperties) {
@@ -7479,7 +7177,7 @@ c = Collidable = (function(superClass) {
   };
 
   Collidable.prototype.createCollisionBitmap = function(objects) {
-    var calc, canvas, j, k, l, len, len1, len2, mask, obj, parent, parents;
+    var c, calc, canvas, j, k, l, len, len1, len2, mask, obj, parent, parents;
     mask = this.mask;
     calc = Helpers.MatrixCalculation;
     canvas = document.createElement("canvas");
@@ -7531,10 +7229,6 @@ c = Collidable = (function(superClass) {
 
 })(Views.Sprite);
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Helpers = {
   MatrixCalculation: require('../helpers/matrix-calculation')
 };
@@ -7546,14 +7240,10 @@ Geometry = {
 
 
 },{"../geometry/vector":12,"../helpers/matrix-calculation":14,"./sprite":36}],31:[function(require,module,exports){
-var Container, ObjectCreator, Views, c,
+var Container, ObjectCreator, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   slice = [].slice;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
 
 Views = {
   Child: require('./child')
@@ -7577,7 +7267,7 @@ All objects which are drawn on the game's canvas extends the View-class.
 @param {Child} child3 A third ...
  */
 
-c = Container = (function(superClass) {
+module.exports = Container = (function(superClass) {
   extend(Container, superClass);
 
   function Container() {
@@ -7746,39 +7436,6 @@ c = Container = (function(superClass) {
 
 
   /*
-  Gets the complete region that will used for drawing on next redraw
-  
-  @return {Math.Rectangle} A rectangle representing the region
-   */
-
-  Container.prototype.getCombinedRedrawRegion = function() {
-    var addBox, box, child, i;
-    if (this.getRedrawRegion) {
-      box = this.getRedrawRegion();
-    }
-    i = 0;
-    while (i < this.children.length) {
-      child = this.children[i];
-      if (child.getCombinedRedrawRegion) {
-        addBox = child.getCombinedRedrawRegion();
-      } else {
-        addBox = child.getRedrawRegion();
-      }
-      child.currentRedrawRegion = addBox;
-      if (addBox) {
-        if (box) {
-          box = box.getBoundingRectangle(addBox);
-        } else {
-          box = addBox;
-        }
-      }
-      i++;
-    }
-    return box;
-  };
-
-
-  /*
   Removes one or more children from the
   
   @param {Child} child1 A child to add to the View object
@@ -7824,13 +7481,42 @@ c = Container = (function(superClass) {
     });
   };
 
+
+  /*
+  Gets the complete region that will used for drawing on next draw
+  
+  @return {Math.Rectangle} A rectangle representing the region
+   */
+
+  Container.prototype.getCombinedRedrawRegion = function() {
+    var addBox, box, child, i;
+    if (this.getRedrawRegion) {
+      box = this.getRedrawRegion();
+    }
+    i = 0;
+    while (i < this.children.length) {
+      child = this.children[i];
+      if (child.getCombinedRedrawRegion) {
+        addBox = child.getCombinedRedrawRegion();
+      } else {
+        addBox = child.getRedrawRegion();
+      }
+      child.currentRedrawRegion = addBox;
+      if (addBox) {
+        if (box) {
+          box = box.getBoundingRectangle(addBox);
+        } else {
+          box = addBox;
+        }
+      }
+      i++;
+    }
+    return box;
+  };
+
   return Container;
 
 })(Views.Child);
-
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
 
 ObjectCreator = require('../engine/object-creator');
 
@@ -7840,10 +7526,6 @@ ObjectCreator = require('../engine/object-creator');
 var GameObject, Geometry, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
 
 Views = {
   Collidable: require('./collidable')
@@ -7944,13 +7626,9 @@ Geometry = {
 
 
 },{"../geometry/vector":12,"./collidable":30}],33:[function(require,module,exports){
-var Geometry, Helpers, Line, Views, c,
+var Geometry, Helpers, Line, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -7986,7 +7664,7 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {string} [lineCap='butt'] The line's cap style if added to a view
  */
 
-c = Line = (function(superClass) {
+module.exports = Line = (function(superClass) {
   extend(Line, superClass);
 
   Helpers.Mixin.mixin(Line, Views.Child);
@@ -8173,22 +7851,14 @@ c = Line = (function(superClass) {
 
 })(Geometry.Line);
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Geometry.Vector = require('../geometry/vector');
 
 
 
 },{"../geometry/line":9,"../geometry/vector":12,"../helpers/mixin":15,"./child":28}],34:[function(require,module,exports){
-var Geometry, Helpers, Polygon, Views, c,
+var Geometry, Helpers, Polygon, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -8222,7 +7892,7 @@ The constructor for the Polygon class. Uses the setFromPoints-function to set th
 @param {number} [lineWidth = 1] The polygon's width if added to a view (in px)
  */
 
-c = Polygon = (function(superClass) {
+module.exports = Polygon = (function(superClass) {
   extend(Polygon, superClass);
 
   Helpers.Mixin.mixin(Polygon, Views.Child);
@@ -8240,43 +7910,16 @@ c = Polygon = (function(superClass) {
     return;
   }
 
-
-  /*
-  Calculates the region which the object will fill out when redrawn.
-  
-  @private
-  @return {Rectangle} The bounding rectangle of the redraw
-   */
-
-  Polygon.prototype.getRedrawRegion = function() {
-    var ln, rect;
-    rect = this.getBoundingRectangle();
-    ln = Math.ceil(this.lineWidth / 2);
-    rect.x -= ln;
-    rect.y -= ln;
-    rect.width += ln * 2;
-    rect.height += ln * 2;
-    return rect.add(this.parent.getRoomPosition());
-  };
-
   return Polygon;
 
 })(Geometry.Polygon);
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 
 
 },{"../geometry/polygon":10,"../helpers/mixin":15,"./child":28}],35:[function(require,module,exports){
-var Geometry, Helpers, Rectangle, Views, c,
+var Geometry, Helpers, Rectangle, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -8316,50 +7959,24 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} [lineWidth = 1] The rectangle's width if added to a view (in px)
  */
 
-c = Rectangle = (function(superClass) {
+module.exports = Rectangle = (function(superClass) {
   extend(Rectangle, superClass);
 
   Helpers.Mixin.mixin(Rectangle, Views.Child);
 
   function Rectangle(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
-    if (width == null) {
-      width = 0;
-    }
-    if (height == null) {
-      height = 0;
-    }
-    if (fillStyle == null) {
-      fillStyle = "#000";
-    }
-    if (strokeStyle == null) {
-      strokeStyle = "#000";
-    }
+    var hidden;
+    this.width = width != null ? width : 0;
+    this.height = height != null ? height : 0;
+    this.fillStyle = fillStyle != null ? fillStyle : "#000";
+    this.strokeStyle = strokeStyle != null ? strokeStyle : "#000";
     if (lineWidth == null) {
       lineWidth = 0;
     }
     Views.Child.prototype.constructor.call(this);
+    this.x = x;
+    this.y = y;
     this.renderType = "rectangle";
-    if (engine.enableRedrawRegions) {
-      this.RectangleInitWithRedrawRegions(x, y, width, height, fillStyle, strokeStyle, lineWidth);
-    } else {
-      this.RectangleInitWithoutRedrawRegions(x, y, width, height, fillStyle, strokeStyle, lineWidth);
-    }
-    return;
-  }
-
-
-  /*
-  @lends View.Rectangle.prototype
-   */
-
-  Rectangle.prototype.RectangleInitWithoutRedrawRegions = function(x1, y1, width1, height1, fillStyle1, strokeStyle1, lineWidth) {
-    var hidden;
-    this.x = x1;
-    this.y = y1;
-    this.width = width1;
-    this.height = height1;
-    this.fillStyle = fillStyle1;
-    this.strokeStyle = strokeStyle1;
     hidden = {
       lineWidth: lineWidth
     };
@@ -8376,74 +7993,8 @@ c = Rectangle = (function(superClass) {
         }
       }
     });
-  };
-
-  Rectangle.prototype.RectangleInitWithRedrawRegions = function(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
-    var hidden;
-    hidden = {
-      width: width,
-      height: height,
-      fillStyle: fillStyle,
-      strokeStyle: strokeStyle,
-      lineWidth: lineWidth
-    };
-    Object.defineProperty(this, "width", {
-      get: function() {
-        return hidden.width;
-      },
-      set: function(value) {
-        if (hidden.width !== value) {
-          hidden.width = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "height", {
-      get: function() {
-        return hidden.height;
-      },
-      set: function(value) {
-        if (hidden.height !== value) {
-          hidden.height = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "fillStyle", {
-      get: function() {
-        return hidden.fillStyle;
-      },
-      set: function(value) {
-        if (hidden.fillStyle !== value) {
-          hidden.fillStyle = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "strokeStyle", {
-      get: function() {
-        return hidden.strokeStyle;
-      },
-      set: function(value) {
-        if (hidden.strokeStyle !== value) {
-          hidden.strokeStyle = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "lineWidth", {
-      get: function() {
-        return hidden.lineWidth;
-      },
-      set: function(value) {
-        if (hidden.lineWidth !== value) {
-          hidden.lineWidth = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    this.set(x, y, width, height);
-  };
+    return;
+  }
 
 
   /*
@@ -8477,43 +8028,16 @@ c = Rectangle = (function(superClass) {
     return ret;
   };
 
-
-  /*
-  Calculates the region which the object will fill out when redrawn.
-  
-  @private
-  @return {Rectangle} The bounding rectangle of the redraw
-   */
-
-  Rectangle.prototype.getRedrawRegion = function() {
-    var ln, rect;
-    rect = this.copy();
-    ln = Math.ceil(this.lineWidth / 2);
-    rect.x -= ln;
-    rect.y -= ln;
-    rect.width += ln * 2;
-    rect.height += ln * 2;
-    return rect.add(this.parent.getRoomPosition());
-  };
-
   return Rectangle;
 
 })(Geometry.Rectangle);
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 
 
 },{"../geometry/rectangle":11,"../helpers/mixin":15,"./child":28}],36:[function(require,module,exports){
-var Globals, Helpers, Mixins, Sprite, Views, c,
+var Globals, Helpers, Mixins, Sprite, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -8564,7 +8088,7 @@ offset: new Math.Vector('center', 'center')
 }</code>
  */
 
-c = Sprite = (function(superClass) {
+module.exports = Sprite = (function(superClass) {
   extend(Sprite, superClass);
 
   Helpers.Mixin.mixin(Sprite, Mixins.Animatable);
@@ -8716,22 +8240,14 @@ c = Sprite = (function(superClass) {
 
 })(Views.Child);
 
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
-
 Globals = require('../engine/globals');
 
 
 
 },{"../engine/globals":4,"../helpers/mixin":15,"../mixins/animatable":20,"../mixins/texture":21,"./child":28}],37:[function(require,module,exports){
-var Geometry, Globals, Helpers, Mixins, TextBlock, Views, c,
+var Geometry, Globals, Helpers, Mixins, TextBlock, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
-
-module.exports = function() {
-  return module.exports.prototype.constructor.apply(this, arguments);
-};
 
 Helpers = {
   Mixin: require('../helpers/mixin')
@@ -8784,7 +8300,7 @@ offset: new Vector(0, 0)
 }</code>
  */
 
-c = TextBlock = (function(superClass) {
+module.exports = TextBlock = (function(superClass) {
   extend(TextBlock, superClass);
 
   Helpers.Mixin.mixin(TextBlock, Mixins.Animatable);
@@ -8980,10 +8496,6 @@ c = TextBlock = (function(superClass) {
   return TextBlock;
 
 })(Views.Child);
-
-module.exports.prototype = Object.create(c.prototype);
-
-module.exports.prototype.constructor = c;
 
 Geometry = {
   Vector: require('../geometry/vector')

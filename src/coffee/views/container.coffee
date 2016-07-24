@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 Views =
   Child: require './child'
 
@@ -19,7 +17,7 @@ All objects which are drawn on the game's canvas extends the View-class.
 @param {Child} child2 An other child to add to the view upon creation
 @param {Child} child3 A third ...
 ###
-c = class Container extends Views.Child
+module.exports = class Container extends Views.Child
   constructor: (children...) ->
     super()
     @children = []
@@ -153,31 +151,6 @@ c = class Container extends Views.Child
       i++
     return
 
-
-  ###
-  Gets the complete region that will used for drawing on next redraw
-
-  @return {Math.Rectangle} A rectangle representing the region
-  ###
-  getCombinedRedrawRegion: ->
-    box = @getRedrawRegion() if @getRedrawRegion
-    i = 0
-    while i < @children.length
-      child = @children[i]
-      if child.getCombinedRedrawRegion
-        addBox = child.getCombinedRedrawRegion()
-      else
-        addBox = child.getRedrawRegion()
-      child.currentRedrawRegion = addBox
-      if addBox
-        if box
-          box = box.getBoundingRectangle(addBox)
-        else
-          box = addBox
-      i++
-    box
-
-
   ###
   Removes one or more children from the
 
@@ -214,7 +187,27 @@ c = class Container extends Views.Child
 
     return
 
-module.exports:: = Object.create c::
-module.exports::constructor = c
+  ###
+  Gets the complete region that will used for drawing on next draw
+
+  @return {Math.Rectangle} A rectangle representing the region
+  ###
+  getCombinedRedrawRegion: ->
+    box = @getRedrawRegion() if @getRedrawRegion
+    i = 0
+    while i < @children.length
+      child = @children[i]
+      if child.getCombinedRedrawRegion
+        addBox = child.getCombinedRedrawRegion()
+      else
+        addBox = child.getRedrawRegion()
+      child.currentRedrawRegion = addBox
+      if addBox
+        if box
+          box = box.getBoundingRectangle(addBox)
+        else
+          box = addBox
+      i++
+    box
 
 ObjectCreator = require '../engine/object-creator'

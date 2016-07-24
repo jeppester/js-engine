@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 Helpers =
   Mixin: require '../helpers/mixin'
 
@@ -29,7 +27,7 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {number} [lineWidth=1] The line's width if added to a view (in px)
 @param {string} [lineCap='butt'] The line's cap style if added to a view
 ###
-c = class Line extends Geometry.Line
+module.exports = class Line extends Geometry.Line
   # Mix in Child
   Helpers.Mixin.mixin @, Views.Child
 
@@ -200,8 +198,5 @@ c = class Line extends Geometry.Line
   ###
   isVisible: ->
     Views.Child::isVisible.call(@) and (@a.x isnt @b.x or @a.y isnt @b.y)
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Geometry.Vector = require '../geometry/vector'

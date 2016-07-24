@@ -1,12 +1,10 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 ###
 Constructor for the Keyboard class
 
 @name Input.Keyboard
 @class A class that eases checking of the current state of all keys.
 ###
-c = class Keyboard
+module.exports = class Keyboard
   constructor: ->
     document.addEventListener "keydown", (event) =>
       @onKeyDown event
@@ -91,6 +89,3 @@ c = class Keyboard
     throw new Error("Missing argument: key") if key is undefined #dev
     key = key.toUpperCase().charCodeAt(0) if typeof key is "string"
     @keys[key].events.length and -@keys[key].events[0] > engine.last
-
-module.exports:: = Object.create c::
-module.exports::constructor = c

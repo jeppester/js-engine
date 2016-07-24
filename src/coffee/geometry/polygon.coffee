@@ -1,6 +1,4 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
-c = class Polygon
+module.exports = class Polygon
   ###
   The constructor for the Polygon class. Uses the setFromPoints-function to set the points of the polygon.
 
@@ -305,9 +303,6 @@ c = class Polygon
       intersectionCount
     else
       false
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Geometry =
   Circle: require './circle'

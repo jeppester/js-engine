@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 Helpers =
   Mixin: require '../helpers/mixin'
 
@@ -46,7 +44,7 @@ composite: 'source-over',
 offset: new Vector(0, 0)
 }</code>
 ###
-c = class TextBlock extends Views.Child
+module.exports = class TextBlock extends Views.Child
   # Mix in Child
   Helpers.Mixin.mixin @, Mixins.Animatable
   Helpers.Mixin.mixin @, Mixins.Texture
@@ -223,9 +221,6 @@ c = class TextBlock extends Views.Child
   isVisible: ->
     # If sprites size has been modified to zero, do nothing
     not (@size is 0 or @widthScale is 0 or @heightScale is 0 or /^\s*$/.test(@string))
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Geometry =
   Vector: require '../geometry/vector'

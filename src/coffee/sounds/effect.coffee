@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 ###
 Constructor for the sound class
 
@@ -10,7 +8,7 @@ Constructor for the sound class
 
 @param {HTMLAudioElement} audioElement The Audio element to use as source for the sound object
 ###
-c = class Effect
+module.exports = class Effect
   constructor: (audioElement) ->
     throw new Error("Missing argument: audioElement") if audioElement is undefined #dev
     throw new Error("Argument audioElement has to be of type HTMLAudioElement") if audioElement.toString() isnt "[object HTMLAudioElement]" #dev
@@ -95,6 +93,3 @@ c = class Effect
           sound.loop = false
           true
       false
-
-module.exports:: = Object.create c::
-module.exports::constructor = c

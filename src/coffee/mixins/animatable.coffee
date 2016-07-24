@@ -1,6 +1,4 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
-c = class Animatable
+module.exports = class Animatable
   ###
   Used for animating numeric properties of the owner of the function.
   Available easing functions are:
@@ -152,8 +150,5 @@ c = class Animatable
     #dev
     room.loops[loopName].schedule this, func, delay
     return
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Globals = require '../engine/globals'

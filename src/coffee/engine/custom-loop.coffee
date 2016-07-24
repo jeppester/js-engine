@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 ###
 @name CustomLoop
 @class A loop class.
@@ -15,7 +13,7 @@ A loop also has it's own time that is stopped whenever the loop is not executed.
 @param {number} [framesPerExecution=1] The number of frames between each execution of the custom loop
 @param {function} [maskFunction=function(){}] A function that will be run before each execution, if the function returns true the execution proceeds as planned, if not, the execution will not be run
 ###
-c = class CustomLoop
+module.exports = class CustomLoop
   constructor: (framesPerExecution, maskFunction) ->
     @framesPerExecution = framesPerExecution? || 1
     @maskFunction = maskFunction? || -> true
@@ -318,9 +316,6 @@ c = class CustomLoop
     @executions = @executions.concat(@executionsQueue)
     @executionsQueue = []
     return
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Helpers =
   Easing: require '../helpers/easing'

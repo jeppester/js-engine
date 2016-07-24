@@ -1,6 +1,4 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
-c = class WebGLColorShaderProgram
+module.exports = class WebGLColorShaderProgram
   constructor: (gl) ->
     @program = gl.createProgram()
     @initShaders gl
@@ -196,11 +194,5 @@ c = class WebGLColorShaderProgram
     Helpers.WebGL.setPlaneOutline gl, x, y, width, height, 1
     gl.drawArrays gl.TRIANGLES, 0, 24
 
-module.exports:: = Object.create c::
-module.exports::constructor = c
-
 Helpers =
   WebGL: require '../../helpers/webgl'
-
-Geometry =
-  Line: require '../../geometry/line'

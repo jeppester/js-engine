@@ -1,12 +1,10 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 ###
 Constructor for the Pointer class
 
 @name Input.Pointer
 @class A class that eases the use of mouse and touch, by providing functions for checking the current state of both.
 ###
-c = class Pointer
+module.exports = class Pointer
   constructor: ->
     if engine.host.hasTouch
 
@@ -396,14 +394,14 @@ c = class Pointer
       if camera.projectionRegion.contains(vector) or len is 0
 
         # Find the position relative to the projection region
-        ret.subtract camera.projectionRegion
+        ret.move -camera.projectionRegion.x, -camera.projectionRegion.y
 
         # Transform the position, based on the relation between the capture region and the projection region
         ret.x *= camera.captureRegion.width / camera.projectionRegion.width
         ret.y *= camera.captureRegion.height / camera.projectionRegion.height
 
         # The position is now relative to the capture region, move it to make it relative to the room
-        ret.add camera.captureRegion
+        ret.move camera.captureRegion.x, camera.captureRegion.y
 
         # Return the calculated room position
         return ret
@@ -506,9 +504,6 @@ c = class Pointer
     # Finally: set the cursor
     engine.arena.style.cursor = cursor
     return
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Geometry =
   Vector: require '../geometry/vector'

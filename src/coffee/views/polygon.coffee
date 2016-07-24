@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 Helpers =
   Mixin: require '../helpers/mixin'
 
@@ -27,7 +25,7 @@ The constructor for the Polygon class. Uses the setFromPoints-function to set th
 @param {string} [strokeStyle = "#000"] The polygon's color if added to a view (css color string)
 @param {number} [lineWidth = 1] The polygon's width if added to a view (in px)
 ###
-c = class Polygon extends Geometry.Polygon
+module.exports = class Polygon extends Geometry.Polygon
   # Mix in Child
   Helpers.Mixin.mixin @, Views.Child
 
@@ -40,24 +38,3 @@ c = class Polygon extends Geometry.Polygon
     @closed = 1
     @lineDash = []
     return
-
-  ###
-  Calculates the region which the object will fill out when redrawn.
-
-  @private
-  @return {Rectangle} The bounding rectangle of the redraw
-  ###
-  getRedrawRegion: ->
-    # Get bounding rectangle
-    rect = @getBoundingRectangle()
-
-    # line width
-    ln = Math.ceil(@lineWidth / 2)
-    rect.x -= ln
-    rect.y -= ln
-    rect.width += ln * 2
-    rect.height += ln * 2
-    rect.add @parent.getRoomPosition()
-
-module.exports:: = Object.create c::
-module.exports::constructor = c

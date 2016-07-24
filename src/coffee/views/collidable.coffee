@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 Views =
   Sprite: require './sprite'
 
@@ -20,7 +18,7 @@ Can check both for precise (bitmap-based) collisions and bounding box collisions
 @param {number} [direction=0] The direction of the created object. Defaults to 0
 @param {object} [additionalProperties] An object containing key-value pairs that will be set as properties for the created object. Can be used for setting advanced options such as sprite offset and opacity.
 ###
-c = class Collidable extends Views.Sprite
+module.exports = class Collidable extends Views.Sprite
   constructor: (source, x, y, direction, additionalProperties) ->
     super
     @mask = (if @mask then @mask else engine.loader.getMask(source, @getTheme()))
@@ -307,9 +305,6 @@ c = class Collidable extends Views.Sprite
 
     # Return collision image data
     c.getImageData 0, 0, canvas.width, canvas.height
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Helpers =
   MatrixCalculation: require '../helpers/matrix-calculation'

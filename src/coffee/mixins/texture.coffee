@@ -1,6 +1,4 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
-c = class Texture
+module.exports = class Texture
   ###
   Parses an offset global into an actual Math.Vector offset that fits the object's texture
 
@@ -56,9 +54,6 @@ c = class Texture
     box.width = Math.ceil(box.width + 1)
     box.height = Math.ceil(box.height + 1)
     box
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Geometry =
   Vector: require '../geometry/vector'

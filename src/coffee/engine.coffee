@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 ###
 The constructor for the Engine class.
 
@@ -59,10 +57,9 @@ The default options are:
 "resetCursorOnEachFrame": true // Whether or not the mouse cursor should be reset on each frame
 "soundsMuted": false, // If all sound effects should be initially muted
 "themesPath": "assets", // The path to the themes-directory
-"enableRedrawRegions": false, // Whether the engine should use redraw regions for drawing or not
 }</code>
 ###
-c = window.Engine = class Engine
+module.exports = window.Engine = class Engine
   # Load classes for easy usage
   @Helpers:
     MatrixCalculation: require './helpers/matrix-calculation'
@@ -183,7 +180,6 @@ c = window.Engine = class Engine
     @cameras = []
     @defaultCollisionResolution = 1
     @redrawObjects = []
-    @enableRedrawRegions = false
     @disableWebGL = false
     @soundsMuted = false
     @musicMuted = false
@@ -204,7 +200,6 @@ c = window.Engine = class Engine
       "disableTouchScroll"
       "drawBoundingBoxes"
       "drawMasks"
-      "enableRedrawRegions"
       "enginePath"
       "focusOnLoad"
       "gameClass"
@@ -260,7 +255,7 @@ c = window.Engine = class Engine
     Global Loader instance which is created upon engine initialization
     @global
     ###
-    @loader = new module.exports::constructor.Loader()
+    @loader = new @constructor.Loader()
 
     # Load themes
     @defaultTheme = @options.themes[0]
@@ -304,8 +299,8 @@ c = window.Engine = class Engine
 
     # Make main camera
     @cameras.push new @constructor.Camera(
-      new module.exports::constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
-      new module.exports::constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY))
+      new @constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
+      new @constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY))
 
     # Disable right click inside arena
     if @disableRightClick
@@ -313,8 +308,8 @@ c = window.Engine = class Engine
         false
 
     # Create objects required by the engine
-    @keyboard = new module.exports::constructor.Input.Keyboard()
-    @pointer = new module.exports::constructor.Input.Pointer()
+    @keyboard = new @constructor.Input.Keyboard()
+    @pointer = new @constructor.Input.Pointer()
 
     # Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
     if @pauseOnBlur
@@ -349,10 +344,10 @@ c = window.Engine = class Engine
   initRenderer: ->
     if not @disableWebGL and (@canvas.getContext("webgl") or @canvas.getContext("experimental-webgl"))
       console.log 'Using WebGL renderer'
-      @renderer = new module.exports::constructor.Renderers.WebGLRenderer(@canvas)
+      @renderer = new @constructor.Renderers.WebGLRenderer(@canvas)
     else
       console.log 'Using canvas renderer'
-      @renderer = new module.exports::constructor.Renderers.CanvasRenderer(@canvas)
+      @renderer = new @constructor.Renderers.CanvasRenderer(@canvas)
     return
 
   ###
@@ -429,21 +424,21 @@ c = window.Engine = class Engine
         @convertSpeed speed.y, from, to
       )
 
-    from ?= module.exports::constructor.Globals.SPEED_PIXELS_PER_SECOND
-    to ?= module.exports::constructor.Globals.SPEED_PIXELS_PER_FRAME
+    from ?= @constructor.Globals.SPEED_PIXELS_PER_SECOND
+    to ?= @constructor.Globals.SPEED_PIXELS_PER_FRAME
 
     # Convert all formats to pixels per frame
     switch from
-      when module.exports::constructor.Globals.SPEED_PIXELS_PER_SECOND
+      when @constructor.Globals.SPEED_PIXELS_PER_SECOND
         speed = speed * @gameTimeIncrease / 1000
       # Convert pixels per frame to the output format
-      when module.exports::constructor.Globals.SPEED_PIXELS_PER_FRAME
+      when @constructor.Globals.SPEED_PIXELS_PER_FRAME
         speed
 
     switch to
-      when module.exports::constructor.Globals.SPEED_PIXELS_PER_SECOND
+      when @constructor.Globals.SPEED_PIXELS_PER_SECOND
         speed = speed / @gameTimeIncrease * 1000
-      when module.exports::constructor.Globals.SPEED_PIXELS_PER_FRAME
+      when @constructor.Globals.SPEED_PIXELS_PER_FRAME
         speed
 
   ###
@@ -754,6 +749,3 @@ c = window.Engine = class Engine
     a.click()
     document.body.removeChild a, document.body
     return
-
-module.exports:: = Object.create c::
-module.exports::constructor = c

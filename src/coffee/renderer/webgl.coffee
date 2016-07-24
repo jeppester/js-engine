@@ -1,6 +1,4 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
-c = class WebGLRenderer
+module.exports = class WebGLRenderer
   currentAlpha: null
   currentResolution:
     width: 0
@@ -151,9 +149,6 @@ c = class WebGLRenderer
 
     @currentProgram?.flushBuffers? gl
     return
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 TextureShaderProgram = require './webgl/texture-shader-program'
 ColorShaderProgram = require './webgl/color-shader-program'

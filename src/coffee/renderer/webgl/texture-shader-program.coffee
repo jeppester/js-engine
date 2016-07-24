@@ -1,10 +1,9 @@
-module.exports = -> module.exports::constructor.apply @, arguments
 coordsBufferLength = 5 * 6 * 20000
 # 5 points per vertex (x, y + texture coords + opacity)
 # 6 vertices per object (two triangles)
 # 1000 objects per draw (maybe we can increase this)
 
-c = class WebGLTextureShaderProgram
+module.exports = class WebGLTextureShaderProgram
   textureCache: {}
   maskCache: {}
   locations: {}
@@ -313,10 +312,3 @@ c = class WebGLTextureShaderProgram
       gl.drawArrays gl.TRIANGLES, 0, @coordsCount / 5
       @coordsCount = 0
     return
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
-
-Helpers =
-  WebGL:             require '../../helpers/webgl'
-  MatrixCalculation: require '../../helpers/matrix-calculation'

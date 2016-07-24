@@ -1,5 +1,3 @@
-module.exports = -> module.exports::constructor.apply @, arguments
-
 ###
 Constructor for the Line class. Uses setFromVectors to create the line's start and end points
 
@@ -13,7 +11,7 @@ Constructor for the Line class. Uses setFromVectors to create the line's start a
 @param {Geometry.Vector} startVector A Vector representing the start point of the line
 @param {Geometry.Vector} endVector A Vector representing the end point of the line
 ###
-c = class Line
+module.exports = class Line
   constructor: (startVector, endVector) ->
     startVector = (if startVector isnt undefined then startVector else new Geometry.Vector())
     endVector = (if endVector isnt undefined then endVector else new Geometry.Vector())
@@ -267,9 +265,6 @@ c = class Line
       @a.copy()
       @b.copy()
     ])
-
-module.exports:: = Object.create c::
-module.exports::constructor = c
 
 Geometry =
   Circle: require './circle'
