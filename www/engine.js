@@ -6105,7 +6105,7 @@ c = WebGLRenderer = (function() {
       if (last === void 0) {
         list.push(object);
       } else {
-        list.splice(counter[0], void 0, object);
+        list.splice(counter[0], list.length - counter[0], object);
       }
     }
     counter[0] += 1;
