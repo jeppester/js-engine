@@ -86,7 +86,6 @@ module.exports = class WebGLColorShaderProgram
     unless @currentAlpha == alpha
       @currentAlpha = alpha
       gl.uniform1f @locations.u_alpha, alpha
-      console.log alpha
 
   # Draw functions
   renderLine: (gl, object, wm) ->
@@ -189,6 +188,35 @@ module.exports = class WebGLColorShaderProgram
 
       # Draw
       gl.drawArrays gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2
+    return
+
+  renderPolygon: (gl, object, wm) ->
+    l = @locations
+    @setAlpha gl, object.opacity
+
+    # Set matrix (it is the same for both fill and stroke)
+    gl.uniformMatrix3fv l.u_matrix, false, wm
+
+    # Draw fill
+    if object.fillStyle isnt "transparent"
+      # Set color
+      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString object.fillStyle
+
+      # Set geometry (no need to set x and y as they already in the world matrix)
+      Helpers.WebGL.setPolygon gl, object.points
+
+      # Draw
+      gl.drawArrays gl.TRIANGLES, 0, (object.points.length - 2) * 3
+
+    if object.strokeStyle isnt "transparent"
+      # Set color
+      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
+
+      # Set geometry (no need to set x and y as they already in the world matrix)
+      Helpers.WebGL.setPolygonOutline gl, object.points, object.lineWidth
+
+      # Draw
+      gl.drawArrays gl.TRIANGLE_STRIP, 0, object.points.length * 2 + 2
     return
 
   renderBoundingBox: (gl, object, wm)->

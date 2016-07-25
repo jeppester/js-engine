@@ -6,7 +6,7 @@ GeometricObjectCollision = (function() {
     var textOptions;
     this.circle = new Engine.Views.Circle(300, 200, 80, "#F11", "#F11");
     this.line = new Engine.Views.Line(null, null, "#F00", 6).setFromCoordinates(20, 320, 80, 380);
-    this.polygon = new Engine.Views.Polygon([], "#FFF", "#F00", 6).setFromCoordinates(540, 40, 535, 70.5, 560, 70.5, 540, 50, 560, 35);
+    this.polygon = new Engine.Views.Polygon([], "#FFF", "#F00", 6).setFromCoordinates(530, 30, 480, 120.5, 560, 120.5, 530, 70, 560, 35);
     this.rectangle = new Engine.Views.Rectangle(20.5, 130.5, 100, 40, "#FFF", "#F00", 6);
     this.circle2 = new Engine.Views.Circle(530, 330, 50, "#FFF", "#F00", 6);
     textOptions = {

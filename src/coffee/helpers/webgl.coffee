@@ -1,3 +1,5 @@
+poly2tri = require 'poly2tri'
+
 module.exports = WebGLHelper =
   planeCache: new Float32Array 12
 
@@ -116,4 +118,62 @@ module.exports = WebGLHelper =
       coords[i * 4 + 3] = y + Math.sin(segmentLength * i) * ir
       i++
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW
+    return
+
+  setPolygon: (gl, points)->
+    # Triangulate polygon
+    triangles = new poly2tri.SweepContext(points.slice())
+      .triangulate()
+      .getTriangles()
+
+    coords = new Float32Array triangles.reduce (coords, triangle)->
+      p = triangle.getPoints()
+      coords.push(
+        p[0].x, p[0].y
+        p[1].x, p[1].y
+        p[2].x, p[2].y
+      )
+      coords
+    , []
+
+    gl.bufferData gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW
+    return
+
+  setPolygonOutline: (gl, points, width)->
+    coords = new Float32Array(points.length * 4 + 4)
+
+    for point, i in points
+      prev = points[(i - 1 + points.length) % points.length]
+      next = points[(i + 1 + points.length) % points.length]
+
+      # Find normal direction
+      pN = point.copy().subtract(prev)
+      pN.set -pN.y, pN.x
+      pN.scale 1 / pN.getLength()
+
+      nN = next.copy().subtract(point)
+      nN.set -nN.y, nN.x
+      nN.scale 1 / nN.getLength()
+
+      pointNormal = pN.copy().add nN
+
+      # Find normal length
+      angle = pN.getDirectionTo pointNormal
+      length = width / 2 / Math.cos(angle)
+      pointNormal.scale length / pointNormal.getLength()
+
+      # Find miter points
+      p1 = point.copy().add(pointNormal)
+      p2 = point.copy().subtract(pointNormal)
+      coords[i * 4] = p1.x
+      coords[i * 4 + 1] = p1.y
+      coords[i * 4 + 2] = p2.x
+      coords[i * 4 + 3] = p2.y
+
+    coords[coords.length - 4] = coords[0]
+    coords[coords.length - 3] = coords[1]
+    coords[coords.length - 2] = coords[2]
+    coords[coords.length - 1] = coords[3]
+
+    gl.bufferData gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW
     return

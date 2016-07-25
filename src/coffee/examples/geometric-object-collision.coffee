@@ -5,7 +5,7 @@ class GeometricObjectCollision
 
     # Add different objects to calculate the distance to
     @line = new Engine.Views.Line(null, null, "#F00", 6).setFromCoordinates 20, 320, 80, 380
-    @polygon = new Engine.Views.Polygon([], "#FFF", "#F00", 6).setFromCoordinates 540, 40, 535, 70.5, 560, 70.5, 540, 50, 560, 35
+    @polygon = new Engine.Views.Polygon([], "#FFF", "#F00", 6).setFromCoordinates 530, 30, 480, 120.5, 560, 120.5, 530, 70, 560, 35
     @rectangle = new Engine.Views.Rectangle 20.5, 130.5, 100, 40, "#FFF", "#F00", 6
     @circle2 = new Engine.Views.Circle 530, 330, 50, "#FFF", "#F00", 6
 

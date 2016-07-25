@@ -163,6 +163,11 @@ module.exports = class Vector
     @y *= vector.y
     this
 
+  reverse: ->
+    @x = -@x
+    @y = -@y
+    @
+
   ###
   Calculates the cross product of the Vector and another vector
 
@@ -207,7 +212,7 @@ module.exports = class Vector
   ###
   getDirectionTo: (point) ->
     throw new Error("Only Vectors or objects inheriting Vector are supported") if not point instanceof module.exports #dev
-    point.copy().subtract(this).getDirection()
+    point.getDirection() - @getDirection()
 
   ###
   Calculates the shortest distance from the Vector object to another geometric object

@@ -126,12 +126,7 @@ module.exports = class Polygon
   @return {Geometry.Vector} An array containing all the points of the polygon, as Vector objects
   ###
   getPoints: ->
-    points = []
-    i = 0
-    while i < @points.length
-      points.push @points[i].copy()
-      i++
-    points
+    @points.map (p)-> p.copy()
 
   ###
   Fetches all of the polygon's sides as Line objects.
