@@ -8,7 +8,6 @@ module.exports = class WebGLTextureShaderProgram
   maskCache: {}
   locations: {}
   currentTexture: document.createElement 'img'
-  vertex: null
   program: null
   coordsCount: 0
   coords: new Float32Array coordsBufferLength

@@ -9120,8 +9120,6 @@ module.exports = WebGLTextureShaderProgram = (function() {
 
   WebGLTextureShaderProgram.prototype.currentTexture = document.createElement('img');
 
-  WebGLTextureShaderProgram.prototype.vertex = null;
-
   WebGLTextureShaderProgram.prototype.program = null;
 
   WebGLTextureShaderProgram.prototype.coordsCount = 0;
