@@ -2,7 +2,8 @@ poly2tri = require 'poly2tri'
 
 module.exports = WebGLHelper =
   planeCache: new Float32Array 12
-  triangleCache: {}
+  polygonCoordsCache: {}
+  polygonOutlineCoordsCache: {}
 
   generateCacheKeyForPoints: (points) ->
     string = ''
@@ -126,17 +127,11 @@ module.exports = WebGLHelper =
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW
     return
 
-  setPolygon: (gl, points)->
-    # Triangulate polygon if it is not already cached
-    cacheKey = this.generateCacheKeyForPoints points
-    unless this.triangleCache[cacheKey]
-      this.triangleCache[cacheKey] = new poly2tri.SweepContext(points.slice())
-        .triangulate()
-        .getTriangles()
-
-    triangles = this.triangleCache[cacheKey]
-
-    coords = new Float32Array triangles.reduce (coords, triangle)->
+  triangulatePolygonPoints: (points)->
+    triangles = new poly2tri.SweepContext(points.slice())
+      .triangulate()
+      .getTriangles()
+    new Float32Array triangles.reduce (coords, triangle)->
       p = triangle.getPoints()
       coords.push(
         p[0].x, p[0].y
@@ -146,10 +141,7 @@ module.exports = WebGLHelper =
       coords
     , []
 
-    gl.bufferData gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW
-    return
-
-  setPolygonOutline: (gl, points, width)->
+  calculatePolygonOutlineCoords: (points, width)->
     coords = new Float32Array(points.length * 4 + 4)
 
     for point, i in points
@@ -184,6 +176,24 @@ module.exports = WebGLHelper =
     coords[coords.length - 3] = coords[1]
     coords[coords.length - 2] = coords[2]
     coords[coords.length - 1] = coords[3]
+    coords
 
+  setPolygon: (gl, points)->
+    # Triangulate polygon if it is not already cached
+    cacheKey = this.generateCacheKeyForPoints points
+    unless this.polygonCoordsCache[cacheKey]
+      this.polygonCoordsCache[cacheKey] = this.triangulatePolygonPoints(points)
+
+    coords = this.polygonCoordsCache[cacheKey]
+    gl.bufferData gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW
+    return
+
+  setPolygonOutline: (gl, points, width)->
+    # Triangulate polygon if it is not already cached
+    cacheKey = this.generateCacheKeyForPoints(points) + width
+    unless this.polygonOutlineCoordsCache[cacheKey]
+      this.polygonOutlineCoordsCache[cacheKey] = this.calculatePolygonOutlineCoords(points, width)
+
+    coords = this.polygonOutlineCoordsCache[cacheKey]
     gl.bufferData gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW
     return

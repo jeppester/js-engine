@@ -7233,7 +7233,8 @@ poly2tri = require('poly2tri');
 
 module.exports = WebGLHelper = {
   planeCache: new Float32Array(12),
-  triangleCache: {},
+  polygonCoordsCache: {},
+  polygonOutlineCoordsCache: {},
   generateCacheKeyForPoints: function(points) {
     var j, len, p, string;
     string = '';
@@ -7319,22 +7320,17 @@ module.exports = WebGLHelper = {
     }
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
   },
-  setPolygon: function(gl, points) {
-    var cacheKey, coords, triangles;
-    cacheKey = this.generateCacheKeyForPoints(points);
-    if (!this.triangleCache[cacheKey]) {
-      this.triangleCache[cacheKey] = new poly2tri.SweepContext(points.slice()).triangulate().getTriangles();
-    }
-    triangles = this.triangleCache[cacheKey];
-    coords = new Float32Array(triangles.reduce(function(coords, triangle) {
+  triangulatePolygonPoints: function(points) {
+    var triangles;
+    triangles = new poly2tri.SweepContext(points.slice()).triangulate().getTriangles();
+    return new Float32Array(triangles.reduce(function(coords, triangle) {
       var p;
       p = triangle.getPoints();
       coords.push(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y);
       return coords;
     }, []));
-    gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
   },
-  setPolygonOutline: function(gl, points, width) {
+  calculatePolygonOutlineCoords: function(points, width) {
     var angle, coords, i, j, len, length, nN, next, p1, p2, pN, point, pointNormal, prev;
     coords = new Float32Array(points.length * 4 + 4);
     for (i = j = 0, len = points.length; j < len; i = ++j) {
@@ -7362,6 +7358,24 @@ module.exports = WebGLHelper = {
     coords[coords.length - 3] = coords[1];
     coords[coords.length - 2] = coords[2];
     coords[coords.length - 1] = coords[3];
+    return coords;
+  },
+  setPolygon: function(gl, points) {
+    var cacheKey, coords;
+    cacheKey = this.generateCacheKeyForPoints(points);
+    if (!this.polygonCoordsCache[cacheKey]) {
+      this.polygonCoordsCache[cacheKey] = this.triangulatePolygonPoints(points);
+    }
+    coords = this.polygonCoordsCache[cacheKey];
+    gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
+  },
+  setPolygonOutline: function(gl, points, width) {
+    var cacheKey, coords;
+    cacheKey = this.generateCacheKeyForPoints(points) + width;
+    if (!this.polygonOutlineCoordsCache[cacheKey]) {
+      this.polygonOutlineCoordsCache[cacheKey] = this.calculatePolygonOutlineCoords(points, width);
+    }
+    coords = this.polygonOutlineCoordsCache[cacheKey];
     gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
   }
 };
