@@ -8934,25 +8934,31 @@ View = {
 
 
 },{"../helpers/matrix-calculation":25,"../views/child":39,"./webgl/color-shader-program":35,"./webgl/texture-shader-program":36}],35:[function(require,module,exports){
-var Helpers, WebGLColorShaderProgram;
+var Helpers, WebGLColorShaderProgram, coordsBufferLength;
+
+coordsBufferLength = 5 * 6 * 20000;
 
 module.exports = WebGLColorShaderProgram = (function() {
-  WebGLColorShaderProgram.prototype.currentAlpha = null;
+  WebGLColorShaderProgram.prototype.program = null;
+
+  WebGLColorShaderProgram.prototype.coordsCount = 0;
+
+  WebGLColorShaderProgram.prototype.locations = {};
+
+  WebGLColorShaderProgram.prototype.coords = new Float32Array(coordsBufferLength);
+
+  WebGLColorShaderProgram.prototype.coordsBuffer = null;
 
   function WebGLColorShaderProgram(gl) {
     this.program = gl.createProgram();
     this.initShaders(gl);
     this.bindLocations(gl);
     this.initBuffers(gl);
-    this.cache = {
-      currentBuffer: this.vertexBuffer
-    };
-    return;
   }
 
   WebGLColorShaderProgram.prototype.initShaders = function(gl) {
     var fragmentCode, fragmentShader, vertexCode, vertexShader;
-    vertexCode = "attribute vec2 a_position; uniform vec2 u_resolution; uniform mat3 u_matrix; void main() { vec2 position = (u_matrix * vec3(a_position, 1)).xy; vec2 zeroToOne = position / u_resolution; vec2 zeroToTwo = zeroToOne * 2.0; vec2 clipSpace = zeroToTwo - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); }";
+    vertexCode = "attribute vec2 a_position; attribute float a_opacity; attribute int a_color; uniform vec2 u_resolution; void main() { vec2 position = (u_matrix * vec3(a_position, 1)).xy; vec2 zeroToOne = position / u_resolution; vec2 zeroToTwo = zeroToOne * 2.0; vec2 clipSpace = zeroToTwo - 1.0; gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1); v_opacity = a_opacity; v_color = a_color; }";
     vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexCode);
     gl.compileShader(vertexShader);
@@ -8960,7 +8966,7 @@ module.exports = WebGLColorShaderProgram = (function() {
       throw new Error(gl.getShaderInfoLog(vertexShader));
     }
     gl.attachShader(this.program, vertexShader);
-    fragmentCode = "precision mediump float; uniform int u_color; uniform float u_alpha; void main() { float rValue = float(u_color / 256 / 256); float gValue = float(u_color / 256 - int(rValue * 256.0)); float bValue = float(u_color - int(rValue * 256.0 * 256.0) - int(gValue * 256.0)); gl_FragColor = vec4(rValue / 255.0, gValue / 255.0, bValue / 255.0, u_alpha); }";
+    fragmentCode = "precision mediump float; varying int v_color; varying float v_alpha; void main() { float rValue = float(v_color / 256 / 256); float gValue = float(v_color / 256 - int(rValue * 256.0)); float bValue = float(v_color - int(rValue * 256.0 * 256.0) - int(gValue * 256.0)); gl_FragColor = vec4(rValue / 255.0, gValue / 255.0, bValue / 255.0, v_opacity); }";
     fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentCode);
     gl.compileShader(fragmentShader);

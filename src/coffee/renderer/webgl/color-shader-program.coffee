@@ -1,20 +1,27 @@
+coordsBufferLength = 5 * 6 * 20000
+
 module.exports = class WebGLColorShaderProgram
-  currentAlpha: null
+  program: null
+  coordsCount: 0
+  locations: {}
+
+  coords: new Float32Array coordsBufferLength
+  coordsBuffer: null
 
   constructor: (gl) ->
     @program = gl.createProgram()
     @initShaders gl
     @bindLocations gl
     @initBuffers gl
-    @cache = currentBuffer: @vertexBuffer
-    return
 
   initShaders: (gl) ->
     # Vertex shader
     vertexCode = "
       attribute vec2 a_position;
+      attribute float a_opacity;
+      attribute int a_color;
+
       uniform vec2 u_resolution;
-      uniform mat3 u_matrix;
 
       void main() {
         vec2 position = (u_matrix * vec3(a_position, 1)).xy;
@@ -23,6 +30,9 @@ module.exports = class WebGLColorShaderProgram
         vec2 clipSpace = zeroToTwo - 1.0;
 
         gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+
+        v_opacity = a_opacity;
+        v_color = a_color;
       }
     "
     vertexShader = gl.createShader(gl.VERTEX_SHADER)
@@ -38,14 +48,14 @@ module.exports = class WebGLColorShaderProgram
     # Fragment shader
     fragmentCode = "
       precision mediump float;
-      uniform int u_color;
-      uniform float u_alpha;
+      varying int v_color;
+      varying float v_alpha;
 
       void main() {
-        float rValue = float(u_color / 256 / 256);
-        float gValue = float(u_color / 256 - int(rValue * 256.0));
-        float bValue = float(u_color - int(rValue * 256.0 * 256.0) - int(gValue * 256.0));
-        gl_FragColor = vec4(rValue / 255.0, gValue / 255.0, bValue / 255.0, u_alpha);
+        float rValue = float(v_color / 256 / 256);
+        float gValue = float(v_color / 256 - int(rValue * 256.0));
+        float bValue = float(v_color - int(rValue * 256.0 * 256.0) - int(gValue * 256.0));
+        gl_FragColor = vec4(rValue / 255.0, gValue / 255.0, bValue / 255.0, v_opacity);
       }
     "
     fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
