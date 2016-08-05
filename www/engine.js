@@ -7233,6 +7233,16 @@ poly2tri = require('poly2tri');
 
 module.exports = WebGLHelper = {
   planeCache: new Float32Array(12),
+  triangleCache: {},
+  generateCacheKeyForPoints: function(points) {
+    var j, len, p, string;
+    string = '';
+    for (j = 0, len = points.length; j < len; j++) {
+      p = points[j];
+      string += p.x + "," + p.y + ",";
+    }
+    return string;
+  },
   colorFromCSSString: function(string) {
     var a, b, c;
     if (string.length === 4) {
@@ -7310,8 +7320,12 @@ module.exports = WebGLHelper = {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
   },
   setPolygon: function(gl, points) {
-    var coords, triangles;
-    triangles = new poly2tri.SweepContext(points.slice()).triangulate().getTriangles();
+    var cacheKey, coords, triangles;
+    cacheKey = this.generateCacheKeyForPoints(points);
+    if (!this.triangleCache[cacheKey]) {
+      this.triangleCache[cacheKey] = new poly2tri.SweepContext(points.slice()).triangulate().getTriangles();
+    }
+    triangles = this.triangleCache[cacheKey];
     coords = new Float32Array(triangles.reduce(function(coords, triangle) {
       var p;
       p = triangle.getPoints();

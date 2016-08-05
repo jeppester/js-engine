@@ -2,6 +2,12 @@ poly2tri = require 'poly2tri'
 
 module.exports = WebGLHelper =
   planeCache: new Float32Array 12
+  triangleCache: {}
+
+  generateCacheKeyForPoints: (points) ->
+    string = ''
+    string += "#{p.x},#{p.y}," for p in points
+    string
 
   colorFromCSSString: (string) ->
     if string.length is 4
@@ -121,10 +127,14 @@ module.exports = WebGLHelper =
     return
 
   setPolygon: (gl, points)->
-    # Triangulate polygon
-    triangles = new poly2tri.SweepContext(points.slice())
-      .triangulate()
-      .getTriangles()
+    # Triangulate polygon if it is not already cached
+    cacheKey = this.generateCacheKeyForPoints points
+    unless this.triangleCache[cacheKey]
+      this.triangleCache[cacheKey] = new poly2tri.SweepContext(points.slice())
+        .triangulate()
+        .getTriangles()
+
+    triangles = this.triangleCache[cacheKey]
 
     coords = new Float32Array triangles.reduce (coords, triangle)->
       p = triangle.getPoints()
