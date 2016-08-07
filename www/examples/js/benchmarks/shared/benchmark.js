@@ -1,62 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Benchmark, Main, startEngine,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-Benchmark = require('./shared/benchmark');
-
-startEngine = require('./shared/startEngine');
-
-Main = (function(_super) {
-  __extends(Main, _super);
-
-  function Main() {
-    engine.defaultActivityLoop.attachOperation('check-bounce', function(objects) {
-      var object, _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = objects.length; _i < _len; _i++) {
-        object = objects[_i];
-        if (object.x < 0) {
-          object.x = 0;
-          object.speed.x = -object.speed.x;
-        } else if (object.x > 600) {
-          object.x = 600;
-          object.speed.x = -object.speed.x;
-        }
-        if (object.y < 0) {
-          object.y = 0;
-          _results.push(object.speed.y = -object.speed.y);
-        } else if (object.y > 400) {
-          object.y = 400;
-          _results.push(object.speed.y = -object.speed.y);
-        } else {
-          _results.push(void 0);
-        }
-      }
-      return _results;
-    });
-    Main.__super__.constructor.apply(this, arguments);
-  }
-
-  Main.prototype.getObject = function(x, y, direction) {
-    var speed, sprite;
-    speed = new Engine.Geometry.Vector().setFromDirection(direction, 5);
-    sprite = new Engine.Views.GameObject('rock', x, y, direction, {
-      speed: speed
-    });
-    engine.defaultActivityLoop.subscribeToOperation('check-bounce', sprite);
-    return sprite;
-  };
-
-  return Main;
-
-})(Benchmark);
-
-startEngine(Main);
-
-
-
-},{"./shared/benchmark":2,"./shared/startEngine":3}],2:[function(require,module,exports){
 var Benchmark;
 
 module.exports = Benchmark = (function() {
@@ -161,22 +103,6 @@ module.exports = Benchmark = (function() {
   return Benchmark;
 
 })();
-
-
-
-},{}],3:[function(require,module,exports){
-module.exports = function(gameClass) {
-  return new Engine({
-    gameClass: gameClass,
-    themesPath: '../assets',
-    themes: ['example'],
-    backgroundColor: "#000",
-    disableWebGL: /canvas/.test(window.location.search),
-    pauseOnBlur: false,
-    canvasResX: 600,
-    canvasResY: 400
-  });
-};
 
 
 
