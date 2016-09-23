@@ -12,12 +12,15 @@ module.exports = WebGLHelper =
 
   colorFromCSSString: (string) ->
     if string.length is 4
-      a = string.substr(1, 1)
-      b = string.substr(2, 1)
-      c = string.substr(3, 1)
-      parseInt "0x" + a + a + b + b + c + c
-    else
-      parseInt "0x" + string.substr(1, 6)
+      a = string[1]
+      b = string[2]
+      c = string[3]
+      string = '#' + a + a + b + b + c + c
+
+    r = parseInt(string.substr(1, 2), 16) / 255
+    g = parseInt(string.substr(1, 2), 16) / 255
+    b = parseInt(string.substr(1, 2), 16) / 255
+    [r, g, b]
 
   # Produces bufferdata for TRIANGLES
   setPlane: (gl, x, y, width, height) ->

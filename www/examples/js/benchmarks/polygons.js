@@ -1,14 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var Benchmark, Main, startEngine,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Benchmark = require('./shared/benchmark');
 
 startEngine = require('./shared/startEngine');
 
-Main = (function(_super) {
-  __extends(Main, _super);
+Main = (function(superClass) {
+  extend(Main, superClass);
 
   function Main() {
     return Main.__super__.constructor.apply(this, arguments);
@@ -56,13 +56,13 @@ module.exports = Benchmark = (function() {
   }
 
   Benchmark.prototype.getSearch = function() {
-    var name, part, parts, s, search, value, _i, _len, _ref;
+    var j, len, name, part, parts, ref, s, search, value;
     s = window.location.search.replace(/^\?/, '');
     parts = s.split('&');
     search = {};
-    for (_i = 0, _len = parts.length; _i < _len; _i++) {
-      part = parts[_i];
-      _ref = part.split('='), name = _ref[0], value = _ref[1];
+    for (j = 0, len = parts.length; j < len; j++) {
+      part = parts[j];
+      ref = part.split('='), name = ref[0], value = ref[1];
       search[name] = value;
     }
     return search;
@@ -103,7 +103,7 @@ module.exports = Benchmark = (function() {
   };
 
   Benchmark.prototype.addObjects = function(count) {
-    var col, cols, direction, directionInt, i, row, rows, x, xInt, y, yInt, _i, _results;
+    var col, cols, direction, directionInt, i, j, ref, results, row, rows, x, xInt, y, yInt;
     if (count == null) {
       count = 10;
     }
@@ -114,8 +114,8 @@ module.exports = Benchmark = (function() {
     xInt = engine.canvasResX / cols;
     yInt = engine.canvasResY / rows;
     directionInt = Math.PI / 100;
-    _results = [];
-    for (i = _i = 0; 0 <= count ? _i < count : _i > count; i = 0 <= count ? ++_i : --_i) {
+    results = [];
+    for (i = j = 0, ref = count; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
       x = col * xInt;
       y = row * yInt;
       engine.currentRoom.addChildren(this.getObject(x, y, direction));
@@ -123,12 +123,12 @@ module.exports = Benchmark = (function() {
       ++row;
       if (row > rows) {
         row = 0;
-        _results.push(++col);
+        results.push(++col);
       } else {
-        _results.push(void 0);
+        results.push(void 0);
       }
     }
-    return _results;
+    return results;
   };
 
   Benchmark.prototype.getObject = function(x, y) {

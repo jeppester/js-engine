@@ -17,22 +17,22 @@ module.exports = class WebGLColorShaderProgram
   initShaders: (gl) ->
     # Vertex shader
     vertexCode = "
-      attribute vec2 a_position;
-      attribute float a_opacity;
-      attribute int a_color;
-
       uniform vec2 u_resolution;
 
+      attribute vec2 a_position;
+      attribute vec3 a_color;
+      attribute float a_opacity;
+
+      varying float v_opacity;
+      varying vec3 v_color;
+
       void main() {
-        vec2 position = (u_matrix * vec3(a_position, 1)).xy;
-        vec2 zeroToOne = position / u_resolution;
-        vec2 zeroToTwo = zeroToOne * 2.0;
-        vec2 clipSpace = zeroToTwo - 1.0;
+        vec2 clipSpace = a_position / u_resolution * 2.0 - 1.0;
 
         gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
 
-        v_opacity = a_opacity;
         v_color = a_color;
+        v_opacity = a_opacity;
       }
     "
     vertexShader = gl.createShader(gl.VERTEX_SHADER)
@@ -48,14 +48,12 @@ module.exports = class WebGLColorShaderProgram
     # Fragment shader
     fragmentCode = "
       precision mediump float;
-      varying int v_color;
-      varying float v_alpha;
+
+      varying vec3 v_color;
+      varying float v_opacity;
 
       void main() {
-        float rValue = float(v_color / 256 / 256);
-        float gValue = float(v_color / 256 - int(rValue * 256.0));
-        float bValue = float(v_color - int(rValue * 256.0 * 256.0) - int(gValue * 256.0));
-        gl_FragColor = vec4(rValue / 255.0, gValue / 255.0, bValue / 255.0, v_opacity);
+        gl_FragColor = vec4(v_color, v_opacity);
       }
     "
     fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)

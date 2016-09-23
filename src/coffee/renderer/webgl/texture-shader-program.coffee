@@ -24,11 +24,11 @@ module.exports = class WebGLTextureShaderProgram
   initShaders: (gl) ->
     # Vertex shader
     vertexCode = "
+      uniform vec2 u_resolution;
+
       attribute vec2 a_position;
       attribute vec2 a_texCoord;
       attribute float a_opacity;
-
-      uniform vec2 u_resolution;
 
       varying vec2 v_texCoord;
       varying float v_opacity;
