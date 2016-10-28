@@ -1,11 +1,10 @@
-coordsBufferLength = 5 * 6 * 20000
+TriangleBuffer = require './triangle-buffer'
 
 module.exports = class WebGLColorShaderProgram
   program: null
-  coordsCount: 0
   locations: {}
 
-  coords: new Float32Array coordsBufferLength
+  triangleBuffer: new TriangleBuffer 20000 # 20000 triangles
   coordsBuffer: null
 
   constructor: (gl) ->
@@ -70,12 +69,10 @@ module.exports = class WebGLColorShaderProgram
 
   bindLocations: (gl) ->
     @locations =
-      a_position: gl.getAttribLocation(@program, "a_position")
-      u_resolution: gl.getUniformLocation(@program, "u_resolution")
-      u_matrix: gl.getUniformLocation(@program, "u_matrix")
-      u_color: gl.getUniformLocation(@program, "u_color")
-      u_alpha: gl.getUniformLocation(@program, "u_alpha")
-
+      a_position:   gl.getAttribLocation @program, "a_position"
+      a_color:   gl.getAttribLocation @program, "a_color"
+      a_opacity:    gl.getAttribLocation @program, "a_opacity"
+      u_resolution: gl.getUniformLocation @program, "u_resolution"
     return
 
   initBuffers: (gl) ->
@@ -85,163 +82,171 @@ module.exports = class WebGLColorShaderProgram
 
   # When returning to the program reset the buffer
   onSet: (gl) ->
+    floatSize = @triangleBuffer.getBuffer().BYTES_PER_ELEMENT
     gl.bindBuffer gl.ARRAY_BUFFER, @vertexBuffer
-    gl.enableVertexAttribArray @locations.a_position
-    gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 0, 0
-    return
 
-  setAlpha: (gl, alpha) ->
-    unless @currentAlpha == alpha
-      @currentAlpha = alpha
-      gl.uniform1f @locations.u_alpha, alpha
+    # Position
+    gl.vertexAttribPointer @locations.a_position, 2, gl.FLOAT, false, 6 * floatSize, 0
+    gl.enableVertexAttribArray @locations.a_position
+
+    # Color
+    gl.vertexAttribPointer @locations.a_color, 3, gl.FLOAT, false, 6 * floatSize, 2 * floatSize
+    gl.enableVertexAttribArray @locations.a_color
+
+    # Opacity
+    gl.vertexAttribPointer @locations.a_opacity, 1, gl.FLOAT, false, 6 * floatSize, 5 * floatSize
+    gl.enableVertexAttribArray @locations.a_opacity
+    return
 
   # Draw functions
   renderLine: (gl, object, wm) ->
-    l = @locations
-    @setAlpha gl, object.opacity
-
     # If the line is transparent, do nothing
-    if object.strokeStyle is "transparent"
-      return
-    else if object.strokeStyle.length is 4
-      color = object.strokeStyle
-      a = color.substr(1, 1)
-      b = color.substr(2, 1)
-      c = color.substr(3, 1)
-      color = parseInt("0x" + a + a + b + b + c + c)
-    else
-      color = parseInt("0x" + object.strokeStyle.substr(1, 6))
+    return if object.strokeStyle is "transparent"
 
-    # Set color
-    gl.uniform1i l.u_color, color
-
-    # Set geometry
+    # Set triangles
+    color = Helpers.WebGL.colorFromCSSString object.strokeStyle
     coords = object.createPolygonFromWidth(object.lineWidth, object.lineCap).getCoordinates()
-    Helpers.WebGL.setConvexPolygon gl, coords
-
-    # Set matrix
-    gl.uniformMatrix3fv l.u_matrix, false, wm
-
-    # Draw
-    gl.drawArrays gl.TRIANGLE_FAN, 0, coords.length / 2
+    triangles = coords.length / 2 - 2
+    for i in [0..triangles]
+      offset = (i + 1) * 2
+      trianglesLeft = @triangleBuffer.pushTriangle(
+        coords[0]
+        coords[1]
+        coords[offset]
+        coords[offset + 1]
+        coords[offset + 2]
+        coords[offset + 3]
+        color
+        object.opacity
+        wm
+      )
+      @flushBuffers(gl) if trianglesLeft == 0
     return
 
-  renderRectangle: (gl, object, wm) ->
-    l = @locations
-    @setAlpha gl, object.opacity
+  # renderRectangle: (gl, object, wm) ->
+  #   l = @locations
+  #   @setAlpha gl, object.opacity
+  #
+  #   # Set matrix (it is the same for both fill and stroke)
+  #   gl.uniformMatrix3fv l.u_matrix, false, wm
+  #
+  #   # Draw fill
+  #   if object.fillStyle isnt "transparent"
+  #     # Set color
+  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString object.fillStyle
+  #
+  #     # Set geometry (no need to set x and y as they already in the world matrix)
+  #     Helpers.WebGL.setPlane gl, 0, 0, object.width, object.height
+  #
+  #     # Draw
+  #     gl.drawArrays gl.TRIANGLES, 0, 6
+  #
+  #   # Draw stroke (if not transparent)
+  #   if object.strokeStyle isnt "transparent"
+  #     # Set color
+  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
+  #
+  #     # Set geometry (no need to set x and y as they are already included in the world matrix)
+  #     Helpers.WebGL.setPlaneOutline gl, 0, 0, object.width, object.height, object.lineWidth
+  #
+  #     # Draw
+  #     gl.drawArrays gl.TRIANGLES, 0, 24
+  #   return
+  #
+  # renderCircle: (gl, object, wm) ->
+  #   l = @locations
+  #   @setAlpha gl, object.opacity
+  #
+  #   # Set matrix (it is the same for both fill and stroke)
+  #   gl.uniformMatrix3fv l.u_matrix, false, wm
+  #
+  #   # Decide how many segments we want
+  #   if object.radius < 10
+  #     segmentsCount = 12
+  #   else if object.radius < 50
+  #     segmentsCount = 30
+  #   else if object.radius < 100
+  #     segmentsCount = 50
+  #   else
+  #     segmentsCount = 80
+  #
+  #   # Draw fill
+  #   if object.fillStyle isnt "transparent"
+  #
+  #     # Set color
+  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.fillStyle)
+  #
+  #     # Set geometry (no need to set x and y as they already in the world matrix)
+  #     Helpers.WebGL.setCircle gl, 0, 0, segmentsCount, object.radius
+  #
+  #     # Draw
+  #     gl.drawArrays gl.TRIANGLE_FAN, 0, segmentsCount
+  #
+  #   # Draw stroke (if not transparent)
+  #   if object.strokeStyle isnt "transparent"
+  #
+  #     # Set color
+  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
+  #
+  #     # Set geometry (no need to set x and y as they already in the world matrix)
+  #     Helpers.WebGL.setCircleOutline gl, 0, 0, segmentsCount, object.radius, object.lineWidth
+  #
+  #     # Draw
+  #     gl.drawArrays gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2
+  #   return
+  #
+  # renderPolygon: (gl, object, wm) ->
+  #   l = @locations
+  #   @setAlpha gl, object.opacity
+  #
+  #   # Set matrix (it is the same for both fill and stroke)
+  #   gl.uniformMatrix3fv l.u_matrix, false, wm
+  #
+  #   # Draw fill
+  #   if object.fillStyle isnt "transparent"
+  #     # Set color
+  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString object.fillStyle
+  #
+  #     # Set geometry (no need to set x and y as they already in the world matrix)
+  #     Helpers.WebGL.setPolygon gl, object.points
+  #
+  #     # Draw
+  #     gl.drawArrays gl.TRIANGLES, 0, (object.points.length - 2) * 3
+  #
+  #   if object.strokeStyle isnt "transparent"
+  #     # Set color
+  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
+  #
+  #     # Set geometry (no need to set x and y as they already in the world matrix)
+  #     Helpers.WebGL.setPolygonOutline gl, object.points, object.lineWidth
+  #
+  #     # Draw
+  #     gl.drawArrays gl.TRIANGLE_STRIP, 0, object.points.length * 2 + 2
+  #   return
+  #
+  # renderBoundingBox: (gl, object, wm)->
+  #   l = @locations
+  #   @setAlpha gl, 1
+  #
+  #   mask = engine.loader.getMask object.source, object.getTheme()
+  #   box = mask.boundingBox
+  #   x = box.points[0].x
+  #   y = box.points[0].y
+  #   width = box.points[2].x - x
+  #   height = box.points[2].y - y
+  #
+  #   gl.uniformMatrix3fv l.u_matrix, false, wm
+  #   gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString '#0F0'
+  #   Helpers.WebGL.setPlaneOutline gl, x, y, width, height, 1
+  #   gl.drawArrays gl.TRIANGLES, 0, 24
 
-    # Set matrix (it is the same for both fill and stroke)
-    gl.uniformMatrix3fv l.u_matrix, false, wm
-
-    # Draw fill
-    if object.fillStyle isnt "transparent"
-      # Set color
-      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString object.fillStyle
-
-      # Set geometry (no need to set x and y as they already in the world matrix)
-      Helpers.WebGL.setPlane gl, 0, 0, object.width, object.height
-
-      # Draw
-      gl.drawArrays gl.TRIANGLES, 0, 6
-
-    # Draw stroke (if not transparent)
-    if object.strokeStyle isnt "transparent"
-      # Set color
-      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
-
-      # Set geometry (no need to set x and y as they are already included in the world matrix)
-      Helpers.WebGL.setPlaneOutline gl, 0, 0, object.width, object.height, object.lineWidth
-
-      # Draw
-      gl.drawArrays gl.TRIANGLES, 0, 24
+  flushBuffers: (gl)->
+    triangleCount = @triangleBuffer.getTriangleCount()
+    if triangleCount != 0
+      gl.bufferData gl.ARRAY_BUFFER, @triangleBuffer.getBuffer(), gl.DYNAMIC_DRAW
+      gl.drawArrays gl.TRIANGLES, 0, triangleCount / 6
+      @triangleBuffer.resetIndex()
     return
-
-  renderCircle: (gl, object, wm) ->
-    l = @locations
-    @setAlpha gl, object.opacity
-
-    # Set matrix (it is the same for both fill and stroke)
-    gl.uniformMatrix3fv l.u_matrix, false, wm
-
-    # Decide how many segments we want
-    if object.radius < 10
-      segmentsCount = 12
-    else if object.radius < 50
-      segmentsCount = 30
-    else if object.radius < 100
-      segmentsCount = 50
-    else
-      segmentsCount = 80
-
-    # Draw fill
-    if object.fillStyle isnt "transparent"
-
-      # Set color
-      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.fillStyle)
-
-      # Set geometry (no need to set x and y as they already in the world matrix)
-      Helpers.WebGL.setCircle gl, 0, 0, segmentsCount, object.radius
-
-      # Draw
-      gl.drawArrays gl.TRIANGLE_FAN, 0, segmentsCount
-
-    # Draw stroke (if not transparent)
-    if object.strokeStyle isnt "transparent"
-
-      # Set color
-      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
-
-      # Set geometry (no need to set x and y as they already in the world matrix)
-      Helpers.WebGL.setCircleOutline gl, 0, 0, segmentsCount, object.radius, object.lineWidth
-
-      # Draw
-      gl.drawArrays gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2
-    return
-
-  renderPolygon: (gl, object, wm) ->
-    l = @locations
-    @setAlpha gl, object.opacity
-
-    # Set matrix (it is the same for both fill and stroke)
-    gl.uniformMatrix3fv l.u_matrix, false, wm
-
-    # Draw fill
-    if object.fillStyle isnt "transparent"
-      # Set color
-      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString object.fillStyle
-
-      # Set geometry (no need to set x and y as they already in the world matrix)
-      Helpers.WebGL.setPolygon gl, object.points
-
-      # Draw
-      gl.drawArrays gl.TRIANGLES, 0, (object.points.length - 2) * 3
-
-    if object.strokeStyle isnt "transparent"
-      # Set color
-      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
-
-      # Set geometry (no need to set x and y as they already in the world matrix)
-      Helpers.WebGL.setPolygonOutline gl, object.points, object.lineWidth
-
-      # Draw
-      gl.drawArrays gl.TRIANGLE_STRIP, 0, object.points.length * 2 + 2
-    return
-
-  renderBoundingBox: (gl, object, wm)->
-    l = @locations
-    @setAlpha gl, 1
-
-    mask = engine.loader.getMask object.source, object.getTheme()
-    box = mask.boundingBox
-    x = box.points[0].x
-    y = box.points[0].y
-    width = box.points[2].x - x
-    height = box.points[2].y - y
-
-    gl.uniformMatrix3fv l.u_matrix, false, wm
-    gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString '#0F0'
-    Helpers.WebGL.setPlaneOutline gl, x, y, width, height, 1
-    gl.drawArrays gl.TRIANGLES, 0, 24
 
 Helpers =
   WebGL: require '../../helpers/webgl'

@@ -2,6 +2,7 @@ poly2tri = require 'poly2tri'
 
 module.exports = WebGLHelper =
   planeCache: new Float32Array 12
+  colorCache: new Float32Array 3
   polygonCoordsCache: {}
   polygonOutlineCoordsCache: {}
 
@@ -17,10 +18,10 @@ module.exports = WebGLHelper =
       c = string[3]
       string = '#' + a + a + b + b + c + c
 
-    r = parseInt(string.substr(1, 2), 16) / 255
-    g = parseInt(string.substr(1, 2), 16) / 255
-    b = parseInt(string.substr(1, 2), 16) / 255
-    [r, g, b]
+    @colorCache[0] = parseInt(string.substr(1, 2), 16) / 255
+    @colorCache[1] = parseInt(string.substr(1, 2), 16) / 255
+    @colorCache[2] = parseInt(string.substr(1, 2), 16) / 255
+    @colorCache
 
   # Produces bufferdata for TRIANGLES
   setPlane: (gl, x, y, width, height) ->

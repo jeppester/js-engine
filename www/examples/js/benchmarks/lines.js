@@ -11,41 +11,17 @@ Main = (function(_super) {
   __extends(Main, _super);
 
   function Main() {
-    engine.defaultActivityLoop.attachOperation('check-bounce', function(objects) {
-      var object, _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = objects.length; _i < _len; _i++) {
-        object = objects[_i];
-        if (object.x < 0) {
-          object.x = 0;
-          object.speed.x = -object.speed.x;
-        } else if (object.x > 600) {
-          object.x = 600;
-          object.speed.x = -object.speed.x;
-        }
-        if (object.y < 0) {
-          object.y = 0;
-          _results.push(object.speed.y = -object.speed.y);
-        } else if (object.y > 400) {
-          object.y = 400;
-          _results.push(object.speed.y = -object.speed.y);
-        } else {
-          _results.push(void 0);
-        }
-      }
-      return _results;
-    });
-    Main.__super__.constructor.apply(this, arguments);
+    return Main.__super__.constructor.apply(this, arguments);
   }
 
-  Main.prototype.getObject = function(x, y, direction) {
-    var speed, sprite;
-    speed = new Engine.Geometry.Vector().setFromDirection(direction, 5);
-    sprite = new Engine.Views.GameObject('rock', x, y, direction, {
-      speed: speed
-    });
-    engine.defaultActivityLoop.subscribeToOperation('check-bounce', sprite);
-    return sprite;
+  Main.prototype.defaultObjectsCount = 1000;
+
+  Main.prototype.getObject = function(x, y) {
+    var line;
+    line = new Engine.Views.Line(new Engine.Geometry.Vector(0, 0), new Engine.Geometry.Vector(10, 10), "#FFF", 2);
+    line.x = x;
+    line.y = y;
+    return line;
   };
 
   return Main;

@@ -1,24 +1,24 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var Benchmark, Main, startEngine,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Benchmark = require('./shared/benchmark');
 
 startEngine = require('./shared/startEngine');
 
-Main = (function(superClass) {
-  extend(Main, superClass);
+Main = (function(_super) {
+  __extends(Main, _super);
 
   function Main() {
     engine.defaultActivityLoop.attachOperation('rotation-transform', function(objects) {
-      var i, len, object, results;
-      results = [];
-      for (i = 0, len = objects.length; i < len; i++) {
-        object = objects[i];
-        results.push(object.direction += engine.perFrameSpeed(object.rotationSpeed));
+      var object, _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = objects.length; _i < _len; _i++) {
+        object = objects[_i];
+        _results.push(object.direction += engine.perFrameSpeed(object.rotationSpeed));
       }
-      return results;
+      return _results;
     });
     Main.__super__.constructor.apply(this, arguments);
   }
@@ -28,7 +28,7 @@ Main = (function(superClass) {
   };
 
   Main.prototype.addObjects = function(count) {
-    var arm, arms, container, direction, dist, i, nextContainer, object, outerContainer, ref, results, sprite, subCount;
+    var arm, arms, container, direction, dist, nextContainer, object, outerContainer, sprite, subCount, _i, _results;
     if (count == null) {
       count = 10;
     }
@@ -44,15 +44,15 @@ Main = (function(superClass) {
     sprite = new Engine.Views.Sprite('rock', 0, 0);
     outerContainer.addChildren(sprite);
     this.count = 1;
-    results = [];
-    for (arm = i = 0, ref = arms; 0 <= ref ? i < ref : i > ref; arm = 0 <= ref ? ++i : --i) {
+    _results = [];
+    for (arm = _i = 0; 0 <= arms ? _i < arms : _i > arms; arm = 0 <= arms ? ++_i : --_i) {
       dist = 150;
       direction = Math.PI * 2 / arms * arm;
       nextContainer = outerContainer;
-      results.push((function() {
-        var j, ref1, results1;
-        results1 = [];
-        for (object = j = 0, ref1 = subCount; 0 <= ref1 ? j < ref1 : j > ref1; object = 0 <= ref1 ? ++j : --j) {
+      _results.push((function() {
+        var _j, _results1;
+        _results1 = [];
+        for (object = _j = 0; 0 <= subCount ? _j < subCount : _j > subCount; object = 0 <= subCount ? ++_j : --_j) {
           container = new Engine.Views.Container();
           container.x = Math.cos(direction) * dist;
           container.y = Math.sin(direction) * dist;
@@ -64,12 +64,12 @@ Main = (function(superClass) {
           this.count++;
           container.addChildren(sprite);
           dist *= .9;
-          results1.push(nextContainer = container);
+          _results1.push(nextContainer = container);
         }
-        return results1;
+        return _results1;
       }).call(this));
     }
-    return results;
+    return _results;
   };
 
   return Main;
@@ -103,13 +103,13 @@ module.exports = Benchmark = (function() {
   }
 
   Benchmark.prototype.getSearch = function() {
-    var j, len, name, part, parts, ref, s, search, value;
+    var name, part, parts, s, search, value, _i, _len, _ref;
     s = window.location.search.replace(/^\?/, '');
     parts = s.split('&');
     search = {};
-    for (j = 0, len = parts.length; j < len; j++) {
-      part = parts[j];
-      ref = part.split('='), name = ref[0], value = ref[1];
+    for (_i = 0, _len = parts.length; _i < _len; _i++) {
+      part = parts[_i];
+      _ref = part.split('='), name = _ref[0], value = _ref[1];
       search[name] = value;
     }
     return search;
@@ -150,7 +150,7 @@ module.exports = Benchmark = (function() {
   };
 
   Benchmark.prototype.addObjects = function(count) {
-    var col, cols, direction, directionInt, i, j, ref, results, row, rows, x, xInt, y, yInt;
+    var col, cols, direction, directionInt, i, row, rows, x, xInt, y, yInt, _i, _results;
     if (count == null) {
       count = 10;
     }
@@ -161,8 +161,8 @@ module.exports = Benchmark = (function() {
     xInt = engine.canvasResX / cols;
     yInt = engine.canvasResY / rows;
     directionInt = Math.PI / 100;
-    results = [];
-    for (i = j = 0, ref = count; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+    _results = [];
+    for (i = _i = 0; 0 <= count ? _i < count : _i > count; i = 0 <= count ? ++_i : --_i) {
       x = col * xInt;
       y = row * yInt;
       engine.currentRoom.addChildren(this.getObject(x, y, direction));
@@ -170,12 +170,12 @@ module.exports = Benchmark = (function() {
       ++row;
       if (row > rows) {
         row = 0;
-        results.push(++col);
+        _results.push(++col);
       } else {
-        results.push(void 0);
+        _results.push(void 0);
       }
     }
-    return results;
+    return _results;
   };
 
   Benchmark.prototype.getObject = function(x, y) {

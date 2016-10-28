@@ -237,7 +237,6 @@ module.exports = class Line
         d
       ])
     else
-
       # To make round caps, make the line as two half circles, one half relative til point a, the other half relative to point b
       points = new Array(32)
       startAngle = ort.getDirection()
