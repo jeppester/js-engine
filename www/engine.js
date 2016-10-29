@@ -7236,6 +7236,7 @@ module.exports = WebGLHelper = {
   colorCache: {},
   polygonCoordsCache: {},
   polygonOutlineCoordsCache: {},
+  lineCoordsCache: {},
   generateCacheKeyForPoints: function(points) {
     var p, string, _i, _len;
     string = '';
@@ -7244,6 +7245,16 @@ module.exports = WebGLHelper = {
       string += "" + p.x + "," + p.y + ",";
     }
     return string;
+  },
+  getLineCoords: function(line) {
+    var cacheKey, coords;
+    cacheKey = "" + line.a.x + "," + line.a.y + "," + line.b.x + "," + line.b.y + "," + line.lineWidth + "," + line.lineCap;
+    coords = this.lineCoordsCache[cacheKey];
+    if (!coords) {
+      coords = line.createPolygonFromWidth(line.lineWidth, line.lineCap).getCoordinates();
+      this.lineCoordsCache[cacheKey] = coords;
+    }
+    return coords;
   },
   colorFromCSSString: function(string) {
     var color;
@@ -8994,15 +9005,15 @@ module.exports = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderLine = function(gl, object, wm) {
-    var color, coords, i, offset, triangles, trianglesLeft, _i;
+    var color, coords, offset, triangleCount, trianglesLeft;
     if (object.strokeStyle === "transparent") {
       return;
     }
     color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
-    coords = object.createPolygonFromWidth(object.lineWidth, object.lineCap).getCoordinates();
-    triangles = coords.length / 2 - 2;
-    for (i = _i = 1; 1 <= triangles ? _i <= triangles : _i >= triangles; i = 1 <= triangles ? ++_i : --_i) {
-      offset = i * 2;
+    coords = Helpers.WebGL.getLineCoords(object);
+    triangleCount = coords.length / 2 - 2;
+    while (--triangleCount) {
+      offset = triangleCount * 2;
       trianglesLeft = this.triangleBuffer.pushTriangle(coords[0], coords[1], coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], color, object.opacity, wm);
       if (trianglesLeft === 0) {
         this.flushBuffers(gl);

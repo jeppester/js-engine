@@ -19,7 +19,7 @@ class Main extends Benchmark
     color
 
   getObject: (x, y)->
-    line = new Engine.Views.Line(new Engine.Geometry.Vector(0, 0), new Engine.Geometry.Vector(10, 10), @getColor(), 5, 'butt')
+    line = new Engine.Views.Line(new Engine.Geometry.Vector(0, 0), new Engine.Geometry.Vector(10, 10), @getColor(), 5, 'round')
     line.x = x
     line.y = y
     line

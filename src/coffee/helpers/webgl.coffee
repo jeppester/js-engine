@@ -5,11 +5,20 @@ module.exports = WebGLHelper =
   colorCache: {}
   polygonCoordsCache: {}
   polygonOutlineCoordsCache: {}
+  lineCoordsCache: {}
 
   generateCacheKeyForPoints: (points) ->
     string = ''
     string += "#{p.x},#{p.y}," for p in points
     string
+
+  getLineCoords: (line) ->
+    cacheKey = "#{line.a.x},#{line.a.y},#{line.b.x},#{line.b.y},#{line.lineWidth},#{line.lineCap}"
+    coords = @lineCoordsCache[cacheKey]
+    if !coords
+      coords = line.createPolygonFromWidth(line.lineWidth, line.lineCap).getCoordinates()
+      @lineCoordsCache[cacheKey] = coords
+    coords
 
   colorFromCSSString: (string) ->
     color = @colorCache[string]

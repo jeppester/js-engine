@@ -105,10 +105,10 @@ module.exports = class WebGLColorShaderProgram
 
     # Set triangles
     color = Helpers.WebGL.colorFromCSSString object.strokeStyle
-    coords = object.createPolygonFromWidth(object.lineWidth, object.lineCap).getCoordinates()
-    triangles = coords.length / 2 - 2
-    for i in [1..triangles]
-      offset = i * 2
+    coords = Helpers.WebGL.getLineCoords object
+    triangleCount = coords.length / 2 - 2
+    while --triangleCount
+      offset = triangleCount * 2
       trianglesLeft = @triangleBuffer.pushTriangle(
         coords[0]
         coords[1]

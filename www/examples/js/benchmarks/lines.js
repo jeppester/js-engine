@@ -26,7 +26,7 @@ Main = (function(_super) {
 
   Main.prototype.getObject = function(x, y) {
     var line;
-    line = new Engine.Views.Line(new Engine.Geometry.Vector(0, 0), new Engine.Geometry.Vector(10, 10), this.getColor(), 5, 'butt');
+    line = new Engine.Views.Line(new Engine.Geometry.Vector(0, 0), new Engine.Geometry.Vector(10, 10), this.getColor(), 5, 'round');
     line.x = x;
     line.y = y;
     return line;
