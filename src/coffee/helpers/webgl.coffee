@@ -40,7 +40,7 @@ module.exports = WebGLHelper =
     color
 
   # Produces bufferdata for TRIANGLES
-  getPlaneOutlineCoords: (width, height, outlineWidth) ->
+  getPlaneOutlineTriangleCoords: (width, height, outlineWidth) ->
     cacheKey = "#{width},#{height},#{outlineWidth}"
     coords = @planeOutlineCoordsCache[cacheKey]
     if !coords

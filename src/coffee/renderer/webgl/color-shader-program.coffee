@@ -134,17 +134,14 @@ module.exports = class WebGLColorShaderProgram
 
     if object.strokeStyle != "transparent" && object.lineWidth != 0
       color = Helpers.WebGL.colorFromCSSString object.strokeStyle
-      coords = Helpers.WebGL.getPlaneOutlineCoords object.width, object.height, object.lineWidth
+      coords = Helpers.WebGL.getPlaneOutlineTriangleCoords object.width, object.height, object.lineWidth
       triangleCount = coords.length / 6
       while triangleCount--
         offset = triangleCount * 6
         @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
-          coords[offset]
-          coords[offset + 1]
-          coords[offset + 2]
-          coords[offset + 3]
-          coords[offset + 4]
-          coords[offset + 5]
+          coords[offset],     coords[offset + 1]
+          coords[offset + 2], coords[offset + 3]
+          coords[offset + 4], coords[offset + 5]
           color
           object.opacity
           wm

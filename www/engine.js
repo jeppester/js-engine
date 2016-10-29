@@ -7268,7 +7268,7 @@ module.exports = WebGLHelper = {
     }
     return color;
   },
-  getPlaneOutlineCoords: function(width, height, outlineWidth) {
+  getPlaneOutlineTriangleCoords: function(width, height, outlineWidth) {
     var cacheKey, coords, ix1, ix2, iy1, iy2, ox1, ox2, oy1, oy2;
     cacheKey = "" + width + "," + height + "," + outlineWidth;
     coords = this.planeOutlineCoordsCache[cacheKey];
@@ -9017,7 +9017,7 @@ module.exports = WebGLColorShaderProgram = (function() {
     }
     if (object.strokeStyle !== "transparent" && object.lineWidth !== 0) {
       color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
-      coords = Helpers.WebGL.getPlaneOutlineCoords(object.width, object.height, object.lineWidth);
+      coords = Helpers.WebGL.getPlaneOutlineTriangleCoords(object.width, object.height, object.lineWidth);
       triangleCount = coords.length / 6;
       while (triangleCount--) {
         offset = triangleCount * 6;
