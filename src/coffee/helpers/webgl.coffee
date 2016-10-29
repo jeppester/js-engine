@@ -19,8 +19,8 @@ module.exports = WebGLHelper =
       string = '#' + a + a + b + b + c + c
 
     @colorCache[0] = parseInt(string.substr(1, 2), 16) / 255
-    @colorCache[1] = parseInt(string.substr(1, 2), 16) / 255
-    @colorCache[2] = parseInt(string.substr(1, 2), 16) / 255
+    @colorCache[1] = parseInt(string.substr(3, 2), 16) / 255
+    @colorCache[2] = parseInt(string.substr(5, 2), 16) / 255
     @colorCache
 
   # Produces bufferdata for TRIANGLES
