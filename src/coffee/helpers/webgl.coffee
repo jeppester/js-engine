@@ -24,15 +24,18 @@ module.exports = WebGLHelper =
   colorFromCSSString: (string) ->
     color = @colorCache[string]
     if !color
-      color = new Float32Array 3
       if string.length is 4
-        color[0] = parseInt(string.substr(1, 1), 16) / 16
-        color[1] = parseInt(string.substr(2, 1), 16) / 16
-        color[2] = parseInt(string.substr(3, 1), 16) / 16
+        color = new Float32Array([
+          parseInt(string.substr(1, 1), 16) / 16
+          parseInt(string.substr(2, 1), 16) / 16
+          parseInt(string.substr(3, 1), 16) / 16
+        ])
       else
-        color[0] = parseInt(string.substr(1, 2), 16) / 255
-        color[1] = parseInt(string.substr(3, 2), 16) / 255
-        color[2] = parseInt(string.substr(5, 2), 16) / 255
+        color = new Float32Array([
+          parseInt(string.substr(1, 2), 16) / 255
+          parseInt(string.substr(3, 2), 16) / 255
+          parseInt(string.substr(5, 2), 16) / 255
+        ])
       @colorCache[string] = color
     color
 
