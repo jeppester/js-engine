@@ -9005,7 +9005,7 @@ module.exports = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderLine = function(gl, object, wm) {
-    var color, coords, offset, triangleCount, trianglesLeft;
+    var color, coords, offset, triangleCount;
     if (object.strokeStyle === "transparent") {
       return;
     }
@@ -9014,8 +9014,7 @@ module.exports = WebGLColorShaderProgram = (function() {
     triangleCount = coords.length / 2 - 2;
     while (--triangleCount) {
       offset = triangleCount * 2;
-      trianglesLeft = this.triangleBuffer.pushTriangle(coords[0], coords[1], coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], color, object.opacity, wm);
-      if (trianglesLeft === 0) {
+      if (!this.triangleBuffer.pushTriangle(coords[0], coords[1], coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], color, object.opacity, wm)) {
         this.flushBuffers(gl);
       }
     }
@@ -9304,6 +9303,7 @@ module.exports = TriangleBuffer = (function() {
   TriangleBuffer.prototype.pushTriangle = function(x1, y1, x2, y2, x3, y3, color, opacity, wm) {
     var i;
     i = this.currentTriangle * 18;
+    ++this.currentTriangle;
     this.buffer[i] = x1 * wm[0] + y1 * wm[3] + wm[6];
     this.buffer[i + 1] = x1 * wm[1] + y1 * wm[4] + wm[7];
     this.buffer[i + 2] = color[0];
@@ -9322,8 +9322,7 @@ module.exports = TriangleBuffer = (function() {
     this.buffer[i + 15] = color[1];
     this.buffer[i + 16] = color[2];
     this.buffer[i + 17] = opacity;
-    ++this.currentTriangle;
-    return this.triangleCount - this.currentTriangle;
+    return this.triangleCount !== this.currentTriangle;
   };
 
   return TriangleBuffer;

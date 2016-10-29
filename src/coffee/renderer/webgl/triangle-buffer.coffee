@@ -12,6 +12,7 @@ module.exports = class TriangleBuffer
 
   pushTriangle: (x1, y1, x2, y2, x3, y3, color, opacity, wm) ->
     i = @currentTriangle * 18
+    ++@currentTriangle
 
     # Matrix equation:
     # x = x * wm[0] + y * wm[3] + wm[6]
@@ -41,7 +42,5 @@ module.exports = class TriangleBuffer
     @buffer[i + 16] = color[2] # b
     @buffer[i + 17] = opacity # opacity
 
-    ++@currentTriangle
-
-    # Return the remaning triangles before a flush is needed
-    return @triangleCount - @currentTriangle
+    # Return whether or not there is space for more triangles
+    return @triangleCount != @currentTriangle

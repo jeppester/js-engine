@@ -109,7 +109,7 @@ module.exports = class WebGLColorShaderProgram
     triangleCount = coords.length / 2 - 2
     while --triangleCount
       offset = triangleCount * 2
-      trianglesLeft = @triangleBuffer.pushTriangle(
+      @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
         coords[0]
         coords[1]
         coords[offset]
@@ -120,7 +120,6 @@ module.exports = class WebGLColorShaderProgram
         object.opacity
         wm
       )
-      @flushBuffers gl if trianglesLeft == 0
     return
 
   # renderRectangle: (gl, object, wm) ->
