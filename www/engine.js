@@ -7233,7 +7233,7 @@ poly2tri = require('poly2tri');
 
 module.exports = WebGLHelper = {
   planeCache: new Float32Array(12),
-  colorCache: new Float32Array(3),
+  colorCache: {},
   polygonCoordsCache: {},
   polygonOutlineCoordsCache: {},
   generateCacheKeyForPoints: function(points) {
@@ -7246,17 +7246,22 @@ module.exports = WebGLHelper = {
     return string;
   },
   colorFromCSSString: function(string) {
-    var a, b, c;
-    if (string.length === 4) {
-      a = string[1];
-      b = string[2];
-      c = string[3];
-      string = '#' + a + a + b + b + c + c;
+    var color;
+    color = this.colorCache[string];
+    if (!color) {
+      color = new Float32Array(3);
+      if (string.length === 4) {
+        color[0] = parseInt(string.substr(1, 1), 16) / 16;
+        color[1] = parseInt(string.substr(2, 1), 16) / 16;
+        color[2] = parseInt(string.substr(3, 1), 16) / 16;
+      } else {
+        color[0] = parseInt(string.substr(1, 2), 16) / 255;
+        color[1] = parseInt(string.substr(3, 2), 16) / 255;
+        color[2] = parseInt(string.substr(5, 2), 16) / 255;
+      }
+      this.colorCache[string] = color;
     }
-    this.colorCache[0] = parseInt(string.substr(1, 2), 16) / 255;
-    this.colorCache[1] = parseInt(string.substr(3, 2), 16) / 255;
-    this.colorCache[2] = parseInt(string.substr(5, 2), 16) / 255;
-    return this.colorCache;
+    return color;
   },
   setPlane: function(gl, x, y, width, height) {
     var p, x1, x2, y1, y2;

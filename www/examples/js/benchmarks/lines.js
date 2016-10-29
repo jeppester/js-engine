@@ -16,8 +16,6 @@ Main = (function(_super) {
     return Main.__super__.constructor.apply(this, arguments);
   }
 
-  Main.prototype.defaultObjectsCount = 1000;
-
   Main.prototype.getColor = function() {
     var color, colors;
     colors = ['#FFF', '#BBB', '#F00', '#FF0', '#F0F', '#0F0', '#0FF', '#00F'];
@@ -28,7 +26,7 @@ Main = (function(_super) {
 
   Main.prototype.getObject = function(x, y) {
     var line;
-    line = new Engine.Views.Line(new Engine.Geometry.Vector(0, 0), new Engine.Geometry.Vector(10, 10), this.getColor(), 5, 'round');
+    line = new Engine.Views.Line(new Engine.Geometry.Vector(0, 0), new Engine.Geometry.Vector(10, 10), this.getColor(), 5, 'butt');
     line.x = x;
     line.y = y;
     return line;
