@@ -107,8 +107,8 @@ module.exports = class WebGLColorShaderProgram
     color = Helpers.WebGL.colorFromCSSString object.strokeStyle
     coords = object.createPolygonFromWidth(object.lineWidth, object.lineCap).getCoordinates()
     triangles = coords.length / 2 - 2
-    for i in [0..triangles]
-      offset = (i + 1) * 2
+    for i in [1..triangles]
+      offset = i * 2
       trianglesLeft = @triangleBuffer.pushTriangle(
         coords[0]
         coords[1]
@@ -120,7 +120,7 @@ module.exports = class WebGLColorShaderProgram
         object.opacity
         wm
       )
-      @flushBuffers(gl) if trianglesLeft == 0
+      @flushBuffers gl if trianglesLeft == 0
     return
 
   # renderRectangle: (gl, object, wm) ->
@@ -244,7 +244,7 @@ module.exports = class WebGLColorShaderProgram
     triangleCount = @triangleBuffer.getTriangleCount()
     if triangleCount != 0
       gl.bufferData gl.ARRAY_BUFFER, @triangleBuffer.getBuffer(), gl.DYNAMIC_DRAW
-      gl.drawArrays gl.TRIANGLES, 0, triangleCount / 6
+      gl.drawArrays gl.TRIANGLES, 0, triangleCount * 3 # Three points per triangle
       @triangleBuffer.resetIndex()
     return
 

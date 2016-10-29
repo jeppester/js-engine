@@ -7254,8 +7254,8 @@ module.exports = WebGLHelper = {
       string = '#' + a + a + b + b + c + c;
     }
     this.colorCache[0] = parseInt(string.substr(1, 2), 16) / 255;
-    this.colorCache[1] = parseInt(string.substr(1, 2), 16) / 255;
-    this.colorCache[2] = parseInt(string.substr(1, 2), 16) / 255;
+    this.colorCache[1] = parseInt(string.substr(3, 2), 16) / 255;
+    this.colorCache[2] = parseInt(string.substr(5, 2), 16) / 255;
     return this.colorCache;
   },
   setPlane: function(gl, x, y, width, height) {
@@ -8996,8 +8996,8 @@ module.exports = WebGLColorShaderProgram = (function() {
     color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
     coords = object.createPolygonFromWidth(object.lineWidth, object.lineCap).getCoordinates();
     triangles = coords.length / 2 - 2;
-    for (i = _i = 0; 0 <= triangles ? _i <= triangles : _i >= triangles; i = 0 <= triangles ? ++_i : --_i) {
-      offset = (i + 1) * 2;
+    for (i = _i = 1; 1 <= triangles ? _i <= triangles : _i >= triangles; i = 1 <= triangles ? ++_i : --_i) {
+      offset = i * 2;
       trianglesLeft = this.triangleBuffer.pushTriangle(coords[0], coords[1], coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], color, object.opacity, wm);
       if (trianglesLeft === 0) {
         this.flushBuffers(gl);
@@ -9010,7 +9010,7 @@ module.exports = WebGLColorShaderProgram = (function() {
     triangleCount = this.triangleBuffer.getTriangleCount();
     if (triangleCount !== 0) {
       gl.bufferData(gl.ARRAY_BUFFER, this.triangleBuffer.getBuffer(), gl.DYNAMIC_DRAW);
-      gl.drawArrays(gl.TRIANGLES, 0, triangleCount / 6);
+      gl.drawArrays(gl.TRIANGLES, 0, triangleCount * 3);
       this.triangleBuffer.resetIndex();
     }
   };

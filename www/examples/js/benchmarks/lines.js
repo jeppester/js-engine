@@ -1,11 +1,13 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Benchmark, Main, startEngine,
+var Benchmark, Main, colorNumber, startEngine,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Benchmark = require('./shared/benchmark');
 
 startEngine = require('./shared/startEngine');
+
+colorNumber = 0;
 
 Main = (function(_super) {
   __extends(Main, _super);
@@ -16,9 +18,17 @@ Main = (function(_super) {
 
   Main.prototype.defaultObjectsCount = 1000;
 
+  Main.prototype.getColor = function() {
+    var color, colors;
+    colors = ['#FFF', '#BBB', '#F00', '#FF0', '#F0F', '#0F0', '#0FF', '#00F'];
+    color = colors[colorNumber % colors.length];
+    ++colorNumber;
+    return color;
+  };
+
   Main.prototype.getObject = function(x, y) {
     var line;
-    line = new Engine.Views.Line(new Engine.Geometry.Vector(0, 0), new Engine.Geometry.Vector(10, 10), "#FFF", 2);
+    line = new Engine.Views.Line(new Engine.Geometry.Vector(0, 0), new Engine.Geometry.Vector(10, 10), this.getColor(), 5, 'round');
     line.x = x;
     line.y = y;
     return line;
