@@ -7287,9 +7287,6 @@ module.exports = WebGLHelper = {
     }
     return coords;
   },
-  setConvexPolygon: function(gl, coords) {
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
-  },
   setCircle: function(gl, x, y, segmentsCount, radius) {
     var coords, i, segmentLength;
     coords = new Array(segmentsCount * 2);

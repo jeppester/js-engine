@@ -3,7 +3,6 @@ startEngine = require './shared/startEngine'
 colorNumber = 0
 
 class Main extends Benchmark
-  defaultObjectsCount: 4
   getColor: ->
     colors = [
       '#FFF',
@@ -20,9 +19,9 @@ class Main extends Benchmark
     color
 
   getObject: (x, y)->
-    line = new Engine.Views.Line(new Engine.Geometry.Vector(0, 0), new Engine.Geometry.Vector(20, 0), @getColor(), 200, 'round')
-    line.x = x + 100
-    line.y = y + 100
+    line = new Engine.Views.Line(new Engine.Geometry.Vector(0, 0), new Engine.Geometry.Vector(20, 0), @getColor(), 4, 'round')
+    line.x = x
+    line.y = y
     line
 
 startEngine Main

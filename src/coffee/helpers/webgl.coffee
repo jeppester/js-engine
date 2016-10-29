@@ -74,11 +74,6 @@ module.exports = WebGLHelper =
     coords
 
   # Produces bufferdata for TRIANGLE_FAN
-  setConvexPolygon: (gl, coords) ->
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW
-    return
-
-  # Produces bufferdata for TRIANGLE_FAN
   setCircle: (gl, x, y, segmentsCount, radius) ->
     coords = new Array(segmentsCount * 2)
     segmentLength = Math.PI * 2 / segmentsCount
