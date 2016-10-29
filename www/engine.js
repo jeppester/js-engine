@@ -5608,17 +5608,15 @@ module.exports = Line = (function() {
       startAngle = ort.getDirection();
       width /= 2;
       segmentRad = Math.PI / 15;
-      i = 0;
-      while (i < 16) {
+      i = 16;
+      while (i--) {
         angle = startAngle + segmentRad * i;
         points[i] = new Geometry.Vector(this.a.x + width * Math.cos(angle), this.a.y + width * Math.sin(angle));
-        i++;
       }
-      i = 0;
-      while (i < 16) {
+      i = 16;
+      while (i--) {
         angle = startAngle + segmentRad * (i + 15);
         points[i + 16] = new Geometry.Vector(this.b.x + width * Math.cos(angle), this.b.y + width * Math.sin(angle));
-        i++;
       }
       return new Geometry.Polygon(points);
     }
@@ -8998,8 +8996,8 @@ module.exports = WebGLColorShaderProgram = (function() {
     color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
     coords = Helpers.WebGL.getLineCoords(object);
     triangleCount = coords.length / 2 - 2;
-    while (--triangleCount) {
-      offset = triangleCount * 2;
+    while (triangleCount--) {
+      offset = (triangleCount + 1) * 2;
       if (!this.triangleBuffer.pushTriangle(coords[0], coords[1], coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], color, object.opacity, wm)) {
         this.flushBuffers(gl);
       }

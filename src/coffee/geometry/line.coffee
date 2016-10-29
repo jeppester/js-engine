@@ -242,16 +242,15 @@ module.exports = class Line
       startAngle = ort.getDirection()
       width /= 2
       segmentRad = Math.PI / 15
-      i = 0
-      while i < 16
+      i = 16
+      while i--
         angle = startAngle + segmentRad * i
         points[i] = new Geometry.Vector(@a.x + width * Math.cos(angle), @a.y + width * Math.sin(angle))
-        i++
-      i = 0
-      while i < 16
+
+      i = 16
+      while i--
         angle = startAngle + segmentRad * (i + 15)
         points[i + 16] = new Geometry.Vector(@b.x + width * Math.cos(angle), @b.y + width * Math.sin(angle))
-        i++
       new Geometry.Polygon(points)
 
   ###
