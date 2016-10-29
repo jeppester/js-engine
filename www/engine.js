@@ -7237,6 +7237,7 @@ module.exports = WebGLHelper = {
   polygonCoordsCache: {},
   polygonOutlineCoordsCache: {},
   lineCoordsCache: {},
+  planeOutlineCoordsCache: {},
   generateCacheKeyForPoints: function(points) {
     var p, string, _i, _len;
     string = '';
@@ -7274,39 +7275,24 @@ module.exports = WebGLHelper = {
     }
     return color;
   },
-  setPlane: function(gl, x, y, width, height) {
-    var p, x1, x2, y1, y2;
-    x1 = x;
-    x2 = x + width;
-    y1 = y;
-    y2 = y + height;
-    p = this.planeCache;
-    p[0] = x1;
-    p[1] = y1;
-    p[2] = x2;
-    p[3] = y1;
-    p[4] = x1;
-    p[5] = y2;
-    p[6] = x1;
-    p[7] = y2;
-    p[8] = x2;
-    p[9] = y1;
-    p[10] = x2;
-    p[11] = y2;
-    return gl.bufferData(gl.ARRAY_BUFFER, p, gl.STATIC_DRAW);
-  },
-  setPlaneOutline: function(gl, x, y, width, height, outlineWidth) {
-    var ix1, ix2, iy1, iy2, ox1, ox2, oy1, oy2;
-    outlineWidth /= 2;
-    ox1 = x - outlineWidth;
-    ox2 = x + width + outlineWidth;
-    oy1 = y - outlineWidth;
-    oy2 = y + height + outlineWidth;
-    ix1 = x + outlineWidth;
-    ix2 = x + width - outlineWidth;
-    iy1 = y + outlineWidth;
-    iy2 = y + height - outlineWidth;
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ox1, oy1, ox2, oy1, ix1, iy1, ix1, iy1, ix2, iy1, ox2, oy1, ox1, oy1, ox1, oy2, ix1, iy1, ix1, iy1, ix1, iy2, ox1, oy2, ix1, iy2, ox1, oy2, ox2, oy2, ix1, iy2, ix2, iy2, ox2, oy2, ox2, oy1, ox2, oy2, ix2, iy1, ix2, iy1, ix2, iy2, ox2, oy2]), gl.STATIC_DRAW);
+  getPlaneOutlineCoords: function(width, height, outlineWidth) {
+    var cacheKey, coords, ix1, ix2, iy1, iy2, ox1, ox2, oy1, oy2;
+    cacheKey = "" + width + "," + height + "," + outlineWidth;
+    coords = this.planeOutlineCoordsCache[cacheKey];
+    if (!coords) {
+      outlineWidth /= 2;
+      ox1 = -outlineWidth;
+      ox2 = width + outlineWidth;
+      oy1 = -outlineWidth;
+      oy2 = height + outlineWidth;
+      ix1 = outlineWidth;
+      ix2 = width - outlineWidth;
+      iy1 = outlineWidth;
+      iy2 = height - outlineWidth;
+      coords = new Float32Array([ox1, oy1, ox2, oy1, ix1, iy1, ix1, iy1, ix2, iy1, ox2, oy1, ox1, oy1, ox1, oy2, ix1, iy1, ix1, iy1, ix1, iy2, ox1, oy2, ix1, iy2, ox1, oy2, ox2, oy2, ix1, iy2, ix2, iy2, ox2, oy2, ox2, oy1, ox2, oy2, ix2, iy1, ix2, iy1, ix2, iy2, ox2, oy2]);
+      this.planeOutlineCoordsCache[cacheKey] = coords;
+    }
+    return coords;
   },
   setConvexPolygon: function(gl, coords) {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
@@ -8882,6 +8868,11 @@ module.exports = WebGLRenderer = (function() {
           program = this.programs.color;
           this.setProgram(program);
           program.renderLine(gl, object, object.wm);
+          break;
+        case "rectangle":
+          program = this.programs.color;
+          this.setProgram(this.programs.color);
+          program.renderRectangle(gl, object, object.wm);
       }
     }
     if (typeof (_base = this.currentProgram).flushBuffers === "function") {
@@ -9016,6 +9007,30 @@ module.exports = WebGLColorShaderProgram = (function() {
       offset = triangleCount * 2;
       if (!this.triangleBuffer.pushTriangle(coords[0], coords[1], coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], color, object.opacity, wm)) {
         this.flushBuffers(gl);
+      }
+    }
+  };
+
+  WebGLColorShaderProgram.prototype.renderRectangle = function(gl, object, wm) {
+    var color, coords, offset, triangleCount;
+    if (object.fillStyle !== "transparent") {
+      color = Helpers.WebGL.colorFromCSSString(object.fillStyle);
+      if (!this.triangleBuffer.pushTriangle(0, 0, object.width, 0, object.width, object.height, color, object.opacity, wm)) {
+        this.flushBuffers(gl);
+      }
+      if (!this.triangleBuffer.pushTriangle(0, 0, object.width, object.height, 0, object.height, color, object.opacity, wm)) {
+        this.flushBuffers(gl);
+      }
+    }
+    if (object.strokeStyle !== "transparent" && object.lineWidth !== 0) {
+      color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
+      coords = Helpers.WebGL.getPlaneOutlineCoords(object.width, object.height, object.lineWidth);
+      triangleCount = coords.length / 6;
+      while (triangleCount--) {
+        offset = triangleCount * 6;
+        if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
+          this.flushBuffers(gl);
+        }
       }
     }
   };

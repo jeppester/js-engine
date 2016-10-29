@@ -122,35 +122,37 @@ module.exports = class WebGLColorShaderProgram
       )
     return
 
-  # renderRectangle: (gl, object, wm) ->
-  #   l = @locations
-  #   @setAlpha gl, object.opacity
-  #
-  #   # Set matrix (it is the same for both fill and stroke)
-  #   gl.uniformMatrix3fv l.u_matrix, false, wm
-  #
-  #   # Draw fill
-  #   if object.fillStyle isnt "transparent"
-  #     # Set color
-  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString object.fillStyle
-  #
-  #     # Set geometry (no need to set x and y as they already in the world matrix)
-  #     Helpers.WebGL.setPlane gl, 0, 0, object.width, object.height
-  #
-  #     # Draw
-  #     gl.drawArrays gl.TRIANGLES, 0, 6
-  #
-  #   # Draw stroke (if not transparent)
-  #   if object.strokeStyle isnt "transparent"
-  #     # Set color
-  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
-  #
-  #     # Set geometry (no need to set x and y as they are already included in the world matrix)
-  #     Helpers.WebGL.setPlaneOutline gl, 0, 0, object.width, object.height, object.lineWidth
-  #
-  #     # Draw
-  #     gl.drawArrays gl.TRIANGLES, 0, 24
-  #   return
+  renderRectangle: (gl, object, wm) ->
+    # Fill
+    if object.fillStyle != "transparent"
+      color = Helpers.WebGL.colorFromCSSString object.fillStyle
+      @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
+        0, 0, object.width, 0, object.width, object.height
+        color, object.opacity, wm
+      )
+      @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
+        0, 0, object.width, object.height, 0, object.height
+        color, object.opacity, wm
+      )
+
+    if object.strokeStyle != "transparent" && object.lineWidth != 0
+      color = Helpers.WebGL.colorFromCSSString object.strokeStyle
+      coords = Helpers.WebGL.getPlaneOutlineCoords object.width, object.height, object.lineWidth
+      triangleCount = coords.length / 6
+      while triangleCount--
+        offset = triangleCount * 6
+        @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
+          coords[offset]
+          coords[offset + 1]
+          coords[offset + 2]
+          coords[offset + 3]
+          coords[offset + 4]
+          coords[offset + 5]
+          color
+          object.opacity
+          wm
+        )
+    return
   #
   # renderCircle: (gl, object, wm) ->
   #   l = @locations

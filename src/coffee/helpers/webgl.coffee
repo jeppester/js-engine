@@ -6,6 +6,7 @@ module.exports = WebGLHelper =
   polygonCoordsCache: {}
   polygonOutlineCoordsCache: {}
   lineCoordsCache: {}
+  planeOutlineCoordsCache: {}
 
   generateCacheKeyForPoints: (points) ->
     string = ''
@@ -36,73 +37,38 @@ module.exports = WebGLHelper =
     color
 
   # Produces bufferdata for TRIANGLES
-  setPlane: (gl, x, y, width, height) ->
-    x1 = x
-    x2 = x + width
-    y1 = y
-    y2 = y + height
+  getPlaneOutlineCoords: (width, height, outlineWidth) ->
+    cacheKey = "#{width},#{height},#{outlineWidth}"
+    coords = @planeOutlineCoordsCache[cacheKey]
+    if !coords
+      outlineWidth /= 2
+      ox1 = -outlineWidth
+      ox2 = width + outlineWidth
+      oy1 = -outlineWidth
+      oy2 = height + outlineWidth
+      ix1 = outlineWidth
+      ix2 = width - outlineWidth
+      iy1 = outlineWidth
+      iy2 = height - outlineWidth
+      coords = new Float32Array([
+        # Top line
+        ox1, oy1, ox2, oy1, ix1, iy1
+        ix1, iy1, ix2, iy1, ox2, oy1
 
-    p = @planeCache
-    p[0] = x1
-    p[1] = y1
-    p[2] = x2
-    p[3] = y1
-    p[4] = x1
-    p[5] = y2
-    p[6] = x1
-    p[7] = y2
-    p[8] = x2
-    p[9] = y1
-    p[10] = x2
-    p[11] = y2
-    gl.bufferData gl.ARRAY_BUFFER, p, gl.STATIC_DRAW
+        # Left line
+        ox1, oy1, ox1, oy2, ix1, iy1
+        ix1, iy1, ix1, iy2, ox1, oy2
 
-  # Produces bufferdata for TRIANGLES
-  setPlaneOutline: (gl, x, y, width, height, outlineWidth) ->
-    outlineWidth /= 2
-    ox1 = x - outlineWidth
-    ox2 = x + width + outlineWidth
-    oy1 = y - outlineWidth
-    oy2 = y + height + outlineWidth
-    ix1 = x + outlineWidth
-    ix2 = x + width - outlineWidth
-    iy1 = y + outlineWidth
-    iy2 = y + height - outlineWidth
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
+        # Bottom line
+        ix1, iy2, ox1, oy2, ox2, oy2
+        ix1, iy2, ix2, iy2, ox2, oy2
 
-      # Top line
-      ox1, oy1
-      ox2, oy1
-      ix1, iy1
-      ix1, iy1
-      ix2, iy1
-      ox2, oy1
-
-      # Left line
-      ox1, oy1
-      ox1, oy2
-      ix1, iy1
-      ix1, iy1
-      ix1, iy2
-      ox1, oy2
-
-      # Bottom line
-      ix1, iy2
-      ox1, oy2
-      ox2, oy2
-      ix1, iy2
-      ix2, iy2
-      ox2, oy2
-
-      # Right line
-      ox2, oy1
-      ox2, oy2
-      ix2, iy1
-      ix2, iy1
-      ix2, iy2
-      ox2, oy2
-    ]), gl.STATIC_DRAW
-    return
+        # Right line
+        ox2, oy1, ox2, oy2, ix2, iy1
+        ix2, iy1, ix2, iy2, ox2, oy2
+      ])
+      @planeOutlineCoordsCache[cacheKey] = coords
+    coords
 
   # Produces bufferdata for TRIANGLE_FAN
   setConvexPolygon: (gl, coords) ->
