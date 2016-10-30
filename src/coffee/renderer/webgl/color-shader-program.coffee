@@ -166,7 +166,7 @@ module.exports = class WebGLColorShaderProgram
         )
 
     # Stroke
-    if object.strokeStyle != "transparent"
+    if object.strokeStyle != "transparent" && object.lineWidth != 0
       color = Helpers.WebGL.colorFromCSSString object.strokeStyle
       coords = Helpers.WebGL.getCircleOutlineTriangleCoords object.radius, object.lineWidth
       triangleCount = coords.length / 6

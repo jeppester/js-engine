@@ -7290,7 +7290,7 @@ module.exports = WebGLHelper = {
     return coords;
   },
   getCircleTriangleCoords: function(radius) {
-    var cacheKey, coords, offset, pointNumber, pointsCount, segmentLength, trianglesCount;
+    var cacheKey, coords, firstX, firstY, lastX, lastY, offset, pointsCount, segmentLength, trianglesCount;
     cacheKey = "" + radius;
     coords = this.circleTriangleCoordsCache[cacheKey];
     if (!coords) {
@@ -7298,22 +7298,18 @@ module.exports = WebGLHelper = {
       trianglesCount = pointsCount - 2;
       coords = new Float32Array(trianglesCount * 6);
       segmentLength = Math.PI * 2 / pointsCount;
-      pointNumber = 0;
-      while (pointNumber < pointsCount) {
-        if (pointNumber < 3) {
-          offset = pointNumber * 2;
-          coords[offset] = Math.cos(segmentLength * pointNumber) * radius;
-          coords[offset + 1] = Math.sin(segmentLength * pointNumber) * radius;
-        } else {
-          offset = (pointNumber - 2) * 6;
-          coords[offset] = coords[0];
-          coords[offset + 1] = coords[1];
-          coords[offset + 2] = coords[offset - 2];
-          coords[offset + 3] = coords[offset - 1];
-          coords[offset + 4] = Math.cos(segmentLength * pointNumber) * radius;
-          coords[offset + 5] = Math.sin(segmentLength * pointNumber) * radius;
-        }
-        pointNumber++;
+      firstX = Math.cos(-1 * segmentLength) * radius;
+      firstY = Math.sin(-1 * segmentLength) * radius;
+      lastX = Math.cos(-2 * segmentLength) * radius;
+      lastY = Math.sin(-2 * segmentLength) * radius;
+      while (trianglesCount--) {
+        offset = trianglesCount * 6;
+        coords[offset] = firstX;
+        coords[offset + 1] = firstY;
+        coords[offset + 2] = lastX;
+        coords[offset + 3] = lastY;
+        coords[offset + 4] = lastX = Math.cos(segmentLength * trianglesCount) * radius;
+        coords[offset + 5] = lastY = Math.sin(segmentLength * trianglesCount) * radius;
       }
       this.circleTriangleCoordsCache[cacheKey] = coords;
     }
@@ -7345,16 +7341,12 @@ module.exports = WebGLHelper = {
         coords[offset + 3] = lastOuterY;
         coords[offset + 4] = outerX;
         coords[offset + 5] = outerY;
-        coords[offset + 6] = outerX;
-        coords[offset + 7] = outerY;
-        coords[offset + 8] = innerX;
-        coords[offset + 9] = innerY;
-        coords[offset + 10] = lastInnerX;
-        coords[offset + 11] = lastInnerY;
-        lastInnerX = innerX;
-        lastInnerY = innerY;
-        lastOuterX = outerX;
-        lastOuterY = outerY;
+        coords[offset + 6] = lastInnerX;
+        coords[offset + 7] = lastInnerY;
+        coords[offset + 8] = lastInnerX = innerX;
+        coords[offset + 9] = lastInnerY = innerY;
+        coords[offset + 10] = lastOuterX = outerX;
+        coords[offset + 11] = lastOuterY = outerY;
       }
       this.circleOutlineTriangleCoordsCache[cacheKey] = coords;
     }
@@ -9099,7 +9091,7 @@ module.exports = WebGLColorShaderProgram = (function() {
         }
       }
     }
-    if (object.strokeStyle !== "transparent") {
+    if (object.strokeStyle !== "transparent" && object.lineWidth !== 0) {
       color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
       coords = Helpers.WebGL.getCircleOutlineTriangleCoords(object.radius, object.lineWidth);
       triangleCount = coords.length / 6;
