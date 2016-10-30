@@ -73,17 +73,30 @@ module.exports = WebGLHelper =
       @planeOutlineCoordsCache[cacheKey] = coords
     coords
 
-  # Produces bufferdata for TRIANGLE_FAN
-  setCircle: (gl, x, y, segmentsCount, radius) ->
-    coords = new Array(segmentsCount * 2)
-    segmentLength = Math.PI * 2 / segmentsCount
-    i = 0
-    while i < segmentsCount
-      coords[i * 2] = x + Math.cos(segmentLength * i) * radius
-      coords[i * 2 + 1] = y + Math.sin(segmentLength * i) * radius
-      i++
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW
-    return
+  getCircleTriangleCoords: (radius) ->
+    cacheKey = "#{radius}"
+    coords = @circleTriangleCoordsCache[cacheKey]
+
+    if !coords
+      # Decide how many segments we want
+      if object.radius < 10
+        segmentsCount = 12
+      else if object.radius < 50
+        segmentsCount = 30
+      else if object.radius < 100
+        segmentsCount = 50
+      else
+        segmentsCount = 80
+
+      coords = new Array(segmentsCount * 2)
+
+      segmentLength = Math.PI * 2 / segmentsCount
+      i = 0
+      while i < segmentsCount
+        coords[i * 2] = x + Math.cos(segmentLength * i) * radius
+        coords[i * 2 + 1] = y + Math.sin(segmentLength * i) * radius
+        i++
+      return
 
   # Produces bufferdata for TRIANGLE_STRIP
   setCircleOutline: (gl, x, y, segmentsCount, radius, outlineWidth) ->

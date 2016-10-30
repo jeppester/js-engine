@@ -140,10 +140,10 @@ module.exports = class WebGLRenderer
         #   program = @programs.color
         #   @setProgram @programs.color
         #   program.renderPolygon gl, object, object.wm
-        # when "circle"
-        #   program = @programs.color
-        #   @setProgram program
-        #   program.renderCircle gl, object, object.wm
+        when "circle"
+          program = @programs.color
+          @setProgram program
+          program.renderCircle gl, object, object.wm
 
     @currentProgram.flushBuffers? gl
     return

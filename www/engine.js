@@ -7287,17 +7287,29 @@ module.exports = WebGLHelper = {
     }
     return coords;
   },
-  setCircle: function(gl, x, y, segmentsCount, radius) {
-    var coords, i, segmentLength;
-    coords = new Array(segmentsCount * 2);
-    segmentLength = Math.PI * 2 / segmentsCount;
-    i = 0;
-    while (i < segmentsCount) {
-      coords[i * 2] = x + Math.cos(segmentLength * i) * radius;
-      coords[i * 2 + 1] = y + Math.sin(segmentLength * i) * radius;
-      i++;
+  getCircleTriangleCoords: function(radius) {
+    var cacheKey, coords, i, segmentLength, segmentsCount;
+    cacheKey = "" + radius;
+    coords = this.circleTriangleCoordsCache[cacheKey];
+    if (!coords) {
+      if (object.radius < 10) {
+        segmentsCount = 12;
+      } else if (object.radius < 50) {
+        segmentsCount = 30;
+      } else if (object.radius < 100) {
+        segmentsCount = 50;
+      } else {
+        segmentsCount = 80;
+      }
+      coords = new Array(segmentsCount * 2);
+      segmentLength = Math.PI * 2 / segmentsCount;
+      i = 0;
+      while (i < segmentsCount) {
+        coords[i * 2] = x + Math.cos(segmentLength * i) * radius;
+        coords[i * 2 + 1] = y + Math.sin(segmentLength * i) * radius;
+        i++;
+      }
     }
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
   },
   setCircleOutline: function(gl, x, y, segmentsCount, radius, outlineWidth) {
     var coords, i, ir, or_, segmentLength;
@@ -8863,6 +8875,11 @@ module.exports = WebGLRenderer = (function() {
           program = this.programs.color;
           this.setProgram(this.programs.color);
           program.renderRectangle(gl, object, object.wm);
+          break;
+        case "circle":
+          program = this.programs.color;
+          this.setProgram(program);
+          program.renderCircle(gl, object, object.wm);
       }
     }
     if (typeof (_base = this.currentProgram).flushBuffers === "function") {
@@ -9022,6 +9039,23 @@ module.exports = WebGLColorShaderProgram = (function() {
           this.flushBuffers(gl);
         }
       }
+    }
+  };
+
+  WebGLColorShaderProgram.prototype.renderCircle = function(gl, object, wm) {
+    var l;
+    l = this.locations;
+    this.setAlpha(gl, object.opacity);
+    gl.uniformMatrix3fv(l.u_matrix, false, wm);
+    if (object.fillStyle !== "transparent") {
+      gl.uniform1i(l.u_color, Helpers.WebGL.colorFromCSSString(object.fillStyle));
+      Helpers.WebGL.setCircle(gl, 0, 0, segmentsCount, object.radius);
+      gl.drawArrays(gl.TRIANGLE_FAN, 0, segmentsCount);
+    }
+    if (object.strokeStyle !== "transparent") {
+      gl.uniform1i(l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle));
+      Helpers.WebGL.setCircleOutline(gl, 0, 0, segmentsCount, object.radius, object.lineWidth);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2);
     }
   };
 

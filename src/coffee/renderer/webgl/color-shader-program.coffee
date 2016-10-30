@@ -147,48 +147,38 @@ module.exports = class WebGLColorShaderProgram
           wm
         )
     return
-  #
-  # renderCircle: (gl, object, wm) ->
-  #   l = @locations
-  #   @setAlpha gl, object.opacity
-  #
-  #   # Set matrix (it is the same for both fill and stroke)
-  #   gl.uniformMatrix3fv l.u_matrix, false, wm
-  #
-  #   # Decide how many segments we want
-  #   if object.radius < 10
-  #     segmentsCount = 12
-  #   else if object.radius < 50
-  #     segmentsCount = 30
-  #   else if object.radius < 100
-  #     segmentsCount = 50
-  #   else
-  #     segmentsCount = 80
-  #
-  #   # Draw fill
-  #   if object.fillStyle isnt "transparent"
-  #
-  #     # Set color
-  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.fillStyle)
-  #
-  #     # Set geometry (no need to set x and y as they already in the world matrix)
-  #     Helpers.WebGL.setCircle gl, 0, 0, segmentsCount, object.radius
-  #
-  #     # Draw
-  #     gl.drawArrays gl.TRIANGLE_FAN, 0, segmentsCount
-  #
-  #   # Draw stroke (if not transparent)
-  #   if object.strokeStyle isnt "transparent"
-  #
-  #     # Set color
-  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
-  #
-  #     # Set geometry (no need to set x and y as they already in the world matrix)
-  #     Helpers.WebGL.setCircleOutline gl, 0, 0, segmentsCount, object.radius, object.lineWidth
-  #
-  #     # Draw
-  #     gl.drawArrays gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2
-  #   return
+
+  renderCircle: (gl, object, wm) ->
+    l = @locations
+    @setAlpha gl, object.opacity
+
+    # Set matrix (it is the same for both fill and stroke)
+    gl.uniformMatrix3fv l.u_matrix, false, wm
+
+    # Draw fill
+    if object.fillStyle isnt "transparent"
+
+      # Set color
+      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.fillStyle)
+
+      # Set geometry (no need to set x and y as they already in the world matrix)
+      Helpers.WebGL.setCircle gl, 0, 0, segmentsCount, object.radius
+
+      # Draw
+      gl.drawArrays gl.TRIANGLE_FAN, 0, segmentsCount
+
+    # Draw stroke (if not transparent)
+    if object.strokeStyle isnt "transparent"
+
+      # Set color
+      gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
+
+      # Set geometry (no need to set x and y as they already in the world matrix)
+      Helpers.WebGL.setCircleOutline gl, 0, 0, segmentsCount, object.radius, object.lineWidth
+
+      # Draw
+      gl.drawArrays gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2
+    return
   #
   # renderPolygon: (gl, object, wm) ->
   #   l = @locations
