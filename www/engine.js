@@ -7320,7 +7320,7 @@ module.exports = WebGLHelper = {
     return coords;
   },
   getCircleOutlineTriangleCoords: function(radius, outlineWidth) {
-    var cacheKey, coords, i, innerRadius, innerX, innerY, lastInnerX, lastInnerY, lastOuterX, lastOuterY, offset, outerRadius, outerX, outerY, pointsCount, segmentLength;
+    var cacheKey, coords, innerRadius, innerX, innerY, lastInnerX, lastInnerY, lastOuterX, lastOuterY, offset, outerRadius, outerX, outerY, pointsCount, segmentLength;
     cacheKey = "" + radius + "," + outlineWidth;
     coords = this.circleOutlineTriangleCoordsCache[cacheKey];
     if (!coords) {
@@ -7329,34 +7329,32 @@ module.exports = WebGLHelper = {
       segmentLength = Math.PI * 2 / pointsCount;
       outerRadius = radius + outlineWidth / 2;
       innerRadius = radius - outlineWidth / 2;
-      i = 0;
-      lastInnerX = Math.cos(segmentLength * -1) * innerRadius;
-      lastInnerY = Math.sin(segmentLength * -1) * innerRadius;
-      lastOuterX = Math.cos(segmentLength * -1) * outerRadius;
-      lastOuterY = Math.sin(segmentLength * -1) * outerRadius;
-      while (i < pointsCount) {
-        innerX = Math.cos(segmentLength * i) * innerRadius;
-        innerY = Math.sin(segmentLength * i) * innerRadius;
-        outerX = Math.cos(segmentLength * i) * outerRadius;
-        outerY = Math.sin(segmentLength * i) * outerRadius;
-        offset = i * 12;
-        coords[i] = lastInnerX;
-        coords[i + 1] = lastInnerY;
-        coords[i + 2] = lastOuterX;
-        coords[i + 3] = lastOuterY;
-        coords[i + 4] = outerX;
-        coords[i + 5] = outerY;
-        coords[i + 6] = outerX;
-        coords[i + 7] = outerY;
-        coords[i + 8] = innerX;
-        coords[i + 9] = innerY;
-        coords[i + 10] = lastInnerX;
-        coords[i + 11] = lastInnerY;
+      lastInnerX = innerRadius;
+      lastInnerY = 0;
+      lastOuterX = outerRadius;
+      lastOuterY = 0;
+      while (pointsCount--) {
+        innerX = Math.cos(segmentLength * pointsCount) * innerRadius;
+        innerY = Math.sin(segmentLength * pointsCount) * innerRadius;
+        outerX = Math.cos(segmentLength * pointsCount) * outerRadius;
+        outerY = Math.sin(segmentLength * pointsCount) * outerRadius;
+        offset = pointsCount * 12;
+        coords[offset] = lastInnerX;
+        coords[offset + 1] = lastInnerY;
+        coords[offset + 2] = lastOuterX;
+        coords[offset + 3] = lastOuterY;
+        coords[offset + 4] = outerX;
+        coords[offset + 5] = outerY;
+        coords[offset + 6] = outerX;
+        coords[offset + 7] = outerY;
+        coords[offset + 8] = innerX;
+        coords[offset + 9] = innerY;
+        coords[offset + 10] = lastInnerX;
+        coords[offset + 11] = lastInnerY;
         lastInnerX = innerX;
         lastInnerY = innerY;
         lastOuterX = outerX;
         lastOuterY = outerY;
-        i++;
       }
       this.circleOutlineTriangleCoordsCache[cacheKey] = coords;
     }
