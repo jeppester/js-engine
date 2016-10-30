@@ -19,7 +19,6 @@ class Main extends Benchmark
     color
 
   getObject: (x, y)->
-    line = new Engine.Views.Circle(x, y, 5, @getColor(), @getColor(), 4)
-    line
+    new Engine.Views.Circle(x, y, 8, @getColor(), @getColor(), 4)
 
 startEngine Main

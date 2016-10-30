@@ -25,9 +25,7 @@ Main = (function(_super) {
   };
 
   Main.prototype.getObject = function(x, y) {
-    var line;
-    line = new Engine.Views.Circle(x, y, 5, this.getColor(), this.getColor(), 4);
-    return line;
+    return new Engine.Views.Circle(x, y, 8, this.getColor(), this.getColor(), 4);
   };
 
   return Main;

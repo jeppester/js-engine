@@ -7,6 +7,8 @@ module.exports = WebGLHelper =
   polygonOutlineCoordsCache: {}
   lineCoordsCache: {}
   planeOutlineCoordsCache: {}
+  circleTriangleCoordsCache: {}
+  circleOutlineTriangleCoordsCache: {}
 
   generateCacheKeyForPoints: (points) ->
     string = ''
@@ -78,47 +80,88 @@ module.exports = WebGLHelper =
     coords = @circleTriangleCoordsCache[cacheKey]
 
     if !coords
-      # Decide how many segments we want
-      if object.radius < 10
-        segmentsCount = 12
-      else if object.radius < 50
-        segmentsCount = 30
-      else if object.radius < 100
-        segmentsCount = 50
-      else
-        segmentsCount = 80
+      pointsCount = @getPointsCountForRadius(radius)
+      trianglesCount = pointsCount - 2
+      coords = new Float32Array(trianglesCount * 6)
+      segmentLength = Math.PI * 2 / pointsCount
 
-      coords = new Array(segmentsCount * 2)
-
-      segmentLength = Math.PI * 2 / segmentsCount
-      i = 0
-      while i < segmentsCount
-        coords[i * 2] = x + Math.cos(segmentLength * i) * radius
-        coords[i * 2 + 1] = y + Math.sin(segmentLength * i) * radius
-        i++
-      return
+      pointNumber = 0
+      while pointNumber < pointsCount
+        if pointNumber < 3
+          # First three points form triangle 1
+          offset = pointNumber * 2
+          coords[offset] =     Math.cos(segmentLength * pointNumber) * radius
+          coords[offset + 1] = Math.sin(segmentLength * pointNumber) * radius
+        else
+          # All other triangles consist of the very first point + the last used point
+          offset = (pointNumber - 2) * 6
+          coords[offset] =     coords[0]
+          coords[offset + 1] = coords[1]
+          coords[offset + 2] = coords[offset - 2]
+          coords[offset + 3] = coords[offset - 1]
+          coords[offset + 4] = Math.cos(segmentLength * pointNumber) * radius
+          coords[offset + 5] = Math.sin(segmentLength * pointNumber) * radius
+        pointNumber++
+      @circleTriangleCoordsCache[cacheKey] = coords
+    coords
 
   # Produces bufferdata for TRIANGLE_STRIP
-  setCircleOutline: (gl, x, y, segmentsCount, radius, outlineWidth) ->
-    coords = new Array(segmentsCount * 4)
-    segmentLength = Math.PI * 2 / segmentsCount
-    or_ = radius + outlineWidth / 2
-    ir = radius - outlineWidth / 2
+  getCircleOutlineTriangleCoords: (radius, outlineWidth) ->
+    cacheKey = "#{radius},#{outlineWidth}"
+    coords = @circleOutlineTriangleCoordsCache[cacheKey]
+    if !coords
+      pointsCount = @getPointsCountForRadius(radius)
+      coords = new Float32Array pointsCount * 12 # Two triangles per point
 
-    # "<=" instead of "<" is because we want the first two points to appear
-    # both in the beginning and in the end of the array (to close the circle)
-    i = 0
-    while i <= segmentsCount
-      # Outer point
-      coords[i * 4] = x + Math.cos(segmentLength * i) * or_
-      coords[i * 4 + 1] = y + Math.sin(segmentLength * i) * or_
+      segmentLength = Math.PI * 2 / pointsCount
+      outerRadius = radius + outlineWidth / 2
+      innerRadius = radius - outlineWidth / 2
 
-      # Inner point
-      coords[i * 4 + 2] = x + Math.cos(segmentLength * i) * ir
-      coords[i * 4 + 3] = y + Math.sin(segmentLength * i) * ir
-      i++
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW
-    return
+      i = 0
+      lastInnerX = Math.cos(segmentLength * -1) * innerRadius
+      lastInnerY = Math.sin(segmentLength * -1) * innerRadius
+      lastOuterX = Math.cos(segmentLength * -1) * outerRadius
+      lastOuterY = Math.sin(segmentLength * -1) * outerRadius
+      while i < pointsCount
+        innerX = Math.cos(segmentLength * i) * innerRadius
+        innerY = Math.sin(segmentLength * i) * innerRadius
+        outerX = Math.cos(segmentLength * i) * outerRadius
+        outerY = Math.sin(segmentLength * i) * outerRadius
+
+        # Use the last corner coords to create two triangles
+        offset = i * 12
+        coords[i] =      lastInnerX
+        coords[i + 1] =  lastInnerY
+        coords[i + 2] =  lastOuterX
+        coords[i + 3] =  lastOuterY
+        coords[i + 4] =  outerX
+        coords[i + 5] =  outerY
+
+        coords[i + 6] =  outerX
+        coords[i + 7] =  outerY
+        coords[i + 8] =  innerX
+        coords[i + 9] =  innerY
+        coords[i + 10] = lastInnerX
+        coords[i + 11] = lastInnerY
+
+        lastInnerX = innerX
+        lastInnerY = innerY
+        lastOuterX = outerX
+        lastOuterY = outerY
+        i++
+
+      @circleOutlineTriangleCoordsCache[cacheKey] = coords
+    coords
+
+  getPointsCountForRadius: (radius)->
+    if radius < 10
+      12
+    else if radius < 50
+      30
+    else if radius < 100
+      50
+    else
+      80
 
   triangulatePolygonPoints: (points)->
     triangles = new poly2tri.SweepContext(points.slice())

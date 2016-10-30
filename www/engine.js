@@ -7236,6 +7236,8 @@ module.exports = WebGLHelper = {
   polygonOutlineCoordsCache: {},
   lineCoordsCache: {},
   planeOutlineCoordsCache: {},
+  circleTriangleCoordsCache: {},
+  circleOutlineTriangleCoordsCache: {},
   generateCacheKeyForPoints: function(points) {
     var p, string, _i, _len;
     string = '';
@@ -7288,44 +7290,88 @@ module.exports = WebGLHelper = {
     return coords;
   },
   getCircleTriangleCoords: function(radius) {
-    var cacheKey, coords, i, segmentLength, segmentsCount;
+    var cacheKey, coords, offset, pointNumber, pointsCount, segmentLength, trianglesCount;
     cacheKey = "" + radius;
     coords = this.circleTriangleCoordsCache[cacheKey];
     if (!coords) {
-      if (object.radius < 10) {
-        segmentsCount = 12;
-      } else if (object.radius < 50) {
-        segmentsCount = 30;
-      } else if (object.radius < 100) {
-        segmentsCount = 50;
-      } else {
-        segmentsCount = 80;
+      pointsCount = this.getPointsCountForRadius(radius);
+      trianglesCount = pointsCount - 2;
+      coords = new Float32Array(trianglesCount * 6);
+      segmentLength = Math.PI * 2 / pointsCount;
+      pointNumber = 0;
+      while (pointNumber < pointsCount) {
+        if (pointNumber < 3) {
+          offset = pointNumber * 2;
+          coords[offset] = Math.cos(segmentLength * pointNumber) * radius;
+          coords[offset + 1] = Math.sin(segmentLength * pointNumber) * radius;
+        } else {
+          offset = (pointNumber - 2) * 6;
+          coords[offset] = coords[0];
+          coords[offset + 1] = coords[1];
+          coords[offset + 2] = coords[offset - 2];
+          coords[offset + 3] = coords[offset - 1];
+          coords[offset + 4] = Math.cos(segmentLength * pointNumber) * radius;
+          coords[offset + 5] = Math.sin(segmentLength * pointNumber) * radius;
+        }
+        pointNumber++;
       }
-      coords = new Array(segmentsCount * 2);
-      segmentLength = Math.PI * 2 / segmentsCount;
+      this.circleTriangleCoordsCache[cacheKey] = coords;
+    }
+    return coords;
+  },
+  getCircleOutlineTriangleCoords: function(radius, outlineWidth) {
+    var cacheKey, coords, i, innerRadius, innerX, innerY, lastInnerX, lastInnerY, lastOuterX, lastOuterY, offset, outerRadius, outerX, outerY, pointsCount, segmentLength;
+    cacheKey = "" + radius + "," + outlineWidth;
+    coords = this.circleOutlineTriangleCoordsCache[cacheKey];
+    if (!coords) {
+      pointsCount = this.getPointsCountForRadius(radius);
+      coords = new Float32Array(pointsCount * 12);
+      segmentLength = Math.PI * 2 / pointsCount;
+      outerRadius = radius + outlineWidth / 2;
+      innerRadius = radius - outlineWidth / 2;
       i = 0;
-      while (i < segmentsCount) {
-        coords[i * 2] = x + Math.cos(segmentLength * i) * radius;
-        coords[i * 2 + 1] = y + Math.sin(segmentLength * i) * radius;
+      lastInnerX = Math.cos(segmentLength * -1) * innerRadius;
+      lastInnerY = Math.sin(segmentLength * -1) * innerRadius;
+      lastOuterX = Math.cos(segmentLength * -1) * outerRadius;
+      lastOuterY = Math.sin(segmentLength * -1) * outerRadius;
+      while (i < pointsCount) {
+        innerX = Math.cos(segmentLength * i) * innerRadius;
+        innerY = Math.sin(segmentLength * i) * innerRadius;
+        outerX = Math.cos(segmentLength * i) * outerRadius;
+        outerY = Math.sin(segmentLength * i) * outerRadius;
+        offset = i * 12;
+        coords[i] = lastInnerX;
+        coords[i + 1] = lastInnerY;
+        coords[i + 2] = lastOuterX;
+        coords[i + 3] = lastOuterY;
+        coords[i + 4] = outerX;
+        coords[i + 5] = outerY;
+        coords[i + 6] = outerX;
+        coords[i + 7] = outerY;
+        coords[i + 8] = innerX;
+        coords[i + 9] = innerY;
+        coords[i + 10] = lastInnerX;
+        coords[i + 11] = lastInnerY;
+        lastInnerX = innerX;
+        lastInnerY = innerY;
+        lastOuterX = outerX;
+        lastOuterY = outerY;
         i++;
       }
+      this.circleOutlineTriangleCoordsCache[cacheKey] = coords;
     }
+    return coords;
   },
-  setCircleOutline: function(gl, x, y, segmentsCount, radius, outlineWidth) {
-    var coords, i, ir, or_, segmentLength;
-    coords = new Array(segmentsCount * 4);
-    segmentLength = Math.PI * 2 / segmentsCount;
-    or_ = radius + outlineWidth / 2;
-    ir = radius - outlineWidth / 2;
-    i = 0;
-    while (i <= segmentsCount) {
-      coords[i * 4] = x + Math.cos(segmentLength * i) * or_;
-      coords[i * 4 + 1] = y + Math.sin(segmentLength * i) * or_;
-      coords[i * 4 + 2] = x + Math.cos(segmentLength * i) * ir;
-      coords[i * 4 + 3] = y + Math.sin(segmentLength * i) * ir;
-      i++;
+  getPointsCountForRadius: function(radius) {
+    if (radius < 10) {
+      return 12;
+    } else if (radius < 50) {
+      return 30;
+    } else if (radius < 100) {
+      return 50;
+    } else {
+      return 80;
     }
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
   },
   triangulatePolygonPoints: function(points) {
     var triangles;
@@ -9043,19 +9089,28 @@ module.exports = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderCircle = function(gl, object, wm) {
-    var l;
-    l = this.locations;
-    this.setAlpha(gl, object.opacity);
-    gl.uniformMatrix3fv(l.u_matrix, false, wm);
+    var color, coords, offset, triangleCount;
     if (object.fillStyle !== "transparent") {
-      gl.uniform1i(l.u_color, Helpers.WebGL.colorFromCSSString(object.fillStyle));
-      Helpers.WebGL.setCircle(gl, 0, 0, segmentsCount, object.radius);
-      gl.drawArrays(gl.TRIANGLE_FAN, 0, segmentsCount);
+      color = Helpers.WebGL.colorFromCSSString(object.fillStyle);
+      coords = Helpers.WebGL.getCircleTriangleCoords(object.radius);
+      triangleCount = coords.length / 6;
+      while (triangleCount--) {
+        offset = triangleCount * 6;
+        if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
+          this.flushBuffers(gl);
+        }
+      }
     }
     if (object.strokeStyle !== "transparent") {
-      gl.uniform1i(l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle));
-      Helpers.WebGL.setCircleOutline(gl, 0, 0, segmentsCount, object.radius, object.lineWidth);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, segmentsCount * 2 + 2);
+      color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
+      coords = Helpers.WebGL.getCircleOutlineTriangleCoords(object.radius, object.lineWidth);
+      triangleCount = coords.length / 6;
+      while (triangleCount--) {
+        offset = triangleCount * 6;
+        if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
+          this.flushBuffers(gl);
+        }
+      }
     }
   };
 
