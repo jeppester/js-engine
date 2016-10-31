@@ -7311,28 +7311,20 @@ module.exports = WebGLHelper = {
     return coords;
   },
   getCircleTriangleCoords: function(radius) {
-    var cacheKey, coords, firstX, firstY, lastX, lastY, offset, pointsCount, segmentLength, trianglesCount;
+    var cacheKey, coords, points, pointsCount, segmentLength;
     cacheKey = "" + radius;
     coords = this.triangleCaches.circle[cacheKey];
     if (!coords) {
       pointsCount = this.getPointsCountForRadius(radius);
-      trianglesCount = pointsCount - 2;
-      coords = new Float32Array(trianglesCount * 6);
       segmentLength = Math.PI * 2 / pointsCount;
-      firstX = Math.cos(-1 * segmentLength) * radius;
-      firstY = Math.sin(-1 * segmentLength) * radius;
-      lastX = Math.cos(-2 * segmentLength) * radius;
-      lastY = Math.sin(-2 * segmentLength) * radius;
-      while (trianglesCount--) {
-        offset = trianglesCount * 6;
-        coords[offset] = firstX;
-        coords[offset + 1] = firstY;
-        coords[offset + 2] = lastX;
-        coords[offset + 3] = lastY;
-        coords[offset + 4] = lastX = Math.cos(segmentLength * trianglesCount) * radius;
-        coords[offset + 5] = lastY = Math.sin(segmentLength * trianglesCount) * radius;
+      points = [];
+      while (pointsCount--) {
+        points.push({
+          x: Math.cos(segmentLength * pointsCount) * radius,
+          y: Math.sin(segmentLength * pointsCount) * radius
+        });
       }
-      this.triangleCaches.circle[cacheKey] = coords;
+      coords = this.triangleCaches.circle[cacheKey] = this.getTrianglesForConvexShape(points);
     }
     return coords;
   },

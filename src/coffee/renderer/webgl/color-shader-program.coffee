@@ -100,7 +100,7 @@ module.exports = class WebGLColorShaderProgram
   # Draw functions
   renderLine: (gl, object, wm) ->
     # If the line is transparent, do nothing
-    return if object.strokeStyle is "transparent"
+    return if object.strokeStyle == "transparent"
 
     # Set triangles
     color = Helpers.WebGL.colorFromCSSString object.strokeStyle
@@ -184,7 +184,6 @@ module.exports = class WebGLColorShaderProgram
         wm
       )
     return
-
 
   flushBuffers: (gl)->
     triangleCount = @triangleBuffer.getTriangleCount()

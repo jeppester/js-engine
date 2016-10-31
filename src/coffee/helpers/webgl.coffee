@@ -101,24 +101,13 @@ module.exports = WebGLHelper =
 
     unless coords
       pointsCount = @getPointsCountForRadius(radius)
-      trianglesCount = pointsCount - 2
-      coords = new Float32Array(trianglesCount * 6)
       segmentLength = Math.PI * 2 / pointsCount
-
-      firstX = Math.cos(-1 * segmentLength) * radius
-      firstY = Math.sin(-1 * segmentLength) * radius
-      lastX =  Math.cos(-2 * segmentLength) * radius
-      lastY =  Math.sin(-2 * segmentLength) * radius
-      while trianglesCount--
-        # All other triangles consist of the very first point + the last used point
-        offset = trianglesCount * 6
-        coords[offset]             = firstX
-        coords[offset + 1]         = firstY
-        coords[offset + 2]         = lastX
-        coords[offset + 3]         = lastY
-        coords[offset + 4] = lastX = Math.cos(segmentLength * trianglesCount) * radius
-        coords[offset + 5] = lastY = Math.sin(segmentLength * trianglesCount) * radius
-      @triangleCaches.circle[cacheKey] = coords
+      points = []
+      while pointsCount--
+        points.push
+          x: Math.cos(segmentLength * pointsCount) * radius
+          y: Math.sin(segmentLength * pointsCount) * radius
+      coords = @triangleCaches.circle[cacheKey] = @getTrianglesForConvexShape(points)
     coords
 
   # Produces bufferdata for TRIANGLE_STRIP
