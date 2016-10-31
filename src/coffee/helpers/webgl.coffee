@@ -3,14 +3,14 @@ poly2tri = require 'poly2tri'
 module.exports = WebGLHelper =
   planeCache: new Float32Array 12
   colorCache: {}
-  polygonCoordsCache: {}
-  polygonOutlineCoordsCache: {}
-  lineCoordsCache: {}
-  planeOutlineCoordsCache: {}
-  circleTriangleCoordsCache: {}
-  circleOutlineTriangleCoordsCache: {}
-  polygonTriangleCoordsCache: {}
-  polygonOutlineTriangleCoordsCache: {}
+  triangleCaches: {
+    line: {}
+    circle: {}
+    circleOutline: {}
+    polygon: {}
+    polygonOutline: {}
+    planeOutline: {}
+  }
 
   generateCacheKeyForPoints: (points) ->
     string = ''
@@ -19,10 +19,10 @@ module.exports = WebGLHelper =
 
   getLineCoords: (line) ->
     cacheKey = "#{line.a.x},#{line.a.y},#{line.b.x},#{line.b.y},#{line.lineWidth},#{line.lineCap}"
-    coords = @lineCoordsCache[cacheKey]
+    coords = @triangleCaches.line[cacheKey]
     if !coords
       coords = line.createPolygonFromWidth(line.lineWidth, line.lineCap).getCoordinates()
-      @lineCoordsCache[cacheKey] = coords
+      @triangleCaches.line[cacheKey] = coords
     coords
 
   colorFromCSSString: (string) ->
@@ -46,7 +46,7 @@ module.exports = WebGLHelper =
   # Produces bufferdata for TRIANGLES
   getPlaneOutlineTriangleCoords: (width, height, outlineWidth) ->
     cacheKey = "#{width},#{height},#{outlineWidth}"
-    coords = @planeOutlineCoordsCache[cacheKey]
+    coords = @triangleCaches.planeOutline[cacheKey]
     if !coords
       outlineWidth /= 2
       ox1 = -outlineWidth
@@ -74,12 +74,12 @@ module.exports = WebGLHelper =
         ox2, oy1, ox2, oy2, ix2, iy1
         ix2, iy1, ix2, iy2, ox2, oy2
       ])
-      @planeOutlineCoordsCache[cacheKey] = coords
+      @triangleCaches.planeOutline[cacheKey] = coords
     coords
 
   getCircleTriangleCoords: (radius) ->
     cacheKey = "#{radius}"
-    coords = @circleTriangleCoordsCache[cacheKey]
+    coords = @triangleCaches.circle[cacheKey]
 
     if !coords
       pointsCount = @getPointsCountForRadius(radius)
@@ -100,13 +100,13 @@ module.exports = WebGLHelper =
         coords[offset + 3]         = lastY
         coords[offset + 4] = lastX = Math.cos(segmentLength * trianglesCount) * radius
         coords[offset + 5] = lastY = Math.sin(segmentLength * trianglesCount) * radius
-      @circleTriangleCoordsCache[cacheKey] = coords
+      @triangleCaches.circle[cacheKey] = coords
     coords
 
   # Produces bufferdata for TRIANGLE_STRIP
   getCircleOutlineTriangleCoords: (radius, outlineWidth) ->
     cacheKey = "#{radius},#{outlineWidth}"
-    coords = @circleOutlineTriangleCoordsCache[cacheKey]
+    coords = @triangleCaches.circleOutline[cacheKey]
     if !coords
       pointsCount = @getPointsCountForRadius(radius)
       coords = new Float32Array pointsCount * 12 # Two triangles per point
@@ -141,7 +141,7 @@ module.exports = WebGLHelper =
         coords[offset + 10] = lastOuterX = outerX
         coords[offset + 11] = lastOuterY = outerY
 
-      @circleOutlineTriangleCoordsCache[cacheKey] = coords
+      @triangleCaches.circleOutline[cacheKey] = coords
     coords
 
   getPointsCountForRadius: (radius)->
@@ -156,7 +156,7 @@ module.exports = WebGLHelper =
 
   getPolygonTriangleCoords: (points)->
     cacheKey = this.generateCacheKeyForPoints points
-    coords = this.polygonTriangleCoordsCache[cacheKey]
+    coords = @triangleCaches.polygon[cacheKey]
     unless coords
       triangles = new poly2tri.SweepContext(points.slice())
         .triangulate()
@@ -170,12 +170,12 @@ module.exports = WebGLHelper =
           p[2].x, p[2].y
         )
       coords = new Float32Array coords
-      this.polygonTriangleCoordsCache[cacheKey] = coords
+      @triangleCaches.polygon[cacheKey] = coords
     coords
 
   getPolygonOutlineTriangleCoords: (points, width)->
     cacheKey = "#{this.generateCacheKeyForPoints(points)},#{width}"
-    coords = @polygonOutlineTriangleCoordsCache[cacheKey]
+    coords = @triangleCaches.polygonOutline[cacheKey]
     if !coords
       outlinePoints = []
       for point, i in points
@@ -230,15 +230,5 @@ module.exports = WebGLHelper =
         lastPoint1 = point1
         lastPoint2 = point2
 
-      @polygonOutlineTriangleCoordsCache[cacheKey] = coords
+      @triangleCaches.polygonOutline[cacheKey] = coords
     coords
-
-  setPolygonOutline: (gl, points, width)->
-    # Triangulate polygon if it is not already cached
-    cacheKey = this.generateCacheKeyForPoints(points) + width
-    unless this.polygonOutlineCoordsCache[cacheKey]
-      this.polygonOutlineCoordsCache[cacheKey] = this.calculatePolygonOutlineCoords(points, width)
-
-    coords = this.polygonOutlineCoordsCache[cacheKey]
-    gl.bufferData gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW
-    return
