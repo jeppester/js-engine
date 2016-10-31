@@ -99,7 +99,7 @@ module.exports = WebGLHelper =
     cacheKey = "#{radius}"
     coords = @triangleCaches.circle[cacheKey]
 
-    if !coords
+    unless coords
       pointsCount = @getPointsCountForRadius(radius)
       trianglesCount = pointsCount - 2
       coords = new Float32Array(trianglesCount * 6)
@@ -125,7 +125,7 @@ module.exports = WebGLHelper =
   getCircleOutlineTriangleCoords: (radius, outlineWidth) ->
     cacheKey = "#{radius},#{outlineWidth}"
     coords = @triangleCaches.circleOutline[cacheKey]
-    if !coords
+    unless coords
       pointsCount = @getPointsCountForRadius(radius)
       coords = new Float32Array pointsCount * 12 # Two triangles per point
 
@@ -194,7 +194,7 @@ module.exports = WebGLHelper =
   getPolygonOutlineTriangleCoords: (points, width)->
     cacheKey = "#{this.generateCacheKeyForPoints(points)},#{width}"
     coords = @triangleCaches.polygonOutline[cacheKey]
-    if !coords
+    unless coords
       outlinePoints = []
       for point, i in points
         prev = points[(i - 1 + points.length) % points.length]

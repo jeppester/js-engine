@@ -5,7 +5,7 @@ module.exports = class WebGLColorShaderProgram
   locations: {}
 
   triangleBuffer: new TriangleBuffer 20000 # 20000 triangles
-  coordsBuffer: null
+  vertexBuffer: null
 
   constructor: (gl) ->
     @program = gl.createProgram()
@@ -27,9 +27,7 @@ module.exports = class WebGLColorShaderProgram
 
       void main() {
         vec2 clipSpace = a_position / u_resolution * 2.0 - 1.0;
-
         gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
-
         v_color = a_color;
         v_opacity = a_opacity;
       }
@@ -39,9 +37,9 @@ module.exports = class WebGLColorShaderProgram
     gl.compileShader vertexShader
 
     # Check that the shader did compile
-    # dev
-    throw new Error(gl.getShaderInfoLog(vertexShader)) unless gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS) # dev
-    # dev
+    unless gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS) # dev
+      throw new Error(gl.getShaderInfoLog(vertexShader)) # dev
+
     gl.attachShader @program, vertexShader
 
     # Fragment shader
@@ -60,10 +58,11 @@ module.exports = class WebGLColorShaderProgram
     gl.compileShader fragmentShader
 
     # Check that the shader did compile
-    # dev
-    throw new Error(gl.getShaderInfoLog(fragmentShader)) unless gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS) # dev
-    # dev
+    unless gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS) # dev
+      throw new Error(gl.getShaderInfoLog(fragmentShader)) # dev
+
     gl.attachShader @program, fragmentShader
+
     gl.linkProgram @program
     return
 
@@ -106,22 +105,12 @@ module.exports = class WebGLColorShaderProgram
     # Set triangles
     color = Helpers.WebGL.colorFromCSSString object.strokeStyle
     coords = Helpers.WebGL.getLineCoords object
-    triangleCount = coords.length / 6
-    while triangleCount--
-      offset = triangleCount * 6
-      @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
-        coords[offset],     coords[offset + 1]
-        coords[offset + 2], coords[offset + 3]
-        coords[offset + 4], coords[offset + 5]
-        color
-        object.opacity
-        wm
-      )
+    @pushObject gl, coords, color, object.opacity, wm
     return
 
   renderRectangle: (gl, object, wm) ->
     # Fill
-    if object.fillStyle != "transparent"
+    unless object.fillStyle == "transparent"
       color = Helpers.WebGL.colorFromCSSString object.fillStyle
       @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
         0, 0, object.width, 0, object.width, object.height
@@ -132,89 +121,38 @@ module.exports = class WebGLColorShaderProgram
         color, object.opacity, wm
       )
 
-    if object.strokeStyle != "transparent" && object.lineWidth != 0
+    unless object.strokeStyle == "transparent" || object.lineWidth == 0
       color = Helpers.WebGL.colorFromCSSString object.strokeStyle
       coords = Helpers.WebGL.getPlaneOutlineTriangleCoords object.width, object.height, object.lineWidth
-      triangleCount = coords.length / 6
-      while triangleCount--
-        offset = triangleCount * 6
-        @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
-          coords[offset],     coords[offset + 1]
-          coords[offset + 2], coords[offset + 3]
-          coords[offset + 4], coords[offset + 5]
-          color
-          object.opacity
-          wm
-        )
+      @pushObject gl, coords, color, object.opacity, wm
     return
 
   renderCircle: (gl, object, wm) ->
     # Fill
-    if object.fillStyle != "transparent"
+    unless object.fillStyle == "transparent"
       color = Helpers.WebGL.colorFromCSSString object.fillStyle
       coords = Helpers.WebGL.getCircleTriangleCoords object.radius
-      triangleCount = coords.length / 6
-      while triangleCount--
-        offset = triangleCount * 6
-        @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
-          coords[offset],     coords[offset + 1]
-          coords[offset + 2], coords[offset + 3]
-          coords[offset + 4], coords[offset + 5]
-          color
-          object.opacity
-          wm
-        )
+      @pushObject gl, coords, color, object.opacity, wm
 
     # Stroke
-    if object.strokeStyle != "transparent" && object.lineWidth != 0
+    unless object.strokeStyle == "transparent" || object.lineWidth == 0
       color = Helpers.WebGL.colorFromCSSString object.strokeStyle
       coords = Helpers.WebGL.getCircleOutlineTriangleCoords object.radius, object.lineWidth
-      triangleCount = coords.length / 6
-      while triangleCount--
-        offset = triangleCount * 6
-        @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
-          coords[offset],     coords[offset + 1]
-          coords[offset + 2], coords[offset + 3]
-          coords[offset + 4], coords[offset + 5]
-          color
-          object.opacity
-          wm
-        )
+      @pushObject gl, coords, color, object.opacity, wm
     return
-
 
   renderPolygon: (gl, object, wm) ->
     # Fill
     unless object.fillStyle == "transparent"
       color = Helpers.WebGL.colorFromCSSString object.fillStyle
       coords = Helpers.WebGL.getPolygonTriangleCoords object.points
-      triangleCount = coords.length / 6
-      while triangleCount--
-        offset = triangleCount * 6
-        @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
-          coords[offset],     coords[offset + 1]
-          coords[offset + 2], coords[offset + 3]
-          coords[offset + 4], coords[offset + 5]
-          color
-          object.opacity
-          wm
-        )
+      @pushObject(gl, coords, color, object.opacity, wm)
 
     # Stroke
     unless object.strokeStyle == "transparent" || object.lineWidth == 0
       color = Helpers.WebGL.colorFromCSSString object.strokeStyle
       coords = Helpers.WebGL.getPolygonOutlineTriangleCoords object.points, object.lineWidth
-      triangleCount = coords.length / 6
-      while triangleCount--
-        offset = triangleCount * 6
-        @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
-          coords[offset],     coords[offset + 1]
-          coords[offset + 2], coords[offset + 3]
-          coords[offset + 4], coords[offset + 5]
-          color
-          object.opacity
-          wm
-        )
+      @pushObject(gl, coords, color, object.opacity, wm)
     return
 
   # renderBoundingBox: (gl, object, wm)->
@@ -232,6 +170,21 @@ module.exports = class WebGLColorShaderProgram
   #   gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString '#0F0'
   #   Helpers.WebGL.setPlaneOutline gl, x, y, width, height, 1
   #   gl.drawArrays gl.TRIANGLES, 0, 24
+
+  pushObject: (gl, coords, color, opacity, wm)->
+    triangleCount = coords.length / 6
+    while triangleCount--
+      offset = triangleCount * 6
+      @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
+        coords[offset],     coords[offset + 1]
+        coords[offset + 2], coords[offset + 3]
+        coords[offset + 4], coords[offset + 5]
+        color
+        opacity
+        wm
+      )
+    return
+
 
   flushBuffers: (gl)->
     triangleCount = @triangleBuffer.getTriangleCount()

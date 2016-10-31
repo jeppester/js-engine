@@ -9019,7 +9019,7 @@ module.exports = WebGLColorShaderProgram = (function() {
 
   WebGLColorShaderProgram.prototype.triangleBuffer = new TriangleBuffer(20000);
 
-  WebGLColorShaderProgram.prototype.coordsBuffer = null;
+  WebGLColorShaderProgram.prototype.vertexBuffer = null;
 
   function WebGLColorShaderProgram(gl) {
     this.program = gl.createProgram();
@@ -9075,23 +9075,17 @@ module.exports = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderLine = function(gl, object, wm) {
-    var color, coords, offset, triangleCount;
+    var color, coords;
     if (object.strokeStyle === "transparent") {
       return;
     }
     color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
     coords = Helpers.WebGL.getLineCoords(object);
-    triangleCount = coords.length / 6;
-    while (triangleCount--) {
-      offset = triangleCount * 6;
-      if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
-        this.flushBuffers(gl);
-      }
-    }
+    this.pushObject(gl, coords, color, object.opacity, wm);
   };
 
   WebGLColorShaderProgram.prototype.renderRectangle = function(gl, object, wm) {
-    var color, coords, offset, triangleCount;
+    var color, coords;
     if (object.fillStyle !== "transparent") {
       color = Helpers.WebGL.colorFromCSSString(object.fillStyle);
       if (!this.triangleBuffer.pushTriangle(0, 0, object.width, 0, object.width, object.height, color, object.opacity, wm)) {
@@ -9101,67 +9095,48 @@ module.exports = WebGLColorShaderProgram = (function() {
         this.flushBuffers(gl);
       }
     }
-    if (object.strokeStyle !== "transparent" && object.lineWidth !== 0) {
+    if (!(object.strokeStyle === "transparent" || object.lineWidth === 0)) {
       color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
       coords = Helpers.WebGL.getPlaneOutlineTriangleCoords(object.width, object.height, object.lineWidth);
-      triangleCount = coords.length / 6;
-      while (triangleCount--) {
-        offset = triangleCount * 6;
-        if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
-          this.flushBuffers(gl);
-        }
-      }
+      this.pushObject(gl, coords, color, object.opacity, wm);
     }
   };
 
   WebGLColorShaderProgram.prototype.renderCircle = function(gl, object, wm) {
-    var color, coords, offset, triangleCount;
+    var color, coords;
     if (object.fillStyle !== "transparent") {
       color = Helpers.WebGL.colorFromCSSString(object.fillStyle);
       coords = Helpers.WebGL.getCircleTriangleCoords(object.radius);
-      triangleCount = coords.length / 6;
-      while (triangleCount--) {
-        offset = triangleCount * 6;
-        if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
-          this.flushBuffers(gl);
-        }
-      }
+      this.pushObject(gl, coords, color, object.opacity, wm);
     }
-    if (object.strokeStyle !== "transparent" && object.lineWidth !== 0) {
+    if (!(object.strokeStyle === "transparent" || object.lineWidth === 0)) {
       color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
       coords = Helpers.WebGL.getCircleOutlineTriangleCoords(object.radius, object.lineWidth);
-      triangleCount = coords.length / 6;
-      while (triangleCount--) {
-        offset = triangleCount * 6;
-        if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
-          this.flushBuffers(gl);
-        }
-      }
+      this.pushObject(gl, coords, color, object.opacity, wm);
     }
   };
 
   WebGLColorShaderProgram.prototype.renderPolygon = function(gl, object, wm) {
-    var color, coords, offset, triangleCount;
+    var color, coords;
     if (object.fillStyle !== "transparent") {
       color = Helpers.WebGL.colorFromCSSString(object.fillStyle);
       coords = Helpers.WebGL.getPolygonTriangleCoords(object.points);
-      triangleCount = coords.length / 6;
-      while (triangleCount--) {
-        offset = triangleCount * 6;
-        if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
-          this.flushBuffers(gl);
-        }
-      }
+      this.pushObject(gl, coords, color, object.opacity, wm);
     }
     if (!(object.strokeStyle === "transparent" || object.lineWidth === 0)) {
       color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
       coords = Helpers.WebGL.getPolygonOutlineTriangleCoords(object.points, object.lineWidth);
-      triangleCount = coords.length / 6;
-      while (triangleCount--) {
-        offset = triangleCount * 6;
-        if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
-          this.flushBuffers(gl);
-        }
+      this.pushObject(gl, coords, color, object.opacity, wm);
+    }
+  };
+
+  WebGLColorShaderProgram.prototype.pushObject = function(gl, coords, color, opacity, wm) {
+    var offset, triangleCount;
+    triangleCount = coords.length / 6;
+    while (triangleCount--) {
+      offset = triangleCount * 6;
+      if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, opacity, wm)) {
+        this.flushBuffers(gl);
       }
     }
   };
