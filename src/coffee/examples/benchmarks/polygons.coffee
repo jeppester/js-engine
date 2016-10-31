@@ -3,7 +3,7 @@ startEngine = require './shared/startEngine'
 
 class Main extends Benchmark
   getObject: (x, y)->
-    polygon = new Engine.Views.Polygon([], "#FFF", "#F00", 2)
+    polygon = new Engine.Views.Polygon([], @getColor(), @getColor(), 2)
     polygon.setFromCoordinates(
       -10, -10
       0, -2

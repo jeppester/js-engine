@@ -2,7 +2,9 @@
 var Benchmark;
 
 module.exports = Benchmark = (function() {
-  Benchmark.prototype.defaultObjectsCount = 8000;
+  Benchmark.prototype.defaultObjectsCount = 10000;
+
+  Benchmark.prototype.currentColor = 0;
 
   function Benchmark() {
     engine.loader.hideOverlay((function(_this) {
@@ -19,6 +21,12 @@ module.exports = Benchmark = (function() {
       };
     })(this)), 2000);
   }
+
+  Benchmark.prototype.getColor = function() {
+    var colors;
+    colors = ['#00F', '#0F0', '#FFF', '#BBB', '#F00', '#FF0', '#F0F', '#0FF'];
+    return colors[this.currentColor++ % colors.length];
+  };
 
   Benchmark.prototype.getSearch = function() {
     var name, part, parts, s, search, value, _i, _len, _ref;

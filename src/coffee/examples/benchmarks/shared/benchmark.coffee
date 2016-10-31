@@ -1,5 +1,6 @@
 module.exports = class Benchmark
-  defaultObjectsCount: 8000
+  defaultObjectsCount: 10000
+  currentColor: 0
 
   constructor: ->
     engine.loader.hideOverlay => @onLoaded()
@@ -7,6 +8,19 @@ module.exports = class Benchmark
     @posX = 0
     @posY = 0
     setTimeout (=> @startTest()), 2000
+
+  getColor: ->
+    colors = [
+      '#00F'
+      '#0F0',
+      '#FFF',
+      '#BBB',
+      '#F00',
+      '#FF0',
+      '#F0F',
+      '#0FF',
+    ]
+    colors[@currentColor++ % colors.length]
 
   getSearch: ->
     s = window.location.search.replace /^\?/, ''

@@ -1,13 +1,11 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Benchmark, Main, colorNumber, startEngine,
+var Benchmark, Main, startEngine,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Benchmark = require('./shared/benchmark');
 
 startEngine = require('./shared/startEngine');
-
-colorNumber = 0;
 
 Main = (function(_super) {
   __extends(Main, _super);
@@ -16,16 +14,8 @@ Main = (function(_super) {
     return Main.__super__.constructor.apply(this, arguments);
   }
 
-  Main.prototype.getColor = function() {
-    var color, colors;
-    colors = ['#FFF', '#BBB', '#F00', '#FF0', '#F0F', '#0F0', '#0FF', '#00F'];
-    color = colors[colorNumber % colors.length];
-    ++colorNumber;
-    return color;
-  };
-
   Main.prototype.getObject = function(x, y) {
-    return new Engine.Views.Circle(x, y, 8, this.getColor(), this.getColor(), 4);
+    return new Engine.Views.Circle(x, y, 4, this.getColor(), this.getColor(), 2);
   };
 
   return Main;
@@ -40,7 +30,9 @@ startEngine(Main);
 var Benchmark;
 
 module.exports = Benchmark = (function() {
-  Benchmark.prototype.defaultObjectsCount = 8000;
+  Benchmark.prototype.defaultObjectsCount = 10000;
+
+  Benchmark.prototype.currentColor = 0;
 
   function Benchmark() {
     engine.loader.hideOverlay((function(_this) {
@@ -57,6 +49,12 @@ module.exports = Benchmark = (function() {
       };
     })(this)), 2000);
   }
+
+  Benchmark.prototype.getColor = function() {
+    var colors;
+    colors = ['#00F', '#0F0', '#FFF', '#BBB', '#F00', '#FF0', '#F0F', '#0FF'];
+    return colors[this.currentColor++ % colors.length];
+  };
 
   Benchmark.prototype.getSearch = function() {
     var name, part, parts, s, search, value, _i, _len, _ref;
