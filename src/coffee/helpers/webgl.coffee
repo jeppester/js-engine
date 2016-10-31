@@ -9,6 +9,8 @@ module.exports = WebGLHelper =
   planeOutlineCoordsCache: {}
   circleTriangleCoordsCache: {}
   circleOutlineTriangleCoordsCache: {}
+  polygonTriangleCoordsCache: {}
+  polygonOutlineTriangleCoordsCache: {}
 
   generateCacheKeyForPoints: (points) ->
     string = ''
@@ -152,66 +154,84 @@ module.exports = WebGLHelper =
     else
       80
 
-  triangulatePolygonPoints: (points)->
-    triangles = new poly2tri.SweepContext(points.slice())
-      .triangulate()
-      .getTriangles()
-    new Float32Array triangles.reduce (coords, triangle)->
-      p = triangle.getPoints()
-      coords.push(
-        p[0].x, p[0].y
-        p[1].x, p[1].y
-        p[2].x, p[2].y
-      )
-      coords
-    , []
-
-  calculatePolygonOutlineCoords: (points, width)->
-    coords = new Float32Array(points.length * 4 + 4)
-
-    for point, i in points
-      prev = points[(i - 1 + points.length) % points.length]
-      next = points[(i + 1 + points.length) % points.length]
-
-      # Find normal direction
-      pN = point.copy().subtract(prev)
-      pN.set -pN.y, pN.x
-      pN.scale 1 / pN.getLength()
-
-      nN = next.copy().subtract(point)
-      nN.set -nN.y, nN.x
-      nN.scale 1 / nN.getLength()
-
-      pointNormal = pN.copy().add nN
-
-      # Find normal length
-      angle = pN.getDirectionTo pointNormal
-      length = width / 2 / Math.cos(angle)
-      pointNormal.scale length / pointNormal.getLength()
-
-      # Find miter points
-      p1 = point.copy().add(pointNormal)
-      p2 = point.copy().subtract(pointNormal)
-      coords[i * 4] = p1.x
-      coords[i * 4 + 1] = p1.y
-      coords[i * 4 + 2] = p2.x
-      coords[i * 4 + 3] = p2.y
-
-    coords[coords.length - 4] = coords[0]
-    coords[coords.length - 3] = coords[1]
-    coords[coords.length - 2] = coords[2]
-    coords[coords.length - 1] = coords[3]
+  getPolygonTriangleCoords: (points)->
+    cacheKey = this.generateCacheKeyForPoints points
+    coords = this.polygonTriangleCoordsCache[cacheKey]
+    unless coords
+      triangles = new poly2tri.SweepContext(points.slice())
+        .triangulate()
+        .getTriangles()
+      coords = []
+      triangles.forEach (triangle)->
+        p = triangle.getPoints()
+        coords.push(
+          p[0].x, p[0].y
+          p[1].x, p[1].y
+          p[2].x, p[2].y
+        )
+      coords = new Float32Array coords
+      this.polygonTriangleCoordsCache[cacheKey] = coords
     coords
 
-  setPolygon: (gl, points)->
-    # Triangulate polygon if it is not already cached
-    cacheKey = this.generateCacheKeyForPoints points
-    unless this.polygonCoordsCache[cacheKey]
-      this.polygonCoordsCache[cacheKey] = this.triangulatePolygonPoints(points)
+  getPolygonOutlineTriangleCoords: (points, width)->
+    cacheKey = "#{this.generateCacheKeyForPoints(points)},#{width}"
+    coords = @polygonOutlineTriangleCoordsCache[cacheKey]
+    if !coords
+      outlinePoints = []
+      for point, i in points
+        prev = points[(i - 1 + points.length) % points.length]
+        next = points[(i + 1 + points.length) % points.length]
 
-    coords = this.polygonCoordsCache[cacheKey]
-    gl.bufferData gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW
-    return
+        # Find normal direction
+        pN = point.copy().subtract(prev)
+        pN.set -pN.y, pN.x
+        pN.scale 1 / pN.getLength()
+
+        nN = next.copy().subtract(point)
+        nN.set -nN.y, nN.x
+        nN.scale 1 / nN.getLength()
+
+        pointNormal = pN.copy().add nN
+
+        # Find normal length
+        angle = pN.getDirectionTo pointNormal
+        length = width / 2 / Math.cos(angle)
+        pointNormal.scale length / pointNormal.getLength()
+
+        # Find miter points
+        p1 = point.copy().add(pointNormal)
+        p2 = point.copy().subtract(pointNormal)
+        outlinePoints.push [p1, p2]
+
+      pointsCount = points.length
+      coords = new Float32Array pointsCount * 12 # Two triangles per point
+
+      lastPoint1 = outlinePoints[0][0]
+      lastPoint2 = outlinePoints[0][1]
+      while pointsCount--
+        point1 = outlinePoints[pointsCount][0]
+        point2 = outlinePoints[pointsCount][1]
+
+        offset = pointsCount * 12
+        coords[offset]      = lastPoint1.x
+        coords[offset + 1]  = lastPoint1.y
+        coords[offset + 2]  = lastPoint2.x
+        coords[offset + 3]  = lastPoint2.y
+        coords[offset + 4]  = point2.x
+        coords[offset + 5]  = point2.y
+
+        coords[offset + 6]  = lastPoint1.x
+        coords[offset + 7]  = lastPoint1.y
+        coords[offset + 8]  = point1.x
+        coords[offset + 9]  = point1.y
+        coords[offset + 10] = point2.x
+        coords[offset + 11] = point2.y
+
+        lastPoint1 = point1
+        lastPoint2 = point2
+
+      @polygonOutlineTriangleCoordsCache[cacheKey] = coords
+    coords
 
   setPolygonOutline: (gl, points, width)->
     # Triangulate polygon if it is not already cached

@@ -182,36 +182,41 @@ module.exports = class WebGLColorShaderProgram
         )
     return
 
-  #
-  # renderPolygon: (gl, object, wm) ->
-  #   l = @locations
-  #   @setAlpha gl, object.opacity
-  #
-  #   # Set matrix (it is the same for both fill and stroke)
-  #   gl.uniformMatrix3fv l.u_matrix, false, wm
-  #
-  #   # Draw fill
-  #   if object.fillStyle isnt "transparent"
-  #     # Set color
-  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString object.fillStyle
-  #
-  #     # Set geometry (no need to set x and y as they already in the world matrix)
-  #     Helpers.WebGL.setPolygon gl, object.points
-  #
-  #     # Draw
-  #     gl.drawArrays gl.TRIANGLES, 0, (object.points.length - 2) * 3
-  #
-  #   if object.strokeStyle isnt "transparent"
-  #     # Set color
-  #     gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString(object.strokeStyle)
-  #
-  #     # Set geometry (no need to set x and y as they already in the world matrix)
-  #     Helpers.WebGL.setPolygonOutline gl, object.points, object.lineWidth
-  #
-  #     # Draw
-  #     gl.drawArrays gl.TRIANGLE_STRIP, 0, object.points.length * 2 + 2
-  #   return
-  #
+
+  renderPolygon: (gl, object, wm) ->
+    # Fill
+    unless object.fillStyle == "transparent"
+      color = Helpers.WebGL.colorFromCSSString object.fillStyle
+      coords = Helpers.WebGL.getPolygonTriangleCoords object.points
+      triangleCount = coords.length / 6
+      while triangleCount--
+        offset = triangleCount * 6
+        @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
+          coords[offset],     coords[offset + 1]
+          coords[offset + 2], coords[offset + 3]
+          coords[offset + 4], coords[offset + 5]
+          color
+          object.opacity
+          wm
+        )
+
+    # Stroke
+    unless object.strokeStyle == "transparent" || object.lineWidth == 0
+      color = Helpers.WebGL.colorFromCSSString object.strokeStyle
+      coords = Helpers.WebGL.getPolygonOutlineTriangleCoords object.points, object.lineWidth
+      triangleCount = coords.length / 6
+      while triangleCount--
+        offset = triangleCount * 6
+        @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
+          coords[offset],     coords[offset + 1]
+          coords[offset + 2], coords[offset + 3]
+          coords[offset + 4], coords[offset + 5]
+          color
+          object.opacity
+          wm
+        )
+    return
+
   # renderBoundingBox: (gl, object, wm)->
   #   l = @locations
   #   @setAlpha gl, 1

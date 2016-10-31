@@ -14,8 +14,6 @@ Main = (function(_super) {
     return Main.__super__.constructor.apply(this, arguments);
   }
 
-  Main.prototype.defaultObjectsCount = 1000;
-
   Main.prototype.getObject = function(x, y) {
     var polygon;
     polygon = new Engine.Views.Polygon([], "#FFF", "#F00", 2);

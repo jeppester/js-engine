@@ -136,10 +136,10 @@ module.exports = class WebGLRenderer
           program = @programs.color
           @setProgram @programs.color
           program.renderRectangle gl, object, object.wm
-        # when "polygon"
-        #   program = @programs.color
-        #   @setProgram @programs.color
-        #   program.renderPolygon gl, object, object.wm
+        when "polygon"
+          program = @programs.color
+          @setProgram @programs.color
+          program.renderPolygon gl, object, object.wm
         when "circle"
           program = @programs.color
           @setProgram program

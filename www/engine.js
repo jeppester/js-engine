@@ -7238,6 +7238,8 @@ module.exports = WebGLHelper = {
   planeOutlineCoordsCache: {},
   circleTriangleCoordsCache: {},
   circleOutlineTriangleCoordsCache: {},
+  polygonTriangleCoordsCache: {},
+  polygonOutlineTriangleCoordsCache: {},
   generateCacheKeyForPoints: function(points) {
     var p, string, _i, _len;
     string = '';
@@ -7363,54 +7365,73 @@ module.exports = WebGLHelper = {
       return 80;
     }
   },
-  triangulatePolygonPoints: function(points) {
-    var triangles;
-    triangles = new poly2tri.SweepContext(points.slice()).triangulate().getTriangles();
-    return new Float32Array(triangles.reduce(function(coords, triangle) {
-      var p;
-      p = triangle.getPoints();
-      coords.push(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y);
-      return coords;
-    }, []));
-  },
-  calculatePolygonOutlineCoords: function(points, width) {
-    var angle, coords, i, length, nN, next, p1, p2, pN, point, pointNormal, prev, _i, _len;
-    coords = new Float32Array(points.length * 4 + 4);
-    for (i = _i = 0, _len = points.length; _i < _len; i = ++_i) {
-      point = points[i];
-      prev = points[(i - 1 + points.length) % points.length];
-      next = points[(i + 1 + points.length) % points.length];
-      pN = point.copy().subtract(prev);
-      pN.set(-pN.y, pN.x);
-      pN.scale(1 / pN.getLength());
-      nN = next.copy().subtract(point);
-      nN.set(-nN.y, nN.x);
-      nN.scale(1 / nN.getLength());
-      pointNormal = pN.copy().add(nN);
-      angle = pN.getDirectionTo(pointNormal);
-      length = width / 2 / Math.cos(angle);
-      pointNormal.scale(length / pointNormal.getLength());
-      p1 = point.copy().add(pointNormal);
-      p2 = point.copy().subtract(pointNormal);
-      coords[i * 4] = p1.x;
-      coords[i * 4 + 1] = p1.y;
-      coords[i * 4 + 2] = p2.x;
-      coords[i * 4 + 3] = p2.y;
+  getPolygonTriangleCoords: function(points) {
+    var cacheKey, coords, triangles;
+    cacheKey = this.generateCacheKeyForPoints(points);
+    coords = this.polygonTriangleCoordsCache[cacheKey];
+    if (!coords) {
+      triangles = new poly2tri.SweepContext(points.slice()).triangulate().getTriangles();
+      coords = [];
+      triangles.forEach(function(triangle) {
+        var p;
+        p = triangle.getPoints();
+        return coords.push(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y);
+      });
+      coords = new Float32Array(coords);
+      this.polygonTriangleCoordsCache[cacheKey] = coords;
     }
-    coords[coords.length - 4] = coords[0];
-    coords[coords.length - 3] = coords[1];
-    coords[coords.length - 2] = coords[2];
-    coords[coords.length - 1] = coords[3];
     return coords;
   },
-  setPolygon: function(gl, points) {
-    var cacheKey, coords;
-    cacheKey = this.generateCacheKeyForPoints(points);
-    if (!this.polygonCoordsCache[cacheKey]) {
-      this.polygonCoordsCache[cacheKey] = this.triangulatePolygonPoints(points);
+  getPolygonOutlineTriangleCoords: function(points, width) {
+    var angle, cacheKey, coords, i, lastPoint1, lastPoint2, length, nN, next, offset, outlinePoints, p1, p2, pN, point, point1, point2, pointNormal, pointsCount, prev, _i, _len;
+    cacheKey = "" + (this.generateCacheKeyForPoints(points)) + "," + width;
+    coords = this.polygonOutlineTriangleCoordsCache[cacheKey];
+    if (!coords) {
+      outlinePoints = [];
+      for (i = _i = 0, _len = points.length; _i < _len; i = ++_i) {
+        point = points[i];
+        prev = points[(i - 1 + points.length) % points.length];
+        next = points[(i + 1 + points.length) % points.length];
+        pN = point.copy().subtract(prev);
+        pN.set(-pN.y, pN.x);
+        pN.scale(1 / pN.getLength());
+        nN = next.copy().subtract(point);
+        nN.set(-nN.y, nN.x);
+        nN.scale(1 / nN.getLength());
+        pointNormal = pN.copy().add(nN);
+        angle = pN.getDirectionTo(pointNormal);
+        length = width / 2 / Math.cos(angle);
+        pointNormal.scale(length / pointNormal.getLength());
+        p1 = point.copy().add(pointNormal);
+        p2 = point.copy().subtract(pointNormal);
+        outlinePoints.push([p1, p2]);
+      }
+      pointsCount = points.length;
+      coords = new Float32Array(pointsCount * 12);
+      lastPoint1 = outlinePoints[0][0];
+      lastPoint2 = outlinePoints[0][1];
+      while (pointsCount--) {
+        point1 = outlinePoints[pointsCount][0];
+        point2 = outlinePoints[pointsCount][1];
+        offset = pointsCount * 12;
+        coords[offset] = lastPoint1.x;
+        coords[offset + 1] = lastPoint1.y;
+        coords[offset + 2] = lastPoint2.x;
+        coords[offset + 3] = lastPoint2.y;
+        coords[offset + 4] = point2.x;
+        coords[offset + 5] = point2.y;
+        coords[offset + 6] = lastPoint1.x;
+        coords[offset + 7] = lastPoint1.y;
+        coords[offset + 8] = point1.x;
+        coords[offset + 9] = point1.y;
+        coords[offset + 10] = point2.x;
+        coords[offset + 11] = point2.y;
+        lastPoint1 = point1;
+        lastPoint2 = point2;
+      }
+      this.polygonOutlineTriangleCoordsCache[cacheKey] = coords;
     }
-    coords = this.polygonCoordsCache[cacheKey];
-    gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
+    return coords;
   },
   setPolygonOutline: function(gl, points, width) {
     var cacheKey, coords;
@@ -8912,6 +8933,11 @@ module.exports = WebGLRenderer = (function() {
           this.setProgram(this.programs.color);
           program.renderRectangle(gl, object, object.wm);
           break;
+        case "polygon":
+          program = this.programs.color;
+          this.setProgram(this.programs.color);
+          program.renderPolygon(gl, object, object.wm);
+          break;
         case "circle":
           program = this.programs.color;
           this.setProgram(program);
@@ -9094,6 +9120,32 @@ module.exports = WebGLColorShaderProgram = (function() {
     if (object.strokeStyle !== "transparent" && object.lineWidth !== 0) {
       color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
       coords = Helpers.WebGL.getCircleOutlineTriangleCoords(object.radius, object.lineWidth);
+      triangleCount = coords.length / 6;
+      while (triangleCount--) {
+        offset = triangleCount * 6;
+        if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
+          this.flushBuffers(gl);
+        }
+      }
+    }
+  };
+
+  WebGLColorShaderProgram.prototype.renderPolygon = function(gl, object, wm) {
+    var color, coords, offset, triangleCount;
+    if (object.fillStyle !== "transparent") {
+      color = Helpers.WebGL.colorFromCSSString(object.fillStyle);
+      coords = Helpers.WebGL.getPolygonTriangleCoords(object.points);
+      triangleCount = coords.length / 6;
+      while (triangleCount--) {
+        offset = triangleCount * 6;
+        if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
+          this.flushBuffers(gl);
+        }
+      }
+    }
+    if (!(object.strokeStyle === "transparent" || object.lineWidth === 0)) {
+      color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
+      coords = Helpers.WebGL.getPolygonOutlineTriangleCoords(object.points, object.lineWidth);
       triangleCount = coords.length / 6;
       while (triangleCount--) {
         offset = triangleCount * 6;
