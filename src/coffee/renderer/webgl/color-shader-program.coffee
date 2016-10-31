@@ -106,13 +106,13 @@ module.exports = class WebGLColorShaderProgram
     # Set triangles
     color = Helpers.WebGL.colorFromCSSString object.strokeStyle
     coords = Helpers.WebGL.getLineCoords object
-    triangleCount = coords.length / 2 - 2
+    triangleCount = coords.length / 6
     while triangleCount--
-      offset = (triangleCount + 1) * 2
+      offset = triangleCount * 6
       @flushBuffers(gl) unless @triangleBuffer.pushTriangle(
-        coords[0],          coords[1] # Always use first point
         coords[offset],     coords[offset + 1]
         coords[offset + 2], coords[offset + 3]
+        coords[offset + 4], coords[offset + 5]
         color
         object.opacity
         wm

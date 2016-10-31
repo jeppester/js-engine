@@ -20,9 +20,27 @@ module.exports = WebGLHelper =
   getLineCoords: (line) ->
     cacheKey = "#{line.a.x},#{line.a.y},#{line.b.x},#{line.b.y},#{line.lineWidth},#{line.lineCap}"
     coords = @triangleCaches.line[cacheKey]
-    if !coords
-      coords = line.createPolygonFromWidth(line.lineWidth, line.lineCap).getCoordinates()
-      @triangleCaches.line[cacheKey] = coords
+    unless coords
+      points = line.createPolygonFromWidth(line.lineWidth, line.lineCap).points
+      coords = @triangleCaches.line[cacheKey] = @getTrianglesForConvexShape(points)
+    coords
+
+  getTrianglesForConvexShape: (points) ->
+    trianglesCount = points.length - 2
+    coords = new Float32Array(trianglesCount * 6)
+    first = points[points.length - 1]
+    last = points[points.length - 2]
+    while trianglesCount--
+      # All other triangles consist of the very first point + the last used point
+      offset = trianglesCount * 6
+      current = points[trianglesCount]
+      coords[offset]     = first.x
+      coords[offset + 1] = first.y
+      coords[offset + 2] = last.x
+      coords[offset + 3] = last.y
+      coords[offset + 4] = current.x
+      coords[offset + 5] = current.y
+      last = current
     coords
 
   colorFromCSSString: (string) ->

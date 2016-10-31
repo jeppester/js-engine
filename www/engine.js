@@ -7250,12 +7250,31 @@ module.exports = WebGLHelper = {
     return string;
   },
   getLineCoords: function(line) {
-    var cacheKey, coords;
+    var cacheKey, coords, points;
     cacheKey = line.a.x + "," + line.a.y + "," + line.b.x + "," + line.b.y + "," + line.lineWidth + "," + line.lineCap;
     coords = this.triangleCaches.line[cacheKey];
     if (!coords) {
-      coords = line.createPolygonFromWidth(line.lineWidth, line.lineCap).getCoordinates();
-      this.triangleCaches.line[cacheKey] = coords;
+      points = line.createPolygonFromWidth(line.lineWidth, line.lineCap).points;
+      coords = this.triangleCaches.line[cacheKey] = this.getTrianglesForConvexShape(points);
+    }
+    return coords;
+  },
+  getTrianglesForConvexShape: function(points) {
+    var coords, current, first, last, offset, trianglesCount;
+    trianglesCount = points.length - 2;
+    coords = new Float32Array(trianglesCount * 6);
+    first = points[points.length - 1];
+    last = points[points.length - 2];
+    while (trianglesCount--) {
+      offset = trianglesCount * 6;
+      current = points[trianglesCount];
+      coords[offset] = first.x;
+      coords[offset + 1] = first.y;
+      coords[offset + 2] = last.x;
+      coords[offset + 3] = last.y;
+      coords[offset + 4] = current.x;
+      coords[offset + 5] = current.y;
+      last = current;
     }
     return coords;
   },
@@ -9062,10 +9081,10 @@ module.exports = WebGLColorShaderProgram = (function() {
     }
     color = Helpers.WebGL.colorFromCSSString(object.strokeStyle);
     coords = Helpers.WebGL.getLineCoords(object);
-    triangleCount = coords.length / 2 - 2;
+    triangleCount = coords.length / 6;
     while (triangleCount--) {
-      offset = (triangleCount + 1) * 2;
-      if (!this.triangleBuffer.pushTriangle(coords[0], coords[1], coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], color, object.opacity, wm)) {
+      offset = triangleCount * 6;
+      if (!this.triangleBuffer.pushTriangle(coords[offset], coords[offset + 1], coords[offset + 2], coords[offset + 3], coords[offset + 4], coords[offset + 5], color, object.opacity, wm)) {
         this.flushBuffers(gl);
       }
     }
