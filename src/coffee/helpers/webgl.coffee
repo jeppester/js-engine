@@ -13,11 +13,7 @@ module.exports = WebGLHelper =
     planeOutline: {}
   }
 
-  generateCacheKeyForPoints: (points) ->
-    string = ''
-    string += "#{p.x},#{p.y}," for p in points
-    string
-
+  # SHAPE TRIANGULATION FUNCTIONS
   getLineCoords: (line) ->
     cacheKey = "#{line.a.x},#{line.a.y},#{line.b.x},#{line.b.y},#{line.lineWidth},#{line.lineCap}"
     coords = @triangleCaches.line[cacheKey]
@@ -26,43 +22,6 @@ module.exports = WebGLHelper =
       coords = @triangleCaches.line[cacheKey] = @getTrianglesForConvexShape(points)
     coords
 
-  getTrianglesForConvexShape: (points) ->
-    trianglesCount = points.length - 2
-    coords = new Float32Array(trianglesCount * 6)
-    first = points[points.length - 1]
-    last = points[points.length - 2]
-    while trianglesCount--
-      # All other triangles consist of the very first point + the last used point
-      offset = trianglesCount * 6
-      current = points[trianglesCount]
-      coords[offset]     = first.x
-      coords[offset + 1] = first.y
-      coords[offset + 2] = last.x
-      coords[offset + 3] = last.y
-      coords[offset + 4] = current.x
-      coords[offset + 5] = current.y
-      last = current
-    coords
-
-  colorFromCSSString: (string) ->
-    color = @colorCache[string]
-    if !color
-      if string.length is 4
-        color = new Float32Array([
-          parseInt(string.substr(1, 1), 16) / 16
-          parseInt(string.substr(2, 1), 16) / 16
-          parseInt(string.substr(3, 1), 16) / 16
-        ])
-      else
-        color = new Float32Array([
-          parseInt(string.substr(1, 2), 16) / 255
-          parseInt(string.substr(3, 2), 16) / 255
-          parseInt(string.substr(5, 2), 16) / 255
-        ])
-      @colorCache[string] = color
-    color
-
-  # Produces bufferdata for TRIANGLES
   getPlaneOutlineTriangleCoords: (width, height, outlineWidth) ->
     cacheKey = "#{width},#{height},#{outlineWidth}"
     coords = @triangleCaches.planeOutline[cacheKey]
@@ -85,7 +44,6 @@ module.exports = WebGLHelper =
       coords = @triangleCaches.circle[cacheKey] = @getTrianglesForConvexShape(points)
     coords
 
-  # Produces bufferdata for TRIANGLE_STRIP
   getCircleOutlineTriangleCoords: (radius, outlineWidth) ->
     cacheKey = "#{radius},#{outlineWidth}"
     coords = @triangleCaches.circleOutline[cacheKey]
@@ -93,20 +51,6 @@ module.exports = WebGLHelper =
       points = @getCirclePoints(radius)
       coords = @triangleCaches.circleOutline[cacheKey] = @getOutlineCoords points, outlineWidth
     coords
-
-  getCirclePoints: (radius)->
-    pointsCount = Math.round(radius / 2)
-    pointsCount = Math.min 80, pointsCount
-    pointsCount = Math.max 12, pointsCount
-
-    segmentLength = Math.PI * 2 / pointsCount
-    points = []
-    while pointsCount--
-      points.push new Vector(
-        Math.cos(segmentLength * pointsCount) * radius
-        Math.sin(segmentLength * pointsCount) * radius
-      )
-    points
 
   getPolygonTriangleCoords: (points)->
     cacheKey = this.generateCacheKeyForPoints points
@@ -133,10 +77,69 @@ module.exports = WebGLHelper =
       coords = @triangleCaches.polygonOutline[cacheKey] = @getOutlineCoords points, width
     coords
 
-  getOutlineCoords: (points, width)->
-    outlinePoints = []
+  # OTHER HELPERS
+  colorFromCSSString: (string) ->
+    color = @colorCache[string]
+    if !color
+      if string.length is 4
+        color = new Float32Array([
+          parseInt(string.substr(1, 1), 16) / 16
+          parseInt(string.substr(2, 1), 16) / 16
+          parseInt(string.substr(3, 1), 16) / 16
+        ])
+      else
+        color = new Float32Array([
+          parseInt(string.substr(1, 2), 16) / 255
+          parseInt(string.substr(3, 2), 16) / 255
+          parseInt(string.substr(5, 2), 16) / 255
+        ])
+      @colorCache[string] = color
+    color
 
-    # Find mitered outline points
+  generateCacheKeyForPoints: (points) ->
+    string = ''
+    string += "#{p.x},#{p.y}," for p in points
+    string
+
+  getTrianglesForConvexShape: (points) ->
+    trianglesCount = points.length - 2
+    coords = new Float32Array(trianglesCount * 6)
+
+    first = points[points.length - 1]
+    last = points[points.length - 2]
+    while trianglesCount--
+      # All triangles consist of:
+      # - the very first point
+      # - the last used point
+      # - the current point
+      offset = trianglesCount * 6
+      current = points[trianglesCount]
+      coords[offset]     = first.x
+      coords[offset + 1] = first.y
+      coords[offset + 2] = last.x
+      coords[offset + 3] = last.y
+      coords[offset + 4] = current.x
+      coords[offset + 5] = current.y
+      last = current
+    coords
+
+  getCirclePoints: (radius)->
+    pointsCount = Math.round(radius / 2)
+    pointsCount = Math.min 80, pointsCount
+    pointsCount = Math.max 12, pointsCount
+
+    segmentLength = Math.PI * 2 / pointsCount
+    points = []
+    while pointsCount--
+      points.push new Vector(
+        Math.cos(segmentLength * pointsCount) * radius
+        Math.sin(segmentLength * pointsCount) * radius
+      )
+    points
+
+  getOutlineCoords: (points, width)->
+    # Find miter points
+    miterPoints = []
     for point, i in points
       prev = points[(i - 1 + points.length) % points.length]
       next = points[(i + 1 + points.length) % points.length]
@@ -160,17 +163,17 @@ module.exports = WebGLHelper =
       # Find miter points
       p1 = point.copy().add(pointNormal)
       p2 = point.copy().subtract(pointNormal)
-      outlinePoints.push [p1, p2]
+      miterPoints.push [p1, p2]
 
-    # Create triangles for mitered outline points
+    # Create triangles for miter points
     pointsCount = points.length
     coords = new Float32Array pointsCount * 12 # Two triangles per point
 
-    lastPoint1 = outlinePoints[0][0]
-    lastPoint2 = outlinePoints[0][1]
+    lastPoint1 = miterPoints[0][0]
+    lastPoint2 = miterPoints[0][1]
     while pointsCount--
-      point1 = outlinePoints[pointsCount][0]
-      point2 = outlinePoints[pointsCount][1]
+      point1 = miterPoints[pointsCount][0]
+      point2 = miterPoints[pointsCount][1]
 
       offset = pointsCount * 12
       coords[offset]      = lastPoint1.x

@@ -7242,15 +7242,6 @@ module.exports = WebGLHelper = {
     polygonOutline: {},
     planeOutline: {}
   },
-  generateCacheKeyForPoints: function(points) {
-    var j, len, p, string;
-    string = '';
-    for (j = 0, len = points.length; j < len; j++) {
-      p = points[j];
-      string += p.x + "," + p.y + ",";
-    }
-    return string;
-  },
   getLineCoords: function(line) {
     var cacheKey, coords, points;
     cacheKey = line.a.x + "," + line.a.y + "," + line.b.x + "," + line.b.y + "," + line.lineWidth + "," + line.lineCap;
@@ -7260,38 +7251,6 @@ module.exports = WebGLHelper = {
       coords = this.triangleCaches.line[cacheKey] = this.getTrianglesForConvexShape(points);
     }
     return coords;
-  },
-  getTrianglesForConvexShape: function(points) {
-    var coords, current, first, last, offset, trianglesCount;
-    trianglesCount = points.length - 2;
-    coords = new Float32Array(trianglesCount * 6);
-    first = points[points.length - 1];
-    last = points[points.length - 2];
-    while (trianglesCount--) {
-      offset = trianglesCount * 6;
-      current = points[trianglesCount];
-      coords[offset] = first.x;
-      coords[offset + 1] = first.y;
-      coords[offset + 2] = last.x;
-      coords[offset + 3] = last.y;
-      coords[offset + 4] = current.x;
-      coords[offset + 5] = current.y;
-      last = current;
-    }
-    return coords;
-  },
-  colorFromCSSString: function(string) {
-    var color;
-    color = this.colorCache[string];
-    if (!color) {
-      if (string.length === 4) {
-        color = new Float32Array([parseInt(string.substr(1, 1), 16) / 16, parseInt(string.substr(2, 1), 16) / 16, parseInt(string.substr(3, 1), 16) / 16]);
-      } else {
-        color = new Float32Array([parseInt(string.substr(1, 2), 16) / 255, parseInt(string.substr(3, 2), 16) / 255, parseInt(string.substr(5, 2), 16) / 255]);
-      }
-      this.colorCache[string] = color;
-    }
-    return color;
   },
   getPlaneOutlineTriangleCoords: function(width, height, outlineWidth) {
     var cacheKey, coords, points;
@@ -7323,18 +7282,6 @@ module.exports = WebGLHelper = {
     }
     return coords;
   },
-  getCirclePoints: function(radius) {
-    var points, pointsCount, segmentLength;
-    pointsCount = Math.round(radius / 2);
-    pointsCount = Math.min(80, pointsCount);
-    pointsCount = Math.max(12, pointsCount);
-    segmentLength = Math.PI * 2 / pointsCount;
-    points = [];
-    while (pointsCount--) {
-      points.push(new Vector(Math.cos(segmentLength * pointsCount) * radius, Math.sin(segmentLength * pointsCount) * radius));
-    }
-    return points;
-  },
   getPolygonTriangleCoords: function(points) {
     var cacheKey, coords, triangles;
     cacheKey = this.generateCacheKeyForPoints(points);
@@ -7360,9 +7307,62 @@ module.exports = WebGLHelper = {
     }
     return coords;
   },
+  colorFromCSSString: function(string) {
+    var color;
+    color = this.colorCache[string];
+    if (!color) {
+      if (string.length === 4) {
+        color = new Float32Array([parseInt(string.substr(1, 1), 16) / 16, parseInt(string.substr(2, 1), 16) / 16, parseInt(string.substr(3, 1), 16) / 16]);
+      } else {
+        color = new Float32Array([parseInt(string.substr(1, 2), 16) / 255, parseInt(string.substr(3, 2), 16) / 255, parseInt(string.substr(5, 2), 16) / 255]);
+      }
+      this.colorCache[string] = color;
+    }
+    return color;
+  },
+  generateCacheKeyForPoints: function(points) {
+    var j, len, p, string;
+    string = '';
+    for (j = 0, len = points.length; j < len; j++) {
+      p = points[j];
+      string += p.x + "," + p.y + ",";
+    }
+    return string;
+  },
+  getTrianglesForConvexShape: function(points) {
+    var coords, current, first, last, offset, trianglesCount;
+    trianglesCount = points.length - 2;
+    coords = new Float32Array(trianglesCount * 6);
+    first = points[points.length - 1];
+    last = points[points.length - 2];
+    while (trianglesCount--) {
+      offset = trianglesCount * 6;
+      current = points[trianglesCount];
+      coords[offset] = first.x;
+      coords[offset + 1] = first.y;
+      coords[offset + 2] = last.x;
+      coords[offset + 3] = last.y;
+      coords[offset + 4] = current.x;
+      coords[offset + 5] = current.y;
+      last = current;
+    }
+    return coords;
+  },
+  getCirclePoints: function(radius) {
+    var points, pointsCount, segmentLength;
+    pointsCount = Math.round(radius / 2);
+    pointsCount = Math.min(80, pointsCount);
+    pointsCount = Math.max(12, pointsCount);
+    segmentLength = Math.PI * 2 / pointsCount;
+    points = [];
+    while (pointsCount--) {
+      points.push(new Vector(Math.cos(segmentLength * pointsCount) * radius, Math.sin(segmentLength * pointsCount) * radius));
+    }
+    return points;
+  },
   getOutlineCoords: function(points, width) {
-    var angle, coords, i, j, lastPoint1, lastPoint2, len, length, nN, next, offset, outlinePoints, p1, p2, pN, point, point1, point2, pointNormal, pointsCount, prev;
-    outlinePoints = [];
+    var angle, coords, i, j, lastPoint1, lastPoint2, len, length, miterPoints, nN, next, offset, p1, p2, pN, point, point1, point2, pointNormal, pointsCount, prev;
+    miterPoints = [];
     for (i = j = 0, len = points.length; j < len; i = ++j) {
       point = points[i];
       prev = points[(i - 1 + points.length) % points.length];
@@ -7379,15 +7379,15 @@ module.exports = WebGLHelper = {
       pointNormal.scale(length / pointNormal.getLength());
       p1 = point.copy().add(pointNormal);
       p2 = point.copy().subtract(pointNormal);
-      outlinePoints.push([p1, p2]);
+      miterPoints.push([p1, p2]);
     }
     pointsCount = points.length;
     coords = new Float32Array(pointsCount * 12);
-    lastPoint1 = outlinePoints[0][0];
-    lastPoint2 = outlinePoints[0][1];
+    lastPoint1 = miterPoints[0][0];
+    lastPoint2 = miterPoints[0][1];
     while (pointsCount--) {
-      point1 = outlinePoints[pointsCount][0];
-      point2 = outlinePoints[pointsCount][1];
+      point1 = miterPoints[pointsCount][0];
+      point2 = miterPoints[pointsCount][1];
       offset = pointsCount * 12;
       coords[offset] = lastPoint1.x;
       coords[offset + 1] = lastPoint1.y;
