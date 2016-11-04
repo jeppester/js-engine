@@ -1,149 +1,145 @@
 poly2tri = require 'poly2tri'
+Vector = require '../geometry/vector'
 
 module.exports = WebGLHelper =
   planeCache: new Float32Array 12
-  polygonCoordsCache: {}
-  polygonOutlineCoordsCache: {}
+  colorCache: {}
+  triangleCaches: {
+    line: {}
+    circle: {}
+    circleOutline: {}
+    polygon: {}
+    polygonOutline: {}
+    planeOutline: {}
+  }
+
+  # SHAPE TRIANGULATION FUNCTIONS
+  getLineCoords: (line) ->
+    cacheKey = "#{line.a.x},#{line.a.y},#{line.b.x},#{line.b.y},#{line.lineWidth},#{line.lineCap}"
+    coords = @triangleCaches.line[cacheKey]
+    unless coords
+      points = line.createPolygonFromWidth(line.lineWidth, line.lineCap).points
+      coords = @triangleCaches.line[cacheKey] = @getTrianglesForConvexShape(points)
+    coords
+
+  getPlaneOutlineTriangleCoords: (width, height, outlineWidth) ->
+    cacheKey = "#{width},#{height},#{outlineWidth}"
+    coords = @triangleCaches.planeOutline[cacheKey]
+    if !coords
+      points = [
+        new Vector(0,     0)
+        new Vector(width, 0)
+        new Vector(width, height)
+        new Vector(0,     height)
+      ]
+      coords = @triangleCaches.planeOutline[cacheKey] = @getOutlineCoords points, outlineWidth
+    coords
+
+  getCircleTriangleCoords: (radius) ->
+    cacheKey = "#{radius}"
+    coords = @triangleCaches.circle[cacheKey]
+
+    unless coords
+      points = @getCirclePoints(radius)
+      coords = @triangleCaches.circle[cacheKey] = @getTrianglesForConvexShape(points)
+    coords
+
+  getCircleOutlineTriangleCoords: (radius, outlineWidth) ->
+    cacheKey = "#{radius},#{outlineWidth}"
+    coords = @triangleCaches.circleOutline[cacheKey]
+    unless coords
+      points = @getCirclePoints(radius)
+      coords = @triangleCaches.circleOutline[cacheKey] = @getOutlineCoords points, outlineWidth
+    coords
+
+  getPolygonTriangleCoords: (points)->
+    cacheKey = this.generateCacheKeyForPoints points
+    coords = @triangleCaches.polygon[cacheKey]
+    unless coords
+      triangles = new poly2tri.SweepContext(points.slice())
+        .triangulate()
+        .getTriangles()
+      coords = []
+      triangles.forEach (triangle)->
+        p = triangle.getPoints()
+        coords.push(
+          p[0].x, p[0].y
+          p[1].x, p[1].y
+          p[2].x, p[2].y
+        )
+      coords = @triangleCaches.polygon[cacheKey] = new Float32Array coords
+    coords
+
+  getPolygonOutlineTriangleCoords: (points, width)->
+    cacheKey = "#{this.generateCacheKeyForPoints(points)},#{width}"
+    coords = @triangleCaches.polygonOutline[cacheKey]
+    unless coords
+      coords = @triangleCaches.polygonOutline[cacheKey] = @getOutlineCoords points, width
+    coords
+
+  # OTHER HELPERS
+  colorFromCSSString: (string) ->
+    color = @colorCache[string]
+    if !color
+      if string.length is 4
+        color = new Float32Array([
+          parseInt(string.substr(1, 1), 16) / 16
+          parseInt(string.substr(2, 1), 16) / 16
+          parseInt(string.substr(3, 1), 16) / 16
+        ])
+      else
+        color = new Float32Array([
+          parseInt(string.substr(1, 2), 16) / 255
+          parseInt(string.substr(3, 2), 16) / 255
+          parseInt(string.substr(5, 2), 16) / 255
+        ])
+      @colorCache[string] = color
+    color
 
   generateCacheKeyForPoints: (points) ->
     string = ''
     string += "#{p.x},#{p.y}," for p in points
     string
 
-  colorFromCSSString: (string) ->
-    if string.length is 4
-      a = string.substr(1, 1)
-      b = string.substr(2, 1)
-      c = string.substr(3, 1)
-      parseInt "0x" + a + a + b + b + c + c
-    else
-      parseInt "0x" + string.substr(1, 6)
+  getTrianglesForConvexShape: (points) ->
+    trianglesCount = points.length - 2
+    coords = new Float32Array(trianglesCount * 6)
 
-  # Produces bufferdata for TRIANGLES
-  setPlane: (gl, x, y, width, height) ->
-    x1 = x
-    x2 = x + width
-    y1 = y
-    y2 = y + height
+    first = points[points.length - 1]
+    last = points[points.length - 2]
+    while trianglesCount--
+      # All triangles consist of:
+      # - the very first point
+      # - the last used point
+      # - the current point
+      offset = trianglesCount * 6
+      current = points[trianglesCount]
+      coords[offset]     = first.x
+      coords[offset + 1] = first.y
+      coords[offset + 2] = last.x
+      coords[offset + 3] = last.y
+      coords[offset + 4] = current.x
+      coords[offset + 5] = current.y
+      last = current
+    coords
 
-    p = @planeCache
-    p[0] = x1
-    p[1] = y1
-    p[2] = x2
-    p[3] = y1
-    p[4] = x1
-    p[5] = y2
-    p[6] = x1
-    p[7] = y2
-    p[8] = x2
-    p[9] = y1
-    p[10] = x2
-    p[11] = y2
-    gl.bufferData gl.ARRAY_BUFFER, p, gl.STATIC_DRAW
+  getCirclePoints: (radius)->
+    pointsCount = Math.round(radius / 2)
+    pointsCount = Math.min 80, pointsCount
+    pointsCount = Math.max 12, pointsCount
 
-  # Produces bufferdata for TRIANGLES
-  setPlaneOutline: (gl, x, y, width, height, outlineWidth) ->
-    outlineWidth /= 2
-    ox1 = x - outlineWidth
-    ox2 = x + width + outlineWidth
-    oy1 = y - outlineWidth
-    oy2 = y + height + outlineWidth
-    ix1 = x + outlineWidth
-    ix2 = x + width - outlineWidth
-    iy1 = y + outlineWidth
-    iy2 = y + height - outlineWidth
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array([
-
-      # Top line
-      ox1, oy1
-      ox2, oy1
-      ix1, iy1
-      ix1, iy1
-      ix2, iy1
-      ox2, oy1
-
-      # Left line
-      ox1, oy1
-      ox1, oy2
-      ix1, iy1
-      ix1, iy1
-      ix1, iy2
-      ox1, oy2
-
-      # Bottom line
-      ix1, iy2
-      ox1, oy2
-      ox2, oy2
-      ix1, iy2
-      ix2, iy2
-      ox2, oy2
-
-      # Right line
-      ox2, oy1
-      ox2, oy2
-      ix2, iy1
-      ix2, iy1
-      ix2, iy2
-      ox2, oy2
-    ]), gl.STATIC_DRAW
-    return
-
-  # Produces bufferdata for TRIANGLE_FAN
-  setConvexPolygon: (gl, coords) ->
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW
-    return
-
-  # Produces bufferdata for TRIANGLE_FAN
-  setCircle: (gl, x, y, segmentsCount, radius) ->
-    coords = new Array(segmentsCount * 2)
-    segmentLength = Math.PI * 2 / segmentsCount
-    i = 0
-    while i < segmentsCount
-      coords[i * 2] = x + Math.cos(segmentLength * i) * radius
-      coords[i * 2 + 1] = y + Math.sin(segmentLength * i) * radius
-      i++
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW
-    return
-
-  # Produces bufferdata for TRIANGLE_STRIP
-  setCircleOutline: (gl, x, y, segmentsCount, radius, outlineWidth) ->
-    coords = new Array(segmentsCount * 4)
-    segmentLength = Math.PI * 2 / segmentsCount
-    or_ = radius + outlineWidth / 2
-    ir = radius - outlineWidth / 2
-
-    # "<=" instead of "<" is because we want the first two points to appear
-    # both in the beginning and in the end of the array (to close the circle)
-    i = 0
-    while i <= segmentsCount
-      # Outer point
-      coords[i * 4] = x + Math.cos(segmentLength * i) * or_
-      coords[i * 4 + 1] = y + Math.sin(segmentLength * i) * or_
-
-      # Inner point
-      coords[i * 4 + 2] = x + Math.cos(segmentLength * i) * ir
-      coords[i * 4 + 3] = y + Math.sin(segmentLength * i) * ir
-      i++
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW
-    return
-
-  triangulatePolygonPoints: (points)->
-    triangles = new poly2tri.SweepContext(points.slice())
-      .triangulate()
-      .getTriangles()
-    new Float32Array triangles.reduce (coords, triangle)->
-      p = triangle.getPoints()
-      coords.push(
-        p[0].x, p[0].y
-        p[1].x, p[1].y
-        p[2].x, p[2].y
+    segmentLength = Math.PI * 2 / pointsCount
+    points = []
+    while pointsCount--
+      points.push new Vector(
+        Math.cos(segmentLength * pointsCount) * radius
+        Math.sin(segmentLength * pointsCount) * radius
       )
-      coords
-    , []
+    points
 
-  calculatePolygonOutlineCoords: (points, width)->
-    coords = new Float32Array(points.length * 4 + 4)
-
+  getOutlineCoords: (points, width)->
+    # Find miter points
+    miterPoints = []
     for point, i in points
       prev = points[(i - 1 + points.length) % points.length]
       next = points[(i + 1 + points.length) % points.length]
@@ -167,33 +163,33 @@ module.exports = WebGLHelper =
       # Find miter points
       p1 = point.copy().add(pointNormal)
       p2 = point.copy().subtract(pointNormal)
-      coords[i * 4] = p1.x
-      coords[i * 4 + 1] = p1.y
-      coords[i * 4 + 2] = p2.x
-      coords[i * 4 + 3] = p2.y
+      miterPoints.push [p1, p2]
 
-    coords[coords.length - 4] = coords[0]
-    coords[coords.length - 3] = coords[1]
-    coords[coords.length - 2] = coords[2]
-    coords[coords.length - 1] = coords[3]
+    # Create triangles for miter points
+    pointsCount = points.length
+    coords = new Float32Array pointsCount * 12 # Two triangles per point
+
+    lastPoint1 = miterPoints[0][0]
+    lastPoint2 = miterPoints[0][1]
+    while pointsCount--
+      point1 = miterPoints[pointsCount][0]
+      point2 = miterPoints[pointsCount][1]
+
+      offset = pointsCount * 12
+      coords[offset]      = lastPoint1.x
+      coords[offset + 1]  = lastPoint1.y
+      coords[offset + 2]  = lastPoint2.x
+      coords[offset + 3]  = lastPoint2.y
+      coords[offset + 4]  = point2.x
+      coords[offset + 5]  = point2.y
+
+      coords[offset + 6]  = lastPoint1.x
+      coords[offset + 7]  = lastPoint1.y
+      coords[offset + 8]  = point1.x
+      coords[offset + 9]  = point1.y
+      coords[offset + 10] = point2.x
+      coords[offset + 11] = point2.y
+
+      lastPoint1 = point1
+      lastPoint2 = point2
     coords
-
-  setPolygon: (gl, points)->
-    # Triangulate polygon if it is not already cached
-    cacheKey = this.generateCacheKeyForPoints points
-    unless this.polygonCoordsCache[cacheKey]
-      this.polygonCoordsCache[cacheKey] = this.triangulatePolygonPoints(points)
-
-    coords = this.polygonCoordsCache[cacheKey]
-    gl.bufferData gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW
-    return
-
-  setPolygonOutline: (gl, points, width)->
-    # Triangulate polygon if it is not already cached
-    cacheKey = this.generateCacheKeyForPoints(points) + width
-    unless this.polygonOutlineCoordsCache[cacheKey]
-      this.polygonOutlineCoordsCache[cacheKey] = this.calculatePolygonOutlineCoords(points, width)
-
-    coords = this.polygonOutlineCoordsCache[cacheKey]
-    gl.bufferData gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW
-    return
