@@ -59,7 +59,7 @@ The default options are:
 "themesPath": "assets", // The path to the themes-directory
 }</code>
 ###
-module.exports = window.Engine = class Engine
+module.exports = class
   # Load classes for easy usage
   @Helpers:
     MatrixCalculation: require './helpers/matrix-calculation'

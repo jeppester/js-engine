@@ -2,31 +2,26 @@
   "name": "jsengine",
   "version": "1.0.0",
   "description": "2d game engine",
-  "browserify": {
-    "transform": [
-      "coffeeify",
-      "jadeify"
-    ]
-  },
   "scripts": {
     "start": "./node_modules/grunt-cli/bin/grunt start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jesper Sørensen",
   "license": "MIT",
+  "main": "www/engine.js",
   "devDependencies": {
-    "browserify": "~10.2.4",
+    "browserify": "^13.1.1",
     "coffeeify": "~1.0.0",
     "grunt": "~0.4.5",
     "grunt-browserify": "~3.5.0",
     "grunt-cli": "~0.1.13",
+    "grunt-contrib-coffee": "^1.0.0",
     "grunt-contrib-connect": "~0.9.0",
     "grunt-contrib-jade": "~0.14.1",
     "grunt-contrib-stylus": "~0.20.0",
     "grunt-contrib-watch": "~0.6.1",
     "grunt-open": "~0.2.3",
     "jade": "^1.9.2",
-    "jadeify": "~4.3.0",
     "poly2tri": "^1.3.5"
   },
   "coffeelintConfig": {
@@ -42,5 +37,8 @@
       "level": "error",
       "value": "100"
     }
+  },
+  "dependencies": {
+    "browserify-derequire": "^0.9.4"
   }
 }

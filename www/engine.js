@@ -1,6 +1,6 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Engine = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports={"version": "1.3.5"}
-},{}],2:[function(require,module,exports){
+},{}],2:[function(_dereq_,module,exports){
 /*
  * Poly2Tri Copyright (c) 2009-2014, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -181,7 +181,7 @@ module.exports = AdvancingFront;
 module.exports.Node = Node;
 
 
-},{}],3:[function(require,module,exports){
+},{}],3:[function(_dereq_,module,exports){
 /*
  * Poly2Tri Copyright (c) 2009-2014, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -216,7 +216,7 @@ module.exports = assert;
 
 
 
-},{}],4:[function(require,module,exports){
+},{}],4:[function(_dereq_,module,exports){
 /*
  * Poly2Tri Copyright (c) 2009-2014, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -240,7 +240,7 @@ module.exports = assert;
  * easier to keep the 2 versions in sync.
  */
 
-var xy = require('./xy');
+var xy = _dereq_('./xy');
 
 // ------------------------------------------------------------------------Point
 /**
@@ -493,7 +493,7 @@ Point.dot = function(a, b) {
 
 module.exports = Point;
 
-},{"./xy":11}],5:[function(require,module,exports){
+},{"./xy":11}],5:[function(_dereq_,module,exports){
 /*
  * Poly2Tri Copyright (c) 2009-2014, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -512,7 +512,7 @@ module.exports = Point;
  * Class added in the JavaScript version (was not present in the c++ version)
  */
 
-var xy = require('./xy');
+var xy = _dereq_('./xy');
 
 /**
  * Custom exception class to indicate invalid Point values
@@ -547,7 +547,7 @@ PointError.prototype.constructor = PointError;
 
 module.exports = PointError;
 
-},{"./xy":11}],6:[function(require,module,exports){
+},{"./xy":11}],6:[function(_dereq_,module,exports){
 (function (global){
 /*
  * Poly2Tri Copyright (c) 2009-2014, Poly2Tri Contributors
@@ -621,7 +621,7 @@ exports.noConflict = function() {
  * @public
  * @const {string}
  */
-exports.VERSION = require('../dist/version.json').version;
+exports.VERSION = _dereq_('../dist/version.json').version;
 
 /**
  * Exports the {@linkcode PointError} class.
@@ -629,32 +629,32 @@ exports.VERSION = require('../dist/version.json').version;
  * @typedef {PointError} module:poly2tri.PointError
  * @function
  */
-exports.PointError = require('./pointerror');
+exports.PointError = _dereq_('./pointerror');
 /**
  * Exports the {@linkcode Point} class.
  * @public
  * @typedef {Point} module:poly2tri.Point
  * @function
  */
-exports.Point = require('./point');
+exports.Point = _dereq_('./point');
 /**
  * Exports the {@linkcode Triangle} class.
  * @public
  * @typedef {Triangle} module:poly2tri.Triangle
  * @function
  */
-exports.Triangle = require('./triangle');
+exports.Triangle = _dereq_('./triangle');
 /**
  * Exports the {@linkcode SweepContext} class.
  * @public
  * @typedef {SweepContext} module:poly2tri.SweepContext
  * @function
  */
-exports.SweepContext = require('./sweepcontext');
+exports.SweepContext = _dereq_('./sweepcontext');
 
 
 // Backward compatibility
-var sweep = require('./sweep');
+var sweep = _dereq_('./sweep');
 /**
  * @function
  * @deprecated use {@linkcode SweepContext#triangulate} instead
@@ -667,7 +667,7 @@ exports.triangulate = sweep.triangulate;
 exports.sweep = {Triangulate: sweep.triangulate};
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../dist/version.json":1,"./point":4,"./pointerror":5,"./sweep":7,"./sweepcontext":8,"./triangle":9}],7:[function(require,module,exports){
+},{"../dist/version.json":1,"./point":4,"./pointerror":5,"./sweep":7,"./sweepcontext":8,"./triangle":9}],7:[function(_dereq_,module,exports){
 /*
  * Poly2Tri Copyright (c) 2009-2014, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -700,15 +700,15 @@ exports.sweep = {Triangulate: sweep.triangulate};
  * easier to keep the 2 versions in sync.
  */
 
-var assert = require('./assert');
-var PointError = require('./pointerror');
-var Triangle = require('./triangle');
-var Node = require('./advancingfront').Node;
+var assert = _dereq_('./assert');
+var PointError = _dereq_('./pointerror');
+var Triangle = _dereq_('./triangle');
+var Node = _dereq_('./advancingfront').Node;
 
 
 // ------------------------------------------------------------------------utils
 
-var utils = require('./utils');
+var utils = _dereq_('./utils');
 
 /** @const */
 var EPSILON = utils.EPSILON;
@@ -1503,7 +1503,7 @@ function flipScanEdgeEvent(tcx, ep, eq, flip_triangle, t, p) {
 
 exports.triangulate = triangulate;
 
-},{"./advancingfront":2,"./assert":3,"./pointerror":5,"./triangle":9,"./utils":10}],8:[function(require,module,exports){
+},{"./advancingfront":2,"./assert":3,"./pointerror":5,"./triangle":9,"./utils":10}],8:[function(_dereq_,module,exports){
 /*
  * Poly2Tri Copyright (c) 2009-2014, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -1529,11 +1529,11 @@ exports.triangulate = triangulate;
  * easier to keep the 2 versions in sync.
  */
 
-var PointError = require('./pointerror');
-var Point = require('./point');
-var Triangle = require('./triangle');
-var sweep = require('./sweep');
-var AdvancingFront = require('./advancingfront');
+var PointError = _dereq_('./pointerror');
+var Point = _dereq_('./point');
+var Triangle = _dereq_('./triangle');
+var sweep = _dereq_('./sweep');
+var AdvancingFront = _dereq_('./advancingfront');
 var Node = AdvancingFront.Node;
 
 
@@ -2046,7 +2046,7 @@ SweepContext.prototype.meshClean = function(triangle) {
 
 module.exports = SweepContext;
 
-},{"./advancingfront":2,"./point":4,"./pointerror":5,"./sweep":7,"./triangle":9}],9:[function(require,module,exports){
+},{"./advancingfront":2,"./point":4,"./pointerror":5,"./sweep":7,"./triangle":9}],9:[function(_dereq_,module,exports){
 /*
  * Poly2Tri Copyright (c) 2009-2014, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -2072,7 +2072,7 @@ module.exports = SweepContext;
  * easier to keep the 2 versions in sync.
  */
 
-var xy = require("./xy");
+var xy = _dereq_("./xy");
 
 
 // ---------------------------------------------------------------------Triangle
@@ -2609,7 +2609,7 @@ Triangle.prototype.markConstrainedEdgeByPoints = function(p, q) {
 
 module.exports = Triangle;
 
-},{"./xy":11}],10:[function(require,module,exports){
+},{"./xy":11}],10:[function(_dereq_,module,exports){
 /*
  * Poly2Tri Copyright (c) 2009-2014, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -2720,7 +2720,7 @@ function isAngleObtuse(pa, pb, pc) {
 exports.isAngleObtuse = isAngleObtuse;
 
 
-},{}],11:[function(require,module,exports){
+},{}],11:[function(_dereq_,module,exports){
 /*
  * Poly2Tri Copyright (c) 2009-2014, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -2829,7 +2829,7 @@ module.exports = {
     equals: equals
 };
 
-},{}],12:[function(require,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 
 /*
 The constructor for the Engine class.
@@ -2892,69 +2892,67 @@ The default options are:
 "themesPath": "assets", // The path to the themes-directory
 }</code>
  */
-var Engine;
-
-module.exports = window.Engine = Engine = (function() {
-  Engine.Helpers = {
-    MatrixCalculation: require('./helpers/matrix-calculation'),
-    Mixin: require('./helpers/mixin'),
-    RoomTransition: require('./helpers/room-transition'),
-    WebGL: require('./helpers/webgl')
+module.exports = (function() {
+  _Class.Helpers = {
+    MatrixCalculation: _dereq_('./helpers/matrix-calculation'),
+    Mixin: _dereq_('./helpers/mixin'),
+    RoomTransition: _dereq_('./helpers/room-transition'),
+    WebGL: _dereq_('./helpers/webgl')
   };
 
-  Engine.Geometry = {
-    Vector: require('./geometry/vector'),
-    Circle: require('./geometry/circle'),
-    Line: require('./geometry/line'),
-    Rectangle: require('./geometry/rectangle'),
-    Polygon: require('./geometry/polygon')
+  _Class.Geometry = {
+    Vector: _dereq_('./geometry/vector'),
+    Circle: _dereq_('./geometry/circle'),
+    Line: _dereq_('./geometry/line'),
+    Rectangle: _dereq_('./geometry/rectangle'),
+    Polygon: _dereq_('./geometry/polygon')
   };
 
-  Engine.Mixins = {
-    Animatable: require('./mixins/animatable')
+  _Class.Mixins = {
+    Animatable: _dereq_('./mixins/animatable')
   };
 
-  Engine.Input = {
-    Keyboard: require('./input/keyboard'),
-    Pointer: require('./input/pointer')
+  _Class.Input = {
+    Keyboard: _dereq_('./input/keyboard'),
+    Pointer: _dereq_('./input/pointer')
   };
 
-  Engine.Renderers = {
-    WebGLRenderer: require('./renderer/webgl'),
-    CanvasRenderer: require('./renderer/canvas')
+  _Class.Renderers = {
+    WebGLRenderer: _dereq_('./renderer/webgl'),
+    CanvasRenderer: _dereq_('./renderer/canvas')
   };
 
-  Engine.Sounds = {
-    Effect: require('./sounds/effect'),
-    Music: require('./sounds/music')
+  _Class.Sounds = {
+    Effect: _dereq_('./sounds/effect'),
+    Music: _dereq_('./sounds/music')
   };
 
-  Engine.Views = {
-    Child: require('./views/child'),
-    Container: require('./views/container'),
-    Circle: require('./views/circle'),
-    Line: require('./views/line'),
-    Rectangle: require('./views/rectangle'),
-    Polygon: require('./views/polygon'),
-    Sprite: require('./views/sprite'),
-    TextBlock: require('./views/text-block'),
-    Collidable: require('./views/collidable'),
-    GameObject: require('./views/game-object')
+  _Class.Views = {
+    Child: _dereq_('./views/child'),
+    Container: _dereq_('./views/container'),
+    Circle: _dereq_('./views/circle'),
+    Line: _dereq_('./views/line'),
+    Rectangle: _dereq_('./views/rectangle'),
+    Polygon: _dereq_('./views/polygon'),
+    Sprite: _dereq_('./views/sprite'),
+    TextBlock: _dereq_('./views/text-block'),
+    Collidable: _dereq_('./views/collidable'),
+    GameObject: _dereq_('./views/game-object')
   };
 
-  Engine.Room = require('./engine/room');
+  _Class.Room = _dereq_('./engine/room');
 
-  Engine.Globals = require('./engine/globals');
+  _Class.Globals = _dereq_('./engine/globals');
 
-  Engine.ObjectCreator = require('./engine/object-creator');
+  _Class.ObjectCreator = _dereq_('./engine/object-creator');
 
-  Engine.CustomLoop = require('./engine/custom-loop');
+  _Class.CustomLoop = _dereq_('./engine/custom-loop');
 
-  Engine.Camera = require('./engine/camera');
+  _Class.Camera = _dereq_('./engine/camera');
 
-  Engine.Loader = require('./engine/loader');
+  _Class.Loader = _dereq_('./engine/loader');
 
-  function Engine(options) {
+  function _Class(options) {
 
     /*
     Global engine var set upon engine initialization
@@ -2971,7 +2969,7 @@ module.exports = window.Engine = Engine = (function() {
   @private
    */
 
-  Engine.prototype.load = function() {
+  _Class.prototype.load = function() {
     var audioFormats, copyOpt, i, opt;
     this.host = {
       hasTouch: "ontouchstart" in document,
@@ -3091,7 +3089,7 @@ module.exports = window.Engine = Engine = (function() {
   @private
    */
 
-  Engine.prototype.initialize = function() {
+  _Class.prototype.initialize = function() {
     this.frames = 0;
     this.last = new Date().getTime();
     this.now = this.last;
@@ -3139,7 +3137,7 @@ module.exports = window.Engine = Engine = (function() {
   Creates and prepares the game canvas for being used
    */
 
-  Engine.prototype.createCanvas = function() {
+  _Class.prototype.createCanvas = function() {
     this.canvas = document.createElement("canvas");
     this.canvas.style.display = "block";
     this.canvas.width = this.canvasResX;
@@ -3147,7 +3145,7 @@ module.exports = window.Engine = Engine = (function() {
     this.arena.appendChild(this.canvas);
   };
 
-  Engine.prototype.initRenderer = function() {
+  _Class.prototype.initRenderer = function() {
     if (!this.disableWebGL && (this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl"))) {
       console.log('Using WebGL renderer');
       this.renderer = new this.constructor.Renderers.WebGLRenderer(this.canvas);
@@ -3164,7 +3162,7 @@ module.exports = window.Engine = Engine = (function() {
   @param {boolean} enable Decides whether autoresize should be enabled or disabled
    */
 
-  Engine.prototype.setAutoResize = function(enable) {
+  _Class.prototype.setAutoResize = function(enable) {
     if (enable && !this.autoResize) {
       this.autoResize = true;
       this.autoResizeCanvas();
@@ -3190,7 +3188,7 @@ module.exports = window.Engine = Engine = (function() {
   @private
    */
 
-  Engine.prototype.autoResizeCanvas = function() {
+  _Class.prototype.autoResizeCanvas = function() {
     var gameWH, h, w, windowWH;
     if (this !== engine) {
       engine.autoResizeCanvas();
@@ -3217,7 +3215,7 @@ module.exports = window.Engine = Engine = (function() {
     this.canvas.style.width = w + "px";
   };
 
-  Engine.prototype.perFrameSpeed = function(speed) {
+  _Class.prototype.perFrameSpeed = function(speed) {
     return speed * this.gameTimeIncrease / 1000;
   };
 
@@ -3231,7 +3229,7 @@ module.exports = window.Engine = Engine = (function() {
   @return {number} The resulting value of the conversion
    */
 
-  Engine.prototype.convertSpeed = function(speed, from, to) {
+  _Class.prototype.convertSpeed = function(speed, from, to) {
     if (speed === void 0) {
       throw new Error("Missing argument: speed");
     }
@@ -3267,7 +3265,7 @@ module.exports = window.Engine = Engine = (function() {
   @param {number} transition A room transition constant or function
    */
 
-  Engine.prototype.goToRoom = function(room, transition, transitionOptions) {
+  _Class.prototype.goToRoom = function(room, transition, transitionOptions) {
     var oldRoom;
     if (this.changingRoom) {
       return false;
@@ -3305,7 +3303,7 @@ module.exports = window.Engine = Engine = (function() {
   @param {Room} room The room which should be added
    */
 
-  Engine.prototype.addRoom = function(room) {
+  _Class.prototype.addRoom = function(room) {
     if (room === void 0) {
       throw new Error("Missing argument: room");
     }
@@ -3322,7 +3320,7 @@ module.exports = window.Engine = Engine = (function() {
   @param {Room|string} room A pointer to the room, or a string representing the name of the room, which should be removed
    */
 
-  Engine.prototype.removeRoom = function(room) {
+  _Class.prototype.removeRoom = function(room) {
     var index;
     if (room === void 0) {
       throw new Error("Missing argument: room");
@@ -3354,7 +3352,7 @@ module.exports = window.Engine = Engine = (function() {
   @param {boolean} muted Whether or not the sound effects should be muted
    */
 
-  Engine.prototype.setSoundsMuted = function(muted) {
+  _Class.prototype.setSoundsMuted = function(muted) {
     muted = (muted !== void 0 ? muted : true);
     if (muted) {
       loader.getAllSounds().forEach(function(s) {
@@ -3371,7 +3369,7 @@ module.exports = window.Engine = Engine = (function() {
   @param {boolean} muted Whether of not the music should be muted
    */
 
-  Engine.prototype.setMusicMuted = function(muted) {
+  _Class.prototype.setMusicMuted = function(muted) {
     muted = (muted !== void 0 ? muted : true);
     if (muted) {
       loader.getAllMusic().forEach(function(m) {
@@ -3389,7 +3387,7 @@ module.exports = window.Engine = Engine = (function() {
   @param {boolean} enforce Whether or not the enforce the theme on objects for which another theme has already been set
    */
 
-  Engine.prototype.setDefaultTheme = function(themeName, enforce) {
+  _Class.prototype.setDefaultTheme = function(themeName, enforce) {
     if (themeName === void 0) {
       throw new Error("Missing argument: themeName");
     }
@@ -3406,7 +3404,7 @@ module.exports = window.Engine = Engine = (function() {
   Starts the engine's main loop
    */
 
-  Engine.prototype.startMainLoop = function() {
+  _Class.prototype.startMainLoop = function() {
     if (this.running) {
       return;
     }
@@ -3420,7 +3418,7 @@ module.exports = window.Engine = Engine = (function() {
   Stops the engine's main loop
    */
 
-  Engine.prototype.stopMainLoop = function() {
+  _Class.prototype.stopMainLoop = function() {
     if (!this.running) {
       return;
     }
@@ -3434,7 +3432,7 @@ module.exports = window.Engine = Engine = (function() {
   @private
    */
 
-  Engine.prototype.mainLoop = function() {
+  _Class.prototype.mainLoop = function() {
     var drawTime;
     if (!this.running) {
       return;
@@ -3477,7 +3475,7 @@ module.exports = window.Engine = Engine = (function() {
   @param {number} res The new horizontal resolution
    */
 
-  Engine.prototype.setCanvasResX = function(res) {
+  _Class.prototype.setCanvasResX = function(res) {
     this.canvas.width = res;
     this.canvasResX = res;
     if (this.autoResize) {
@@ -3492,7 +3490,7 @@ module.exports = window.Engine = Engine = (function() {
   @param {number} res The new vertical resolution
    */
 
-  Engine.prototype.setCanvasResY = function(res) {
+  _Class.prototype.setCanvasResY = function(res) {
     this.canvas.height = res;
     this.canvasResY = res;
     if (this.autoResize) {
@@ -3500,7 +3498,7 @@ module.exports = window.Engine = Engine = (function() {
     }
   };
 
-  Engine.prototype.loadFileContent = function(filePath) {
+  _Class.prototype.loadFileContent = function(filePath) {
     var req;
     req = new XMLHttpRequest();
     req.open("GET", filePath, false);
@@ -3515,7 +3513,7 @@ module.exports = window.Engine = Engine = (function() {
   @param {string|string[]} filePaths A file path (string), or an array of file paths to load and execute as JavaScript
    */
 
-  Engine.prototype.loadFiles = function(filePaths) {
+  _Class.prototype.loadFiles = function(filePaths) {
     var i, req, script;
     if (typeof filePaths === "string") {
       filePaths = [filePaths];
@@ -3548,7 +3546,7 @@ module.exports = window.Engine = Engine = (function() {
   @param {object} caller An object to call the callback function as.
    */
 
-  Engine.prototype.ajaxRequest = function(url, params, async, callback, caller) {
+  _Class.prototype.ajaxRequest = function(url, params, async, callback, caller) {
     var req;
     if (url === void 0) {
       throw new Error("Missing argument: url");
@@ -3589,7 +3587,7 @@ module.exports = window.Engine = Engine = (function() {
   param {Object} obj The object to remove
    */
 
-  Engine.prototype.purge = function(obj) {
+  _Class.prototype.purge = function(obj) {
     var customLoop, j, len, len1, name, ref, ref1, room;
     if (obj === void 0) {
       throw new Error("Cannot purge object: " + obj);
@@ -3622,7 +3620,7 @@ module.exports = window.Engine = Engine = (function() {
   Downloads a screen dump of the main canvas. Very usable for creating game screenshots directly from browser consoles.
    */
 
-  Engine.prototype.dumpScreen = function() {
+  _Class.prototype.dumpScreen = function() {
     var a, dataString;
     dataString = this.canvas.toDataURL().replace(/image\/png/, "image/octet-stream");
     a = document.createElement("a");
@@ -3633,13 +3631,13 @@ module.exports = window.Engine = Engine = (function() {
     document.body.removeChild(a, document.body);
   };
 
-  return Engine;
+  return _Class;
 
 })();
 
 
 
-},{"./engine/camera":13,"./engine/custom-loop":14,"./engine/globals":15,"./engine/loader":16,"./engine/object-creator":17,"./engine/room":18,"./geometry/circle":19,"./geometry/line":20,"./geometry/polygon":21,"./geometry/rectangle":22,"./geometry/vector":23,"./helpers/matrix-calculation":25,"./helpers/mixin":26,"./helpers/room-transition":27,"./helpers/webgl":28,"./input/keyboard":29,"./input/pointer":30,"./mixins/animatable":31,"./renderer/canvas":33,"./renderer/webgl":34,"./sounds/effect":38,"./sounds/music":39,"./views/child":40,"./views/circle":41,"./views/collidable":42,"./views/container":43,"./views/game-object":44,"./views/line":45,"./views/polygon":46,"./views/rectangle":47,"./views/sprite":48,"./views/text-block":49}],13:[function(require,module,exports){
+},{"./engine/camera":13,"./engine/custom-loop":14,"./engine/globals":15,"./engine/loader":16,"./engine/object-creator":17,"./engine/room":18,"./geometry/circle":19,"./geometry/line":20,"./geometry/polygon":21,"./geometry/rectangle":22,"./geometry/vector":23,"./helpers/matrix-calculation":25,"./helpers/mixin":26,"./helpers/room-transition":27,"./helpers/webgl":28,"./input/keyboard":29,"./input/pointer":30,"./mixins/animatable":31,"./renderer/canvas":33,"./renderer/webgl":34,"./sounds/effect":38,"./sounds/music":39,"./views/child":40,"./views/circle":41,"./views/collidable":42,"./views/container":43,"./views/game-object":44,"./views/line":45,"./views/polygon":46,"./views/rectangle":47,"./views/sprite":48,"./views/text-block":49}],13:[function(_dereq_,module,exports){
 
 /*
 Constructor for Camera class
@@ -3678,12 +3676,12 @@ module.exports = Camera = (function() {
 })();
 
 Geometry = {
-  Rectangle: require('../geometry/rectangle')
+  Rectangle: _dereq_('../geometry/rectangle')
 };
 
 
 
-},{"../geometry/rectangle":22}],14:[function(require,module,exports){
+},{"../geometry/rectangle":22}],14:[function(_dereq_,module,exports){
 
 /*
 @name CustomLoop
@@ -4100,12 +4098,12 @@ module.exports = CustomLoop = (function() {
 })();
 
 Helpers = {
-  Easing: require('../helpers/easing')
+  Easing: _dereq_('../helpers/easing')
 };
 
 
 
-},{"../helpers/easing":24}],15:[function(require,module,exports){
+},{"../helpers/easing":24}],15:[function(_dereq_,module,exports){
 
 /*
 jseGlobals.js:
@@ -4193,7 +4191,7 @@ module.exports = {
 
 
 
-},{}],16:[function(require,module,exports){
+},{}],16:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Loader class.
@@ -4836,17 +4834,17 @@ module.exports = Loader = (function() {
 })();
 
 Sounds = {
-  Music: require('../sounds/music'),
-  Effect: require('../sounds/effect')
+  Music: _dereq_('../sounds/music'),
+  Effect: _dereq_('../sounds/effect')
 };
 
 Geometry = {
-  Rectangle: require('../geometry/rectangle')
+  Rectangle: _dereq_('../geometry/rectangle')
 };
 
 
 
-},{"../geometry/rectangle":22,"../sounds/effect":38,"../sounds/music":39}],17:[function(require,module,exports){
+},{"../geometry/rectangle":22,"../sounds/effect":38,"../sounds/music":39}],17:[function(_dereq_,module,exports){
 var ObjectCreator, Views,
   slice = [].slice;
 
@@ -4926,26 +4924,26 @@ module.exports = ObjectCreator = (function() {
 })();
 
 Views = {
-  Circle: require('../views/circle'),
-  Collidable: require('../views/collidable'),
-  Container: require('../views/container'),
-  GameObject: require('../views/game-object'),
-  Line: require('../views/line'),
-  Polygon: require('../views/polygon'),
-  Rectangle: require('../views/rectangle'),
-  Sprite: require('../views/sprite'),
-  TextBlock: require('../views/text-block')
+  Circle: _dereq_('../views/circle'),
+  Collidable: _dereq_('../views/collidable'),
+  Container: _dereq_('../views/container'),
+  GameObject: _dereq_('../views/game-object'),
+  Line: _dereq_('../views/line'),
+  Polygon: _dereq_('../views/polygon'),
+  Rectangle: _dereq_('../views/rectangle'),
+  Sprite: _dereq_('../views/sprite'),
+  TextBlock: _dereq_('../views/text-block')
 };
 
 
 
-},{"../views/circle":41,"../views/collidable":42,"../views/container":43,"../views/game-object":44,"../views/line":45,"../views/polygon":46,"../views/rectangle":47,"../views/sprite":48,"../views/text-block":49}],18:[function(require,module,exports){
+},{"../views/circle":41,"../views/collidable":42,"../views/container":43,"../views/game-object":44,"../views/line":45,"../views/polygon":46,"../views/rectangle":47,"../views/sprite":48,"../views/text-block":49}],18:[function(_dereq_,module,exports){
 var CustomLoop, Room, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 Views = {
-  Container: require('../views/container')
+  Container: _dereq_('../views/container')
 };
 
 
@@ -5071,19 +5069,19 @@ module.exports = Room = (function(superClass) {
 
 })(Views.Container);
 
-CustomLoop = require('./custom-loop');
+CustomLoop = _dereq_('./custom-loop');
 
 
 
-},{"../views/container":43,"./custom-loop":14}],19:[function(require,module,exports){
+},{"../views/container":43,"./custom-loop":14}],19:[function(_dereq_,module,exports){
 var Circle, Geometry, Helpers, Mixins;
 
 Helpers = {
-  Mixin: require('../helpers/mixin')
+  Mixin: _dereq_('../helpers/mixin')
 };
 
 Mixins = {
-  Animatable: require('../mixins/animatable')
+  Animatable: _dereq_('../mixins/animatable')
 };
 
 
@@ -5308,15 +5306,15 @@ module.exports = Circle = (function() {
 })();
 
 Geometry = {
-  Line: require('./line'),
-  Rectangle: require('./rectangle'),
-  Polygon: require('./polygon'),
-  Vector: require('./vector')
+  Line: _dereq_('./line'),
+  Rectangle: _dereq_('./rectangle'),
+  Polygon: _dereq_('./polygon'),
+  Vector: _dereq_('./vector')
 };
 
 
 
-},{"../helpers/mixin":26,"../mixins/animatable":31,"./line":20,"./polygon":21,"./rectangle":22,"./vector":23}],20:[function(require,module,exports){
+},{"../helpers/mixin":26,"../mixins/animatable":31,"./line":20,"./polygon":21,"./rectangle":22,"./vector":23}],20:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Line class. Uses setFromVectors to create the line's start and end points
@@ -5638,15 +5636,15 @@ module.exports = Line = (function() {
 })();
 
 Geometry = {
-  Circle: require('./circle'),
-  Rectangle: require('./rectangle'),
-  Polygon: require('./polygon'),
-  Vector: require('./vector')
+  Circle: _dereq_('./circle'),
+  Rectangle: _dereq_('./rectangle'),
+  Polygon: _dereq_('./polygon'),
+  Vector: _dereq_('./vector')
 };
 
 
 
-},{"./circle":19,"./polygon":21,"./rectangle":22,"./vector":23}],21:[function(require,module,exports){
+},{"./circle":19,"./polygon":21,"./rectangle":22,"./vector":23}],21:[function(_dereq_,module,exports){
 var Geometry, Polygon;
 
 module.exports = Polygon = (function() {
@@ -6050,23 +6048,23 @@ module.exports = Polygon = (function() {
 })();
 
 Geometry = {
-  Circle: require('./circle'),
-  Line: require('./line'),
-  Rectangle: require('./rectangle'),
-  Vector: require('./vector')
+  Circle: _dereq_('./circle'),
+  Line: _dereq_('./line'),
+  Rectangle: _dereq_('./rectangle'),
+  Vector: _dereq_('./vector')
 };
 
 
 
-},{"./circle":19,"./line":20,"./rectangle":22,"./vector":23}],22:[function(require,module,exports){
+},{"./circle":19,"./line":20,"./rectangle":22,"./vector":23}],22:[function(_dereq_,module,exports){
 var Geometry, Helpers, Mixins, Rectangle;
 
 Helpers = {
-  Mixin: require('../helpers/mixin')
+  Mixin: _dereq_('../helpers/mixin')
 };
 
 Mixins = {
-  Animatable: require('../mixins/animatable')
+  Animatable: _dereq_('../mixins/animatable')
 };
 
 
@@ -6347,23 +6345,23 @@ module.exports = Rectangle = (function() {
 })();
 
 Geometry = {
-  Circle: require('./circle'),
-  Line: require('./line'),
-  Polygon: require('./polygon'),
-  Vector: require('./vector')
+  Circle: _dereq_('./circle'),
+  Line: _dereq_('./line'),
+  Polygon: _dereq_('./polygon'),
+  Vector: _dereq_('./vector')
 };
 
 
 
-},{"../helpers/mixin":26,"../mixins/animatable":31,"./circle":19,"./line":20,"./polygon":21,"./vector":23}],23:[function(require,module,exports){
+},{"../helpers/mixin":26,"../mixins/animatable":31,"./circle":19,"./line":20,"./polygon":21,"./vector":23}],23:[function(_dereq_,module,exports){
 var Geometry, Helpers, Mixins, Vector;
 
 Helpers = {
-  Mixin: require('../helpers/mixin')
+  Mixin: _dereq_('../helpers/mixin')
 };
 
 Mixins = {
-  Animatable: require('../mixins/animatable')
+  Animatable: _dereq_('../mixins/animatable')
 };
 
 
@@ -6677,15 +6675,15 @@ module.exports = Vector = (function() {
 })();
 
 Geometry = {
-  Circle: require('./circle'),
-  Line: require('./line'),
-  Rectangle: require('./rectangle'),
-  Polygon: require('./polygon')
+  Circle: _dereq_('./circle'),
+  Line: _dereq_('./line'),
+  Rectangle: _dereq_('./rectangle'),
+  Polygon: _dereq_('./polygon')
 };
 
 
 
-},{"../helpers/mixin":26,"../mixins/animatable":31,"./circle":19,"./line":20,"./polygon":21,"./rectangle":22}],24:[function(require,module,exports){
+},{"../helpers/mixin":26,"../mixins/animatable":31,"./circle":19,"./line":20,"./polygon":21,"./rectangle":22}],24:[function(_dereq_,module,exports){
 module.exports = {
   linear: function(t, b, c, d) {
     t /= d;
@@ -6739,7 +6737,7 @@ module.exports = {
 
 
 
-},{}],25:[function(require,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 var MatrixCalculationHelper;
 
 module.exports = MatrixCalculationHelper = {
@@ -6896,7 +6894,7 @@ module.exports = MatrixCalculationHelper = {
 
 
 
-},{}],26:[function(require,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 var MixinHelper;
 
 module.exports = MixinHelper = {
@@ -6925,7 +6923,7 @@ module.exports = MixinHelper = {
 
 
 
-},{}],27:[function(require,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 var Camera, RoomTransitionHelper;
 
 module.exports = RoomTransitionHelper = {
@@ -7218,16 +7216,16 @@ module.exports = RoomTransitionHelper = {
   }
 };
 
-Camera = require('../engine/camera');
+Camera = _dereq_('../engine/camera');
 
 
 
-},{"../engine/camera":13}],28:[function(require,module,exports){
+},{"../engine/camera":13}],28:[function(_dereq_,module,exports){
 var Vector, WebGLHelper, poly2tri;
 
-poly2tri = require('poly2tri');
+poly2tri = _dereq_('poly2tri');
 
-Vector = require('../geometry/vector');
+Vector = _dereq_('../geometry/vector');
 
 module.exports = WebGLHelper = {
   planeCache: new Float32Array(12),
@@ -7408,7 +7406,7 @@ module.exports = WebGLHelper = {
 
 
 
-},{"../geometry/vector":23,"poly2tri":6}],29:[function(require,module,exports){
+},{"../geometry/vector":23,"poly2tri":6}],29:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Keyboard class
@@ -7548,7 +7546,7 @@ module.exports = Keyboard = (function() {
 
 
 
-},{}],30:[function(require,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Pointer class
@@ -8205,14 +8203,14 @@ module.exports = Pointer = (function() {
 })();
 
 Geometry = {
-  Vector: require('../geometry/vector')
+  Vector: _dereq_('../geometry/vector')
 };
 
-Globals = require('../engine/globals');
+Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":15,"../geometry/vector":23}],31:[function(require,module,exports){
+},{"../engine/globals":15,"../geometry/vector":23}],31:[function(_dereq_,module,exports){
 var Animatable, Globals;
 
 module.exports = Animatable = (function() {
@@ -8416,11 +8414,11 @@ module.exports = Animatable = (function() {
 
 })();
 
-Globals = require('../engine/globals');
+Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":15}],32:[function(require,module,exports){
+},{"../engine/globals":15}],32:[function(_dereq_,module,exports){
 var Geometry, Globals, Texture;
 
 module.exports = Texture = (function() {
@@ -8494,15 +8492,15 @@ module.exports = Texture = (function() {
 })();
 
 Geometry = {
-  Vector: require('../geometry/vector'),
-  Rectangle: require('../geometry/rectangle')
+  Vector: _dereq_('../geometry/vector'),
+  Rectangle: _dereq_('../geometry/rectangle')
 };
 
-Globals = require('../engine/globals');
+Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":15,"../geometry/rectangle":22,"../geometry/vector":23}],33:[function(require,module,exports){
+},{"../engine/globals":15,"../geometry/rectangle":22,"../geometry/vector":23}],33:[function(_dereq_,module,exports){
 var CanvasRenderer, Helpers;
 
 module.exports = CanvasRenderer = (function() {
@@ -8731,12 +8729,12 @@ module.exports = CanvasRenderer = (function() {
 })();
 
 Helpers = {
-  MatrixCalculation: require('../helpers/matrix-calculation')
+  MatrixCalculation: _dereq_('../helpers/matrix-calculation')
 };
 
 
 
-},{"../helpers/matrix-calculation":25}],34:[function(require,module,exports){
+},{"../helpers/matrix-calculation":25}],34:[function(_dereq_,module,exports){
 var ColorShaderProgram, Helpers, TextureShaderProgram, View, WebGLRenderer;
 
 module.exports = WebGLRenderer = (function() {
@@ -8945,24 +8943,24 @@ module.exports = WebGLRenderer = (function() {
 
 })();
 
-TextureShaderProgram = require('./webgl/texture-shader-program');
+TextureShaderProgram = _dereq_('./webgl/texture-shader-program');
 
-ColorShaderProgram = require('./webgl/color-shader-program');
+ColorShaderProgram = _dereq_('./webgl/color-shader-program');
 
 Helpers = {
-  MatrixCalculation: require('../helpers/matrix-calculation')
+  MatrixCalculation: _dereq_('../helpers/matrix-calculation')
 };
 
 View = {
-  Child: require('../views/child')
+  Child: _dereq_('../views/child')
 };
 
 
 
-},{"../helpers/matrix-calculation":25,"../views/child":40,"./webgl/color-shader-program":35,"./webgl/texture-shader-program":36}],35:[function(require,module,exports){
+},{"../helpers/matrix-calculation":25,"../views/child":40,"./webgl/color-shader-program":35,"./webgl/texture-shader-program":36}],35:[function(_dereq_,module,exports){
 var Helpers, TriangleBuffer, WebGLColorShaderProgram;
 
-TriangleBuffer = require('./triangle-buffer');
+TriangleBuffer = _dereq_('./triangle-buffer');
 
 module.exports = WebGLColorShaderProgram = (function() {
   WebGLColorShaderProgram.prototype.program = null;
@@ -9117,12 +9115,12 @@ module.exports = WebGLColorShaderProgram = (function() {
 })();
 
 Helpers = {
-  WebGL: require('../../helpers/webgl')
+  WebGL: _dereq_('../../helpers/webgl')
 };
 
 
 
-},{"../../helpers/webgl":28,"./triangle-buffer":37}],36:[function(require,module,exports){
+},{"../../helpers/webgl":28,"./triangle-buffer":37}],36:[function(_dereq_,module,exports){
 var WebGLTextureShaderProgram, coordsBufferLength;
 
 coordsBufferLength = 5 * 6 * 20000;
@@ -9360,7 +9358,7 @@ module.exports = WebGLTextureShaderProgram = (function() {
 
 
 
-},{}],37:[function(require,module,exports){
+},{}],37:[function(_dereq_,module,exports){
 var TriangleBuffer;
 
 module.exports = TriangleBuffer = (function() {
@@ -9413,7 +9411,7 @@ module.exports = TriangleBuffer = (function() {
 
 
 
-},{}],38:[function(require,module,exports){
+},{}],38:[function(_dereq_,module,exports){
 
 /*
 Constructor for the sound class
@@ -9570,7 +9568,7 @@ module.exports = Effect = (function() {
 
 
 
-},{}],39:[function(require,module,exports){
+},{}],39:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Music class
@@ -9675,13 +9673,13 @@ module.exports = Music = (function() {
 
 
 
-},{}],40:[function(require,module,exports){
+},{}],40:[function(_dereq_,module,exports){
 
 /*
 @name View.Child
 @class If a class inherits Child it can be added to the view list. Therefore all objects which can be drawn inherits this class
  */
-var Child, Engine, Geometry, Room;
+var Child, Engine, Geometry;
 
 module.exports = Child = (function() {
   Child.prototype.renderType = null;
@@ -9751,7 +9749,7 @@ module.exports = Child = (function() {
   Child.prototype.getRoomPosition = function() {
     var i, parent, parents, pos;
     parents = this.getParents();
-    if (parents.length && parents[parents.length - 1] instanceof Room) {
+    if (parents.length && parents[parents.length - 1] instanceof Engine.Room) {
       pos = new Vector(this.x, this.y);
       i = 0;
       while (i < parents.length) {
@@ -9798,7 +9796,7 @@ module.exports = Child = (function() {
       return false;
     }
     ancestor = parents[parents.length - 1];
-    if (ancestor instanceof Room) {
+    if (ancestor instanceof Engine.Room) {
       return ancestor;
     } else {
       return false;
@@ -9854,29 +9852,31 @@ module.exports = Child = (function() {
 
 })();
 
-Engine = Room = require('../engine/room');
+Engine = {
+  Room: _dereq_('../engine/room')
+};
 
 Geometry = {
-  Vector: require('../geometry/vector')
+  Vector: _dereq_('../geometry/vector')
 };
 
 
 
-},{"../engine/room":18,"../geometry/vector":23}],41:[function(require,module,exports){
+},{"../engine/room":18,"../geometry/vector":23}],41:[function(_dereq_,module,exports){
 var Circle, Geometry, Helpers, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 Helpers = {
-  Mixin: require('../helpers/mixin')
+  Mixin: _dereq_('../helpers/mixin')
 };
 
 Geometry = {
-  Circle: require('../geometry/circle')
+  Circle: _dereq_('../geometry/circle')
 };
 
 Views = {
-  Child: require('./child')
+  Child: _dereq_('./child')
 };
 
 
@@ -9922,17 +9922,17 @@ module.exports = Circle = (function(superClass) {
 
 })(Geometry.Circle);
 
-Geometry.Rectangle = require('../geometry/rectangle');
+Geometry.Rectangle = _dereq_('../geometry/rectangle');
 
 
 
-},{"../geometry/circle":19,"../geometry/rectangle":22,"../helpers/mixin":26,"./child":40}],42:[function(require,module,exports){
+},{"../geometry/circle":19,"../geometry/rectangle":22,"../helpers/mixin":26,"./child":40}],42:[function(_dereq_,module,exports){
 var Collidable, Geometry, Helpers, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 Views = {
-  Sprite: require('./sprite')
+  Sprite: _dereq_('./sprite')
 };
 
 
@@ -10259,23 +10259,23 @@ module.exports = Collidable = (function(superClass) {
 })(Views.Sprite);
 
 Helpers = {
-  MatrixCalculation: require('../helpers/matrix-calculation')
+  MatrixCalculation: _dereq_('../helpers/matrix-calculation')
 };
 
 Geometry = {
-  Vector: require('../geometry/vector')
+  Vector: _dereq_('../geometry/vector')
 };
 
 
 
-},{"../geometry/vector":23,"../helpers/matrix-calculation":25,"./sprite":48}],43:[function(require,module,exports){
+},{"../geometry/vector":23,"../helpers/matrix-calculation":25,"./sprite":48}],43:[function(_dereq_,module,exports){
 var Container, Geometry, ObjectCreator, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   slice = [].slice;
 
 Views = {
-  Child: require('./child')
+  Child: _dereq_('./child')
 };
 
 
@@ -10532,21 +10532,21 @@ module.exports = Container = (function(superClass) {
 
 })(Views.Child);
 
-ObjectCreator = require('../engine/object-creator');
+ObjectCreator = _dereq_('../engine/object-creator');
 
 Geometry = {
-  Rectangle: require('../geometry/rectangle')
+  Rectangle: _dereq_('../geometry/rectangle')
 };
 
 
 
-},{"../engine/object-creator":17,"../geometry/rectangle":22,"./child":40}],44:[function(require,module,exports){
+},{"../engine/object-creator":17,"../geometry/rectangle":22,"./child":40}],44:[function(_dereq_,module,exports){
 var GameObject, Geometry, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 Views = {
-  Collidable: require('./collidable')
+  Collidable: _dereq_('./collidable')
 };
 
 
@@ -10638,26 +10638,26 @@ module.exports = GameObject = (function(superClass) {
 })(Views.Collidable);
 
 Geometry = {
-  Vector: require('../geometry/vector')
+  Vector: _dereq_('../geometry/vector')
 };
 
 
 
-},{"../geometry/vector":23,"./collidable":42}],45:[function(require,module,exports){
+},{"../geometry/vector":23,"./collidable":42}],45:[function(_dereq_,module,exports){
 var Geometry, Helpers, Line, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 Helpers = {
-  Mixin: require('../helpers/mixin')
+  Mixin: _dereq_('../helpers/mixin')
 };
 
 Geometry = {
-  Line: require('../geometry/line')
+  Line: _dereq_('../geometry/line')
 };
 
 Views = {
-  Child: require('./child')
+  Child: _dereq_('./child')
 };
 
 
@@ -10743,25 +10743,25 @@ module.exports = Line = (function(superClass) {
 
 })(Geometry.Line);
 
-Geometry.Vector = require('../geometry/vector');
+Geometry.Vector = _dereq_('../geometry/vector');
 
 
 
-},{"../geometry/line":20,"../geometry/vector":23,"../helpers/mixin":26,"./child":40}],46:[function(require,module,exports){
+},{"../geometry/line":20,"../geometry/vector":23,"../helpers/mixin":26,"./child":40}],46:[function(_dereq_,module,exports){
 var Geometry, Helpers, Polygon, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 Helpers = {
-  Mixin: require('../helpers/mixin')
+  Mixin: _dereq_('../helpers/mixin')
 };
 
 Geometry = {
-  Polygon: require('../geometry/polygon')
+  Polygon: _dereq_('../geometry/polygon')
 };
 
 Views = {
-  Child: require('./child')
+  Child: _dereq_('./child')
 };
 
 
@@ -10808,21 +10808,21 @@ module.exports = Polygon = (function(superClass) {
 
 
 
-},{"../geometry/polygon":21,"../helpers/mixin":26,"./child":40}],47:[function(require,module,exports){
+},{"../geometry/polygon":21,"../helpers/mixin":26,"./child":40}],47:[function(_dereq_,module,exports){
 var Geometry, Helpers, Rectangle, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 Helpers = {
-  Mixin: require('../helpers/mixin')
+  Mixin: _dereq_('../helpers/mixin')
 };
 
 Geometry = {
-  Rectangle: require('../geometry/rectangle')
+  Rectangle: _dereq_('../geometry/rectangle')
 };
 
 Views = {
-  Child: require('./child')
+  Child: _dereq_('./child')
 };
 
 
@@ -10926,22 +10926,22 @@ module.exports = Rectangle = (function(superClass) {
 
 
 
-},{"../geometry/rectangle":22,"../helpers/mixin":26,"./child":40}],48:[function(require,module,exports){
+},{"../geometry/rectangle":22,"../helpers/mixin":26,"./child":40}],48:[function(_dereq_,module,exports){
 var Globals, Helpers, Mixins, Sprite, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 Helpers = {
-  Mixin: require('../helpers/mixin')
+  Mixin: _dereq_('../helpers/mixin')
 };
 
 Mixins = {
-  Animatable: require('../mixins/animatable'),
-  Texture: require('../mixins/texture')
+  Animatable: _dereq_('../mixins/animatable'),
+  Texture: _dereq_('../mixins/texture')
 };
 
 Views = {
-  Child: require('./child')
+  Child: _dereq_('./child')
 };
 
 
@@ -11132,26 +11132,26 @@ module.exports = Sprite = (function(superClass) {
 
 })(Views.Child);
 
-Globals = require('../engine/globals');
+Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":15,"../helpers/mixin":26,"../mixins/animatable":31,"../mixins/texture":32,"./child":40}],49:[function(require,module,exports){
+},{"../engine/globals":15,"../helpers/mixin":26,"../mixins/animatable":31,"../mixins/texture":32,"./child":40}],49:[function(_dereq_,module,exports){
 var Geometry, Globals, Helpers, Mixins, TextBlock, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 Helpers = {
-  Mixin: require('../helpers/mixin')
+  Mixin: _dereq_('../helpers/mixin')
 };
 
 Mixins = {
-  Animatable: require('../mixins/animatable'),
-  Texture: require('../mixins/texture')
+  Animatable: _dereq_('../mixins/animatable'),
+  Texture: _dereq_('../mixins/texture')
 };
 
 Views = {
-  Child: require('./child')
+  Child: _dereq_('./child')
 };
 
 
@@ -11390,11 +11390,12 @@ module.exports = TextBlock = (function(superClass) {
 })(Views.Child);
 
 Geometry = {
-  Vector: require('../geometry/vector')
+  Vector: _dereq_('../geometry/vector')
 };
 
-Globals = require('../engine/globals');
+Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":15,"../geometry/vector":23,"../helpers/mixin":26,"../mixins/animatable":31,"../mixins/texture":32,"./child":40}]},{},[12]);
+},{"../engine/globals":15,"../geometry/vector":23,"../helpers/mixin":26,"../mixins/animatable":31,"../mixins/texture":32,"./child":40}]},{},[12])(12)
+});

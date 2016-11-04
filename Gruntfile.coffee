@@ -1,16 +1,8 @@
+coffeeify = require('coffeeify')
+
 module.exports = (grunt) ->
   grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
-
-    jade:
-      development:
-        files: [
-          expand: true
-          cwd: "src/jade/examples"
-          src: "**/*.jade"
-          dest: "www/examples"
-          ext: ".html"
-        ]
 
     stylus:
       options:
@@ -19,20 +11,39 @@ module.exports = (grunt) ->
         files: 'www/engine.css': 'src/stylus/engine.styl'
 
     browserify:
-      options:
-        browserifyOptions:
-          extensions: ['.coffee', '.jade']
-          paths: ['./node_modules','./src']
-      development:
+      engine:
+        options:
+          browserifyOptions:
+            extensions: ['.coffee']
+            paths: ['./node_modules', './src']
+            transform: [coffeeify]
+            standalone: 'Engine'
+            plugin: ['browserify-derequire']
         files: [
-          { 'www/engine.js': ['src/coffee/engine.coffee'] }
-          {
-            expand: true
-            cwd: "src/coffee/examples"
-            src: "**/*.coffee"
-            dest: "www/examples/js"
-            ext: ".js"
-          }
+          'www/engine.js': ['src/coffee/engine.coffee']
+        ]
+      examples:
+        options:
+          browserifyOptions:
+            extensions: ['.coffee']
+            paths: ['./src/examples']
+            transform: [coffeeify]
+        files: [
+          expand: true
+          cwd: "src/examples/coffee"
+          src: "**/*.coffee"
+          dest: "www/examples/js"
+          ext: ".js"
+        ]
+
+    jade:
+      examples:
+        files: [
+          expand: true
+          cwd: "src/examples/jade"
+          src: "**/[^_]*.jade"
+          dest: "www/examples"
+          ext: ".html"
         ]
 
     watch:
@@ -44,12 +55,12 @@ module.exports = (grunt) ->
       stylus:
         files: [ 'src/**/*.styl' ]
         tasks: [ 'stylus' ]
-      browserify:
-        files: [
-          'src/**/*.coffee'
-          'src/**/*.js'
-        ]
-        tasks: [ 'browserify' ]
+      browserifyEngine:
+        files: [ 'src/coffee/**/*.coffee' ]
+        tasks: [ 'browserify:engine' ]
+      browserifyExamples:
+        files: [ 'src/exmpales/coffee/**/*.coffee' ]
+        tasks: [ 'browserify:examples' ]
 
     connect:
       server:

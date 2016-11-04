@@ -54,7 +54,7 @@ module.exports = class Child
   ###
   getRoomPosition: ->
     parents = @getParents()
-    if parents.length and parents[parents.length - 1] instanceof Room
+    if parents.length and parents[parents.length - 1] instanceof Engine.Room
       pos = new Vector(@x, @y)
       i = 0
       while i < parents.length
@@ -87,7 +87,7 @@ module.exports = class Child
     parents = @getParents()
     return false if parents.length is 0
     ancestor = parents[parents.length - 1]
-    (if ancestor instanceof Room then ancestor else false)
+    (if ancestor instanceof Engine.Room then ancestor else false)
 
   ###
   Sets the position of the object relative to its parent
@@ -127,7 +127,7 @@ module.exports = class Child
 
 # Classes used in class functions at bottom
 Engine =
-  Room = require '../engine/room'
+  Room: require '../engine/room'
 
 Geometry =
   Vector: require '../geometry/vector'
