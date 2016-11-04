@@ -9084,6 +9084,15 @@ module.exports = WebGLColorShaderProgram = (function() {
     }
   };
 
+  WebGLColorShaderProgram.prototype.renderBoundingBox = function(gl, object, wm) {
+    var box, color, coords, mask;
+    mask = engine.loader.getMask(object.source, object.getTheme());
+    box = mask.boundingBox;
+    color = Helpers.WebGL.colorFromCSSString('#0F0');
+    coords = Helpers.WebGL.getPolygonOutlineTriangleCoords(box.points, 1);
+    this.pushObject(gl, coords, color, 1, wm);
+  };
+
   WebGLColorShaderProgram.prototype.pushObject = function(gl, coords, color, opacity, wm) {
     var offset, triangleCount;
     triangleCount = coords.length / 6;

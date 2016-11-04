@@ -155,21 +155,13 @@ module.exports = class WebGLColorShaderProgram
       @pushObject(gl, coords, color, object.opacity, wm)
     return
 
-  # renderBoundingBox: (gl, object, wm)->
-  #   l = @locations
-  #   @setAlpha gl, 1
-  #
-  #   mask = engine.loader.getMask object.source, object.getTheme()
-  #   box = mask.boundingBox
-  #   x = box.points[0].x
-  #   y = box.points[0].y
-  #   width = box.points[2].x - x
-  #   height = box.points[2].y - y
-  #
-  #   gl.uniformMatrix3fv l.u_matrix, false, wm
-  #   gl.uniform1i l.u_color, Helpers.WebGL.colorFromCSSString '#0F0'
-  #   Helpers.WebGL.setPlaneOutline gl, x, y, width, height, 1
-  #   gl.drawArrays gl.TRIANGLES, 0, 24
+  renderBoundingBox: (gl, object, wm) ->
+    mask = engine.loader.getMask object.source, object.getTheme()
+    box = mask.boundingBox
+    color = Helpers.WebGL.colorFromCSSString '#0F0'
+    coords = Helpers.WebGL.getPolygonOutlineTriangleCoords box.points, 1
+    @pushObject gl, coords, color, 1, wm
+    return
 
   pushObject: (gl, coords, color, opacity, wm)->
     triangleCount = coords.length / 6
