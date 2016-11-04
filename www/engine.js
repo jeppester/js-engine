@@ -6089,6 +6089,28 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
  */
 
 module.exports = Rectangle = (function() {
+
+  /*
+  Calculates the bounding rectangle of two or more rectangles
+  
+  @param {Geometry.Rectangle[]} rectangles The rectangles to use for the operation
+   */
+  Rectangle.getBoundingRectangle = function(rectangles) {
+    var i, len, rectangle, x1Coords, x2Coords, y1Coords, y2Coords;
+    x1Coords = [];
+    y1Coords = [];
+    x2Coords = [];
+    y2Coords = [];
+    for (i = 0, len = rectangles.length; i < len; i++) {
+      rectangle = rectangles[i];
+      x1Coords.push(rectangle.x);
+      y1Coords.push(rectangle.y);
+      x2Coords.push(rectangle.x + rectangle.width);
+      y2Coords.push(rectangle.y + rectangle.height);
+    }
+    return new this(Math.min.apply(Math, x1Coords), Math.min.apply(Math, y1Coords), Math.max.apply(Math, x2Coords), Math.max.apply(Math, y2Coords));
+  };
+
   Helpers.Mixin.mixin(Rectangle, Mixins.Animatable);
 
   function Rectangle(x, y, width, height, fillStyle, strokeStyle, lineWidth) {
@@ -6231,30 +6253,6 @@ module.exports = Rectangle = (function() {
     this.width *= scaleH;
     this.height *= scaleV;
     return this;
-  };
-
-
-  /*
-  Calculates the bounding rectangle of the of the two rectangles
-  
-  @param {Geometry.Rectangle} rectangle The rectangle to use for the calculation
-  @return {Geometry.Rectangle} The bounding rectangle for the two rectangles
-   */
-
-  Rectangle.prototype.getBoundingRectangle = function(rectangle) {
-    var crop, rx2, ry2, x2, y2;
-    x2 = this.x + this.width;
-    y2 = this.y + this.height;
-    rx2 = rectangle.x + rectangle.width;
-    ry2 = rectangle.y + rectangle.height;
-    crop = new Geometry.Rectangle();
-    crop.x = (rectangle.x < this.x ? rectangle.x : this.x);
-    crop.y = (rectangle.y < this.y ? rectangle.y : this.y);
-    x2 = (rx2 < x2 ? x2 : rx2);
-    y2 = (ry2 < y2 ? y2 : ry2);
-    crop.width = x2 - crop.x;
-    crop.height = y2 - crop.y;
-    return crop;
   };
 
 
@@ -10271,7 +10269,7 @@ Geometry = {
 
 
 },{"../geometry/vector":23,"../helpers/matrix-calculation":25,"./sprite":48}],43:[function(require,module,exports){
-var Container, ObjectCreator, Views,
+var Container, Geometry, ObjectCreator, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   slice = [].slice;
@@ -10336,7 +10334,6 @@ module.exports = Container = (function(superClass) {
       }
       this.children.push(child);
       child.parent = this;
-      engine.enableRedrawRegions && child.onAfterChange();
       if (child.refreshSource) {
         child.refreshSource();
       }
@@ -10380,7 +10377,6 @@ module.exports = Container = (function(superClass) {
         child.parent.removeChildren(child);
       }
       child.parent = this;
-      engine.enableRedrawRegions && child.onAfterChange();
       if (child.refreshSource) {
         child.refreshSource();
       }
@@ -10519,30 +10515,17 @@ module.exports = Container = (function(superClass) {
   @return {Math.Rectangle} A rectangle representing the region
    */
 
-  Container.prototype.getCombinedRedrawRegion = function() {
-    var addBox, box, child, i;
-    if (this.getRedrawRegion) {
-      box = this.getRedrawRegion();
-    }
-    i = 0;
-    while (i < this.children.length) {
-      child = this.children[i];
-      if (child.getCombinedRedrawRegion) {
-        addBox = child.getCombinedRedrawRegion();
-      } else {
-        addBox = child.getRedrawRegion();
+  Container.prototype.getRedrawRegion = function() {
+    var child, j, len, rectangles, ref;
+    rectangles = [];
+    ref = this.children;
+    for (j = 0, len = ref.length; j < len; j++) {
+      child = ref[j];
+      if (child.getRedrawRegion != null) {
+        rectangles = child.getRedrawRegion().getBoundingRectangle();
       }
-      child.currentRedrawRegion = addBox;
-      if (addBox) {
-        if (box) {
-          box = box.getBoundingRectangle(addBox);
-        } else {
-          box = addBox;
-        }
-      }
-      i++;
     }
-    return box;
+    return Geometry.Rectangle.getBoundingRectangle(rectangles);
   };
 
   return Container;
@@ -10551,9 +10534,13 @@ module.exports = Container = (function(superClass) {
 
 ObjectCreator = require('../engine/object-creator');
 
+Geometry = {
+  Rectangle: require('../geometry/rectangle')
+};
 
 
-},{"../engine/object-creator":17,"./child":40}],44:[function(require,module,exports){
+
+},{"../engine/object-creator":17,"../geometry/rectangle":22,"./child":40}],44:[function(require,module,exports){
 var GameObject, Geometry, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -10703,138 +10690,12 @@ module.exports = Line = (function(superClass) {
   function Line(startVector, endVector, strokeStyle, lineWidth, lineCap) {
     Views.Child.prototype.constructor.call(this);
     this.renderType = "line";
-    if (engine.enableRedrawRegions) {
-      this.LineInitWithRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
-    } else {
-      this.LineInitWithoutRedrawRegions(startVector, endVector, strokeStyle, lineWidth, lineCap);
-    }
-    return;
-  }
-
-  Line.prototype.LineInitWithoutRedrawRegions = function(startVector, endVector, strokeStyle, lineWidth, lineCap) {
     this.strokeStyle = strokeStyle || "#000";
     this.lineWidth = lineWidth || 1;
     this.lineCap = lineCap || "butt";
     this.setFromVectors(startVector || new Geometry.Vector(), endVector || new Geometry.Vector());
-  };
-
-  Line.prototype.LineInitWithRedrawRegions = function(startVector, endVector, strokeStyle, lineWidth, lineCap) {
-    var hidden;
-    hidden = {
-      strokeStyle: strokeStyle || "#000",
-      lineWidth: lineWidth || 1,
-      lineCap: lineCap || "butt",
-      a: void 0,
-      b: void 0,
-      parentObject: this
-    };
-    Object.defineProperty(this, "strokeStyle", {
-      get: function() {
-        return hidden.strokeStyle;
-      },
-      set: function(value) {
-        if (hidden.strokeStyle !== value) {
-          hidden.strokeStyle = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "lineCap", {
-      get: function() {
-        return hidden.lineCap;
-      },
-      set: function(value) {
-        if (hidden.lineCap !== value) {
-          hidden.lineCap = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "lineWidth", {
-      get: function() {
-        return hidden.lineWidth;
-      },
-      set: function(value) {
-        if (hidden.lineWidth !== value) {
-          hidden.lineWidth = value;
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "a", {
-      get: function() {
-        return hidden.a;
-      },
-      set: function(value) {
-        var xHidden, yHidden;
-        if (hidden.a !== value) {
-          hidden.a = value;
-          xHidden = hidden.a.x;
-          yHidden = hidden.a.y;
-          Object.defineProperty(hidden.a, "x", {
-            get: function() {
-              return xHidden;
-            },
-            set: function(value) {
-              if (xHidden !== value) {
-                xHidden = value;
-                hidden.parentObject.onAfterChange();
-              }
-            }
-          });
-          Object.defineProperty(hidden.a, "y", {
-            get: function() {
-              return yHidden;
-            },
-            set: function(value) {
-              if (yHidden !== value) {
-                yHidden = value;
-                hidden.parentObject.onAfterChange();
-              }
-            }
-          });
-          this.onAfterChange();
-        }
-      }
-    });
-    Object.defineProperty(this, "b", {
-      get: function() {
-        return hidden.b;
-      },
-      set: function(value) {
-        var xHidden, yHidden;
-        if (hidden.b !== value) {
-          hidden.b = value;
-          xHidden = hidden.b.x;
-          yHidden = hidden.b.y;
-          Object.defineProperty(hidden.b, "x", {
-            get: function() {
-              return xHidden;
-            },
-            set: function(value) {
-              if (xHidden !== value) {
-                xHidden = value;
-                hidden.parentObject.onAfterChange();
-              }
-            }
-          });
-          Object.defineProperty(hidden.b, "y", {
-            get: function() {
-              return yHidden;
-            },
-            set: function(value) {
-              if (yHidden !== value) {
-                yHidden = value;
-                hidden.parentObject.onAfterChange();
-              }
-            }
-          });
-          this.onAfterChange();
-        }
-      }
-    });
-    this.setFromVectors(startVector || new Geometry.Vector(), endVector || new Geometry.Vector());
-  };
+    return;
+  }
 
 
   /*

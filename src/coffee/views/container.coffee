@@ -52,7 +52,6 @@ module.exports = class Container extends Views.Child
       # Add the child
       @children.push child
       child.parent = this
-      engine.enableRedrawRegions and child.onAfterChange()
 
       # Refresh the child's sprite (it might have changed)
       child.refreshSource() if child.refreshSource
@@ -87,7 +86,6 @@ module.exports = class Container extends Views.Child
       # If the child already has a parent, remove the child from that parent
       child.parent.removeChildren child if child.parent
       child.parent = this
-      engine.enableRedrawRegions and child.onAfterChange()
       child.refreshSource() if child.refreshSource
       i++
     insertChildren
@@ -192,22 +190,12 @@ module.exports = class Container extends Views.Child
 
   @return {Math.Rectangle} A rectangle representing the region
   ###
-  getCombinedRedrawRegion: ->
-    box = @getRedrawRegion() if @getRedrawRegion
-    i = 0
-    while i < @children.length
-      child = @children[i]
-      if child.getCombinedRedrawRegion
-        addBox = child.getCombinedRedrawRegion()
-      else
-        addBox = child.getRedrawRegion()
-      child.currentRedrawRegion = addBox
-      if addBox
-        if box
-          box = box.getBoundingRectangle(addBox)
-        else
-          box = addBox
-      i++
-    box
+  getRedrawRegion: ->
+    rectangles = []
+    for child in @children when child.getRedrawRegion?
+      rectangles = child.getRedrawRegion().getBoundingRectangle()
+    Geometry.Rectangle.getBoundingRectangle(rectangles)
 
 ObjectCreator = require '../engine/object-creator'
+Geometry =
+  Rectangle: require '../geometry/rectangle'

@@ -23,6 +23,29 @@ The constructor for the Rectangle class. Uses the set-function to set the proper
 @param {number} height The height of the rectangle
 ###
 module.exports = class Rectangle
+  ###
+  Calculates the bounding rectangle of two or more rectangles
+
+  @param {Geometry.Rectangle[]} rectangles The rectangles to use for the operation
+  ###
+  @getBoundingRectangle: (rectangles) ->
+    x1Coords = []
+    y1Coords = []
+    x2Coords = []
+    y2Coords = []
+    for rectangle in rectangles
+      x1Coords.push rectangle.x
+      y1Coords.push rectangle.y
+      x2Coords.push rectangle.x + rectangle.width
+      y2Coords.push rectangle.y + rectangle.height
+
+    new @(
+      Math.min.apply(Math, x1Coords)
+      Math.min.apply(Math, y1Coords)
+      Math.max.apply(Math, x2Coords)
+      Math.max.apply(Math, y2Coords)
+    )
+
   # Mix in animatable
   Helpers.Mixin.mixin @, Mixins.Animatable
 
@@ -130,26 +153,6 @@ module.exports = class Rectangle
     @width *= scaleH
     @height *= scaleV
     this
-
-  ###
-  Calculates the bounding rectangle of the of the two rectangles
-
-  @param {Geometry.Rectangle} rectangle The rectangle to use for the calculation
-  @return {Geometry.Rectangle} The bounding rectangle for the two rectangles
-  ###
-  getBoundingRectangle: (rectangle) ->
-    x2 = @x + @width
-    y2 = @y + @height
-    rx2 = rectangle.x + rectangle.width
-    ry2 = rectangle.y + rectangle.height
-    crop = new Geometry.Rectangle()
-    crop.x = (if rectangle.x < @x then rectangle.x else @x)
-    crop.y = (if rectangle.y < @y then rectangle.y else @y)
-    x2 = (if rx2 < x2 then x2 else rx2)
-    y2 = (if ry2 < y2 then y2 else ry2)
-    crop.width = x2 - crop.x
-    crop.height = y2 - crop.y
-    crop
 
   ###
   Creates a polygon with the same points as the rectangle.
