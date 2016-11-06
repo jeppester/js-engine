@@ -9,7 +9,6 @@ Responsible for the main loop, the main canvas, etc.
 @property {boolean} running Whether or not the engine is currently running
 @property {int} canvasResX The main canvas horizontal resolution
 @property {int} canvasResY The main canvas vertical resolution
-@property {string} enginePath The url to jsEngine's source folder
 @property {boolean} focusOnLoad If the engine should focus itself when loaded
 @property {string} themesPath The url to jsEngine's theme folder
 @property {boolean} drawBoundingBoxes Whether or not the bounding boxes of all collidable objects are drawn
@@ -17,9 +16,9 @@ Responsible for the main loop, the main canvas, etc.
 @property {boolean} pauseOnBlur Whether or the engine will pause itself when the window is blurred
 @property {boolean} disableRightClick Whether or not right click context menu is disabled inside the main canvas
 @property {boolean} preventDefaultKeyboard Whether or not preventDefault is called for keyboard events
-@property {HTMLElement} arena The HTML element to use as parent to the main canvas
-@property {boolean} autoResize Whether or not the arena will autoresize itself to fit the window
-@property {boolean} autoResizeLimitToResolution Whether or not the arena should not autoresize itself to be bigger than the main canvas' resolution
+@property {HTMLElement} container The HTML element to use as parent to the main canvas
+@property {boolean} autoResize Whether or not the container will autoresize itself to fit the window
+@property {boolean} autoResizeLimitToResolution Whether or not the container should not autoresize itself to be bigger than the main canvas' resolution
 @property {int} cachedSoundCopies The number of copies each sound object caches of it's source to enable multiple playbacks
 @property {string} loadText The text shown while loading the engine
 @property {string} backgroundColor A CSS color string which is used as the background color of the main canvas
@@ -34,22 +33,21 @@ Responsible for the main loop, the main canvas, etc.
 @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
 The default options are:
 <code>{
-"arena": document.getElementById('arena'), // The element to use as game arena
+"container": document.getElementById('container'), // The element to use as game container
 "avoidSubPixelRendering": true, // If subpixelrendering should be avoided
-"autoResize": true, // If the arena should autoresize to fit the window (or iframe)
+"autoResize": true, // If the container should autoresize to fit the window (or iframe)
 "autoResizeLimitToResolution": true, // If the autoresizing should be limited to the game's resolution
-"backgroundColor": "#000", // The color of the arena's background
+"backgroundColor": "#000", // The color of the container's background
 "cachedSoundCopies": 5, // How many times sounds should be duplicated to allow multiple playbacks
 "canvasResX": 800, // The horizontal resolution to set for the game's main canvas
 "canvasResY": 600, // The vertical resolution to set for the game's main canvas
 "defaultCollisionResolution": 1, // Res. of collision checking, by default every 6th px is checked
-"disableRightClick": true, // If right clicks inside the arena should be disabled
+"disableRightClick": true, // If right clicks inside the container should be disabled
 "disableWebGL": false, // If WebGL rendering should be disabled
 "preventDefaultKeyboard": false, // Whether or not preventDefault should be called for keyboard events
 "disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
 "drawBoundingBoxes": false, // If Collidable object's bounding boxes should be drawn
 "drawMasks": false, // If Collidable object's masks should be drawn
-"enginePath": "js/jsEngine", // The path for the engine classes' directory
 "focusOnLoad": true, // Whether or not to focus the engine's window when the engine is ready
 "loadText": 'jsEngine loading...'
 "musicMuted": false, // If all music playback should be initially muted
@@ -103,19 +101,17 @@ module.exports = class
 
   @Room: require './engine/room'
   @Globals: require './engine/globals'
+  @DefaultSettings: require './engine/default-settings'
   @ObjectCreator: require './engine/object-creator'
   @CustomLoop: require './engine/custom-loop'
   @Camera: require './engine/camera'
   @Loader: require './engine/loader'
 
-  constructor: (options) ->
-    # Set global engine variable
-    ###
-    Global engine var set upon engine initialization
-    @global
-    ###
-    window.engine = this
-    @options = options || {}
+  constructor: (@settings = {}) ->
+    for name, value of @constructor.DefaultSettings
+      @settings[name] ?= value
+    @mainLoop = @mainLoop.bind @
+    @autoResizeCanvas = @autoResizeCanvas.bind @
     @load()
 
   ###
@@ -149,44 +145,9 @@ module.exports = class
       @host.supportedAudio.push audioFormats[i] if document.createElement("audio").canPlayType("audio/" + audioFormats[i])
       i++
 
-    # Load default options
-    # Optimize default options for each browser
-    @avoidSubPixelRendering = true
-    @preloadSounds = true
-    switch @host.device
-      when "iDevice"
-        # iDevices cannot preload sounds (which is utter crap), so disable preloading to make the engine load without sounds
-        @preloadSounds = false
-    @running = false
-    @canvasResX = 800
-    @canvasResY = 600
-    @enginePath = "js/jsEngine"
-    @focusOnLoad = true
-    @themesPath = "assets"
-    @drawBoundingBoxes = false
-    @drawMasks = false
-    @pauseOnBlur = true
-    @disableRightClick = true
-    @preventDefaultKeyboard = false
-    @arena = document.getElementById("arena")
-    @autoResize = true
-    @autoResizeLimitToResolution = true
-    @cachedSoundCopies = 5
-    @loadText = "jsEngine loading..."
-    @backgroundColor = "#000"
-    @timeFactor = 1
-    @disableTouchScroll = true
-    @resetCursorOnEachFrame = true
-    @cameras = []
-    @defaultCollisionResolution = 1
-    @redrawObjects = []
-    @disableWebGL = false
-    @soundsMuted = false
-    @musicMuted = false
-
     # Copy options to engine (except those which are only used for engine initialization)
-    copyOpt = [
-      "arena"
+    copiedOptions = [
+      "container"
       "autoResize"
       "autoResizeLimitToResolution"
       "avoidSubPixelRendering"
@@ -195,39 +156,29 @@ module.exports = class
       "canvasResX"
       "canvasResY"
       "defaultCollisionResolution"
-      "disableWebGL"
-      "disableRightClick"
-      "disableTouchScroll"
       "drawBoundingBoxes"
       "drawMasks"
-      "enginePath"
       "focusOnLoad"
       "gameClass"
-      "loadText"
-      "musicMuted"
       "pauseOnBlur"
       "preventDefaultKeyboard"
       "resetCursorOnEachFrame"
+      "musicMuted"
       "soundsMuted"
-      "themesPath"
     ]
-    i = 0
-    while i < copyOpt.length
-      opt = copyOpt[i]
-      if @options[opt] isnt undefined
-        this[opt] = @options[opt]
-        delete @options[opt]
-      i++
+    console.log(@settings)
+    for name in copiedOptions
+      @[name] = @settings[name]
 
-    # Check if options are valid
+    # Check if settings are valid
     throw new Error('Game class missing') unless @gameClass
 
-    # Set style for arena
-    @arena.style.position = "absolute"
-    @arena.style.backgroundColor = @backgroundColor
-    @arena.style.userSelect = "none"
-    @arena.style.webkitUserSelect = "none"
-    @arena.style.MozUserSelect = "none"
+    # Set style for container
+    @container.style.position = "absolute"
+    @container.style.backgroundColor = @backgroundColor
+    @container.style.userSelect = "none"
+    @container.style.webkitUserSelect = "none"
+    @container.style.MozUserSelect = "none"
     @createCanvas()
     @initRenderer()
 
@@ -240,7 +191,7 @@ module.exports = class
       @setAutoResize false
 
     # If disableTouchScroll is set to true, disable touch scroll
-    if @disableTouchScroll
+    if @settings.disableTouchScroll
       document.addEventListener "touchmove", ((event) ->
         event.preventDefault()
         return
@@ -255,15 +206,21 @@ module.exports = class
     Global Loader instance which is created upon engine initialization
     @global
     ###
-    @loader = new @constructor.Loader()
+    @loader = new @constructor.Loader {
+      themesPath:    @settings.themesPath,
+      loadText:      @settings.loadText,
+      defaultTheme:  @settings.defaultTheme,
+      @host,
+      @container
+    }
 
     # Load themes
-    @defaultTheme = @options.themes[0]
-    @loader.onthemesloaded = ->
-      engine.initialize()
+    @defaultTheme = @settings.themes[0]
+    @loader.onthemesloaded = =>
+      @initialize()
       return
 
-    @loader.loadThemes @options.themes
+    @loader.loadThemes @settings.themes
     return
 
   ###
@@ -300,11 +257,13 @@ module.exports = class
     # Make main camera
     @cameras.push new @constructor.Camera(
       new @constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
-      new @constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY))
+      new @constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
+      @currentRoom
+    )
 
-    # Disable right click inside arena
+    # Disable right click inside container
     if @disableRightClick
-      @arena.oncontextmenu = ->
+      @container.oncontextmenu = ->
         false
 
     # Create objects required by the engine
@@ -313,12 +272,12 @@ module.exports = class
 
     # Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
     if @pauseOnBlur
-      window.addEventListener "blur", ->
-        engine.stopMainLoop()
+      window.addEventListener "blur", =>
+        @stopMainLoop()
         return
 
-      window.addEventListener "focus", ->
-        engine.startMainLoop()
+      window.addEventListener "focus", =>
+        @startMainLoop()
         return
 
     # Create game object
@@ -338,7 +297,7 @@ module.exports = class
     @canvas.style.display = "block"
     @canvas.width = @canvasResX
     @canvas.height = @canvasResY
-    @arena.appendChild @canvas
+    @container.appendChild @canvas
     return
 
   initRenderer: ->
@@ -359,18 +318,18 @@ module.exports = class
     if enable and not @autoResize
       @autoResize = true
       @autoResizeCanvas()
-      window.addEventListener "resize", engine.autoResizeCanvas, false
-      window.addEventListener "load", engine.autoResizeCanvas, false
+      window.addEventListener "resize", @autoResizeCanvas, false
+      window.addEventListener "load", @autoResizeCanvas, false
     else if not enable and @autoResize
       @autoResize = false
-      window.removeEventListener "resize", engine.autoResizeCanvas, false
-      window.removeEventListener "load", engine.autoResizeCanvas, false
+      window.removeEventListener "resize", @autoResizeCanvas, false
+      window.removeEventListener "load", @autoResizeCanvas, false
 
       # Reset canvas size
-      @arena.style.top = "50%"
-      @arena.style.left = "50%"
-      @arena.style.marginLeft = -@canvasResX / 2 + "px"
-      @arena.style.marginTop = -@canvasResY / 2 + "px"
+      @container.style.top = "50%"
+      @container.style.left = "50%"
+      @container.style.marginLeft = -@canvasResX / 2 + "px"
+      @container.style.marginTop = -@canvasResY / 2 + "px"
       @canvas.style.width = @canvasResX + "px"
       @canvas.style.height = @canvasResY + "px"
     return
@@ -381,10 +340,6 @@ module.exports = class
   @private
   ###
   autoResizeCanvas: ->
-    if this isnt engine
-      engine.autoResizeCanvas()
-      return
-
     # Check if the window is wider og higher than the game's canvas
     windowWH = window.innerWidth / window.innerHeight
     gameWH = @canvasResX / @canvasResY
@@ -397,10 +352,10 @@ module.exports = class
     if @autoResizeLimitToResolution
       w = Math.min(w, @canvasResX)
       h = Math.min(h, @canvasResY)
-    @arena.style.top = "50%"
-    @arena.style.left = "50%"
-    @arena.style.marginTop = -h / 2 + "px"
-    @arena.style.marginLeft = -w / 2 + "px"
+    @container.style.top = "50%"
+    @container.style.left = "50%"
+    @container.style.marginTop = -h / 2 + "px"
+    @container.style.marginLeft = -w / 2 + "px"
     @canvas.style.height = h + "px"
     @canvas.style.width = w + "px"
     return
@@ -463,10 +418,10 @@ module.exports = class
       throw new Error("Room is not on room list, has it been removed?") if @roomList.indexOf(room) is -1 #dev
     transition = (if transition then transition else ROOM_TRANSITION_NONE)
     oldRoom = @currentRoom
-    engine.changingRoom = true
-    @constructor.Helpers.RoomTransition[transition] oldRoom, room, transitionOptions, ->
-      engine.changingRoom = false
-      engine.currentRoom = room
+    @changingRoom = true
+    @constructor.Helpers.RoomTransition[transition] oldRoom, room, transitionOptions, =>
+      @changingRoom = false
+      @currentRoom = room
 
     oldRoom
 
@@ -504,7 +459,7 @@ module.exports = class
     # Make sure we are not removing the current room, or the master room
     if room is @masterRoom
       throw new Error("Cannot remove master room") #dev
-    else throw new Error("Cannot remove current room, remember to leave the room first, by entering another room (use engine.goToRoom)") if room is @currentRoom #dev
+    else throw new Error("Cannot remove current room, remember to leave the room first, by entering another room (use goToRoom)") if room is @currentRoom #dev
     @roomList.splice i, 1
     return
 
@@ -567,7 +522,7 @@ module.exports = class
     @running = true
 
     # Start mainLoop
-    engine.mainLoop()
+    @mainLoop()
     return
 
   ###
@@ -600,8 +555,8 @@ module.exports = class
     @pointer.resetCursor() if @resetCursorOnEachFrame
 
     # Execute loops
-    @masterRoom.update()
-    @currentRoom.update()
+    @masterRoom.update @frames, @gameTimeIncrease
+    @currentRoom.update @frames, @gameTimeIncrease
 
     # Draw game objects
     @drawCalls = 0 #dev
@@ -622,10 +577,7 @@ module.exports = class
       @fpsMsCounter = 0 #dev
 
     # Schedule the loop to run again
-    requestAnimationFrame (time) ->
-      engine.mainLoop time
-      return
-
+    requestAnimationFrame (time), @mainLoop
     return
 
   ###
@@ -723,7 +675,7 @@ module.exports = class
     # Purge ALL children
     if obj.children
       len = obj.children.length
-      engine.purge obj.children[len] while len--
+      @purge obj.children[len] while len--
 
     # Delete all references from rooms and their loops
     for room in @roomList

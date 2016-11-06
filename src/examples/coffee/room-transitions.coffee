@@ -1,4 +1,4 @@
-class RoomTransitions
+class Main
   constructor: ->
     # Add five objects to the engine's default room and change the name of the room
     engine.currentRoom.name = 'room1'
@@ -40,16 +40,23 @@ class RoomTransitions
       else
         engine.goToRoom 'room1', Engine.Globals.ROOM_TRANSITION_SQUEEZE_SLIDE, {duration: 1000, from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]}
 
+# Start engine
 new Engine
-  # Set main class to load
-  gameClass: RoomTransitions
+  # Main class
+  gameClass: Main
 
-  # Set themes to load
+  # Themes to load
   themes: ['example']
+
+  # Container
+  container: document.getElementById('container')
+
+  # Container background-color
+  backgroundColor: "#000"
 
   # Disable webgl using "canvas" search param
   disableWebGL: /canvas/.test window.location.search
 
-  # Set resolution of the game
+  # Resolution of the game
   canvasResX: 600
   canvasResY: 400

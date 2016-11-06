@@ -9,7 +9,15 @@ On engine startup a Loader object is instantiated to the global variable "loader
 This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
 ###
 module.exports = class Loader
-  constructor: ->
+  constructor: (options)->
+    {
+      @themesPath,
+      @loadText,
+      @defaultTheme,
+      @host,
+      @container
+    } = options
+
     @images = {}
     @loaded = classes: []
     @themes =
@@ -38,10 +46,8 @@ module.exports = class Loader
     }
       @loadOverlay.style[name] = value
     @loadOverlay.className = "load-overlay"
-    @loadOverlay.innerHTML = """
-      <div class="load-overlay-text">#{engine.loadText}</div>
-    """
-    engine.arena.appendChild @loadOverlay
+    @loadOverlay.innerHTML = """<div class="load-overlay-text">#{@loadText}</div>"""
+    @container.appendChild @loadOverlay
     return
 
   ###
@@ -64,7 +70,7 @@ module.exports = class Loader
           return
         , 30
       else
-        engine.arena.removeChild @loadOverlay
+        @container.removeChild @loadOverlay
         delete @fade
 
         @fadeCallback() if @fadeCallback
@@ -83,7 +89,7 @@ module.exports = class Loader
   ###
   getImage: (resource, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
-    themeName = (if themeName isnt undefined then themeName else engine.defaultTheme)
+    themeName = (if themeName isnt undefined then themeName else @defaultTheme)
     @getResource resource, "images", themeName
 
   ###
@@ -95,7 +101,7 @@ module.exports = class Loader
   ###
   getSound: (resource, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
-    themeName = (if themeName isnt undefined then themeName else engine.defaultTheme)
+    themeName = (if themeName isnt undefined then themeName else @defaultTheme)
     @getResource resource, "sfx", themeName
 
 
@@ -108,7 +114,7 @@ module.exports = class Loader
   ###
   getMusic: (resource, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
-    themeName = (if themeName isnt undefined then themeName else engine.defaultTheme)
+    themeName = (if themeName isnt undefined then themeName else @defaultTheme)
     @getResource resource, "music", themeName
 
 
@@ -122,7 +128,7 @@ module.exports = class Loader
   ###
   getMask: (resource, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
-    themeName = (if themeName isnt undefined then themeName else engine.defaultTheme)
+    themeName = (if themeName isnt undefined then themeName else @defaultTheme)
 
     # Check if the mask has been generated
     mask = @getResource(resource, "masks", themeName)
@@ -169,7 +175,7 @@ module.exports = class Loader
   @return {string[]} An array containing all loaded images' resource strings
   ###
   getImageSources: ->
-    object = @themes[engine.defaultTheme].images
+    object = @themes[@defaultTheme].images
     sourceStrings = []
     currentDir = []
     loopThrough = (object) ->
@@ -186,8 +192,8 @@ module.exports = class Loader
 
     loopThrough object
     i = 0
-    while i < @themes[engine.defaultTheme].inherit.length
-      inheritTheme = @themes[@themes[engine.defaultTheme].inherit[i]]
+    while i < @themes[@defaultTheme].inherit.length
+      inheritTheme = @themes[@themes[@defaultTheme].inherit[i]]
       if inheritTheme isnt undefined and inheritTheme.images isnt undefined
         loopThrough inheritTheme.images
       i++
@@ -226,15 +232,6 @@ module.exports = class Loader
     res
 
   ###
-  Reloads all classes. This function is very useful for applying code changes without having to refresh the browser, usually it has to be run multiple times though, to force the browser not to just load the files from its cache.
-  ###
-  reloadAllClasses: ->
-    for i of @loaded.classes
-      engine.loadFiles @loaded.classes[i] if @loaded.classes.hasOwnProperty(i)
-    return
-
-
-  ###
   Loads a list of themes. This function is automatically called by the Engine during its startup, for loading the themes specified by the launch options.
 
   @private
@@ -254,7 +251,7 @@ module.exports = class Loader
 
       # Fetch theme details
       req = new XMLHttpRequest()
-      req.open "GET", engine.themesPath + "/" + name + "/theme.js"
+      req.open "GET", @themesPath + "/" + name + "/theme.js"
       req.send()
 
       req.addEventListener 'error', =>
@@ -262,7 +259,7 @@ module.exports = class Loader
 
       req.addEventListener 'load', =>
         # Get theme details
-        codeString = req.responseText + "\n//# sourceURL=/" + engine.themesPath + "/" + name + "/theme.js"
+        codeString = req.responseText + "\n//# sourceURL=/" + @themesPath + "/" + name + "/theme.js"
         eval "theme = " + codeString
 
         # Load inherited themes
@@ -316,7 +313,7 @@ module.exports = class Loader
             format = format[0] if format
 
             # Start loading iage
-            res.src = engine.themesPath + "/" + theme.name + "/images/" + path + "." + format
+            res.src = @themesPath + "/" + theme.name + "/images/" + path + "." + format
 
             # Find out if the image is a sprite
             images = object[path].match(/; *(\d+) *images?/)
@@ -336,28 +333,28 @@ module.exports = class Loader
           when "sfx"
             format = false
             i = 0
-            while i < engine.host.supportedAudio.length
-              format = engine.host.supportedAudio[i] if object[path].search(engine.host.supportedAudio[i]) isnt -1
+            while i < @host.supportedAudio.length
+              format = @host.supportedAudio[i] if object[path].search(@host.supportedAudio[i]) isnt -1
               i++
             unless format
               console.log "Sound was not available in a supported format: " + theme.name + "/sfx/" + path
               continue
-            res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path + "." + format)
+            res = new Audio(@themesPath + "/" + theme.name + "/sfx/" + path + "." + format)
             theme.sfx[path] = new Sounds.Effect(res)
-            if engine.preloadSounds
+            if @canPreloadSounds()
               res.setAttribute "preload", "auto"
               res.addEventListener "canplaythrough", onload, false
               theme.resourcesCount++
           when "music"
             format = false
             i = 0
-            while i < engine.host.supportedAudio.length
-              format = engine.host.supportedAudio[i] if object[path].search(engine.host.supportedAudio[i]) isnt -1
+            while i < @host.supportedAudio.length
+              format = @host.supportedAudio[i] if object[path].search(@host.supportedAudio[i]) isnt -1
               i++
             throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path) unless format #dev
-            res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path + "." + format)
+            res = new Audio(@themesPath + "/" + theme.name + "/music/" + path + "." + format)
             theme.music[path] = new Sounds.Music(res)
-            if engine.preloadSounds
+            if @canPreloadSounds()
               res.setAttribute "preload", "auto"
               res.addEventListener "canplaythrough", onload, false
               theme.resourcesCount++
@@ -401,19 +398,19 @@ module.exports = class Loader
         theme.resourcesCount++
       when "sfx"
         format = path.match(/[^\.]*$/)[0]
-        throw new Error("Sound format is not supported:", format) if engine.host.supportedAudio.indexOf(format) is -1 #dev
+        throw new Error("Sound format is not supported:", format) if @host.supportedAudio.indexOf(format) is -1 #dev
         res = new Audio(path)
         theme.sfx[resourceString] = new Sounds.Effect(res)
-        if engine.preloadSounds
+        if @canPreloadSounds()
           res.setAttribute "preload", "auto"
           res.addEventListener "canplaythrough", onLoaded, false
           theme.resourcesCount++
       when "music"
         format = path.match(/[^\.]*$/)[0]
-        throw new Error("Sound format is not supported:", format) if engine.host.supportedAudio.indexOf(format) is -1 #dev
+        throw new Error("Sound format is not supported:", format) if @host.supportedAudio.indexOf(format) is -1 #dev
         res = new Audio(path)
         theme.music[resourceString] = new Sounds.Music(res)
-        if engine.preloadSounds
+        if @canPreloadSounds()
           res.setAttribute "preload", "auto"
           res.addEventListener "canplaythrough", onLoaded, false
           theme.resourcesCount++
@@ -433,7 +430,7 @@ module.exports = class Loader
   generateMask: (resourceString, alphaLimit) ->
     throw new Error("Missing argument: resourceString") if resourceString is undefined #dev
     alphaLimit = (if alphaLimit isnt undefined then alphaLimit else 255)
-    image = engine.loader.getImage(resourceString)
+    image = @getImage(resourceString)
     canvas = document.createElement("canvas")
     canvas.width = image.width
     canvas.height = image.height
@@ -498,6 +495,8 @@ module.exports = class Loader
       @onthemesloaded() if @onthemesloaded
       return true
     false
+
+  canPreloadSounds: -> @host.device != 'iDevice'
 
 Sounds =
   Music: require '../sounds/music'

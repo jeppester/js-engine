@@ -1,8 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var StressTest;
+var Main;
 
-StressTest = (function() {
-  function StressTest() {
+Main = (function() {
+  function Main() {
     engine.loader.hideOverlay((function(_this) {
       return function() {
         return _this.onLoaded();
@@ -23,11 +23,11 @@ StressTest = (function() {
     engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
   }
 
-  StressTest.prototype.onLoaded = function() {
+  Main.prototype.onLoaded = function() {
     return this.addObjects(4000);
   };
 
-  StressTest.prototype.updateFPS = function() {
+  Main.prototype.updateFPS = function() {
     this.fpsCounter.set({
       string: 'FPS: ' + engine.fps
     });
@@ -36,7 +36,7 @@ StressTest = (function() {
     });
   };
 
-  StressTest.prototype.addObjects = function(count) {
+  Main.prototype.addObjects = function(count) {
     var i, j, ref, results, sprite;
     if (count == null) {
       count = 10;
@@ -68,7 +68,7 @@ StressTest = (function() {
     return results;
   };
 
-  StressTest.prototype.removeObjects = function(count) {
+  Main.prototype.removeObjects = function(count) {
     var i, j, objects, ref, results;
     if (count == null) {
       count = 10;
@@ -82,7 +82,7 @@ StressTest = (function() {
     return results;
   };
 
-  StressTest.prototype.controls = function() {
+  Main.prototype.controls = function() {
     if (engine.keyboard.isDown(Engine.Globals.KEY_UP)) {
       this.addObjects();
     }
@@ -91,16 +91,16 @@ StressTest = (function() {
     }
   };
 
-  return StressTest;
+  return Main;
 
 })();
 
 new Engine({
-  gameClass: StressTest,
+  gameClass: Main,
   themes: ['example'],
+  container: document.getElementById('container'),
   backgroundColor: "#000",
   disableWebGL: /canvas/.test(window.location.search),
-  pauseOnBlur: false,
   canvasResX: 600,
   canvasResY: 400
 });

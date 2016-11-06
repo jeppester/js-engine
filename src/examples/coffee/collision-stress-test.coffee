@@ -1,4 +1,4 @@
-class CollisionStressTest
+class Main
   constructor: ->
     # Make a global reference to the game object
     engine.loader.hideOverlay => @onLoaded()
@@ -62,22 +62,23 @@ class CollisionStressTest
       @collider.x = pointers[0].x
       @collider.y = pointers[0].y
 
+# Start engine
 new Engine
-  # Set game-class path (Look at this file to start programming your game)
-  gameClass: CollisionStressTest
+  # Main class
+  gameClass: Main
 
-  # Set themes to load
+  # Themes to load
   themes: ['example']
 
-  # Set arena background-color
+  # Container
+  container: document.getElementById('container')
+
+  # Container background-color
   backgroundColor: "#000"
 
   # Disable webgl using "canvas" search param
   disableWebGL: /canvas/.test window.location.search
 
-  # Disable pause on blur (so that JavaScript profiling can be done easier)
-  pauseOnBlur: false
-
-  # Set resolution of the game
+  # Resolution of the game
   canvasResX: 600
   canvasResY: 400

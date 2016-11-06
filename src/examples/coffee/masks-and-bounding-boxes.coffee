@@ -1,4 +1,4 @@
-class MasksAndBBoxes
+class Main
   constructor: ->
     @onLoaded()
 
@@ -43,23 +43,23 @@ class MasksAndBBoxes
 
     engine.currentRoom.loops.eachFrame.attachFunction object, object.checkCollision
 
+# Start engine
 new Engine
-  # Set main class
-  gameClass: MasksAndBBoxes
+  # Main class
+  gameClass: Main
 
-  # Set themes to load
+  # Themes to load
   themes: ['example']
 
-  # Set background color
-  backgroundColor: '#888'
+  # Container
+  container: document.getElementById('container')
+
+  # Container background-color
+  backgroundColor: "#888"
 
   # Disable webgl using "canvas" search param
   disableWebGL: /canvas/.test window.location.search
 
-  # Enable debugging of collision checks
-  drawBoundingBoxes: true
-  drawMasks: true
-
-  # Set resolution of the game
+  # Resolution of the game
   canvasResX: 100
   canvasResY: 100

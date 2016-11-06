@@ -1,4 +1,4 @@
-class StressTest
+class Main
   constructor: ->
     engine.loader.hideOverlay => @onLoaded()
 
@@ -62,22 +62,23 @@ class StressTest
     # Remove objects when arrow down key is down
     @removeObjects() if engine.keyboard.isDown Engine.Globals.KEY_DOWN
 
+# Start engine
 new Engine
-  # Set game-class path (Look at this file to start programming your game)
-  gameClass: StressTest
+  # Main class
+  gameClass: Main
 
-  # Set themes to load
+  # Themes to load
   themes: ['example']
 
-  # Set arena background-color
+  # Container
+  container: document.getElementById('container')
+
+  # Container background-color
   backgroundColor: "#000"
 
   # Disable webgl using "canvas" search param
   disableWebGL: /canvas/.test window.location.search
 
-  # Disable pause on blur (so that JavaScript profiling can be done easier)
-  pauseOnBlur: false
-
-  # Set resolution of the game
+  # Resolution of the game
   canvasResX: 600
   canvasResY: 400

@@ -101,18 +101,21 @@ class Main
 
 # Start engine
 new Engine
-  # Set main class to load
+  # Main class
   gameClass: Main
 
-  # Set themes to load
+  # Themes to load
   themes: ['example']
-  
-  # Set arena background-color
+
+  # Container
+  container: document.getElementById('container')
+
+  # Container background-color
   backgroundColor: "#000"
 
   # Disable webgl using "canvas" search param
   disableWebGL: /canvas/.test window.location.search
 
-  # Set resolution of the game
+  # Resolution of the game
   canvasResX: 600
   canvasResY: 400

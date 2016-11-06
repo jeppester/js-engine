@@ -1,0 +1,26 @@
+module.exports =
+  avoidSubPixelRendering: true
+  running: false
+  canvasResX: 800
+  canvasResY: 600
+  focusOnLoad: true
+  themesPath: "assets"
+  drawBoundingBoxes: false
+  drawMasks: false
+  pauseOnBlur: true
+  disableRightClick: true
+  preventDefaultKeyboard: false
+  autoResize: true
+  autoResizeLimitToResolution: true
+  cachedSoundCopies: 5
+  loadText: "jsEngine loading..."
+  backgroundColor: "#000"
+  timeFactor: 1
+  disableTouchScroll: true
+  resetCursorOnEachFrame: true
+  cameras: []
+  defaultCollisionResolution: 1
+  redrawObjects: []
+  disableWebGL: false
+  soundsMuted: false
+  musicMuted: false

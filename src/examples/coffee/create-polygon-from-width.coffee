@@ -1,4 +1,4 @@
-class CreatePolygonFromWidth
+class Main
   constructor: ->
     # Make a global reference to the game object
     engine.loader.hideOverlay => @onLoaded()
@@ -46,19 +46,23 @@ class CreatePolygonFromWidth
 
     console.log "createPolygonFromWidth (tests/sec): " + ~~(tests / (new Date() - t)) * 1000
 
+# Start engine
 new Engine
-  # Set main class to load
-  gameClass: CreatePolygonFromWidth
+  # Main class
+  gameClass: Main
 
-  # Set themes to load
+  # Themes to load
   themes: ['example']
 
-  # Set arena background-color
+  # Container
+  container: document.getElementById('container')
+
+  # Container background-color
   backgroundColor: "#000"
 
   # Disable webgl using "canvas" search param
   disableWebGL: /canvas/.test window.location.search
 
-  # Set resolution of the game
+  # Resolution of the game
   canvasResX: 600
   canvasResY: 400

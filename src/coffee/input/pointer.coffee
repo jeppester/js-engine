@@ -99,11 +99,11 @@ module.exports = class Pointer
   onMouseMove: (event) ->
     throw new Error("Missing argument: event") if event is undefined #dev
     @mouse.window.set event.pageX, event.pageY
-    @mouse.set @mouse.window.x - engine.arena.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, @mouse.window.y - engine.arena.offsetTop - engine.canvas.offsetTop + document.body.scrollTop
+    @mouse.set @mouse.window.x - engine.container.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, @mouse.window.y - engine.container.offsetTop - engine.canvas.offsetTop + document.body.scrollTop
 
-    # Find the mouse position relative to the arena
-    @mouse.x = @mouse.x / engine.arena.offsetWidth * engine.canvasResX
-    @mouse.y = @mouse.y / engine.arena.offsetHeight * engine.canvasResY
+    # Find the mouse position relative to the container
+    @mouse.x = @mouse.x / engine.container.offsetWidth * engine.canvasResX
+    @mouse.y = @mouse.y / engine.container.offsetHeight * engine.canvasResY
 
     # Convert the position to make it relative to the room
     roomPos = @calculateRoomPosition(@mouse)
@@ -175,9 +175,9 @@ module.exports = class Pointer
       pointerTouch = @touches.filter((t) ->
         t.identifier is eventTouch.identifier
       )[0]
-      pointerTouch.set eventTouch.pageX - engine.arena.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - engine.arena.offsetTop - engine.canvas.offsetTop + document.body.scrollTop
-      pointerTouch.x = pointerTouch.x / engine.arena.offsetWidth * engine.canvasResX
-      pointerTouch.y = pointerTouch.y / engine.arena.offsetHeight * engine.canvasResY
+      pointerTouch.set eventTouch.pageX - engine.container.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - engine.container.offsetTop - engine.canvas.offsetTop + document.body.scrollTop
+      pointerTouch.x = pointerTouch.x / engine.container.offsetWidth * engine.canvasResX
+      pointerTouch.y = pointerTouch.y / engine.container.offsetHeight * engine.canvasResY
 
       # Convert the position to make it relative to the room
       roomPos = @calculateRoomPosition(pointerTouch)
@@ -464,12 +464,12 @@ module.exports = class Pointer
     unpressed
 
   ###
-  Checks if the mouse pointer is outside the game arena.
+  Checks if the mouse pointer is outside the game container.
 
   @return {boolean} True if the pointer is outside, false if not
   ###
   outside: ->
-    new Math.Rectangle(engine.arena.offsetLeft, engine.arena.offsetTop, engine.arena.offsetWidth, engine.arena.offsetHeight).contains(@mouse.window) is false
+    new Math.Rectangle(engine.container.offsetLeft, engine.container.offsetTop, engine.container.offsetWidth, engine.container.offsetHeight).contains(@mouse.window) is false
 
   ###
   Resets the mouse cursor, automatically called by the engine before each frame i executed, unless engine.resetCursorOnEachFrame is set to false
@@ -477,11 +477,11 @@ module.exports = class Pointer
   @private
   ###
   resetCursor: ->
-    engine.arena.style.cursor = "default"
+    engine.container.style.cursor = "default"
     return
 
   ###
-  Sets the mouse cursor for the arena.
+  Sets the mouse cursor for the container.
   By default the mouse cursor will be reset on each frame (this can be changed with the "resetCursorOnEachFrame" engine option)
   Please be aware that not all images can be used as cursor. Not all sizes and formats are supported by all browsers.
 
@@ -502,7 +502,7 @@ module.exports = class Pointer
     else cursor = "url('" + cursor + "') 0 0, auto" unless /^\w*$/.test(cursor)
 
     # Finally: set the cursor
-    engine.arena.style.cursor = cursor
+    engine.container.style.cursor = cursor
     return
 
 Geometry =

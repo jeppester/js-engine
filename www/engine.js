@@ -2842,7 +2842,6 @@ Responsible for the main loop, the main canvas, etc.
 @property {boolean} running Whether or not the engine is currently running
 @property {int} canvasResX The main canvas horizontal resolution
 @property {int} canvasResY The main canvas vertical resolution
-@property {string} enginePath The url to jsEngine's source folder
 @property {boolean} focusOnLoad If the engine should focus itself when loaded
 @property {string} themesPath The url to jsEngine's theme folder
 @property {boolean} drawBoundingBoxes Whether or not the bounding boxes of all collidable objects are drawn
@@ -2850,9 +2849,9 @@ Responsible for the main loop, the main canvas, etc.
 @property {boolean} pauseOnBlur Whether or the engine will pause itself when the window is blurred
 @property {boolean} disableRightClick Whether or not right click context menu is disabled inside the main canvas
 @property {boolean} preventDefaultKeyboard Whether or not preventDefault is called for keyboard events
-@property {HTMLElement} arena The HTML element to use as parent to the main canvas
-@property {boolean} autoResize Whether or not the arena will autoresize itself to fit the window
-@property {boolean} autoResizeLimitToResolution Whether or not the arena should not autoresize itself to be bigger than the main canvas' resolution
+@property {HTMLElement} container The HTML element to use as parent to the main canvas
+@property {boolean} autoResize Whether or not the container will autoresize itself to fit the window
+@property {boolean} autoResizeLimitToResolution Whether or not the container should not autoresize itself to be bigger than the main canvas' resolution
 @property {int} cachedSoundCopies The number of copies each sound object caches of it's source to enable multiple playbacks
 @property {string} loadText The text shown while loading the engine
 @property {string} backgroundColor A CSS color string which is used as the background color of the main canvas
@@ -2867,22 +2866,21 @@ Responsible for the main loop, the main canvas, etc.
 @param {object} options An object containing key-value pairs that will be used as launch options for the engine.
 The default options are:
 <code>{
-"arena": document.getElementById('arena'), // The element to use as game arena
+"container": document.getElementById('container'), // The element to use as game container
 "avoidSubPixelRendering": true, // If subpixelrendering should be avoided
-"autoResize": true, // If the arena should autoresize to fit the window (or iframe)
+"autoResize": true, // If the container should autoresize to fit the window (or iframe)
 "autoResizeLimitToResolution": true, // If the autoresizing should be limited to the game's resolution
-"backgroundColor": "#000", // The color of the arena's background
+"backgroundColor": "#000", // The color of the container's background
 "cachedSoundCopies": 5, // How many times sounds should be duplicated to allow multiple playbacks
 "canvasResX": 800, // The horizontal resolution to set for the game's main canvas
 "canvasResY": 600, // The vertical resolution to set for the game's main canvas
 "defaultCollisionResolution": 1, // Res. of collision checking, by default every 6th px is checked
-"disableRightClick": true, // If right clicks inside the arena should be disabled
+"disableRightClick": true, // If right clicks inside the container should be disabled
 "disableWebGL": false, // If WebGL rendering should be disabled
 "preventDefaultKeyboard": false, // Whether or not preventDefault should be called for keyboard events
 "disableTouchScroll": true, // If touch scroll on tablets and phones should be disable
 "drawBoundingBoxes": false, // If Collidable object's bounding boxes should be drawn
 "drawMasks": false, // If Collidable object's masks should be drawn
-"enginePath": "js/jsEngine", // The path for the engine classes' directory
 "focusOnLoad": true, // Whether or not to focus the engine's window when the engine is ready
 "loadText": 'jsEngine loading...'
 "musicMuted": false, // If all music playback should be initially muted
@@ -2944,6 +2942,8 @@ module.exports = (function() {
 
   _Class.Globals = _dereq_('./engine/globals');
 
+  _Class.DefaultSettings = _dereq_('./engine/default-settings');
+
   _Class.ObjectCreator = _dereq_('./engine/object-creator');
 
   _Class.CustomLoop = _dereq_('./engine/custom-loop');
@@ -2952,14 +2952,18 @@ module.exports = (function() {
 
   _Class.Loader = _dereq_('./engine/loader');
 
-  function _Class(options) {
-
-    /*
-    Global engine var set upon engine initialization
-    @global
-     */
-    window.engine = this;
-    this.options = options || {};
+  function _Class(settings) {
+    var base, name, ref, value;
+    this.settings = settings != null ? settings : {};
+    ref = this.constructor.DefaultSettings;
+    for (name in ref) {
+      value = ref[name];
+      if ((base = this.settings)[name] == null) {
+        base[name] = value;
+      }
+    }
+    this.mainLoop = this.mainLoop.bind(this);
+    this.autoResizeCanvas = this.autoResizeCanvas.bind(this);
     this.load();
   }
 
@@ -2970,7 +2974,7 @@ module.exports = (function() {
    */
 
   _Class.prototype.load = function() {
-    var audioFormats, copyOpt, i, opt;
+    var audioFormats, copiedOptions, i, j, len1, name;
     this.host = {
       hasTouch: "ontouchstart" in document,
       hasMouse: false,
@@ -3002,56 +3006,20 @@ module.exports = (function() {
       }
       i++;
     }
-    this.avoidSubPixelRendering = true;
-    this.preloadSounds = true;
-    switch (this.host.device) {
-      case "iDevice":
-        this.preloadSounds = false;
-    }
-    this.running = false;
-    this.canvasResX = 800;
-    this.canvasResY = 600;
-    this.enginePath = "js/jsEngine";
-    this.focusOnLoad = true;
-    this.themesPath = "assets";
-    this.drawBoundingBoxes = false;
-    this.drawMasks = false;
-    this.pauseOnBlur = true;
-    this.disableRightClick = true;
-    this.preventDefaultKeyboard = false;
-    this.arena = document.getElementById("arena");
-    this.autoResize = true;
-    this.autoResizeLimitToResolution = true;
-    this.cachedSoundCopies = 5;
-    this.loadText = "jsEngine loading...";
-    this.backgroundColor = "#000";
-    this.timeFactor = 1;
-    this.disableTouchScroll = true;
-    this.resetCursorOnEachFrame = true;
-    this.cameras = [];
-    this.defaultCollisionResolution = 1;
-    this.redrawObjects = [];
-    this.disableWebGL = false;
-    this.soundsMuted = false;
-    this.musicMuted = false;
-    copyOpt = ["arena", "autoResize", "autoResizeLimitToResolution", "avoidSubPixelRendering", "backgroundColor", "cachedSoundCopies", "canvasResX", "canvasResY", "defaultCollisionResolution", "disableWebGL", "disableRightClick", "disableTouchScroll", "drawBoundingBoxes", "drawMasks", "enginePath", "focusOnLoad", "gameClass", "loadText", "musicMuted", "pauseOnBlur", "preventDefaultKeyboard", "resetCursorOnEachFrame", "soundsMuted", "themesPath"];
-    i = 0;
-    while (i < copyOpt.length) {
-      opt = copyOpt[i];
-      if (this.options[opt] !== void 0) {
-        this[opt] = this.options[opt];
-        delete this.options[opt];
-      }
-      i++;
+    copiedOptions = ["container", "autoResize", "autoResizeLimitToResolution", "avoidSubPixelRendering", "backgroundColor", "cachedSoundCopies", "canvasResX", "canvasResY", "defaultCollisionResolution", "drawBoundingBoxes", "drawMasks", "focusOnLoad", "gameClass", "pauseOnBlur", "preventDefaultKeyboard", "resetCursorOnEachFrame", "musicMuted", "soundsMuted"];
+    console.log(this.settings);
+    for (j = 0, len1 = copiedOptions.length; j < len1; j++) {
+      name = copiedOptions[j];
+      this[name] = this.settings[name];
     }
     if (!this.gameClass) {
       throw new Error('Game class missing');
     }
-    this.arena.style.position = "absolute";
-    this.arena.style.backgroundColor = this.backgroundColor;
-    this.arena.style.userSelect = "none";
-    this.arena.style.webkitUserSelect = "none";
-    this.arena.style.MozUserSelect = "none";
+    this.container.style.position = "absolute";
+    this.container.style.backgroundColor = this.backgroundColor;
+    this.container.style.userSelect = "none";
+    this.container.style.webkitUserSelect = "none";
+    this.container.style.MozUserSelect = "none";
     this.createCanvas();
     this.initRenderer();
     if (this.autoResize) {
@@ -3061,7 +3029,7 @@ module.exports = (function() {
       this.autoResize = true;
       this.setAutoResize(false);
     }
-    if (this.disableTouchScroll) {
+    if (this.settings.disableTouchScroll) {
       document.addEventListener("touchmove", (function(event) {
         event.preventDefault();
       }), false);
@@ -3074,12 +3042,20 @@ module.exports = (function() {
     Global Loader instance which is created upon engine initialization
     @global
      */
-    this.loader = new this.constructor.Loader();
-    this.defaultTheme = this.options.themes[0];
-    this.loader.onthemesloaded = function() {
-      engine.initialize();
-    };
-    this.loader.loadThemes(this.options.themes);
+    this.loader = new this.constructor.Loader({
+      themesPath: this.settings.themesPath,
+      loadText: this.settings.loadText,
+      defaultTheme: this.settings.defaultTheme,
+      host: this.host,
+      container: this.container
+    });
+    this.defaultTheme = this.settings.themes[0];
+    this.loader.onthemesloaded = (function(_this) {
+      return function() {
+        _this.initialize();
+      };
+    })(this);
+    this.loader.loadThemes(this.settings.themes);
   };
 
 
@@ -3105,21 +3081,25 @@ module.exports = (function() {
     this.currentRoom = new this.constructor.Room("main");
     this.defaultAnimationLoop = this.currentRoom.loops.eachFrame;
     this.defaultActivityLoop = this.currentRoom.loops.eachFrame;
-    this.cameras.push(new this.constructor.Camera(new this.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY), new this.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY)));
+    this.cameras.push(new this.constructor.Camera(new this.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY), new this.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY), this.currentRoom));
     if (this.disableRightClick) {
-      this.arena.oncontextmenu = function() {
+      this.container.oncontextmenu = function() {
         return false;
       };
     }
     this.keyboard = new this.constructor.Input.Keyboard();
     this.pointer = new this.constructor.Input.Pointer();
     if (this.pauseOnBlur) {
-      window.addEventListener("blur", function() {
-        engine.stopMainLoop();
-      });
-      window.addEventListener("focus", function() {
-        engine.startMainLoop();
-      });
+      window.addEventListener("blur", (function(_this) {
+        return function() {
+          _this.stopMainLoop();
+        };
+      })(this));
+      window.addEventListener("focus", (function(_this) {
+        return function() {
+          _this.startMainLoop();
+        };
+      })(this));
     }
     new this.gameClass();
     this.startMainLoop();
@@ -3142,7 +3122,7 @@ module.exports = (function() {
     this.canvas.style.display = "block";
     this.canvas.width = this.canvasResX;
     this.canvas.height = this.canvasResY;
-    this.arena.appendChild(this.canvas);
+    this.container.appendChild(this.canvas);
   };
 
   _Class.prototype.initRenderer = function() {
@@ -3166,16 +3146,16 @@ module.exports = (function() {
     if (enable && !this.autoResize) {
       this.autoResize = true;
       this.autoResizeCanvas();
-      window.addEventListener("resize", engine.autoResizeCanvas, false);
-      window.addEventListener("load", engine.autoResizeCanvas, false);
+      window.addEventListener("resize", this.autoResizeCanvas, false);
+      window.addEventListener("load", this.autoResizeCanvas, false);
     } else if (!enable && this.autoResize) {
       this.autoResize = false;
-      window.removeEventListener("resize", engine.autoResizeCanvas, false);
-      window.removeEventListener("load", engine.autoResizeCanvas, false);
-      this.arena.style.top = "50%";
-      this.arena.style.left = "50%";
-      this.arena.style.marginLeft = -this.canvasResX / 2 + "px";
-      this.arena.style.marginTop = -this.canvasResY / 2 + "px";
+      window.removeEventListener("resize", this.autoResizeCanvas, false);
+      window.removeEventListener("load", this.autoResizeCanvas, false);
+      this.container.style.top = "50%";
+      this.container.style.left = "50%";
+      this.container.style.marginLeft = -this.canvasResX / 2 + "px";
+      this.container.style.marginTop = -this.canvasResY / 2 + "px";
       this.canvas.style.width = this.canvasResX + "px";
       this.canvas.style.height = this.canvasResY + "px";
     }
@@ -3190,10 +3170,6 @@ module.exports = (function() {
 
   _Class.prototype.autoResizeCanvas = function() {
     var gameWH, h, w, windowWH;
-    if (this !== engine) {
-      engine.autoResizeCanvas();
-      return;
-    }
     windowWH = window.innerWidth / window.innerHeight;
     gameWH = this.canvasResX / this.canvasResY;
     if (windowWH > gameWH) {
@@ -3207,10 +3183,10 @@ module.exports = (function() {
       w = Math.min(w, this.canvasResX);
       h = Math.min(h, this.canvasResY);
     }
-    this.arena.style.top = "50%";
-    this.arena.style.left = "50%";
-    this.arena.style.marginTop = -h / 2 + "px";
-    this.arena.style.marginLeft = -w / 2 + "px";
+    this.container.style.top = "50%";
+    this.container.style.left = "50%";
+    this.container.style.marginTop = -h / 2 + "px";
+    this.container.style.marginLeft = -w / 2 + "px";
     this.canvas.style.height = h + "px";
     this.canvas.style.width = w + "px";
   };
@@ -3287,11 +3263,13 @@ module.exports = (function() {
     }
     transition = (transition ? transition : ROOM_TRANSITION_NONE);
     oldRoom = this.currentRoom;
-    engine.changingRoom = true;
-    this.constructor.Helpers.RoomTransition[transition](oldRoom, room, transitionOptions, function() {
-      engine.changingRoom = false;
-      return engine.currentRoom = room;
-    });
+    this.changingRoom = true;
+    this.constructor.Helpers.RoomTransition[transition](oldRoom, room, transitionOptions, (function(_this) {
+      return function() {
+        _this.changingRoom = false;
+        return _this.currentRoom = room;
+      };
+    })(this));
     return oldRoom;
   };
 
@@ -3339,7 +3317,7 @@ module.exports = (function() {
       throw new Error("Cannot remove master room");
     } else {
       if (room === this.currentRoom) {
-        throw new Error("Cannot remove current room, remember to leave the room first, by entering another room (use engine.goToRoom)");
+        throw new Error("Cannot remove current room, remember to leave the room first, by entering another room (use goToRoom)");
       }
     }
     this.roomList.splice(i, 1);
@@ -3410,7 +3388,7 @@ module.exports = (function() {
     }
     this.now = new Date().getTime();
     this.running = true;
-    engine.mainLoop();
+    this.mainLoop();
   };
 
 
@@ -3446,8 +3424,8 @@ module.exports = (function() {
     if (this.resetCursorOnEachFrame) {
       this.pointer.resetCursor();
     }
-    this.masterRoom.update();
-    this.currentRoom.update();
+    this.masterRoom.update(this.frames, this.gameTimeIncrease);
+    this.currentRoom.update(this.frames, this.gameTimeIncrease);
     this.drawCalls = 0;
     drawTime = new Date().getTime();
     this.renderer.render(this.cameras);
@@ -3463,9 +3441,7 @@ module.exports = (function() {
       this.drawTimeCounter = 0;
       this.fpsMsCounter = 0;
     }
-    requestAnimationFrame(function(time) {
-      engine.mainLoop(time);
-    });
+    requestAnimationFrame(time, this.mainLoop);
   };
 
 
@@ -3595,7 +3571,7 @@ module.exports = (function() {
     if (obj.children) {
       len = obj.children.length;
       while (len--) {
-        engine.purge(obj.children[len]);
+        this.purge(obj.children[len]);
       }
     }
     ref = this.roomList;
@@ -3637,14 +3613,14 @@ module.exports = (function() {
 
 
 
-},{"./engine/camera":13,"./engine/custom-loop":14,"./engine/globals":15,"./engine/loader":16,"./engine/object-creator":17,"./engine/room":18,"./geometry/circle":19,"./geometry/line":20,"./geometry/polygon":21,"./geometry/rectangle":22,"./geometry/vector":23,"./helpers/matrix-calculation":25,"./helpers/mixin":26,"./helpers/room-transition":27,"./helpers/webgl":28,"./input/keyboard":29,"./input/pointer":30,"./mixins/animatable":31,"./renderer/canvas":33,"./renderer/webgl":34,"./sounds/effect":38,"./sounds/music":39,"./views/child":40,"./views/circle":41,"./views/collidable":42,"./views/container":43,"./views/game-object":44,"./views/line":45,"./views/polygon":46,"./views/rectangle":47,"./views/sprite":48,"./views/text-block":49}],13:[function(_dereq_,module,exports){
+},{"./engine/camera":13,"./engine/custom-loop":14,"./engine/default-settings":15,"./engine/globals":16,"./engine/loader":17,"./engine/object-creator":18,"./engine/room":19,"./geometry/circle":20,"./geometry/line":21,"./geometry/polygon":22,"./geometry/rectangle":23,"./geometry/vector":24,"./helpers/matrix-calculation":26,"./helpers/mixin":27,"./helpers/room-transition":28,"./helpers/webgl":29,"./input/keyboard":30,"./input/pointer":31,"./mixins/animatable":32,"./renderer/canvas":34,"./renderer/webgl":35,"./sounds/effect":39,"./sounds/music":40,"./views/child":41,"./views/circle":42,"./views/collidable":43,"./views/container":44,"./views/game-object":45,"./views/line":46,"./views/polygon":47,"./views/rectangle":48,"./views/sprite":49,"./views/text-block":50}],13:[function(_dereq_,module,exports){
 
 /*
 Constructor for Camera class
 
 @name Camera
-@class A camera represents a part of the arena which is "projected" on to the engines main canvas.
-the camera contains both a capture region and a projection region, the capture region decides which part of the arena to "capture".
+@class A camera represents a part of the container which is "projected" on to the engines main canvas.
+the camera contains both a capture region and a projection region, the capture region decides which part of the container to "capture".
 The projection region decides where the captured region will be drawn on the main canvas.
 
 @property {Math.Rectangle} captureRegion A rectangle which defines the region of the current room to capture
@@ -3659,15 +3635,15 @@ var Camera, Geometry;
 
 module.exports = Camera = (function() {
   function Camera(captureRegion, projectionRegion, room) {
-    if (!captureRegion instanceof Geometry.Rectangle) {
-      throw new Error("Argument captureRegion should be of type: Rectangle");
-    }
-    if (!projectionRegion instanceof Geometry.Rectangle) {
-      throw new Error("Argument projectionRegion should be of type: Rectangle");
-    }
     this.captureRegion = captureRegion;
     this.projectionRegion = projectionRegion;
-    this.room = room || engine.currentRoom;
+    this.room = room;
+    if (!this.captureRegion instanceof Geometry.Rectangle) {
+      throw new Error("Argument captureRegion should be of type: Rectangle");
+    }
+    if (!this.projectionRegion instanceof Geometry.Rectangle) {
+      throw new Error("Argument projectionRegion should be of type: Rectangle");
+    }
     return;
   }
 
@@ -3681,13 +3657,13 @@ Geometry = {
 
 
 
-},{"../geometry/rectangle":22}],14:[function(_dereq_,module,exports){
+},{"../geometry/rectangle":23}],14:[function(_dereq_,module,exports){
 
 /*
 @name CustomLoop
 @class A loop class.
 Contains a list of functions to run each time the loop executes.
-For the loop to be executed, it will have to be added to the current room via the engine.currentRoom.addLoop.
+For the loop to be executed, it will have to be added to the current room via the [engine].currentRoom.addLoop.
 A loop also has it's own time that is stopped whenever the loop is not executed. This makes it possible to schedule a function execution that will be "postponed" if the loop gets paused.
 
 @property {number} framesPerExecution The number of frames between each execution of the custom loop
@@ -3713,7 +3689,6 @@ module.exports = CustomLoop = (function() {
     this.executionsQueue = [];
     this.executions = [];
     this.animations = [];
-    this.lastFrame = window.engine.frames;
     this.time = 0;
   }
 
@@ -4044,16 +4019,16 @@ module.exports = CustomLoop = (function() {
   This function will automatically be executed, if the loop has been added to the current room, or the engine's masterRoom
    */
 
-  CustomLoop.prototype.execute = function() {
+  CustomLoop.prototype.execute = function(currentFrame, deltaTime) {
     var exec, i;
-    if (engine.frames % this.framesPerExecution || !this.maskFunction()) {
+    if (currentFrame % this.framesPerExecution || !this.maskFunction()) {
       return;
     }
-    if (engine.frames - this.lastFrame === this.framesPerExecution) {
-      this.time += engine.gameTimeIncrease;
+    if (this.lastFrame == null) {
+      this.lastFrame = currentFrame;
     }
-    this.lastFrame = engine.frames;
-    this.last = engine.now;
+    this.time += deltaTime * (currentFrame - this.lastFrame);
+    this.lastFrame = currentFrame;
     this.updateAnimations();
     i = this.executions.length;
     while (i--) {
@@ -4103,7 +4078,38 @@ Helpers = {
 
 
 
-},{"../helpers/easing":24}],15:[function(_dereq_,module,exports){
+},{"../helpers/easing":25}],15:[function(_dereq_,module,exports){
+module.exports = {
+  avoidSubPixelRendering: true,
+  running: false,
+  canvasResX: 800,
+  canvasResY: 600,
+  focusOnLoad: true,
+  themesPath: "assets",
+  drawBoundingBoxes: false,
+  drawMasks: false,
+  pauseOnBlur: true,
+  disableRightClick: true,
+  preventDefaultKeyboard: false,
+  autoResize: true,
+  autoResizeLimitToResolution: true,
+  cachedSoundCopies: 5,
+  loadText: "jsEngine loading...",
+  backgroundColor: "#000",
+  timeFactor: 1,
+  disableTouchScroll: true,
+  resetCursorOnEachFrame: true,
+  cameras: [],
+  defaultCollisionResolution: 1,
+  redrawObjects: [],
+  disableWebGL: false,
+  soundsMuted: false,
+  musicMuted: false
+};
+
+
+
+},{}],16:[function(_dereq_,module,exports){
 
 /*
 jseGlobals.js:
@@ -4191,7 +4197,7 @@ module.exports = {
 
 
 
-},{}],16:[function(_dereq_,module,exports){
+},{}],17:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Loader class.
@@ -4206,8 +4212,9 @@ This loader object will also create a load overlay (the overlay saying "jsEngine
 var Geometry, Loader, Sounds;
 
 module.exports = Loader = (function() {
-  function Loader() {
+  function Loader(options) {
     var name, ref, value;
+    this.themesPath = options.themesPath, this.loadText = options.loadText, this.defaultTheme = options.defaultTheme, this.host = options.host, this.container = options.container;
     this.images = {};
     this.loaded = {
       classes: []
@@ -4241,8 +4248,8 @@ module.exports = Loader = (function() {
       this.loadOverlay.style[name] = value;
     }
     this.loadOverlay.className = "load-overlay";
-    this.loadOverlay.innerHTML = "<div class=\"load-overlay-text\">" + engine.loadText + "</div>";
-    engine.arena.appendChild(this.loadOverlay);
+    this.loadOverlay.innerHTML = "<div class=\"load-overlay-text\">" + this.loadText + "</div>";
+    this.container.appendChild(this.loadOverlay);
     return;
   }
 
@@ -4269,7 +4276,7 @@ module.exports = Loader = (function() {
             _this.fade();
           }, 30);
         } else {
-          engine.arena.removeChild(_this.loadOverlay);
+          _this.container.removeChild(_this.loadOverlay);
           delete _this.fade;
           if (_this.fadeCallback) {
             _this.fadeCallback();
@@ -4294,7 +4301,7 @@ module.exports = Loader = (function() {
     if (resource === void 0) {
       throw new Error("Missing argument: resource");
     }
-    themeName = (themeName !== void 0 ? themeName : engine.defaultTheme);
+    themeName = (themeName !== void 0 ? themeName : this.defaultTheme);
     return this.getResource(resource, "images", themeName);
   };
 
@@ -4311,7 +4318,7 @@ module.exports = Loader = (function() {
     if (resource === void 0) {
       throw new Error("Missing argument: resource");
     }
-    themeName = (themeName !== void 0 ? themeName : engine.defaultTheme);
+    themeName = (themeName !== void 0 ? themeName : this.defaultTheme);
     return this.getResource(resource, "sfx", themeName);
   };
 
@@ -4328,7 +4335,7 @@ module.exports = Loader = (function() {
     if (resource === void 0) {
       throw new Error("Missing argument: resource");
     }
-    themeName = (themeName !== void 0 ? themeName : engine.defaultTheme);
+    themeName = (themeName !== void 0 ? themeName : this.defaultTheme);
     return this.getResource(resource, "music", themeName);
   };
 
@@ -4347,7 +4354,7 @@ module.exports = Loader = (function() {
     if (resource === void 0) {
       throw new Error("Missing argument: resource");
     }
-    themeName = (themeName !== void 0 ? themeName : engine.defaultTheme);
+    themeName = (themeName !== void 0 ? themeName : this.defaultTheme);
     mask = this.getResource(resource, "masks", themeName);
     if (mask) {
       return mask;
@@ -4410,7 +4417,7 @@ module.exports = Loader = (function() {
 
   Loader.prototype.getImageSources = function() {
     var currentDir, i, inheritTheme, loopThrough, object, sourceStrings;
-    object = this.themes[engine.defaultTheme].images;
+    object = this.themes[this.defaultTheme].images;
     sourceStrings = [];
     currentDir = [];
     loopThrough = function(object) {
@@ -4432,8 +4439,8 @@ module.exports = Loader = (function() {
     };
     loopThrough(object);
     i = 0;
-    while (i < this.themes[engine.defaultTheme].inherit.length) {
-      inheritTheme = this.themes[this.themes[engine.defaultTheme].inherit[i]];
+    while (i < this.themes[this.defaultTheme].inherit.length) {
+      inheritTheme = this.themes[this.themes[this.defaultTheme].inherit[i]];
       if (inheritTheme !== void 0 && inheritTheme.images !== void 0) {
         loopThrough(inheritTheme.images);
       }
@@ -4490,20 +4497,6 @@ module.exports = Loader = (function() {
 
 
   /*
-  Reloads all classes. This function is very useful for applying code changes without having to refresh the browser, usually it has to be run multiple times though, to force the browser not to just load the files from its cache.
-   */
-
-  Loader.prototype.reloadAllClasses = function() {
-    var i;
-    for (i in this.loaded.classes) {
-      if (this.loaded.classes.hasOwnProperty(i)) {
-        engine.loadFiles(this.loaded.classes[i]);
-      }
-    }
-  };
-
-
-  /*
   Loads a list of themes. This function is automatically called by the Engine during its startup, for loading the themes specified by the launch options.
   
   @private
@@ -4527,7 +4520,7 @@ module.exports = Loader = (function() {
         continue;
       }
       req = new XMLHttpRequest();
-      req.open("GET", engine.themesPath + "/" + name + "/theme.js");
+      req.open("GET", this.themesPath + "/" + name + "/theme.js");
       req.send();
       req.addEventListener('error', (function(_this) {
         return function() {
@@ -4537,7 +4530,7 @@ module.exports = Loader = (function() {
       req.addEventListener('load', (function(_this) {
         return function() {
           var codeString;
-          codeString = req.responseText + "\n//# sourceURL=/" + engine.themesPath + "/" + name + "/theme.js";
+          codeString = req.responseText + "\n//# sourceURL=/" + _this.themesPath + "/" + name + "/theme.js";
           eval("theme = " + codeString);
           if (theme.inherit.length) {
             _this.loadThemes(theme.inherit);
@@ -4600,7 +4593,7 @@ module.exports = Loader = (function() {
             if (format) {
               format = format[0];
             }
-            res.src = engine.themesPath + "/" + theme.name + "/images/" + path + "." + format;
+            res.src = this.themesPath + "/" + theme.name + "/images/" + path + "." + format;
             images = object[path].match(/; *(\d+) *images?/);
             if (images) {
               res.imageLength = parseInt(images[1], 10);
@@ -4619,9 +4612,9 @@ module.exports = Loader = (function() {
           case "sfx":
             format = false;
             i = 0;
-            while (i < engine.host.supportedAudio.length) {
-              if (object[path].search(engine.host.supportedAudio[i]) !== -1) {
-                format = engine.host.supportedAudio[i];
+            while (i < this.host.supportedAudio.length) {
+              if (object[path].search(this.host.supportedAudio[i]) !== -1) {
+                format = this.host.supportedAudio[i];
               }
               i++;
             }
@@ -4629,9 +4622,9 @@ module.exports = Loader = (function() {
               console.log("Sound was not available in a supported format: " + theme.name + "/sfx/" + path);
               continue;
             }
-            res = new Audio(engine.themesPath + "/" + theme.name + "/sfx/" + path + "." + format);
+            res = new Audio(this.themesPath + "/" + theme.name + "/sfx/" + path + "." + format);
             theme.sfx[path] = new Sounds.Effect(res);
-            if (engine.preloadSounds) {
+            if (this.canPreloadSounds()) {
               res.setAttribute("preload", "auto");
               res.addEventListener("canplaythrough", onload, false);
               theme.resourcesCount++;
@@ -4640,18 +4633,18 @@ module.exports = Loader = (function() {
           case "music":
             format = false;
             i = 0;
-            while (i < engine.host.supportedAudio.length) {
-              if (object[path].search(engine.host.supportedAudio[i]) !== -1) {
-                format = engine.host.supportedAudio[i];
+            while (i < this.host.supportedAudio.length) {
+              if (object[path].search(this.host.supportedAudio[i]) !== -1) {
+                format = this.host.supportedAudio[i];
               }
               i++;
             }
             if (!format) {
               throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path);
             }
-            res = new Audio(engine.themesPath + "/" + theme.name + "/music/" + path + "." + format);
+            res = new Audio(this.themesPath + "/" + theme.name + "/music/" + path + "." + format);
             theme.music[path] = new Sounds.Music(res);
-            if (engine.preloadSounds) {
+            if (this.canPreloadSounds()) {
               res.setAttribute("preload", "auto");
               res.addEventListener("canplaythrough", onload, false);
               theme.resourcesCount++;
@@ -4707,12 +4700,12 @@ module.exports = Loader = (function() {
         break;
       case "sfx":
         format = path.match(/[^\.]*$/)[0];
-        if (engine.host.supportedAudio.indexOf(format) === -1) {
+        if (this.host.supportedAudio.indexOf(format) === -1) {
           throw new Error("Sound format is not supported:", format);
         }
         res = new Audio(path);
         theme.sfx[resourceString] = new Sounds.Effect(res);
-        if (engine.preloadSounds) {
+        if (this.canPreloadSounds()) {
           res.setAttribute("preload", "auto");
           res.addEventListener("canplaythrough", onLoaded, false);
           theme.resourcesCount++;
@@ -4720,12 +4713,12 @@ module.exports = Loader = (function() {
         break;
       case "music":
         format = path.match(/[^\.]*$/)[0];
-        if (engine.host.supportedAudio.indexOf(format) === -1) {
+        if (this.host.supportedAudio.indexOf(format) === -1) {
           throw new Error("Sound format is not supported:", format);
         }
         res = new Audio(path);
         theme.music[resourceString] = new Sounds.Music(res);
-        if (engine.preloadSounds) {
+        if (this.canPreloadSounds()) {
           res.setAttribute("preload", "auto");
           res.addEventListener("canplaythrough", onLoaded, false);
           theme.resourcesCount++;
@@ -4751,7 +4744,7 @@ module.exports = Loader = (function() {
       throw new Error("Missing argument: resourceString");
     }
     alphaLimit = (alphaLimit !== void 0 ? alphaLimit : 255);
-    image = engine.loader.getImage(resourceString);
+    image = this.getImage(resourceString);
     canvas = document.createElement("canvas");
     canvas.width = image.width;
     canvas.height = image.height;
@@ -4829,6 +4822,10 @@ module.exports = Loader = (function() {
     return false;
   };
 
+  Loader.prototype.canPreloadSounds = function() {
+    return this.host.device !== 'iDevice';
+  };
+
   return Loader;
 
 })();
@@ -4844,7 +4841,7 @@ Geometry = {
 
 
 
-},{"../geometry/rectangle":22,"../sounds/effect":38,"../sounds/music":39}],17:[function(_dereq_,module,exports){
+},{"../geometry/rectangle":23,"../sounds/effect":39,"../sounds/music":40}],18:[function(_dereq_,module,exports){
 var ObjectCreator, Views,
   slice = [].slice;
 
@@ -4937,7 +4934,7 @@ Views = {
 
 
 
-},{"../views/circle":41,"../views/collidable":42,"../views/container":43,"../views/game-object":44,"../views/line":45,"../views/polygon":46,"../views/rectangle":47,"../views/sprite":48,"../views/text-block":49}],18:[function(_dereq_,module,exports){
+},{"../views/circle":42,"../views/collidable":43,"../views/container":44,"../views/game-object":45,"../views/line":46,"../views/polygon":47,"../views/rectangle":48,"../views/sprite":49,"../views/text-block":50}],19:[function(_dereq_,module,exports){
 var CustomLoop, Room, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -5007,7 +5004,7 @@ module.exports = Room = (function(superClass) {
   @private
    */
 
-  Room.prototype.update = function() {
+  Room.prototype.update = function(frameNumber, deltaTime) {
     var l, name, ref;
     if (this.paused) {
       return;
@@ -5015,7 +5012,7 @@ module.exports = Room = (function(superClass) {
     ref = this.loops;
     for (name in ref) {
       l = ref[name];
-      l.execute();
+      l.execute(frameNumber, deltaTime);
     }
   };
 
@@ -5073,7 +5070,7 @@ CustomLoop = _dereq_('./custom-loop');
 
 
 
-},{"../views/container":43,"./custom-loop":14}],19:[function(_dereq_,module,exports){
+},{"../views/container":44,"./custom-loop":14}],20:[function(_dereq_,module,exports){
 var Circle, Geometry, Helpers, Mixins;
 
 Helpers = {
@@ -5314,7 +5311,7 @@ Geometry = {
 
 
 
-},{"../helpers/mixin":26,"../mixins/animatable":31,"./line":20,"./polygon":21,"./rectangle":22,"./vector":23}],20:[function(_dereq_,module,exports){
+},{"../helpers/mixin":27,"../mixins/animatable":32,"./line":21,"./polygon":22,"./rectangle":23,"./vector":24}],21:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Line class. Uses setFromVectors to create the line's start and end points
@@ -5644,7 +5641,7 @@ Geometry = {
 
 
 
-},{"./circle":19,"./polygon":21,"./rectangle":22,"./vector":23}],21:[function(_dereq_,module,exports){
+},{"./circle":20,"./polygon":22,"./rectangle":23,"./vector":24}],22:[function(_dereq_,module,exports){
 var Geometry, Polygon;
 
 module.exports = Polygon = (function() {
@@ -6056,7 +6053,7 @@ Geometry = {
 
 
 
-},{"./circle":19,"./line":20,"./rectangle":22,"./vector":23}],22:[function(_dereq_,module,exports){
+},{"./circle":20,"./line":21,"./rectangle":23,"./vector":24}],23:[function(_dereq_,module,exports){
 var Geometry, Helpers, Mixins, Rectangle;
 
 Helpers = {
@@ -6353,7 +6350,7 @@ Geometry = {
 
 
 
-},{"../helpers/mixin":26,"../mixins/animatable":31,"./circle":19,"./line":20,"./polygon":21,"./vector":23}],23:[function(_dereq_,module,exports){
+},{"../helpers/mixin":27,"../mixins/animatable":32,"./circle":20,"./line":21,"./polygon":22,"./vector":24}],24:[function(_dereq_,module,exports){
 var Geometry, Helpers, Mixins, Vector;
 
 Helpers = {
@@ -6683,7 +6680,7 @@ Geometry = {
 
 
 
-},{"../helpers/mixin":26,"../mixins/animatable":31,"./circle":19,"./line":20,"./polygon":21,"./rectangle":22}],24:[function(_dereq_,module,exports){
+},{"../helpers/mixin":27,"../mixins/animatable":32,"./circle":20,"./line":21,"./polygon":22,"./rectangle":23}],25:[function(_dereq_,module,exports){
 module.exports = {
   linear: function(t, b, c, d) {
     t /= d;
@@ -6737,7 +6734,7 @@ module.exports = {
 
 
 
-},{}],25:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 var MatrixCalculationHelper;
 
 module.exports = MatrixCalculationHelper = {
@@ -6894,7 +6891,7 @@ module.exports = MatrixCalculationHelper = {
 
 
 
-},{}],26:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 var MixinHelper;
 
 module.exports = MixinHelper = {
@@ -6923,7 +6920,7 @@ module.exports = MixinHelper = {
 
 
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 var Camera, RoomTransitionHelper;
 
 module.exports = RoomTransitionHelper = {
@@ -7220,7 +7217,7 @@ Camera = _dereq_('../engine/camera');
 
 
 
-},{"../engine/camera":13}],28:[function(_dereq_,module,exports){
+},{"../engine/camera":13}],29:[function(_dereq_,module,exports){
 var Vector, WebGLHelper, poly2tri;
 
 poly2tri = _dereq_('poly2tri');
@@ -7406,7 +7403,7 @@ module.exports = WebGLHelper = {
 
 
 
-},{"../geometry/vector":23,"poly2tri":6}],29:[function(_dereq_,module,exports){
+},{"../geometry/vector":24,"poly2tri":6}],30:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Keyboard class
@@ -7546,7 +7543,7 @@ module.exports = Keyboard = (function() {
 
 
 
-},{}],30:[function(_dereq_,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Pointer class
@@ -7671,9 +7668,9 @@ module.exports = Pointer = (function() {
       throw new Error("Missing argument: event");
     }
     this.mouse.window.set(event.pageX, event.pageY);
-    this.mouse.set(this.mouse.window.x - engine.arena.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, this.mouse.window.y - engine.arena.offsetTop - engine.canvas.offsetTop + document.body.scrollTop);
-    this.mouse.x = this.mouse.x / engine.arena.offsetWidth * engine.canvasResX;
-    this.mouse.y = this.mouse.y / engine.arena.offsetHeight * engine.canvasResY;
+    this.mouse.set(this.mouse.window.x - engine.container.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, this.mouse.window.y - engine.container.offsetTop - engine.canvas.offsetTop + document.body.scrollTop);
+    this.mouse.x = this.mouse.x / engine.container.offsetWidth * engine.canvasResX;
+    this.mouse.y = this.mouse.y / engine.container.offsetHeight * engine.canvasResY;
     roomPos = this.calculateRoomPosition(this.mouse);
     this.mouse.x = roomPos.x;
     this.mouse.y = roomPos.y;
@@ -7759,9 +7756,9 @@ module.exports = Pointer = (function() {
       pointerTouch = this.touches.filter(function(t) {
         return t.identifier === eventTouch.identifier;
       })[0];
-      pointerTouch.set(eventTouch.pageX - engine.arena.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - engine.arena.offsetTop - engine.canvas.offsetTop + document.body.scrollTop);
-      pointerTouch.x = pointerTouch.x / engine.arena.offsetWidth * engine.canvasResX;
-      pointerTouch.y = pointerTouch.y / engine.arena.offsetHeight * engine.canvasResY;
+      pointerTouch.set(eventTouch.pageX - engine.container.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - engine.container.offsetTop - engine.canvas.offsetTop + document.body.scrollTop);
+      pointerTouch.x = pointerTouch.x / engine.container.offsetWidth * engine.canvasResX;
+      pointerTouch.y = pointerTouch.y / engine.container.offsetHeight * engine.canvasResY;
       roomPos = this.calculateRoomPosition(pointerTouch);
       pointerTouch.x = roomPos.x;
       pointerTouch.y = roomPos.y;
@@ -8150,13 +8147,13 @@ module.exports = Pointer = (function() {
 
 
   /*
-  Checks if the mouse pointer is outside the game arena.
+  Checks if the mouse pointer is outside the game container.
   
   @return {boolean} True if the pointer is outside, false if not
    */
 
   Pointer.prototype.outside = function() {
-    return new Math.Rectangle(engine.arena.offsetLeft, engine.arena.offsetTop, engine.arena.offsetWidth, engine.arena.offsetHeight).contains(this.mouse.window) === false;
+    return new Math.Rectangle(engine.container.offsetLeft, engine.container.offsetTop, engine.container.offsetWidth, engine.container.offsetHeight).contains(this.mouse.window) === false;
   };
 
 
@@ -8167,12 +8164,12 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.resetCursor = function() {
-    engine.arena.style.cursor = "default";
+    engine.container.style.cursor = "default";
   };
 
 
   /*
-  Sets the mouse cursor for the arena.
+  Sets the mouse cursor for the container.
   By default the mouse cursor will be reset on each frame (this can be changed with the "resetCursorOnEachFrame" engine option)
   Please be aware that not all images can be used as cursor. Not all sizes and formats are supported by all browsers.
   
@@ -8195,7 +8192,7 @@ module.exports = Pointer = (function() {
         cursor = "url('" + cursor + "') 0 0, auto";
       }
     }
-    engine.arena.style.cursor = cursor;
+    engine.container.style.cursor = cursor;
   };
 
   return Pointer;
@@ -8210,7 +8207,7 @@ Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":15,"../geometry/vector":23}],31:[function(_dereq_,module,exports){
+},{"../engine/globals":16,"../geometry/vector":24}],32:[function(_dereq_,module,exports){
 var Animatable, Globals;
 
 module.exports = Animatable = (function() {
@@ -8418,7 +8415,7 @@ Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":15}],32:[function(_dereq_,module,exports){
+},{"../engine/globals":16}],33:[function(_dereq_,module,exports){
 var Geometry, Globals, Texture;
 
 module.exports = Texture = (function() {
@@ -8500,7 +8497,7 @@ Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":15,"../geometry/rectangle":22,"../geometry/vector":23}],33:[function(_dereq_,module,exports){
+},{"../engine/globals":16,"../geometry/rectangle":23,"../geometry/vector":24}],34:[function(_dereq_,module,exports){
 var CanvasRenderer, Helpers;
 
 module.exports = CanvasRenderer = (function() {
@@ -8734,7 +8731,7 @@ Helpers = {
 
 
 
-},{"../helpers/matrix-calculation":25}],34:[function(_dereq_,module,exports){
+},{"../helpers/matrix-calculation":26}],35:[function(_dereq_,module,exports){
 var ColorShaderProgram, Helpers, TextureShaderProgram, View, WebGLRenderer;
 
 module.exports = WebGLRenderer = (function() {
@@ -8957,7 +8954,7 @@ View = {
 
 
 
-},{"../helpers/matrix-calculation":25,"../views/child":40,"./webgl/color-shader-program":35,"./webgl/texture-shader-program":36}],35:[function(_dereq_,module,exports){
+},{"../helpers/matrix-calculation":26,"../views/child":41,"./webgl/color-shader-program":36,"./webgl/texture-shader-program":37}],36:[function(_dereq_,module,exports){
 var Helpers, TriangleBuffer, WebGLColorShaderProgram;
 
 TriangleBuffer = _dereq_('./triangle-buffer');
@@ -9120,7 +9117,7 @@ Helpers = {
 
 
 
-},{"../../helpers/webgl":28,"./triangle-buffer":37}],36:[function(_dereq_,module,exports){
+},{"../../helpers/webgl":29,"./triangle-buffer":38}],37:[function(_dereq_,module,exports){
 var WebGLTextureShaderProgram, coordsBufferLength;
 
 coordsBufferLength = 5 * 6 * 20000;
@@ -9358,7 +9355,7 @@ module.exports = WebGLTextureShaderProgram = (function() {
 
 
 
-},{}],37:[function(_dereq_,module,exports){
+},{}],38:[function(_dereq_,module,exports){
 var TriangleBuffer;
 
 module.exports = TriangleBuffer = (function() {
@@ -9411,7 +9408,7 @@ module.exports = TriangleBuffer = (function() {
 
 
 
-},{}],38:[function(_dereq_,module,exports){
+},{}],39:[function(_dereq_,module,exports){
 
 /*
 Constructor for the sound class
@@ -9568,7 +9565,7 @@ module.exports = Effect = (function() {
 
 
 
-},{}],39:[function(_dereq_,module,exports){
+},{}],40:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Music class
@@ -9673,7 +9670,7 @@ module.exports = Music = (function() {
 
 
 
-},{}],40:[function(_dereq_,module,exports){
+},{}],41:[function(_dereq_,module,exports){
 
 /*
 @name View.Child
@@ -9862,7 +9859,7 @@ Geometry = {
 
 
 
-},{"../engine/room":18,"../geometry/vector":23}],41:[function(_dereq_,module,exports){
+},{"../engine/room":19,"../geometry/vector":24}],42:[function(_dereq_,module,exports){
 var Circle, Geometry, Helpers, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -9926,7 +9923,7 @@ Geometry.Rectangle = _dereq_('../geometry/rectangle');
 
 
 
-},{"../geometry/circle":19,"../geometry/rectangle":22,"../helpers/mixin":26,"./child":40}],42:[function(_dereq_,module,exports){
+},{"../geometry/circle":20,"../geometry/rectangle":23,"../helpers/mixin":27,"./child":41}],43:[function(_dereq_,module,exports){
 var Collidable, Geometry, Helpers, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -10268,7 +10265,7 @@ Geometry = {
 
 
 
-},{"../geometry/vector":23,"../helpers/matrix-calculation":25,"./sprite":48}],43:[function(_dereq_,module,exports){
+},{"../geometry/vector":24,"../helpers/matrix-calculation":26,"./sprite":49}],44:[function(_dereq_,module,exports){
 var Container, Geometry, ObjectCreator, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
@@ -10540,7 +10537,7 @@ Geometry = {
 
 
 
-},{"../engine/object-creator":17,"../geometry/rectangle":22,"./child":40}],44:[function(_dereq_,module,exports){
+},{"../engine/object-creator":18,"../geometry/rectangle":23,"./child":41}],45:[function(_dereq_,module,exports){
 var GameObject, Geometry, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -10565,9 +10562,9 @@ The constructor for the GameObject class.
 @property {Math.Vector} speed The two-directional velocity of the object in px/second
 
 @param {string} source A string representing the source of the object's bitmap
-@param {number} [x=0] The x-position of the object in the game arena, in pixels
-@param {number} [y=0] The y-position of the object in the game arena, in pixels
-@param {number} [direction=0] The rotation (in radians) of the object when drawn in the game arena
+@param {number} [x=0] The x-position of the object in the game container, in pixels
+@param {number} [y=0] The y-position of the object in the game container, in pixels
+@param {number} [direction=0] The rotation (in radians) of the object when drawn in the game container
 @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
 The default is:
 <code>
@@ -10643,7 +10640,7 @@ Geometry = {
 
 
 
-},{"../geometry/vector":23,"./collidable":42}],45:[function(_dereq_,module,exports){
+},{"../geometry/vector":24,"./collidable":43}],46:[function(_dereq_,module,exports){
 var Geometry, Helpers, Line, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -10747,7 +10744,7 @@ Geometry.Vector = _dereq_('../geometry/vector');
 
 
 
-},{"../geometry/line":20,"../geometry/vector":23,"../helpers/mixin":26,"./child":40}],46:[function(_dereq_,module,exports){
+},{"../geometry/line":21,"../geometry/vector":24,"../helpers/mixin":27,"./child":41}],47:[function(_dereq_,module,exports){
 var Geometry, Helpers, Polygon, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -10808,7 +10805,7 @@ module.exports = Polygon = (function(superClass) {
 
 
 
-},{"../geometry/polygon":21,"../helpers/mixin":26,"./child":40}],47:[function(_dereq_,module,exports){
+},{"../geometry/polygon":22,"../helpers/mixin":27,"./child":41}],48:[function(_dereq_,module,exports){
 var Geometry, Helpers, Rectangle, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -10926,7 +10923,7 @@ module.exports = Rectangle = (function(superClass) {
 
 
 
-},{"../geometry/rectangle":22,"../helpers/mixin":26,"./child":40}],48:[function(_dereq_,module,exports){
+},{"../geometry/rectangle":23,"../helpers/mixin":27,"./child":41}],49:[function(_dereq_,module,exports){
 var Globals, Helpers, Mixins, Sprite, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -10967,9 +10964,9 @@ Usually all graphical objects in a game are sprites or extends this class.
 @property {number} opacity The opacity of the sprite
 
 @param {string} source A string representing the source of the object's bitmap
-@param {number} [x=0] The x-position of the object in the game arena, in pixels
-@param {number} [y=0] The y-position of the object in the game arena, in pixels
-@param {number} [direction=0] The rotation (in radians) of the object when drawn in the game arena
+@param {number} [x=0] The x-position of the object in the game container, in pixels
+@param {number} [y=0] The y-position of the object in the game container, in pixels
+@param {number} [direction=0] The rotation (in radians) of the object when drawn in the game container
 @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
 The default is:<code>
 {
@@ -11136,7 +11133,7 @@ Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":15,"../helpers/mixin":26,"../mixins/animatable":31,"../mixins/texture":32,"./child":40}],49:[function(_dereq_,module,exports){
+},{"../engine/globals":16,"../helpers/mixin":27,"../mixins/animatable":32,"../mixins/texture":33,"./child":41}],50:[function(_dereq_,module,exports){
 var Geometry, Globals, Helpers, Mixins, TextBlock, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -11176,8 +11173,8 @@ The constructor for the TextBlock class.
 @property {number} opacity The opacity of the sprite
 
 @param {string} string The string to display inside the TextBlock
-@param {number} [x=0] The x-position of the object in the game arena, in pixels
-@param {number} [y=0] The y-position of the object in the game arena, in pixels
+@param {number} [x=0] The x-position of the object in the game container, in pixels
+@param {number} [y=0] The y-position of the object in the game container, in pixels
 @param {number} [width=200] The width of the text block, in pixels. When the text reaches the width, it will break into a new line
 @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
 The default is:<code>
@@ -11397,5 +11394,5 @@ Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":15,"../geometry/vector":23,"../helpers/mixin":26,"../mixins/animatable":31,"../mixins/texture":32,"./child":40}]},{},[12])(12)
+},{"../engine/globals":16,"../geometry/vector":24,"../helpers/mixin":27,"../mixins/animatable":32,"../mixins/texture":33,"./child":41}]},{},[12])(12)
 });

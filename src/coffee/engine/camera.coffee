@@ -2,8 +2,8 @@
 Constructor for Camera class
 
 @name Camera
-@class A camera represents a part of the arena which is "projected" on to the engines main canvas.
-the camera contains both a capture region and a projection region, the capture region decides which part of the arena to "capture".
+@class A camera represents a part of the container which is "projected" on to the engines main canvas.
+the camera contains both a capture region and a projection region, the capture region decides which part of the container to "capture".
 The projection region decides where the captured region will be drawn on the main canvas.
 
 @property {Math.Rectangle} captureRegion A rectangle which defines the region of the current room to capture
@@ -15,12 +15,9 @@ The projection region decides where the captured region will be drawn on the mai
 @param {Room} room The room to capture from
 ###
 module.exports = class Camera
-  constructor: (captureRegion, projectionRegion, room) ->
-    throw new Error("Argument captureRegion should be of type: Rectangle") if not captureRegion instanceof Geometry.Rectangle #dev
-    throw new Error("Argument projectionRegion should be of type: Rectangle") if not projectionRegion instanceof Geometry.Rectangle #dev
-    @captureRegion = captureRegion
-    @projectionRegion = projectionRegion
-    @room = room or engine.currentRoom
+  constructor: (@captureRegion, @projectionRegion, @room) ->
+    throw new Error("Argument captureRegion should be of type: Rectangle") if not @captureRegion instanceof Geometry.Rectangle #dev
+    throw new Error("Argument projectionRegion should be of type: Rectangle") if not @projectionRegion instanceof Geometry.Rectangle #dev
     return
 
 Geometry =

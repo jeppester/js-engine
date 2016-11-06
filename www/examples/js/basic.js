@@ -76,6 +76,7 @@ Main = (function() {
 new Engine({
   gameClass: Main,
   themes: ['example'],
+  container: document.getElementById('container'),
   backgroundColor: "#000",
   disableWebGL: /canvas/.test(window.location.search),
   canvasResX: 600,

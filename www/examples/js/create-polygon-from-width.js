@@ -1,8 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var CreatePolygonFromWidth;
+var Main;
 
-CreatePolygonFromWidth = (function() {
-  function CreatePolygonFromWidth() {
+Main = (function() {
+  function Main() {
     engine.loader.hideOverlay((function(_this) {
       return function() {
         return _this.onLoaded();
@@ -10,7 +10,7 @@ CreatePolygonFromWidth = (function() {
     })(this));
   }
 
-  CreatePolygonFromWidth.prototype.onLoaded = function() {
+  Main.prototype.onLoaded = function() {
     var i, j, line, polygons, ref, t, tests;
     polygons = [];
     line = new Engine.Geometry.Line().setFromCoordinates(10, 10, 590, 310);
@@ -42,13 +42,14 @@ CreatePolygonFromWidth = (function() {
     return console.log("createPolygonFromWidth (tests/sec): " + ~~(tests / (new Date() - t)) * 1000);
   };
 
-  return CreatePolygonFromWidth;
+  return Main;
 
 })();
 
 new Engine({
-  gameClass: CreatePolygonFromWidth,
+  gameClass: Main,
   themes: ['example'],
+  container: document.getElementById('container'),
   backgroundColor: "#000",
   disableWebGL: /canvas/.test(window.location.search),
   canvasResX: 600,

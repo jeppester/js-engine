@@ -2,7 +2,7 @@
 @name CustomLoop
 @class A loop class.
 Contains a list of functions to run each time the loop executes.
-For the loop to be executed, it will have to be added to the current room via the engine.currentRoom.addLoop.
+For the loop to be executed, it will have to be added to the current room via the [engine].currentRoom.addLoop.
 A loop also has it's own time that is stopped whenever the loop is not executed. This makes it possible to schedule a function execution that will be "postponed" if the loop gets paused.
 
 @property {number} framesPerExecution The number of frames between each execution of the custom loop
@@ -34,7 +34,6 @@ module.exports = class CustomLoop
     @animations = []
 
     # Time tracking
-    @lastFrame = window.engine.frames
     @time = 0
 
   ###
@@ -271,11 +270,11 @@ module.exports = class CustomLoop
   Executes the custom loop. This will execute all the functions that have been added to the loop, and checks all scheduled executions to see if they should fire.
   This function will automatically be executed, if the loop has been added to the current room, or the engine's masterRoom
   ###
-  execute: ->
-    return if engine.frames % @framesPerExecution || !@maskFunction()
-    @time += engine.gameTimeIncrease if engine.frames - @lastFrame == @framesPerExecution
-    @lastFrame = engine.frames
-    @last = engine.now
+  execute: (currentFrame, deltaTime)->
+    return if currentFrame % @framesPerExecution || !@maskFunction()
+    @lastFrame ?= currentFrame
+    @time += deltaTime * (currentFrame - @lastFrame)
+    @lastFrame = currentFrame
 
     # Update animations
     @updateAnimations()

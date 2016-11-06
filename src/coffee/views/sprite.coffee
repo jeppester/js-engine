@@ -30,9 +30,9 @@ Usually all graphical objects in a game are sprites or extends this class.
 @property {number} opacity The opacity of the sprite
 
 @param {string} source A string representing the source of the object's bitmap
-@param {number} [x=0] The x-position of the object in the game arena, in pixels
-@param {number} [y=0] The y-position of the object in the game arena, in pixels
-@param {number} [direction=0] The rotation (in radians) of the object when drawn in the game arena
+@param {number} [x=0] The x-position of the object in the game container, in pixels
+@param {number} [y=0] The y-position of the object in the game container, in pixels
+@param {number} [direction=0] The rotation (in radians) of the object when drawn in the game container
 @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
 The default is:<code>
 {

@@ -71,7 +71,7 @@ class CollisionObject extends Engine.Views.GameObject
     return
 
 # create main class
-class CollisionTest
+class Main
   constructor: ->
     # Add collision checking loop
     engine.currentRoom.addLoop 'collisionChecking', new Engine.CustomLoop(5)
@@ -110,18 +110,21 @@ class CollisionTest
 
 # Start engine
 new Engine
-  # Set game-class path (Look at this file to start programming your game)
-  gameClass: CollisionTest
+  # Main class
+  gameClass: Main
 
-  # Set themes to load
+  # Themes to load
   themes: ['example']
 
-  # Set arena background-color
-  backgroundColor: "#222"
+  # Container
+  container: document.getElementById('container')
+
+  # Container background-color
+  backgroundColor: "#000"
 
   # Disable webgl using "canvas" search param
   disableWebGL: /canvas/.test window.location.search
 
-  # Set resolution of the game
+  # Resolution of the game
   canvasResX: 600
   canvasResY: 400

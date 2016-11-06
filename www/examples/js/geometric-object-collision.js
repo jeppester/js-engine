@@ -1,8 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var GeometricObjectCollision;
+var Main;
 
-GeometricObjectCollision = (function() {
-  function GeometricObjectCollision() {
+Main = (function() {
+  function Main() {
     var textOptions;
     this.circle = new Engine.Views.Circle(300, 200, 80, "#F11", "#F11");
     this.line = new Engine.Views.Line(null, null, "#F00", 6).setFromCoordinates(20, 320, 80, 380);
@@ -25,11 +25,11 @@ GeometricObjectCollision = (function() {
     })(this));
   }
 
-  GeometricObjectCollision.prototype.onLoaded = function() {
+  Main.prototype.onLoaded = function() {
     return engine.currentRoom.loops.eachFrame.attachFunction(this, this.step);
   };
 
-  GeometricObjectCollision.prototype.step = function() {
+  Main.prototype.step = function() {
     var dx, dy;
     dx = 0;
     dy = 0;
@@ -60,13 +60,15 @@ GeometricObjectCollision = (function() {
     });
   };
 
-  return GeometricObjectCollision;
+  return Main;
 
 })();
 
 new Engine({
-  gameClass: GeometricObjectCollision,
+  gameClass: Main,
   themes: ['example'],
+  container: document.getElementById('container'),
+  backgroundColor: "#000",
   disableWebGL: /canvas/.test(window.location.search),
   canvasResX: 600,
   canvasResY: 400

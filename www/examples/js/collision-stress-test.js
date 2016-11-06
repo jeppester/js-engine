@@ -1,9 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
-var CollisionStressTest;
+var Main;
 
-CollisionStressTest = (function() {
-  function CollisionStressTest() {
+Main = (function() {
+  function Main() {
     engine.loader.hideOverlay((function(_this) {
       return function() {
         return _this.onLoaded();
@@ -11,7 +11,7 @@ CollisionStressTest = (function() {
     })(this));
   }
 
-  CollisionStressTest.prototype.onLoaded = function() {
+  Main.prototype.onLoaded = function() {
     this.objectView = new Engine.Views.Container();
     this.hudView = new Engine.Views.Container();
     engine.currentRoom.addChildren(this.objectView, this.hudView);
@@ -33,7 +33,7 @@ CollisionStressTest = (function() {
     return this.addObjects(400);
   };
 
-  CollisionStressTest.prototype.checkCollision = function() {
+  Main.prototype.checkCollision = function() {
     if (this.collider.collidesWith(this.objectView.getChildren(), 1)) {
       return this.collisionDisplay.set({
         string: 'Collides: Yes'
@@ -45,7 +45,7 @@ CollisionStressTest = (function() {
     }
   };
 
-  CollisionStressTest.prototype.updateFPS = function() {
+  Main.prototype.updateFPS = function() {
     this.fpsCounter.set({
       string: 'FPS: ' + engine.fps
     });
@@ -54,7 +54,7 @@ CollisionStressTest = (function() {
     });
   };
 
-  CollisionStressTest.prototype.addObjects = function(count) {
+  Main.prototype.addObjects = function(count) {
     var i, j, ref, results, sprite;
     if (count == null) {
       count = 10;
@@ -67,7 +67,7 @@ CollisionStressTest = (function() {
     return results;
   };
 
-  CollisionStressTest.prototype.removeObjects = function(count) {
+  Main.prototype.removeObjects = function(count) {
     var i, j, objects, ref, results;
     if (count == null) {
       count = 10;
@@ -81,7 +81,7 @@ CollisionStressTest = (function() {
     return results;
   };
 
-  CollisionStressTest.prototype.controls = function() {
+  Main.prototype.controls = function() {
     var pointers;
     if (engine.keyboard.isDown(Engine.Globals.KEY_UP)) {
       this.addObjects();
@@ -96,16 +96,16 @@ CollisionStressTest = (function() {
     }
   };
 
-  return CollisionStressTest;
+  return Main;
 
 })();
 
 new Engine({
-  gameClass: CollisionStressTest,
+  gameClass: Main,
   themes: ['example'],
+  container: document.getElementById('container'),
   backgroundColor: "#000",
   disableWebGL: /canvas/.test(window.location.search),
-  pauseOnBlur: false,
   canvasResX: 600,
   canvasResY: 400
 });

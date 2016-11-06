@@ -51,10 +51,10 @@ module.exports = class Room extends Views.Container
 
   @private
   ###
-  update: ->
+  update: (frameNumber, deltaTime)->
     return if @paused
     for name, l of @loops
-      l.execute()
+      l.execute frameNumber, deltaTime
     return
 
   ###

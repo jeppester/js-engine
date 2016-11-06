@@ -29,8 +29,8 @@ The constructor for the TextBlock class.
 @property {number} opacity The opacity of the sprite
 
 @param {string} string The string to display inside the TextBlock
-@param {number} [x=0] The x-position of the object in the game arena, in pixels
-@param {number} [y=0] The y-position of the object in the game arena, in pixels
+@param {number} [x=0] The x-position of the object in the game container, in pixels
+@param {number} [y=0] The y-position of the object in the game container, in pixels
 @param {number} [width=200] The width of the text block, in pixels. When the text reaches the width, it will break into a new line
 @param {Object} [additionalProperties] An object containing additional properties to assign to the created object.
 The default is:<code>

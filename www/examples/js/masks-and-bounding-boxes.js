@@ -1,12 +1,12 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var MasksAndBBoxes;
+var Main;
 
-MasksAndBBoxes = (function() {
-  function MasksAndBBoxes() {
+Main = (function() {
+  function Main() {
     this.onLoaded();
   }
 
-  MasksAndBBoxes.prototype.onLoaded = function() {
+  Main.prototype.onLoaded = function() {
     var object, object2, text1, text2;
     engine.loader.hideOverlay();
     object = engine.currentRoom.create.GameObject('character', 50, 50, 0);
@@ -49,17 +49,16 @@ MasksAndBBoxes = (function() {
     return engine.currentRoom.loops.eachFrame.attachFunction(object, object.checkCollision);
   };
 
-  return MasksAndBBoxes;
+  return Main;
 
 })();
 
 new Engine({
-  gameClass: MasksAndBBoxes,
+  gameClass: Main,
   themes: ['example'],
-  backgroundColor: '#888',
+  container: document.getElementById('container'),
+  backgroundColor: "#888",
   disableWebGL: /canvas/.test(window.location.search),
-  drawBoundingBoxes: true,
-  drawMasks: true,
   canvasResX: 100,
   canvasResY: 100
 });

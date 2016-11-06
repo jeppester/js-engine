@@ -1,4 +1,4 @@
-class GeometricObjectCollision
+class Main
   constructor: ->
     # Add a circle
     @circle = new Engine.Views.Circle 300, 200, 80, "#F11", "#F11"
@@ -53,16 +53,23 @@ class GeometricObjectCollision
     @text5.set string: "Distance to rectangle: #{Math.round @circle.getDistance(@rectangle)}#{if @circle.intersects @rectangle then ' (intersects)' else ''}"
     return
 
+# Start engine
 new Engine
-  # Set game-class path (Look at this file to start programming your game)
-  gameClass: GeometricObjectCollision
+  # Main class
+  gameClass: Main
 
-  # Set themes to load
+  # Themes to load
   themes: ['example']
+
+  # Container
+  container: document.getElementById('container')
+
+  # Container background-color
+  backgroundColor: "#000"
 
   # Disable webgl using "canvas" search param
   disableWebGL: /canvas/.test window.location.search
 
-  # Set resolution of the game
+  # Resolution of the game
   canvasResX: 600
   canvasResY: 400
