@@ -3,11 +3,16 @@ class MovableCharacter extends Engine.Views.Sprite
   constructor: (x, y)->
     super 'character', x, y, 0
 
-    engine.currentRoom.loops.eachFrame.attachFunction(
+  onAdded: ->
+    super
+    @getRoom().loops.eachFrame.attachFunction(
       @ # This object (an instance reference is needed by the engine)
       @step # The function to call each time the loop executes
     )
+
   step: ->
+    engine = @getEngine()
+
     # Check that the arrow keys are down, if so, move the object by increasing or decreasing it's x and y properties
     # Left
     if engine.keyboard.isDown Engine.Globals.KEY_LEFT
@@ -40,14 +45,14 @@ Engine.ObjectCreator.prototype.MovableCharacter = (x, y)->
 
 # Create main game class
 class Main
-  constructor: ->
+  constructor: (@engine)->
     @onLoaded()
 
   onLoaded: ->
     # Create two views and add them to the room
     @bgView = new Engine.Views.Container
     @fgView = new Engine.Views.Container
-    engine.currentRoom.addChildren @bgView, @fgView
+    @engine.currentRoom.addChildren @bgView, @fgView
 
     # TEXT EXAMPLE
     # Make a hello world text
@@ -97,7 +102,7 @@ class Main
     )
 
     # Hide loader overlay now that everything is ready
-    engine.loader.hideOverlay()
+    @engine.loader.hideOverlay()
 
 # Start engine
 new Engine

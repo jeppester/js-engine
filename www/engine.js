@@ -2955,6 +2955,7 @@ module.exports = (function() {
   function _Class(settings) {
     var base, name, ref, value;
     this.settings = settings != null ? settings : {};
+    this.mainLoop = this.mainLoop.bind(this);
     ref = this.constructor.DefaultSettings;
     for (name in ref) {
       value = ref[name];
@@ -3006,8 +3007,7 @@ module.exports = (function() {
       }
       i++;
     }
-    copiedOptions = ["container", "autoResize", "autoResizeLimitToResolution", "avoidSubPixelRendering", "backgroundColor", "cachedSoundCopies", "canvasResX", "canvasResY", "defaultCollisionResolution", "drawBoundingBoxes", "drawMasks", "focusOnLoad", "gameClass", "pauseOnBlur", "preventDefaultKeyboard", "resetCursorOnEachFrame", "musicMuted", "soundsMuted"];
-    console.log(this.settings);
+    copiedOptions = ["container", "autoResize", "autoResizeLimitToResolution", "avoidSubPixelRendering", "backgroundColor", "cachedSoundCopies", "canvasResX", "canvasResY", "defaultCollisionResolution", "drawBoundingBoxes", "drawMasks", "focusOnLoad", "gameClass", "pauseOnBlur", "preventDefaultKeyboard", "resetCursorOnEachFrame", "musicMuted", "soundsMuted", "timeFactor"];
     for (j = 0, len1 = copiedOptions.length; j < len1; j++) {
       name = copiedOptions[j];
       this[name] = this.settings[name];
@@ -3043,6 +3043,7 @@ module.exports = (function() {
     @global
      */
     this.loader = new this.constructor.Loader({
+      engine: this,
       themesPath: this.settings.themesPath,
       loadText: this.settings.loadText,
       defaultTheme: this.settings.defaultTheme,
@@ -3076,19 +3077,21 @@ module.exports = (function() {
     this.drawTime = 0;
     this.drawTimeCounter = 0;
     this.drawCalls = 0;
-    this.roomList = [];
+    this.rooms = [];
     this.masterRoom = new this.constructor.Room("master");
+    this.addRoom(this.masterRoom);
     this.currentRoom = new this.constructor.Room("main");
+    this.addRoom(this.currentRoom);
     this.defaultAnimationLoop = this.currentRoom.loops.eachFrame;
     this.defaultActivityLoop = this.currentRoom.loops.eachFrame;
-    this.cameras.push(new this.constructor.Camera(new this.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY), new this.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY), this.currentRoom));
+    this.cameras = [new this.constructor.Camera(new this.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY), new this.constructor.Geometry.Rectangle(0, 0, this.canvasResX, this.canvasResY), this.currentRoom)];
     if (this.disableRightClick) {
       this.container.oncontextmenu = function() {
         return false;
       };
     }
-    this.keyboard = new this.constructor.Input.Keyboard();
-    this.pointer = new this.constructor.Input.Pointer();
+    this.keyboard = new this.constructor.Input.Keyboard(this);
+    this.pointer = new this.constructor.Input.Pointer(this);
     if (this.pauseOnBlur) {
       window.addEventListener("blur", (function(_this) {
         return function() {
@@ -3101,7 +3104,7 @@ module.exports = (function() {
         };
       })(this));
     }
-    new this.gameClass();
+    new this.gameClass(this);
     this.startMainLoop();
     if (this.focusOnLoad) {
       window.focus();
@@ -3128,10 +3131,10 @@ module.exports = (function() {
   _Class.prototype.initRenderer = function() {
     if (!this.disableWebGL && (this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl"))) {
       console.log('Using WebGL renderer');
-      this.renderer = new this.constructor.Renderers.WebGLRenderer(this.canvas);
+      this.renderer = new this.constructor.Renderers.WebGLRenderer(this, this.canvas);
     } else {
       console.log('Using canvas renderer');
-      this.renderer = new this.constructor.Renderers.CanvasRenderer(this.canvas);
+      this.renderer = new this.constructor.Renderers.CanvasRenderer(this, this.canvas);
     }
   };
 
@@ -3250,14 +3253,14 @@ module.exports = (function() {
       throw new Error("Missing argument: room");
     }
     if (typeof room === "string") {
-      room = this.roomList.filter(function(r) {
+      room = this.rooms.filter(function(r) {
         return r.name === room;
       })[0];
       if (!room) {
         throw new Error("Could not find a room with the specified name");
       }
     } else {
-      if (this.roomList.indexOf(room) === -1) {
+      if (this.rooms.indexOf(room) === -1) {
         throw new Error("Room is not on room list, has it been removed?");
       }
     }
@@ -3285,10 +3288,11 @@ module.exports = (function() {
     if (room === void 0) {
       throw new Error("Missing argument: room");
     }
-    if (this.roomList.indexOf(room) !== -1) {
+    if (this.rooms.indexOf(room) !== -1) {
       throw new Error("Room is already on room list, rooms are automatically added upon instantiation");
     }
-    this.roomList.push(room);
+    this.rooms.push(room);
+    room.engine = this;
   };
 
 
@@ -3304,12 +3308,12 @@ module.exports = (function() {
       throw new Error("Missing argument: room");
     }
     if (typeof room === "string") {
-      room = this.roomList.getElementByPropertyValue("name", room);
+      room = this.rooms.getElementByPropertyValue("name", room);
       if (!room) {
         throw new Error("Could not find a room with the specified name");
       }
     }
-    index = this.roomList.indexOf(room);
+    index = this.rooms.indexOf(room);
     if (index === -1) {
       throw new Error("Room is not on room list, has it been removed?");
     }
@@ -3320,7 +3324,7 @@ module.exports = (function() {
         throw new Error("Cannot remove current room, remember to leave the room first, by entering another room (use goToRoom)");
       }
     }
-    this.roomList.splice(i, 1);
+    this.rooms.splice(i, 1);
   };
 
 
@@ -3441,7 +3445,7 @@ module.exports = (function() {
       this.drawTimeCounter = 0;
       this.fpsMsCounter = 0;
     }
-    requestAnimationFrame(time, this.mainLoop);
+    requestAnimationFrame(this.mainLoop);
   };
 
 
@@ -3574,7 +3578,7 @@ module.exports = (function() {
         this.purge(obj.children[len]);
       }
     }
-    ref = this.roomList;
+    ref = this.rooms;
     for (j = 0, len1 = ref.length; j < len1; j++) {
       room = ref[j];
       ref1 = room.loops;
@@ -4212,9 +4216,9 @@ This loader object will also create a load overlay (the overlay saying "jsEngine
 var Geometry, Loader, Sounds;
 
 module.exports = Loader = (function() {
-  function Loader(options) {
+  function Loader(arg) {
     var name, ref, value;
-    this.themesPath = options.themesPath, this.loadText = options.loadText, this.defaultTheme = options.defaultTheme, this.host = options.host, this.container = options.container;
+    this.engine = arg.engine, this.themesPath = arg.themesPath, this.loadText = arg.loadText, this.defaultTheme = arg.defaultTheme, this.host = arg.host, this.container = arg.container;
     this.images = {};
     this.loaded = {
       classes: []
@@ -4623,7 +4627,7 @@ module.exports = Loader = (function() {
               continue;
             }
             res = new Audio(this.themesPath + "/" + theme.name + "/sfx/" + path + "." + format);
-            theme.sfx[path] = new Sounds.Effect(res);
+            theme.sfx[path] = new Sounds.Effect(this.engine, res);
             if (this.canPreloadSounds()) {
               res.setAttribute("preload", "auto");
               res.addEventListener("canplaythrough", onload, false);
@@ -4643,7 +4647,7 @@ module.exports = Loader = (function() {
               throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path);
             }
             res = new Audio(this.themesPath + "/" + theme.name + "/music/" + path + "." + format);
-            theme.music[path] = new Sounds.Music(res);
+            theme.music[path] = new Sounds.Music(this.engine, res);
             if (this.canPreloadSounds()) {
               res.setAttribute("preload", "auto");
               res.addEventListener("canplaythrough", onload, false);
@@ -4704,7 +4708,7 @@ module.exports = Loader = (function() {
           throw new Error("Sound format is not supported:", format);
         }
         res = new Audio(path);
-        theme.sfx[resourceString] = new Sounds.Effect(res);
+        theme.sfx[resourceString] = new Sounds.Effect(this.engine, res);
         if (this.canPreloadSounds()) {
           res.setAttribute("preload", "auto");
           res.addEventListener("canplaythrough", onLoaded, false);
@@ -4717,7 +4721,7 @@ module.exports = Loader = (function() {
           throw new Error("Sound format is not supported:", format);
         }
         res = new Audio(path);
-        theme.music[resourceString] = new Sounds.Music(res);
+        theme.music[resourceString] = new Sounds.Music(this.engine, res);
         if (this.canPreloadSounds()) {
           res.setAttribute("preload", "auto");
           res.addEventListener("canplaythrough", onLoaded, false);
@@ -4967,15 +4971,14 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 module.exports = Room = (function(superClass) {
   extend(Room, superClass);
 
-  function Room(name, onEntered, onLeft) {
+  function Room(name1, onEntered, onLeft) {
+    this.name = name1;
     Room.__super__.constructor.call(this);
-    this.name = (name ? name : engine.roomList.length);
     this.onEntered = (onEntered !== void 0 ? onEntered : function() {});
     this.onLeft = (onLeft !== void 0 ? onLeft : function() {});
     this.loops = {};
     this.paused = false;
     this.addLoop("eachFrame", new CustomLoop());
-    engine.addRoom(this);
     return;
   }
 
@@ -7414,12 +7417,13 @@ Constructor for the Keyboard class
 var Keyboard;
 
 module.exports = Keyboard = (function() {
-  function Keyboard() {
+  function Keyboard(engine) {
     var key;
+    this.engine = engine;
     document.addEventListener("keydown", (function(_this) {
       return function(event) {
         _this.onKeyDown(event);
-        if (engine.preventDefaultKeyboard) {
+        if (_this.engine.preventDefaultKeyboard) {
           event.preventDefault();
         }
       };
@@ -7427,7 +7431,7 @@ module.exports = Keyboard = (function() {
     document.addEventListener("keyup", (function(_this) {
       return function(event) {
         _this.onKeyUp(event);
-        if (engine.preventDefaultKeyboard) {
+        if (_this.engine.preventDefaultKeyboard) {
           event.preventDefault();
         }
       };
@@ -7516,7 +7520,7 @@ module.exports = Keyboard = (function() {
     if (typeof key === "string") {
       key = key.toUpperCase().charCodeAt(0);
     }
-    return this.keys[key].events.length && this.keys[key].events[0] > engine.last;
+    return this.keys[key].events.length && this.keys[key].events[0] > this.engine.last;
   };
 
 
@@ -7534,7 +7538,7 @@ module.exports = Keyboard = (function() {
     if (typeof key === "string") {
       key = key.toUpperCase().charCodeAt(0);
     }
-    return this.keys[key].events.length && -this.keys[key].events[0] > engine.last;
+    return this.keys[key].events.length && -this.keys[key].events[0] > this.engine.last;
   };
 
   return Keyboard;
@@ -7554,9 +7558,10 @@ Constructor for the Pointer class
 var Geometry, Globals, Pointer;
 
 module.exports = Pointer = (function() {
-  function Pointer() {
+  function Pointer(engine) {
     var button;
-    if (engine.host.hasTouch) {
+    this.engine = engine;
+    if (this.engine.host.hasTouch) {
       document.addEventListener("touchstart", (function(_this) {
         return function(event) {
           _this.onTouchStart(event);
@@ -7585,7 +7590,7 @@ module.exports = Pointer = (function() {
       })(this), false);
       document.addEventListener("mousemove", (function(_this) {
         return function(event) {
-          engine.host.hasMouse = true;
+          _this.engine.host.hasMouse = true;
           _this.onMouseMove(event);
         };
       })(this), false);
@@ -7668,9 +7673,9 @@ module.exports = Pointer = (function() {
       throw new Error("Missing argument: event");
     }
     this.mouse.window.set(event.pageX, event.pageY);
-    this.mouse.set(this.mouse.window.x - engine.container.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, this.mouse.window.y - engine.container.offsetTop - engine.canvas.offsetTop + document.body.scrollTop);
-    this.mouse.x = this.mouse.x / engine.container.offsetWidth * engine.canvasResX;
-    this.mouse.y = this.mouse.y / engine.container.offsetHeight * engine.canvasResY;
+    this.mouse.set(this.mouse.window.x - this.engine.container.offsetLeft - this.engine.canvas.offsetLeft + document.body.scrollLeft, this.mouse.window.y - this.engine.container.offsetTop - this.engine.canvas.offsetTop + document.body.scrollTop);
+    this.mouse.x = this.mouse.x / this.engine.container.offsetWidth * this.engine.canvasResX;
+    this.mouse.y = this.mouse.y / this.engine.container.offsetHeight * this.engine.canvasResY;
     roomPos = this.calculateRoomPosition(this.mouse);
     this.mouse.x = roomPos.x;
     this.mouse.y = roomPos.y;
@@ -7756,9 +7761,9 @@ module.exports = Pointer = (function() {
       pointerTouch = this.touches.filter(function(t) {
         return t.identifier === eventTouch.identifier;
       })[0];
-      pointerTouch.set(eventTouch.pageX - engine.container.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - engine.container.offsetTop - engine.canvas.offsetTop + document.body.scrollTop);
-      pointerTouch.x = pointerTouch.x / engine.container.offsetWidth * engine.canvasResX;
-      pointerTouch.y = pointerTouch.y / engine.container.offsetHeight * engine.canvasResY;
+      pointerTouch.set(eventTouch.pageX - this.engine.container.offsetLeft - this.engine.canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - this.engine.container.offsetTop - this.engine.canvas.offsetTop + document.body.scrollTop);
+      pointerTouch.x = pointerTouch.x / this.engine.container.offsetWidth * this.engine.canvasResX;
+      pointerTouch.y = pointerTouch.y / this.engine.container.offsetHeight * this.engine.canvasResY;
       roomPos = this.calculateRoomPosition(pointerTouch);
       pointerTouch.x = roomPos.x;
       pointerTouch.y = roomPos.y;
@@ -7773,7 +7778,7 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.mouseHasMoved = function() {
-    return engine.last < this.mouse.lastMoved;
+    return this.engine.last < this.mouse.lastMoved;
   };
 
 
@@ -8018,12 +8023,12 @@ module.exports = Pointer = (function() {
       pointer = pointers[j];
       switch (state) {
         case "pressed":
-          if (pointer.events[0] > engine.last || pointer.events[1] > engine.last) {
+          if (pointer.events[0] > this.engine.last || pointer.events[1] > this.engine.last) {
             ret.push(pointer);
           }
           break;
         case "released":
-          if (-pointer.events[0] > engine.last || -pointer.events[1] > engine.last) {
+          if (-pointer.events[0] > this.engine.last || -pointer.events[1] > this.engine.last) {
             ret.push(pointer);
           }
           break;
@@ -8052,9 +8057,9 @@ module.exports = Pointer = (function() {
   Pointer.prototype.calculateRoomPosition = function(vector) {
     var camera, len, ret;
     ret = vector.copy();
-    len = engine.cameras.length;
+    len = this.engine.cameras.length;
     while (len--) {
-      camera = engine.cameras[len];
+      camera = this.engine.cameras[len];
       if (camera.projectionRegion.contains(vector) || len === 0) {
         ret.move(-camera.projectionRegion.x, -camera.projectionRegion.y);
         ret.x *= camera.captureRegion.width / camera.projectionRegion.width;
@@ -8130,12 +8135,12 @@ module.exports = Pointer = (function() {
     i = 0;
     while (i < pointers.length) {
       events = pointers[i].events;
-      if (events[0] > engine.last) {
+      if (events[0] > this.engine.last) {
         events.shift();
         events.push(void 0);
         unpressed = true;
       }
-      if (events[1] > engine.last) {
+      if (events[1] > this.engine.last) {
         events.pop();
         events.push(void 0);
         unpressed = true;
@@ -8153,24 +8158,24 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.outside = function() {
-    return new Math.Rectangle(engine.container.offsetLeft, engine.container.offsetTop, engine.container.offsetWidth, engine.container.offsetHeight).contains(this.mouse.window) === false;
+    return new Math.Rectangle(this.engine.container.offsetLeft, this.engine.container.offsetTop, this.engine.container.offsetWidth, this.engine.container.offsetHeight).contains(this.mouse.window) === false;
   };
 
 
   /*
-  Resets the mouse cursor, automatically called by the engine before each frame i executed, unless engine.resetCursorOnEachFrame is set to false
+  Resets the mouse cursor, automatically called by the @engine before each frame i executed, unless @engine.resetCursorOnEachFrame is set to false
   
   @private
    */
 
   Pointer.prototype.resetCursor = function() {
-    engine.container.style.cursor = "default";
+    this.engine.container.style.cursor = "default";
   };
 
 
   /*
   Sets the mouse cursor for the container.
-  By default the mouse cursor will be reset on each frame (this can be changed with the "resetCursorOnEachFrame" engine option)
+  By default the mouse cursor will be reset on each frame (this can be changed with the "resetCursorOnEachFrame" @engine option)
   Please be aware that not all images can be used as cursor. Not all sizes and formats are supported by all browsers.
   
   @param {string} A resource string, image path string or css cursor of the cursor
@@ -8184,7 +8189,7 @@ module.exports = Pointer = (function() {
     if (typeof cursor !== "string") {
       throw new Error("Argument cursor should be of type: string");
     }
-    resource = engine.loader.getImage(cursor);
+    resource = this.engine.loader.getImage(cursor);
     if (resource) {
       cursor = "url('" + resource.src + "') 0 0, auto";
     } else {
@@ -8192,7 +8197,7 @@ module.exports = Pointer = (function() {
         cursor = "url('" + cursor + "') 0 0, auto";
       }
     }
-    engine.container.style.cursor = cursor;
+    this.engine.container.style.cursor = cursor;
   };
 
   return Pointer;
@@ -8241,13 +8246,16 @@ module.exports = Animatable = (function() {
    */
 
   Animatable.prototype.animate = function(properties, options) {
-    var anim, c, i, loop_, map, opt;
+    var anim, c, engine, i, loop_, map, opt;
     if (properties === void 0) {
       throw new Error("Missing argument: properties");
     }
     if (options === void 0) {
       throw new Error("Missing argument: options");
     }
+    engine = this.getEngine() || (function() {
+      throw new Error("Must be added to a room belonging to an engine");
+    })();
     anim = {};
     map = properties;
     opt = (options ? options : {});
@@ -8295,10 +8303,13 @@ module.exports = Animatable = (function() {
    */
 
   Animatable.prototype.isAnimated = function() {
-    var animId, animation, loop_, name, room, roomId;
+    var animId, animation, engine, loop_, name, room, roomId;
+    engine = this.getEngine() || (function() {
+      throw new Error("Must be added to a room belonging to an engine");
+    })();
     roomId = 0;
-    while (roomId < engine.roomList.length) {
-      room = engine.roomList[roomId];
+    while (roomId < engine.rooms.length) {
+      room = engine.rooms[roomId];
       for (name in room.loops) {
         if (room.loops.hasOwnProperty(name)) {
           loop_ = room.loops[name];
@@ -8325,10 +8336,13 @@ module.exports = Animatable = (function() {
    */
 
   Animatable.prototype.propertyIsAnimated = function(property) {
-    var animId, animation, loop_, name, room, roomId;
+    var animId, animation, engine, loop_, name, room, roomId;
+    engine = this.getEngine() || (function() {
+      throw new Error("Must be added to a room belonging to an engine");
+    })();
     roomId = 0;
-    while (roomId < engine.roomList.length) {
-      room = engine.roomList[roomId];
+    while (roomId < engine.rooms.length) {
+      room = engine.rooms[roomId];
       for (name in room.loops) {
         if (room.loops.hasOwnProperty(name)) {
           loop_ = room.loops[name];
@@ -8355,11 +8369,14 @@ module.exports = Animatable = (function() {
    */
 
   Animatable.prototype.getAnimations = function() {
-    var animId, animation, animations, loop_, name, room, roomId;
+    var animId, animation, animations, engine, loop_, name, room, roomId;
+    engine = this.getEngine() || (function() {
+      throw new Error("Must be added to a room belonging to an engine");
+    })();
     animations = [];
     roomId = 0;
-    while (roomId < engine.roomList.length) {
-      room = engine.roomList[roomId];
+    while (roomId < engine.rooms.length) {
+      room = engine.rooms[roomId];
       for (name in room.loops) {
         if (room.loops.hasOwnProperty(name)) {
           loop_ = room.loops[name];
@@ -8384,10 +8401,13 @@ module.exports = Animatable = (function() {
    */
 
   Animatable.prototype.stopAnimations = function() {
-    var name, room, roomId;
+    var engine, name, room, roomId;
+    engine = this.getEngine() || (function() {
+      throw new Error("Must be added to a room belonging to an engine");
+    })();
     roomId = 0;
-    while (roomId < engine.roomList.length) {
-      room = engine.roomList[roomId];
+    while (roomId < engine.rooms.length) {
+      room = engine.rooms[roomId];
       for (name in room.loops) {
         if (room.loops.hasOwnProperty(name)) {
           room.loops[name].removeAnimationsOfObject(this);
@@ -8501,7 +8521,8 @@ Globals = _dereq_('../engine/globals');
 var CanvasRenderer, Helpers;
 
 module.exports = CanvasRenderer = (function() {
-  function CanvasRenderer(canvas) {
+  function CanvasRenderer(engine, canvas) {
+    this.engine = engine;
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
     return;
@@ -8535,7 +8556,7 @@ module.exports = CanvasRenderer = (function() {
       c.lineTo(camera.projectionRegion.x, camera.projectionRegion.y + camera.projectionRegion.height);
       c.closePath();
       c.clip();
-      rooms = [engine.masterRoom, camera.room];
+      rooms = [this.engine.masterRoom, camera.room];
       roomsLength = rooms.length;
       ii = 0;
       while (ii < roomsLength) {
@@ -8570,10 +8591,10 @@ module.exports = CanvasRenderer = (function() {
       case "sprite":
         object.updateSubImage();
         this.renderSprite(object);
-        if (engine.drawMasks) {
+        if (this.engine.drawMasks) {
           this.renderMask(object);
         }
-        if (engine.drawBoundingBoxes) {
+        if (this.engine.drawBoundingBoxes) {
           this.renderBoundingBox(object);
         }
         break;
@@ -8685,11 +8706,11 @@ module.exports = CanvasRenderer = (function() {
 
   CanvasRenderer.prototype.renderMask = function(object) {
     var mask;
-    mask = engine.loader.getMask(object.source, object.getTheme());
+    mask = this.engine.loader.getMask(object.source, object.getTheme());
     if (object.imageLength !== 1 && object.animationSpeed !== 0) {
-      if (engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed) {
+      if (this.engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed) {
         object.imageNumber = object.imageNumber + (object.animationSpeed > 0 ? 1 : -1);
-        object.animationLastSwitch = engine.gameTime;
+        object.animationLastSwitch = this.engine.gameTime;
         if (object.imageNumber === object.imageLength) {
           object.imageNumber = (object.animationLoops ? 0 : object.imageLength - 1);
         } else {
@@ -8704,7 +8725,7 @@ module.exports = CanvasRenderer = (function() {
 
   CanvasRenderer.prototype.renderBoundingBox = function(object) {
     var box, c, j, len1, mask, point, ref;
-    mask = engine.loader.getMask(object.source, object.getTheme());
+    mask = this.engine.loader.getMask(object.source, object.getTheme());
     box = mask.boundingBox;
     c = this.context;
     c.strokeStyle = '#0F0';
@@ -8740,8 +8761,9 @@ module.exports = WebGLRenderer = (function() {
     height: 0
   };
 
-  function WebGLRenderer(canvas) {
+  function WebGLRenderer(engine, canvas) {
     var context, i, len, options, ref;
+    this.engine = engine;
     this.canvas = canvas;
     this.currentResolution.width = 0;
     this.currentResolution.height = 0;
@@ -8806,7 +8828,7 @@ module.exports = WebGLRenderer = (function() {
       }
       Helpers.MatrixCalculation.setTranslation(camera.wm, -cr.x, -cr.y);
       gl.viewport(pr.x, pr.y, pr.width, pr.height);
-      rooms = [engine.masterRoom, camera.room];
+      rooms = [this.engine.masterRoom, camera.room];
       for (j = 0, len1 = rooms.length; j < len1; j++) {
         room = rooms[j];
         this.renderRoom(room, camera.wm);
@@ -8816,18 +8838,13 @@ module.exports = WebGLRenderer = (function() {
 
   WebGLRenderer.prototype.renderRoom = function(room, wm) {
     var list;
-    if (!room.parent) {
-      room.parent = new View.Child();
-      room.parent.wm = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]);
-      room.parent.changed = false;
-    }
     list = room.renderList != null ? room.renderList : room.renderList = [];
     this.updateRenderList(list, room, new Uint16Array([0]));
     this.processRenderList(list);
-    if (engine.drawMasks) {
+    if (this.engine.drawMasks) {
       this.renderMasks(list);
     }
-    if (engine.drawBoundingBoxes) {
+    if (this.engine.drawBoundingBoxes) {
       this.renderBoundingBoxes(list);
     }
   };
@@ -8866,7 +8883,9 @@ module.exports = WebGLRenderer = (function() {
         object.wm = new Float32Array(9);
       }
       Helpers.MatrixCalculation.setLocalMatrix(object.wm, object);
-      Helpers.MatrixCalculation.multiply(object.wm, object.parent.wm);
+      if (object.parent) {
+        Helpers.MatrixCalculation.multiply(object.wm, object.parent.wm);
+      }
       offset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
       Helpers.MatrixCalculation.reverseMultiply(object.wm, offset);
       switch (object.renderType) {
@@ -9423,14 +9442,18 @@ Constructor for the sound class
 var Effect;
 
 module.exports = Effect = (function() {
-  function Effect(audioElement) {
-    if (audioElement === void 0) {
-      throw new Error("Missing argument: audioElement");
+  function Effect(engine, source) {
+    this.engine = engine;
+    this.source = source;
+    if (this.engine === void 0) {
+      throw new Error("Missing argument: engine");
     }
-    if (audioElement.toString() !== "[object HTMLAudioElement]") {
-      throw new Error("Argument audioElement has to be of type HTMLAudioElement");
+    if (this.source === void 0) {
+      throw new Error("Missing argument: source");
     }
-    this.source = audioElement;
+    if (this.source.toString() !== "[object HTMLAudioElement]") {
+      throw new Error("Argument source has to be of type HTMLAudioElement");
+    }
     this.playbackId = 0;
     this.elements = [];
     this.source.addEventListener("canplaythrough", (function(_this) {
@@ -9453,7 +9476,7 @@ module.exports = Effect = (function() {
     var i, results;
     i = 0;
     results = [];
-    while (i < engine.cachedSoundCopies) {
+    while (i < this.engine.cachedSoundCopies) {
       this.elements.push(this.source.cloneNode());
       this.elements[i].started = false;
       results.push(i++);
@@ -9471,7 +9494,7 @@ module.exports = Effect = (function() {
 
   Effect.prototype.play = function(loop_) {
     var j, len, ref, sound;
-    if (engine.soundsMuted) {
+    if (this.engine.soundsMuted) {
       return false;
     }
     ref = this.elements;
@@ -9576,19 +9599,23 @@ Constructor for the Music class
 @property {boolean} paused Whether or not the music object is currently paused
 @property {HTMLAudioElement} source The audio element which is used as the source of the music object
 
-@param {HTMLAudioElement} audioElement The Audio element to use as source for the music object
+@param {HTMLAudioElement} @source The Audio element to use as source for the music object
  */
 var Music;
 
 module.exports = Music = (function() {
-  function Music(audioElement) {
-    if (audioElement === void 0) {
-      throw new Error("Missing argument: audioElement");
+  function Music(engine, source) {
+    this.engine = engine;
+    this.source = source;
+    if (this.source === void 0) {
+      throw new Error("Missing argument: @source");
     }
-    if (audioElement.toString() !== "[object HTMLAudioElement]") {
-      throw new Error("Argument audioElement has to be of type HTMLAudioElement");
+    if (this.source === void 0) {
+      throw new Error("Missing argument: @source");
     }
-    this.source = audioElement;
+    if (this.source.toString() !== "[object HTMLAudioElement]") {
+      throw new Error("Argument @source has to be of type HTMLAudioElement");
+    }
     this.source.addEventListener('ended', (function(_this) {
       return function() {
         return _this.playing = false;
@@ -9617,7 +9644,7 @@ module.exports = Music = (function() {
    */
 
   Music.prototype.play = function(loop_) {
-    if (engine.musicMuted) {
+    if (this.engine.musicMuted) {
       return false;
     }
     this.source.play();
@@ -9692,6 +9719,8 @@ module.exports = Child = (function() {
     this.offset = new Geometry.Vector();
     return;
   }
+
+  Child.prototype.onAdded = function() {};
 
   Child.prototype.offsetFromGlobal = function(offset) {
     this.offsetGlobal = offset;
@@ -9777,6 +9806,21 @@ module.exports = Child = (function() {
       parents.push(parent);
     }
     return parents;
+  };
+
+  Child.prototype.getRoom = function() {
+    var parents;
+    parents = this.getParents();
+    if (parents.length && parents[parents.length - 1] instanceof Engine.Room) {
+      return parents[parents.length - 1];
+    } else {
+      return false;
+    }
+  };
+
+  Child.prototype.getEngine = function() {
+    var ref;
+    return ((ref = this.getRoom()) != null ? ref.engine : void 0) || false;
   };
 
 
@@ -10331,6 +10375,9 @@ module.exports = Container = (function(superClass) {
       }
       this.children.push(child);
       child.parent = this;
+      if (typeof child.onAdded === "function") {
+        child.onAdded();
+      }
       if (child.refreshSource) {
         child.refreshSource();
       }
@@ -10999,7 +11046,7 @@ module.exports = Sprite = (function(superClass) {
     this.imageNumber = 0;
     this.imageLength = 1;
     this.animationSpeed = 30;
-    this.animationLastSwitch = engine.gameTime;
+    this.animationLastSwitch = 0;
     this.animationLoops = true;
     this.clipWidth;
     this.clipHeight;
@@ -11034,13 +11081,21 @@ module.exports = Sprite = (function(superClass) {
       offset = Globals.OFFSET_MIDDLE_CENTER;
     }
     Helpers.Mixin["import"](this, additionalProperties);
-    if (!this.refreshSource()) {
-      throw new Error("Sprite source was not successfully loaded: " + source);
-    }
     if (offset) {
       this.offsetFromGlobal(offset);
     }
   }
+
+  Sprite.onAdded = function() {
+    var ref;
+    Sprite.__super__.constructor.onAdded.apply(this, arguments);
+    if (this.animationLastSwitch == null) {
+      this.animationLastSwitch = (ref = this.getEngine()) != null ? ref.gameTime : void 0;
+    }
+    return this.refreshSource() || (function() {
+      throw new Error("Sprite source was not successfully loaded: " + this.source);
+    }).call(this);
+  };
 
 
   /*
@@ -11050,7 +11105,7 @@ module.exports = Sprite = (function(superClass) {
    */
 
   Sprite.prototype.getTheme = function() {
-    var parent, theme;
+    var parent, ref, theme;
     theme = this.theme;
     parent = this;
     while (theme === void 0) {
@@ -11067,7 +11122,7 @@ module.exports = Sprite = (function(superClass) {
     if (theme) {
       return theme;
     } else {
-      return engine.defaultTheme;
+      return (ref = this.getEngine()) != null ? ref.defaultTheme : void 0;
     }
   };
 
@@ -11080,9 +11135,9 @@ module.exports = Sprite = (function(superClass) {
    */
 
   Sprite.prototype.refreshSource = function() {
-    var theme;
+    var ref, theme;
     theme = this.getTheme();
-    this.texture = engine.loader.getImage(this.source, theme);
+    this.texture = (ref = this.getEngine()) != null ? ref.loader.getImage(this.source, theme) : void 0;
     this.imageLength = this.texture.imageLength;
     this.imageNumber = Math.min(this.imageLength - 1, this.imageNumber);
     this.clipWidth = Math.floor(this.texture.width / this.imageLength);

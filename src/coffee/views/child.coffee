@@ -15,6 +15,8 @@ module.exports = class Child
     @offset = new Geometry.Vector()
     return
 
+  onAdded: ()->
+
   offsetFromGlobal: (offset)->
     @offsetGlobal = offset
     @offset = @parseOffsetGlobal offset
@@ -77,6 +79,16 @@ module.exports = class Child
     parent = this
     parents.push parent while (parent = parent.parent) isnt undefined
     parents
+
+  getRoom: ->
+    parents = @getParents()
+    if parents.length and parents[parents.length - 1] instanceof Engine.Room
+      return parents[parents.length - 1]
+    else
+      return false
+
+  getEngine: ->
+    @getRoom()?.engine || false
 
   ###
   Finds the room to which the object is currently added

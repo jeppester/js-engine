@@ -59,7 +59,7 @@ module.exports = (grunt) ->
         files: [ 'src/coffee/**/*.coffee' ]
         tasks: [ 'browserify:engine' ]
       browserifyExamples:
-        files: [ 'src/exmpales/coffee/**/*.coffee' ]
+        files: [ 'src/examples/coffee/**/*.coffee' ]
         tasks: [ 'browserify:examples' ]
 
     connect:

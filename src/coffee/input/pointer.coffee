@@ -5,8 +5,8 @@ Constructor for the Pointer class
 @class A class that eases the use of mouse and touch, by providing functions for checking the current state of both.
 ###
 module.exports = class Pointer
-  constructor: ->
-    if engine.host.hasTouch
+  constructor: (@engine)->
+    if @engine.host.hasTouch
 
       # Add listeners for touch events
       document.addEventListener "touchstart", (event) =>
@@ -33,7 +33,7 @@ module.exports = class Pointer
         return
       , false
       document.addEventListener "mousemove", (event) =>
-        engine.host.hasMouse = true
+        @engine.host.hasMouse = true
         @onMouseMove event
         return
       , false
@@ -99,11 +99,11 @@ module.exports = class Pointer
   onMouseMove: (event) ->
     throw new Error("Missing argument: event") if event is undefined #dev
     @mouse.window.set event.pageX, event.pageY
-    @mouse.set @mouse.window.x - engine.container.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, @mouse.window.y - engine.container.offsetTop - engine.canvas.offsetTop + document.body.scrollTop
+    @mouse.set @mouse.window.x - @engine.container.offsetLeft - @engine.canvas.offsetLeft + document.body.scrollLeft, @mouse.window.y - @engine.container.offsetTop - @engine.canvas.offsetTop + document.body.scrollTop
 
     # Find the mouse position relative to the container
-    @mouse.x = @mouse.x / engine.container.offsetWidth * engine.canvasResX
-    @mouse.y = @mouse.y / engine.container.offsetHeight * engine.canvasResY
+    @mouse.x = @mouse.x / @engine.container.offsetWidth * @engine.canvasResX
+    @mouse.y = @mouse.y / @engine.container.offsetHeight * @engine.canvasResY
 
     # Convert the position to make it relative to the room
     roomPos = @calculateRoomPosition(@mouse)
@@ -175,9 +175,9 @@ module.exports = class Pointer
       pointerTouch = @touches.filter((t) ->
         t.identifier is eventTouch.identifier
       )[0]
-      pointerTouch.set eventTouch.pageX - engine.container.offsetLeft - engine.canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - engine.container.offsetTop - engine.canvas.offsetTop + document.body.scrollTop
-      pointerTouch.x = pointerTouch.x / engine.container.offsetWidth * engine.canvasResX
-      pointerTouch.y = pointerTouch.y / engine.container.offsetHeight * engine.canvasResY
+      pointerTouch.set eventTouch.pageX - @engine.container.offsetLeft - @engine.canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - @engine.container.offsetTop - @engine.canvas.offsetTop + document.body.scrollTop
+      pointerTouch.x = pointerTouch.x / @engine.container.offsetWidth * @engine.canvasResX
+      pointerTouch.y = pointerTouch.y / @engine.container.offsetHeight * @engine.canvasResY
 
       # Convert the position to make it relative to the room
       roomPos = @calculateRoomPosition(pointerTouch)
@@ -191,7 +191,7 @@ module.exports = class Pointer
   @return {boolean} True if the pointer has been moved, false if not
   ###
   mouseHasMoved: ->
-    engine.last < @mouse.lastMoved
+    @engine.last < @mouse.lastMoved
 
   ###
   Checks if a mouse button or touch is currently down.
@@ -368,9 +368,9 @@ module.exports = class Pointer
     for pointer in pointers
       switch state
         when "pressed"
-          ret.push pointer if pointer.events[0] > engine.last || pointer.events[1] > engine.last
+          ret.push pointer if pointer.events[0] > @engine.last || pointer.events[1] > @engine.last
         when "released"
-          ret.push pointer if -pointer.events[0] > engine.last || -pointer.events[1] > engine.last
+          ret.push pointer if -pointer.events[0] > @engine.last || -pointer.events[1] > @engine.last
         when "down"
           ret.push pointer if pointer.events[0] > 0
     if ret.length then ret else false
@@ -386,9 +386,9 @@ module.exports = class Pointer
     ret = vector.copy()
 
     # Find the first camera which covers the position
-    len = engine.cameras.length
+    len = @engine.cameras.length
     while len--
-      camera = engine.cameras[len]
+      camera = @engine.cameras[len]
 
       # If the position is covered by the camera, or we have reached the last camera, base the calculation on that camera
       if camera.projectionRegion.contains(vector) or len is 0
@@ -452,11 +452,11 @@ module.exports = class Pointer
     i = 0
     while i < pointers.length
       events = pointers[i].events
-      if events[0] > engine.last
+      if events[0] > @engine.last
         events.shift()
         events.push undefined
         unpressed = true
-      if events[1] > engine.last
+      if events[1] > @engine.last
         events.pop()
         events.push undefined
         unpressed = true
@@ -469,20 +469,20 @@ module.exports = class Pointer
   @return {boolean} True if the pointer is outside, false if not
   ###
   outside: ->
-    new Math.Rectangle(engine.container.offsetLeft, engine.container.offsetTop, engine.container.offsetWidth, engine.container.offsetHeight).contains(@mouse.window) is false
+    new Math.Rectangle(@engine.container.offsetLeft, @engine.container.offsetTop, @engine.container.offsetWidth, @engine.container.offsetHeight).contains(@mouse.window) is false
 
   ###
-  Resets the mouse cursor, automatically called by the engine before each frame i executed, unless engine.resetCursorOnEachFrame is set to false
+  Resets the mouse cursor, automatically called by the @engine before each frame i executed, unless @engine.resetCursorOnEachFrame is set to false
 
   @private
   ###
   resetCursor: ->
-    engine.container.style.cursor = "default"
+    @engine.container.style.cursor = "default"
     return
 
   ###
   Sets the mouse cursor for the container.
-  By default the mouse cursor will be reset on each frame (this can be changed with the "resetCursorOnEachFrame" engine option)
+  By default the mouse cursor will be reset on each frame (this can be changed with the "resetCursorOnEachFrame" @engine option)
   Please be aware that not all images can be used as cursor. Not all sizes and formats are supported by all browsers.
 
   @param {string} A resource string, image path string or css cursor of the cursor
@@ -492,7 +492,7 @@ module.exports = class Pointer
     throw new Error("Argument cursor should be of type: string") if typeof cursor isnt "string" #dev
 
     # Check if "cursor" is a resource string
-    resource = engine.loader.getImage(cursor)
+    resource = @engine.loader.getImage(cursor)
 
     # If the cursor string corresponded to a resource, use the resource's src as cursor
     if resource
@@ -502,7 +502,7 @@ module.exports = class Pointer
     else cursor = "url('" + cursor + "') 0 0, auto" unless /^\w*$/.test(cursor)
 
     # Finally: set the cursor
-    engine.container.style.cursor = cursor
+    @engine.container.style.cursor = cursor
     return
 
 Geometry =

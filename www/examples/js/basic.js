@@ -8,10 +8,16 @@ MovableCharacter = (function(superClass) {
 
   function MovableCharacter(x, y) {
     MovableCharacter.__super__.constructor.call(this, 'character', x, y, 0);
-    engine.currentRoom.loops.eachFrame.attachFunction(this, this.step);
   }
 
+  MovableCharacter.prototype.onAdded = function() {
+    MovableCharacter.__super__.onAdded.apply(this, arguments);
+    return this.getRoom().loops.eachFrame.attachFunction(this, this.step);
+  };
+
   MovableCharacter.prototype.step = function() {
+    var engine;
+    engine = this.getEngine();
     if (engine.keyboard.isDown(Engine.Globals.KEY_LEFT)) {
       this.x -= engine.convertSpeed(200);
     }
@@ -44,7 +50,8 @@ Engine.ObjectCreator.prototype.MovableCharacter = function(x, y) {
 };
 
 Main = (function() {
-  function Main() {
+  function Main(engine1) {
+    this.engine = engine1;
     this.onLoaded();
   }
 
@@ -52,7 +59,7 @@ Main = (function() {
     var movable, sprite, text;
     this.bgView = new Engine.Views.Container;
     this.fgView = new Engine.Views.Container;
-    engine.currentRoom.addChildren(this.bgView, this.fgView);
+    this.engine.currentRoom.addChildren(this.bgView, this.fgView);
     text = new Engine.Views.TextBlock('Hello world!', 50, 50, 200, {
       font: 'bold 24px Verdana',
       color: '#FFF'
@@ -66,7 +73,7 @@ Main = (function() {
       dur: 5000
     });
     movable = this.fgView.create.MovableCharacter(300, 200);
-    return engine.loader.hideOverlay();
+    return this.engine.loader.hideOverlay();
   };
 
   return Main;

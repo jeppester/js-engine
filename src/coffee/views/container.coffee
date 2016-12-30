@@ -52,6 +52,7 @@ module.exports = class Container extends Views.Child
       # Add the child
       @children.push child
       child.parent = this
+      child.onAdded?()
 
       # Refresh the child's sprite (it might have changed)
       child.refreshSource() if child.refreshSource

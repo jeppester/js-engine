@@ -108,6 +108,7 @@ module.exports = class
   @Loader: require './engine/loader'
 
   constructor: (@settings = {}) ->
+    @mainLoop = @mainLoop.bind @
     for name, value of @constructor.DefaultSettings
       @settings[name] ?= value
     @mainLoop = @mainLoop.bind @
@@ -165,8 +166,8 @@ module.exports = class
       "resetCursorOnEachFrame"
       "musicMuted"
       "soundsMuted"
+      "timeFactor"
     ]
-    console.log(@settings)
     for name in copiedOptions
       @[name] = @settings[name]
 
@@ -207,10 +208,11 @@ module.exports = class
     @global
     ###
     @loader = new @constructor.Loader {
-      themesPath:    @settings.themesPath,
-      loadText:      @settings.loadText,
-      defaultTheme:  @settings.defaultTheme,
-      @host,
+      engine:        @
+      themesPath:    @settings.themesPath
+      loadText:      @settings.loadText
+      defaultTheme:  @settings.defaultTheme
+      @host
       @container
     }
 
@@ -242,24 +244,28 @@ module.exports = class
     @drawCalls = 0
 
     # Create a room list (All rooms will add themselves to this list)
-    @roomList = []
+    @rooms = []
 
     # Create master room
     @masterRoom = new @constructor.Room("master")
+    @addRoom(@masterRoom)
 
     # Make main room
     @currentRoom = new @constructor.Room("main")
+    @addRoom(@currentRoom)
 
     # Set default custom loops
     @defaultAnimationLoop = @currentRoom.loops.eachFrame
     @defaultActivityLoop = @currentRoom.loops.eachFrame
 
     # Make main camera
-    @cameras.push new @constructor.Camera(
-      new @constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
-      new @constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
-      @currentRoom
-    )
+    @cameras = [
+      new @constructor.Camera(
+        new @constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
+        new @constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
+        @currentRoom
+      )
+    ]
 
     # Disable right click inside container
     if @disableRightClick
@@ -267,8 +273,8 @@ module.exports = class
         false
 
     # Create objects required by the engine
-    @keyboard = new @constructor.Input.Keyboard()
-    @pointer = new @constructor.Input.Pointer()
+    @keyboard = new @constructor.Input.Keyboard(@)
+    @pointer = new @constructor.Input.Pointer(@)
 
     # Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
     if @pauseOnBlur
@@ -281,7 +287,7 @@ module.exports = class
         return
 
     # Create game object
-    new @gameClass()
+    new @gameClass(@)
     @startMainLoop()
     window.focus() if @focusOnLoad
     @onload() if @onload
@@ -303,10 +309,10 @@ module.exports = class
   initRenderer: ->
     if not @disableWebGL and (@canvas.getContext("webgl") or @canvas.getContext("experimental-webgl"))
       console.log 'Using WebGL renderer'
-      @renderer = new @constructor.Renderers.WebGLRenderer(@canvas)
+      @renderer = new @constructor.Renderers.WebGLRenderer(@, @canvas)
     else
       console.log 'Using canvas renderer'
-      @renderer = new @constructor.Renderers.CanvasRenderer(@canvas)
+      @renderer = new @constructor.Renderers.CanvasRenderer(@, @canvas)
     return
 
   ###
@@ -408,14 +414,14 @@ module.exports = class
 
     # If a string has been specified, find the room by name
     if typeof room is "string"
-      room = @roomList.filter((r) ->
+      room = @rooms.filter((r) ->
         r.name is room
       )[0]
       throw new Error("Could not find a room with the specified name") unless room #dev
 
     # Else, check if the room exists on the room list, and if not, throw an error
     else
-      throw new Error("Room is not on room list, has it been removed?") if @roomList.indexOf(room) is -1 #dev
+      throw new Error("Room is not on room list, has it been removed?") if @rooms.indexOf(room) is -1 #dev
     transition = (if transition then transition else ROOM_TRANSITION_NONE)
     oldRoom = @currentRoom
     @changingRoom = true
@@ -434,9 +440,10 @@ module.exports = class
   addRoom: (room) ->
     throw new Error("Missing argument: room") if room is undefined #dev
     #dev
-    throw new Error("Room is already on room list, rooms are automatically added upon instantiation") if @roomList.indexOf(room) isnt -1 #dev
+    throw new Error("Room is already on room list, rooms are automatically added upon instantiation") if @rooms.indexOf(room) isnt -1 #dev
     #dev
-    @roomList.push room
+    @rooms.push room
+    room.engine = @
     return
 
   ###
@@ -449,18 +456,18 @@ module.exports = class
 
     # If a string has been specified, find the room by name
     if typeof room is "string"
-      room = @roomList.getElementByPropertyValue("name", room)
+      room = @rooms.getElementByPropertyValue("name", room)
       throw new Error("Could not find a room with the specified name") unless room #dev
 
     # Else, check if the room exists on the room list, and if not, throw an error
-    index = @roomList.indexOf(room)
+    index = @rooms.indexOf(room)
     throw new Error("Room is not on room list, has it been removed?") if index is -1 #dev
 
     # Make sure we are not removing the current room, or the master room
     if room is @masterRoom
       throw new Error("Cannot remove master room") #dev
     else throw new Error("Cannot remove current room, remember to leave the room first, by entering another room (use goToRoom)") if room is @currentRoom #dev
-    @roomList.splice i, 1
+    @rooms.splice i, 1
     return
 
   ###
@@ -577,7 +584,7 @@ module.exports = class
       @fpsMsCounter = 0 #dev
 
     # Schedule the loop to run again
-    requestAnimationFrame (time), @mainLoop
+    requestAnimationFrame @mainLoop
     return
 
   ###
@@ -678,7 +685,7 @@ module.exports = class
       @purge obj.children[len] while len--
 
     # Delete all references from rooms and their loops
-    for room in @roomList
+    for room in @rooms
       for name, customLoop of room.loops
         customLoop.detachFunction obj
         customLoop.unschedule obj

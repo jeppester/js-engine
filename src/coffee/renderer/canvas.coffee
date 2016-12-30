@@ -1,5 +1,5 @@
 module.exports = class CanvasRenderer
-  constructor: (@canvas) ->
+  constructor: (@engine, @canvas) ->
     @context = @canvas.getContext("2d")
     return
 
@@ -37,7 +37,7 @@ module.exports = class CanvasRenderer
       c.closePath()
       c.clip()
       rooms = [
-        engine.masterRoom
+        @engine.masterRoom
         camera.room
       ]
       roomsLength = rooms.length
@@ -69,8 +69,8 @@ module.exports = class CanvasRenderer
       when "sprite"
         object.updateSubImage()
         @renderSprite object
-        @renderMask object if engine.drawMasks
-        @renderBoundingBox object if engine.drawBoundingBoxes
+        @renderMask object if @engine.drawMasks
+        @renderBoundingBox object if @engine.drawBoundingBoxes
       when "circle"
         @renderCircle object
       when "line"
@@ -157,13 +157,13 @@ module.exports = class CanvasRenderer
     return
 
   renderMask: (object)->
-    mask = engine.loader.getMask object.source, object.getTheme()
+    mask = @engine.loader.getMask object.source, object.getTheme()
 
     # Set the right sub image
     if object.imageLength isnt 1 and object.animationSpeed isnt 0
-      if engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed
+      if @engine.gameTime - object.animationLastSwitch > 1000 / object.animationSpeed
         object.imageNumber = object.imageNumber + ((if object.animationSpeed > 0 then 1 else -1))
-        object.animationLastSwitch = engine.gameTime
+        object.animationLastSwitch = @engine.gameTime
         if object.imageNumber is object.imageLength
           object.imageNumber = (if object.animationLoops then 0 else object.imageLength - 1)
         else object.imageNumber = (if object.animationLoops then object.imageLength - 1 else 0) if object.imageNumber is -1
@@ -172,7 +172,7 @@ module.exports = class CanvasRenderer
     @context.drawImage mask, (object.clipWidth + object.texture.spacing) * object.imageNumber, 0, object.clipWidth, object.clipHeight, 0, 0, object.clipWidth, object.clipHeight
 
   renderBoundingBox: (object)->
-    mask = engine.loader.getMask object.source, object.getTheme()
+    mask = @engine.loader.getMask object.source, object.getTheme()
     box = mask.boundingBox
 
     c = @context

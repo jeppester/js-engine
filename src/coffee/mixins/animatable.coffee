@@ -27,6 +27,7 @@ module.exports = class Animatable
   animate: (properties, options) ->
     throw new Error("Missing argument: properties") if properties is undefined #dev
     throw new Error("Missing argument: options") if options is undefined #dev
+    engine = @getEngine() || throw new Error("Must be added to a room belonging to an engine")
 
     anim = {}
     map = properties
@@ -73,10 +74,12 @@ module.exports = class Animatable
   @return {boolean} Whether or not the object is being animated
   ###
   isAnimated: ->
+    engine = @getEngine() || throw new Error("Must be added to a room belonging to an engine")
+
     # Look through all room on the room list, to see if one of the rooms' loops contains an animation of the object
     roomId = 0
-    while roomId < engine.roomList.length
-      room = engine.roomList[roomId]
+    while roomId < engine.rooms.length
+      room = engine.rooms[roomId]
       for name of room.loops
         if room.loops.hasOwnProperty(name)
           loop_ = room.loops[name]
@@ -94,10 +97,12 @@ module.exports = class Animatable
   @return {boolean} Whether or not the property is being animated
   ###
   propertyIsAnimated: (property) ->
+    engine = @getEngine() || throw new Error("Must be added to a room belonging to an engine")
+
     # Look through all room on the room list, to see if one of the rooms' loops contains an animation of the object
     roomId = 0
-    while roomId < engine.roomList.length
-      room = engine.roomList[roomId]
+    while roomId < engine.rooms.length
+      room = engine.rooms[roomId]
       for name of room.loops
         if room.loops.hasOwnProperty(name)
           loop_ = room.loops[name]
@@ -115,10 +120,12 @@ module.exports = class Animatable
   @return {Object[]} An array of all the current animations of the object
   ###
   getAnimations: ->
+    engine = @getEngine() || throw new Error("Must be added to a room belonging to an engine")
+
     animations = []
     roomId = 0
-    while roomId < engine.roomList.length
-      room = engine.roomList[roomId]
+    while roomId < engine.rooms.length
+      room = engine.rooms[roomId]
       for name of room.loops
         if room.loops.hasOwnProperty(name)
           loop_ = room.loops[name]
@@ -134,9 +141,11 @@ module.exports = class Animatable
   Stops all current animations of the object.
   ###
   stopAnimations: ->
+    engine = @getEngine() || throw new Error("Must be added to a room belonging to an engine")
+
     roomId = 0
-    while roomId < engine.roomList.length
-      room = engine.roomList[roomId]
+    while roomId < engine.rooms.length
+      room = engine.rooms[roomId]
       for name of room.loops
         room.loops[name].removeAnimationsOfObject this if room.loops.hasOwnProperty(name)
       roomId++

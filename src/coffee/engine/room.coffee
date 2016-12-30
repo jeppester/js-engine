@@ -21,15 +21,13 @@ The engine also has a master room (engine.masterRoom), which is persistent throu
 @param {function} [onLeft=function () {}] A function to run when the room is left
 ###
 module.exports = class Room extends Views.Container
-  constructor: (name, onEntered, onLeft)->
+  constructor: (@name, onEntered, onLeft)->
     super()
-    @name = (if name then name else engine.roomList.length)
     @onEntered = (if onEntered isnt undefined then onEntered else ->)
     @onLeft = (if onLeft isnt undefined then onLeft else ->)
     @loops = {}
     @paused = false
     @addLoop "eachFrame", new CustomLoop()
-    engine.addRoom this
     return
 
   ###

@@ -3,7 +3,7 @@ module.exports = class WebGLRenderer
     width: 0
     height: 0
 
-  constructor: (@canvas) ->
+  constructor: (@engine, @canvas) ->
     # Cache variables
     @currentResolution.width = 0
     @currentResolution.height = 0
@@ -71,7 +71,7 @@ module.exports = class WebGLRenderer
 
       # Set camera projection viewport
       gl.viewport pr.x, pr.y, pr.width, pr.height
-      rooms = [ engine.masterRoom, camera.room ]
+      rooms = [ @engine.masterRoom, camera.room ]
 
       for room in rooms
         # Draw rooms
@@ -79,17 +79,12 @@ module.exports = class WebGLRenderer
     return
 
   renderRoom: (room, wm)->
-    unless room.parent
-      room.parent = new View.Child()
-      room.parent.wm = new Float32Array [1, 0, 0, 0, 1, 0, 0, 0, 1]
-      room.parent.changed = false
-
     list = room.renderList ?= []
     @updateRenderList list, room, new Uint16Array [0]
     @processRenderList list
 
-    @renderMasks list if engine.drawMasks
-    @renderBoundingBoxes list if engine.drawBoundingBoxes
+    @renderMasks list if @engine.drawMasks
+    @renderBoundingBoxes list if @engine.drawBoundingBoxes
 
     return
 
@@ -113,9 +108,8 @@ module.exports = class WebGLRenderer
     gl = @gl
     for object in list
       object.wm ?= new Float32Array 9
-
       Helpers.MatrixCalculation.setLocalMatrix object.wm, object
-      Helpers.MatrixCalculation.multiply object.wm, object.parent.wm
+      Helpers.MatrixCalculation.multiply object.wm, object.parent.wm if object.parent
       offset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
       Helpers.MatrixCalculation.reverseMultiply object.wm, offset
 

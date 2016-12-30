@@ -65,7 +65,7 @@ module.exports = class Sprite extends Views.Child
     @imageNumber = 0
     @imageLength = 1
     @animationSpeed = 30
-    @animationLastSwitch = engine.gameTime
+    @animationLastSwitch = 0
     @animationLoops = true
     @clipWidth
     @clipHeight
@@ -99,11 +99,14 @@ module.exports = class Sprite extends Views.Child
 
     # Load additional properties
     Helpers.Mixin.import @, additionalProperties
-    unless @refreshSource() #dev
-      throw new Error("Sprite source was not successfully loaded: " + source) # dev
 
     # If using an offset global, set offset
     @offsetFromGlobal offset if offset
+
+  @onAdded: ->
+    super
+    @animationLastSwitch ?= @getEngine()?.gameTime
+    @refreshSource() || throw new Error("Sprite source was not successfully loaded: " + @source) # dev
 
   ###
   Fetches the name of the theme which currently applies to the object.
@@ -121,7 +124,7 @@ module.exports = class Sprite extends Views.Child
           parent = parent.parent
         else
           break
-    (if theme then theme else engine.defaultTheme)
+    (if theme then theme else @getEngine()?.defaultTheme)
 
   ###
   Updates the source bitmap of the object to correspond to it's current theme (set with setTheme or inherited).
@@ -131,7 +134,7 @@ module.exports = class Sprite extends Views.Child
   ###
   refreshSource: ->
     theme = @getTheme()
-    @texture = engine.loader.getImage(@source, theme)
+    @texture = @getEngine()?.loader.getImage(@source, theme)
     @imageLength = @texture.imageLength
     @imageNumber = Math.min(@imageLength - 1, @imageNumber)
     @clipWidth = Math.floor(@texture.width / @imageLength)
