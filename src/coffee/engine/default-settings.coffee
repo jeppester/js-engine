@@ -15,7 +15,6 @@ module.exports =
   cachedSoundCopies: 5
   loadText: "jsEngine loading..."
   backgroundColor: "#000"
-  timeFactor: 1
   disableTouchScroll: true
   resetCursorOnEachFrame: true
   cameras: []

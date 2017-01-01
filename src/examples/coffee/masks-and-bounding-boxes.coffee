@@ -46,7 +46,7 @@ class Main
 # Start engine
 new Engine
   # Main class
-  gameClass: Main
+  mainClass: Main
 
   # Themes to load
   themes: ['example']

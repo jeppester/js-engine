@@ -1,7 +1,7 @@
-module.exports = (gameClass)->
+module.exports = (mainClass)->
   new Engine
     # Set game-class path (Look at this file to start programming your game)
-    gameClass: gameClass
+    mainClass: mainClass
 
     # Set themes to load
     themesPath: '../assets'

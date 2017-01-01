@@ -111,7 +111,6 @@ module.exports = class
     @mainLoop = @mainLoop.bind @
     for name, value of @constructor.DefaultSettings
       @settings[name] ?= value
-    @mainLoop = @mainLoop.bind @
     @autoResizeCanvas = @autoResizeCanvas.bind @
     @load()
 
@@ -146,50 +145,20 @@ module.exports = class
       @host.supportedAudio.push audioFormats[i] if document.createElement("audio").canPlayType("audio/" + audioFormats[i])
       i++
 
-    # Copy options to engine (except those which are only used for engine initialization)
-    copiedOptions = [
-      "container"
-      "autoResize"
-      "autoResizeLimitToResolution"
-      "avoidSubPixelRendering"
-      "backgroundColor"
-      "cachedSoundCopies"
-      "canvasResX"
-      "canvasResY"
-      "defaultCollisionResolution"
-      "drawBoundingBoxes"
-      "drawMasks"
-      "focusOnLoad"
-      "gameClass"
-      "pauseOnBlur"
-      "preventDefaultKeyboard"
-      "resetCursorOnEachFrame"
-      "musicMuted"
-      "soundsMuted"
-      "timeFactor"
-    ]
-    for name in copiedOptions
-      @[name] = @settings[name]
-
     # Check if settings are valid
-    throw new Error('Game class missing') unless @gameClass
+    throw new Error('Game class missing') unless @settings.mainClass
 
     # Set style for container
-    @container.style.position = "absolute"
-    @container.style.backgroundColor = @backgroundColor
-    @container.style.userSelect = "none"
-    @container.style.webkitUserSelect = "none"
-    @container.style.MozUserSelect = "none"
+    @settings.container.style.position = "absolute"
+    @settings.container.style.backgroundColor = @settings.backgroundColor
+    @settings.container.style.userSelect = "none"
+    @settings.container.style.webkitUserSelect = "none"
+    @settings.container.style.MozUserSelect = "none"
     @createCanvas()
     @initRenderer()
 
     # If autoresize is set to true, set up autoresize
-    if @autoResize
-      @autoResize = false
-      @setAutoResize true
-    else
-      @autoResize = true
-      @setAutoResize false
+    @setAutoResize @settings.autoResize, true
 
     # If disableTouchScroll is set to true, disable touch scroll
     if @settings.disableTouchScroll
@@ -207,14 +176,7 @@ module.exports = class
     Global Loader instance which is created upon engine initialization
     @global
     ###
-    @loader = new @constructor.Loader {
-      engine:        @
-      themesPath:    @settings.themesPath
-      loadText:      @settings.loadText
-      defaultTheme:  @settings.defaultTheme
-      @host
-      @container
-    }
+    @loader = new @constructor.Loader @host, @settings
 
     # Load themes
     @defaultTheme = @settings.themes[0]
@@ -261,23 +223,23 @@ module.exports = class
     # Make main camera
     @cameras = [
       new @constructor.Camera(
-        new @constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
-        new @constructor.Geometry.Rectangle(0, 0, @canvasResX, @canvasResY),
+        new @constructor.Geometry.Rectangle(0, 0, @settings.canvasResX, @settings.canvasResY),
+        new @constructor.Geometry.Rectangle(0, 0, @settings.canvasResX, @settings.canvasResY),
         @currentRoom
       )
     ]
 
     # Disable right click inside container
-    if @disableRightClick
-      @container.oncontextmenu = ->
+    if @settings.disableRightClick
+      @settings.container.oncontextmenu = ->
         false
 
     # Create objects required by the engine
-    @keyboard = new @constructor.Input.Keyboard(@)
-    @pointer = new @constructor.Input.Pointer(@)
+    @keyboard = new @constructor.Input.Keyboard(@settings)
+    @pointer = new @constructor.Input.Pointer(@canvas, @cameras, @loader, @host, @settings)
 
     # Set listeners for pausing the engine when the window looses focus (if pauseOnBlur is true)
-    if @pauseOnBlur
+    if @settings.pauseOnBlur
       window.addEventListener "blur", =>
         @stopMainLoop()
         return
@@ -287,10 +249,11 @@ module.exports = class
         return
 
     # Create game object
-    new @gameClass(@)
+    @main = new @settings.mainClass(@)
+    @timeFactor = 1
     @startMainLoop()
-    window.focus() if @focusOnLoad
-    @onload() if @onload
+    window.focus() if @settings.focusOnLoad
+    @onload() if @settings.onload
     console.log "jsEngine started" #dev
     return
 
@@ -301,13 +264,13 @@ module.exports = class
     # Make main canvas
     @canvas = document.createElement("canvas")
     @canvas.style.display = "block"
-    @canvas.width = @canvasResX
-    @canvas.height = @canvasResY
-    @container.appendChild @canvas
+    @canvas.width = @settings.canvasResX
+    @canvas.height = @settings.canvasResY
+    @settings.container.appendChild @canvas
     return
 
   initRenderer: ->
-    if not @disableWebGL and (@canvas.getContext("webgl") or @canvas.getContext("experimental-webgl"))
+    if !@settings.disableWebGL && @canvas.getContext("webgl")
       console.log 'Using WebGL renderer'
       @renderer = new @constructor.Renderers.WebGLRenderer(@, @canvas)
     else
@@ -320,24 +283,25 @@ module.exports = class
 
   @param {boolean} enable Decides whether autoresize should be enabled or disabled
   ###
-  setAutoResize: (enable) ->
-    if enable and not @autoResize
-      @autoResize = true
+  setAutoResize: (enable, force) ->
+    return if enable == @settings.autoresize && !force
+    @settings.autoresize = enable
+
+    if enable
       @autoResizeCanvas()
       window.addEventListener "resize", @autoResizeCanvas, false
       window.addEventListener "load", @autoResizeCanvas, false
-    else if not enable and @autoResize
-      @autoResize = false
+    else
       window.removeEventListener "resize", @autoResizeCanvas, false
       window.removeEventListener "load", @autoResizeCanvas, false
 
       # Reset canvas size
-      @container.style.top = "50%"
-      @container.style.left = "50%"
-      @container.style.marginLeft = -@canvasResX / 2 + "px"
-      @container.style.marginTop = -@canvasResY / 2 + "px"
-      @canvas.style.width = @canvasResX + "px"
-      @canvas.style.height = @canvasResY + "px"
+      @settings.container.style.top = "50%"
+      @settings.container.style.left = "50%"
+      @settings.container.style.marginLeft = -@settings.canvasResX / 2 + "px"
+      @settings.container.style.marginTop = -@settings.canvasResY / 2 + "px"
+      @canvas.style.width = @settings.canvasResX + "px"
+      @canvas.style.height = @settings.canvasResY + "px"
     return
 
   ###
@@ -346,22 +310,25 @@ module.exports = class
   @private
   ###
   autoResizeCanvas: ->
+    { canvasResX, canvasResY, container, autoResizeLimitToResolution } = @settings
+
     # Check if the window is wider og higher than the game's canvas
     windowWH = window.innerWidth / window.innerHeight
-    gameWH = @canvasResX / @canvasResY
+    gameWH = canvasResX / canvasResY
+
     if windowWH > gameWH
       h = window.innerHeight
-      w = @canvasResX / @canvasResY * h
+      w = canvasResX / canvasResY * h
     else
       w = window.innerWidth
-      h = @canvasResY / @canvasResX * w
-    if @autoResizeLimitToResolution
-      w = Math.min(w, @canvasResX)
-      h = Math.min(h, @canvasResY)
-    @container.style.top = "50%"
-    @container.style.left = "50%"
-    @container.style.marginTop = -h / 2 + "px"
-    @container.style.marginLeft = -w / 2 + "px"
+      h = canvasResY / canvasResX * w
+    if autoResizeLimitToResolution
+      w = Math.min(w, canvasResX)
+      h = Math.min(h, canvasResY)
+    container.style.top = "50%"
+    container.style.left = "50%"
+    container.style.marginTop = -h / 2 + "px"
+    container.style.marginLeft = -w / 2 + "px"
     @canvas.style.height = h + "px"
     @canvas.style.width = w + "px"
     return
@@ -468,6 +435,7 @@ module.exports = class
       throw new Error("Cannot remove master room") #dev
     else throw new Error("Cannot remove current room, remember to leave the room first, by entering another room (use goToRoom)") if room is @currentRoom #dev
     @rooms.splice i, 1
+    room.engine = undefined
     return
 
   ###
@@ -479,10 +447,10 @@ module.exports = class
     muted = (if muted isnt undefined then muted else true)
 
     # If muting, check all sounds whether they are being played, if so stop the playback
-    if muted
-      loader.getAllSounds().forEach (s) ->
-        s.stopAll()
-        return
+    loader.getAllSounds().forEach (s) ->
+      s.stopAll() if muted
+      s.soundsMuted = muted
+      return
 
     @soundsMuted = muted
     return
@@ -496,10 +464,10 @@ module.exports = class
     muted = (if muted isnt undefined then muted else true)
 
     # If muting, check all sounds whether they are being played, if so stop the playback
-    if muted
-      loader.getAllMusic().forEach (m) ->
-        m.stop()
-        return
+    loader.getAllMusic().forEach (m) ->
+      m.stop() if muted
+      m.musicMuted = muted
+      return
 
     @musicMuted = muted
     return
@@ -560,6 +528,8 @@ module.exports = class
 
     # Reset mouse cursor (if told to)
     @pointer.resetCursor() if @resetCursorOnEachFrame
+    @pointer.updateLastTick @last
+    @keyboard.updateLastTick @last
 
     # Execute loops
     @masterRoom.update @frames, @gameTimeIncrease
@@ -595,7 +565,7 @@ module.exports = class
   setCanvasResX: (res) ->
     @canvas.width = res
     @canvasResX = res
-    @autoResizeCanvas() if @autoResize
+    @autoResizeCanvas() if @settings.autoResize
     return
 
   ###
@@ -606,7 +576,7 @@ module.exports = class
   setCanvasResY: (res) ->
     @canvas.height = res
     @canvasResY = res
-    @autoResizeCanvas() if @autoResize
+    @autoResizeCanvas() if @settings.autoResize
     return
 
   loadFileContent: (filePath) ->
@@ -614,62 +584,6 @@ module.exports = class
     req.open "GET", filePath, false
     req.send()
     req.responseText
-
-  ###
-  Loads and executes one or multiple JavaScript file synchronously
-
-  @param {string|string[]} filePaths A file path (string), or an array of file paths to load and execute as JavaScript
-  ###
-  loadFiles: (filePaths) ->
-    filePaths = [filePaths] if typeof filePaths is "string"
-
-    # Load first file
-    i = 0
-    while i < filePaths.length
-      req = new XMLHttpRequest()
-      req.open "GET", filePaths[i], false
-      req.send()
-      script = document.createElement("script")
-      script.type = "text/javascript"
-      script.text = req.responseText + "\n//# sourceURL=/" + filePaths[i]
-      document.body.appendChild script
-      i++
-    window.loadedFiles = [] if window.loadedFiles is undefined
-    window.loadedFiles = window.loadedFiles.concat(filePaths)
-    return
-
-  ###
-  Uses an http request to fetch the data from a file and runs a callback function with the file data as first parameter
-
-  @param {string} url A URL path for the file to load
-  @param {string|Object} params A parameter string or an object to JSON-stringify and use as URL parameter (will be send as "data=[JSON String]")
-  @param {boolean} async Whether or not the request should be synchronous.
-  @param {function} callback A callback function to run when the request has finished
-  @param {object} caller An object to call the callback function as.
-  ###
-  ajaxRequest: (url, params, async, callback, caller) ->
-    throw new Error("Missing argument: url") if url is undefined #dev
-    throw new Error("Missing argument: callback") if callback is undefined #dev
-    params = (if params isnt undefined then params else "")
-    async = (if async isnt undefined then async else true)
-    caller = (if caller isnt undefined then caller else window)
-
-    # If params is not a string, json-stringify it
-    params = "data=" + JSON.stringify(params) if typeof params isnt "string"
-    req = new XMLHttpRequest()
-    if async
-      req.onreadystatechange = ->
-        callback.call caller, req.responseText if req.readyState is 4 and req.status is 200
-        return
-    req.open "POST", url, async
-    req.setRequestHeader "Content-type", "application/x-www-form-urlencoded"
-    req.send params
-    unless async
-      if req.readyState is 4 and req.status is 200 #dev
-        callback.call caller, req.responseText #dev
-      else #dev
-        throw new Error("XMLHttpRequest failed: " + url) #dev
-    return
 
   ###
   Removes an object from all engine containers and timers

@@ -10,8 +10,7 @@ Constructor for the Music class
 @param {HTMLAudioElement} @source The Audio element to use as source for the music object
 ###
 module.exports = class Music
-  constructor: (@engine, @source) ->
-    throw new Error("Missing argument: @source") if @source is undefined #dev
+  constructor: (@source, @musicMuted) ->
     throw new Error("Missing argument: @source") if @source is undefined #dev
     throw new Error("Argument @source has to be of type HTMLAudioElement") if @source.toString() isnt "[object HTMLAudioElement]" #dev
     @source.addEventListener 'ended', => @playing = false
@@ -27,7 +26,7 @@ module.exports = class Music
   @return {boolean} True if the playback has started successfully, false if not
   ###
   play: (loop_) ->
-    return false if @engine.musicMuted
+    return false if @musicMuted
     @source.play()
     @source.loop = "loop" if loop_
     true

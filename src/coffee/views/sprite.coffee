@@ -155,6 +155,7 @@ module.exports = class Sprite extends Views.Child
     return
 
   updateSubImage: ->
+    engine = @getEngine()
     # Set the right sub image
     if @animationSpeed != 0 && engine.gameTime - @animationLastSwitch > 1000 / @animationSpeed
       @imageNumber = @imageNumber + (if @animationSpeed > 0 then 1 else -1)

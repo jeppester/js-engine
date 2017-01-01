@@ -115,9 +115,9 @@ module.exports = Benchmark = (function() {
 
 
 },{}],2:[function(require,module,exports){
-module.exports = function(gameClass) {
+module.exports = function(mainClass) {
   return new Engine({
-    gameClass: gameClass,
+    mainClass: mainClass,
     themesPath: '../assets',
     themes: ['example'],
     backgroundColor: "#000",

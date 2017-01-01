@@ -9,8 +9,7 @@ Constructor for the sound class
 @param {HTMLAudioElement} audioElement The Audio element to use as source for the sound object
 ###
 module.exports = class Effect
-  constructor: (@engine, @source) ->
-    throw new Error("Missing argument: engine") if @engine is undefined #dev
+  constructor: (@source, @cachedSoundCopies, @soundsMuted) ->
     throw new Error("Missing argument: source") if @source is undefined #dev
     throw new Error("Argument source has to be of type HTMLAudioElement") if @source.toString() isnt "[object HTMLAudioElement]" #dev
     @playbackId = 0
@@ -31,7 +30,7 @@ module.exports = class Effect
   ###
   cacheCopies: ->
     i = 0
-    while i < @engine.cachedSoundCopies
+    while i < @cachedSoundCopies
       @elements.push @source.cloneNode()
       @elements[i].started = false
       i++
@@ -43,7 +42,7 @@ module.exports = class Effect
   @return {number|boolean} If playback succeeds: a playback ID representing the playback, else: false
   ###
   play: (loop_) ->
-    return false if @engine.soundsMuted
+    return false if @soundsMuted
 
     for sound in @elements
       if (sound.started is false or sound.ended) and not sound.loop

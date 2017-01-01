@@ -9,7 +9,16 @@ On engine startup a Loader object is instantiated to the global variable "loader
 This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
 ###
 module.exports = class Loader
-  constructor: ({@engine, @themesPath, @loadText, @defaultTheme, @host, @container})->
+  constructor: (@host, engineSettings)->
+    {
+      @themesPath
+      @loadText
+      @defaultTheme
+      @container
+      @cachedSoundCopies
+      @soundsMuted
+    } = engineSettings
+
     @images = {}
     @loaded = classes: []
     @themes =
@@ -332,7 +341,7 @@ module.exports = class Loader
               console.log "Sound was not available in a supported format: " + theme.name + "/sfx/" + path
               continue
             res = new Audio(@themesPath + "/" + theme.name + "/sfx/" + path + "." + format)
-            theme.sfx[path] = new Sounds.Effect(@engine, res)
+            theme.sfx[path] = new Sounds.Effect(res, @cachedSoundCopies, @soundsMuted)
             if @canPreloadSounds()
               res.setAttribute "preload", "auto"
               res.addEventListener "canplaythrough", onload, false
@@ -345,7 +354,7 @@ module.exports = class Loader
               i++
             throw new Error("Sound was not available in a supported format: " + theme.name + "/sfx/" + path) unless format #dev
             res = new Audio(@themesPath + "/" + theme.name + "/music/" + path + "." + format)
-            theme.music[path] = new Sounds.Music(@engine, res)
+            theme.music[path] = new Sounds.Music(res, @musicMuted)
             if @canPreloadSounds()
               res.setAttribute "preload", "auto"
               res.addEventListener "canplaythrough", onload, false
@@ -392,7 +401,7 @@ module.exports = class Loader
         format = path.match(/[^\.]*$/)[0]
         throw new Error("Sound format is not supported:", format) if @host.supportedAudio.indexOf(format) is -1 #dev
         res = new Audio(path)
-        theme.sfx[resourceString] = new Sounds.Effect(@engine, res)
+        theme.sfx[resourceString] = new Sounds.Effect(res, @cachedSoundCopies, @soundsMuted)
         if @canPreloadSounds()
           res.setAttribute "preload", "auto"
           res.addEventListener "canplaythrough", onLoaded, false
@@ -401,7 +410,7 @@ module.exports = class Loader
         format = path.match(/[^\.]*$/)[0]
         throw new Error("Sound format is not supported:", format) if @host.supportedAudio.indexOf(format) is -1 #dev
         res = new Audio(path)
-        theme.music[resourceString] = new Sounds.Music(@engine, res)
+        theme.music[resourceString] = new Sounds.Music(res, @musicMuted)
         if @canPreloadSounds()
           res.setAttribute "preload", "auto"
           res.addEventListener "canplaythrough", onLoaded, false

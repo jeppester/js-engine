@@ -62,7 +62,7 @@ Main = (function() {
 })();
 
 new Engine({
-  gameClass: Main,
+  mainClass: Main,
   themes: ['example'],
   container: document.getElementById('container'),
   backgroundColor: "#000",
