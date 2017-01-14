@@ -4,6 +4,10 @@ class CollisionObject extends Engine.Views.GameObject
     # Call the sprite constructor to fully extend the sprite and set all sprite properties
     super source, x, y, 0, additionalProperties
 
+  onAdded: ->
+    super
+    engine = @getEngine()
+
     # Add step function to 'eachFrame'-loop
     if @leftKey
       engine.currentRoom.loops.eachFrame.attachFunction(
@@ -18,6 +22,8 @@ class CollisionObject extends Engine.Views.GameObject
 
   # Create a new JsEngine class which extends the Sprite class
   step: ->
+    engine = @getEngine()
+
     # Check that the arrow keys are down, if so, move the object by increasing or decreasing it's x and y properties
     # Left
     @speed.x -= engine.convertSpeed 100 if engine.keyboard.isDown @leftKey
@@ -33,6 +39,8 @@ class CollisionObject extends Engine.Views.GameObject
     return
 
   collisionCheck: ->
+    engine = @getEngine()
+
     if collision = @collidesWith window.rocks, true, true
       for rock, i in collision.objects
         colPos = collision.positions[i]
@@ -56,25 +64,25 @@ class CollisionObject extends Engine.Views.GameObject
       @x = 16
       @speed.x = -@speed.x
 
-    if @x > engine.canvasResX - 16
-      @x = engine.canvasResX - 16
+    if @x > engine.settings.canvasResX - 16
+      @x = engine.settings.canvasResX - 16
       @speed.x = -@speed.x
 
     if @y < 16
       @y = 16
       @speed.y = -@speed.y
 
-    if @y > engine.canvasResY - 16
-      @y = engine.canvasResY - 16
+    if @y > engine.settings.canvasResY - 16
+      @y = engine.settings.canvasResY - 16
       @speed.y = -@speed.y
 
     return
 
 # create main class
 class Main
-  constructor: ->
+  constructor: (@engine)->
     # Add collision checking loop
-    engine.currentRoom.addLoop 'collisionChecking', new Engine.CustomLoop(5)
+    @engine.currentRoom.addLoop 'collisionChecking', new Engine.CustomLoop(5)
 
     # Make two collision objects
     window.rocks = []
@@ -92,10 +100,10 @@ class Main
       }
     )
 
-    engine.currentRoom.addChildren player
+    @engine.currentRoom.addChildren player
 
     # Hide loader overlay
-    engine.loader.hideOverlay()
+    @engine.loader.hideOverlay()
 
   addRocks: (number = 1)->
     for i in [0...number]
@@ -106,7 +114,7 @@ class Main
       )
       rock.speed.setFromDirection Math.PI * 2 * Math.random(), 150
       window.rocks.push rock
-      engine.currentRoom.addChildren rock
+      @engine.currentRoom.addChildren rock
 
 # Start engine
 new Engine

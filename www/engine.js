@@ -10559,7 +10559,14 @@ module.exports = GameObject = (function(superClass) {
   extend(GameObject, superClass);
 
   function GameObject() {
-    return GameObject.__super__.constructor.apply(this, arguments);
+    GameObject.__super__.constructor.apply(this, arguments);
+    if (this.speed == null) {
+      this.speed = new Geometry.Vector(0, 0);
+    }
+    if (this.rotationSpeed == null) {
+      this.rotationSpeed = 0;
+    }
+    this.alive = true;
   }
 
   GameObject.prototype.onAdded = function() {
@@ -10569,13 +10576,6 @@ module.exports = GameObject = (function(superClass) {
       this.loop.attachOperation('basic-transforms', this.constructor.basicTransformsOperation.bind(this.getRoom()));
     }
     this.loop.subscribeToOperation('basic-transforms', this);
-    if (this.speed == null) {
-      this.speed = new Geometry.Vector(0, 0);
-    }
-    if (this.rotationSpeed == null) {
-      this.rotationSpeed = 0;
-    }
-    this.alive = true;
   };
 
   GameObject.basicTransformsOperation = function(objects) {

@@ -8,13 +8,21 @@ CollisionObject = (function(superClass) {
 
   function CollisionObject(source, x, y, additionalProperties) {
     CollisionObject.__super__.constructor.call(this, source, x, y, 0, additionalProperties);
+  }
+
+  CollisionObject.prototype.onAdded = function() {
+    var engine;
+    CollisionObject.__super__.onAdded.apply(this, arguments);
+    engine = this.getEngine();
     if (this.leftKey) {
       engine.currentRoom.loops.eachFrame.attachFunction(this, this.step);
     }
-    engine.currentRoom.loops.collisionChecking.attachFunction(this, this.collisionCheck);
-  }
+    return engine.currentRoom.loops.collisionChecking.attachFunction(this, this.collisionCheck);
+  };
 
   CollisionObject.prototype.step = function() {
+    var engine;
+    engine = this.getEngine();
     if (engine.keyboard.isDown(this.leftKey)) {
       this.speed.x -= engine.convertSpeed(100);
     }
@@ -30,7 +38,8 @@ CollisionObject = (function(superClass) {
   };
 
   CollisionObject.prototype.collisionCheck = function() {
-    var colPos, collision, i, j, len, ref, rock, speed;
+    var colPos, collision, engine, i, j, len, ref, rock, speed;
+    engine = this.getEngine();
     if (collision = this.collidesWith(window.rocks, true, true)) {
       ref = collision.objects;
       for (i = j = 0, len = ref.length; j < len; i = ++j) {
@@ -54,16 +63,16 @@ CollisionObject = (function(superClass) {
       this.x = 16;
       this.speed.x = -this.speed.x;
     }
-    if (this.x > engine.canvasResX - 16) {
-      this.x = engine.canvasResX - 16;
+    if (this.x > engine.settings.canvasResX - 16) {
+      this.x = engine.settings.canvasResX - 16;
       this.speed.x = -this.speed.x;
     }
     if (this.y < 16) {
       this.y = 16;
       this.speed.y = -this.speed.y;
     }
-    if (this.y > engine.canvasResY - 16) {
-      this.y = engine.canvasResY - 16;
+    if (this.y > engine.settings.canvasResY - 16) {
+      this.y = engine.settings.canvasResY - 16;
       this.speed.y = -this.speed.y;
     }
   };
@@ -73,9 +82,10 @@ CollisionObject = (function(superClass) {
 })(Engine.Views.GameObject);
 
 Main = (function() {
-  function Main() {
+  function Main(engine1) {
     var player;
-    engine.currentRoom.addLoop('collisionChecking', new Engine.CustomLoop(5));
+    this.engine = engine1;
+    this.engine.currentRoom.addLoop('collisionChecking', new Engine.CustomLoop(5));
     window.rocks = [];
     this.addRocks(15);
     player = new CollisionObject("character", 200, 100, {
@@ -84,8 +94,8 @@ Main = (function() {
       leftKey: Engine.Globals.KEY_LEFT,
       rightKey: Engine.Globals.KEY_RIGHT
     });
-    engine.currentRoom.addChildren(player);
-    engine.loader.hideOverlay();
+    this.engine.currentRoom.addChildren(player);
+    this.engine.loader.hideOverlay();
   }
 
   Main.prototype.addRocks = function(number) {
@@ -98,7 +108,7 @@ Main = (function() {
       rock = new CollisionObject("rock", 20 + Math.random() * 560, 20 + Math.random() * 360);
       rock.speed.setFromDirection(Math.PI * 2 * Math.random(), 150);
       window.rocks.push(rock);
-      results.push(engine.currentRoom.addChildren(rock));
+      results.push(this.engine.currentRoom.addChildren(rock));
     }
     return results;
   };

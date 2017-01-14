@@ -33,6 +33,12 @@ speed: new Math.Vector(0, 0)
 </code>
 ###
 module.exports = class GameObject extends Views.Collidable
+  constructor: ->
+    super
+    @speed ?= new Geometry.Vector 0, 0
+    @rotationSpeed ?= 0
+    @alive = true
+
   onAdded: ->
     super
     @loop = @getRoom().loops.eachFrame
@@ -40,9 +46,6 @@ module.exports = class GameObject extends Views.Collidable
       @loop.attachOperation 'basic-transforms', @constructor.basicTransformsOperation.bind(@getRoom())
 
     @loop.subscribeToOperation 'basic-transforms', @
-    @speed ?= new Geometry.Vector 0, 0
-    @rotationSpeed ?= 0
-    @alive = true
     return
 
   @basicTransformsOperation: (objects)->
