@@ -1,7 +1,7 @@
 class Main
-  constructor: ->
+  constructor: (@engine)->
     # Make a global reference to the game object
-    engine.loader.hideOverlay => @onLoaded()
+    @engine.loader.hideOverlay => @onLoaded()
 
   onLoaded: ->
     polygons = []
@@ -36,7 +36,7 @@ class Main
     polygons.push new Engine.Views.Line(new Engine.Geometry.Vector(10, 90), new Engine.Geometry.Vector(590, 390), "#88F", 10, 'square')
     polygons.push new Engine.Views.Line(new Engine.Geometry.Vector(10, 110), new Engine.Geometry.Vector(590, 110), "#88F", 10, 'round')
 
-    engine.currentRoom.addChildren.apply engine.currentRoom, polygons
+    @engine.currentRoom.addChildren.apply @engine.currentRoom, polygons
 
     # Speed tests
     tests = 10000

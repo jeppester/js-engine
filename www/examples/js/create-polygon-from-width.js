@@ -2,8 +2,9 @@
 var Main;
 
 Main = (function() {
-  function Main() {
-    engine.loader.hideOverlay((function(_this) {
+  function Main(engine) {
+    this.engine = engine;
+    this.engine.loader.hideOverlay((function(_this) {
       return function() {
         return _this.onLoaded();
       };
@@ -33,7 +34,7 @@ Main = (function() {
     polygons.push(new Engine.Views.Line(new Engine.Geometry.Vector(10, 70), new Engine.Geometry.Vector(590, 370), "#88F", 10, 'round'));
     polygons.push(new Engine.Views.Line(new Engine.Geometry.Vector(10, 90), new Engine.Geometry.Vector(590, 390), "#88F", 10, 'square'));
     polygons.push(new Engine.Views.Line(new Engine.Geometry.Vector(10, 110), new Engine.Geometry.Vector(590, 110), "#88F", 10, 'round'));
-    engine.currentRoom.addChildren.apply(engine.currentRoom, polygons);
+    this.engine.currentRoom.addChildren.apply(this.engine.currentRoom, polygons);
     tests = 10000;
     t = new Date();
     for (i = j = 0, ref = tests; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
