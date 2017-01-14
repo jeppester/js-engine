@@ -2,8 +2,9 @@
 var Main;
 
 Main = (function() {
-  function Main() {
+  function Main(engine) {
     var textOptions;
+    this.engine = engine;
     this.circle = new Engine.Views.Circle(300, 200, 80, "#F11", "#F11");
     this.line = new Engine.Views.Line(null, null, "#F00", 6).setFromCoordinates(20, 320, 80, 380);
     this.polygon = new Engine.Views.Polygon([], "#FFF", "#F00", 6).setFromCoordinates(530, 30, 480, 120.5, 560, 120.5, 530, 70, 560, 35);
@@ -17,8 +18,8 @@ Main = (function() {
     this.text3 = new Engine.Views.TextBlock('Distance to polygon: 0', 10, 50, 600, textOptions);
     this.text4 = new Engine.Views.TextBlock('Distance to circle: 0', 10, 70, 600, textOptions);
     this.text5 = new Engine.Views.TextBlock('Distance to rectangle: 0', 10, 90, 600, textOptions);
-    engine.currentRoom.addChildren(this.circle, this.line, this.polygon, this.rectangle, this.circle2, this.text, this.text2, this.text3, this.text4, this.text5);
-    engine.loader.hideOverlay((function(_this) {
+    this.engine.currentRoom.addChildren(this.circle, this.line, this.polygon, this.rectangle, this.circle2, this.text, this.text2, this.text3, this.text4, this.text5);
+    this.engine.loader.hideOverlay((function(_this) {
       return function() {
         return _this.onLoaded();
       };
@@ -26,24 +27,24 @@ Main = (function() {
   }
 
   Main.prototype.onLoaded = function() {
-    return engine.currentRoom.loops.eachFrame.attachFunction(this, this.step);
+    return this.engine.currentRoom.loops.eachFrame.attachFunction(this, this.step);
   };
 
   Main.prototype.step = function() {
     var dx, dy;
     dx = 0;
     dy = 0;
-    if (engine.keyboard.isDown(Engine.Globals.KEY_LEFT)) {
-      dx = -engine.convertSpeed(200);
+    if (this.engine.keyboard.isDown(Engine.Globals.KEY_LEFT)) {
+      dx = -this.engine.convertSpeed(200);
     }
-    if (engine.keyboard.isDown(Engine.Globals.KEY_RIGHT)) {
-      dx = engine.convertSpeed(200);
+    if (this.engine.keyboard.isDown(Engine.Globals.KEY_RIGHT)) {
+      dx = this.engine.convertSpeed(200);
     }
-    if (engine.keyboard.isDown(Engine.Globals.KEY_UP)) {
-      dy = -engine.convertSpeed(200);
+    if (this.engine.keyboard.isDown(Engine.Globals.KEY_UP)) {
+      dy = -this.engine.convertSpeed(200);
     }
-    if (engine.keyboard.isDown(Engine.Globals.KEY_DOWN)) {
-      dy = engine.convertSpeed(200);
+    if (this.engine.keyboard.isDown(Engine.Globals.KEY_DOWN)) {
+      dy = this.engine.convertSpeed(200);
     }
     this.circle.move(dx, dy);
     this.text2.set({

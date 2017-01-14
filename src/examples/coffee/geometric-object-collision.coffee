@@ -1,5 +1,5 @@
 class Main
-  constructor: ->
+  constructor: (@engine)->
     # Add a circle
     @circle = new Engine.Views.Circle 300, 200, 80, "#F11", "#F11"
 
@@ -17,7 +17,7 @@ class Main
     @text4 = new Engine.Views.TextBlock 'Distance to circle: 0', 10, 70, 600, textOptions
     @text5 = new Engine.Views.TextBlock 'Distance to rectangle: 0', 10, 90, 600, textOptions
 
-    engine.currentRoom.addChildren(
+    @engine.currentRoom.addChildren(
       @circle
       @line
       @polygon
@@ -30,20 +30,20 @@ class Main
       @text5
     )
 
-    engine.loader.hideOverlay => @onLoaded()
+    @engine.loader.hideOverlay => @onLoaded()
 
   onLoaded: ->
-    engine.currentRoom.loops.eachFrame.attachFunction @, @step
+    @engine.currentRoom.loops.eachFrame.attachFunction @, @step
 
   step: ->
     # Keyboard controls
     dx = 0
     dy = 0
 
-    dx = -engine.convertSpeed 200 if engine.keyboard.isDown Engine.Globals.KEY_LEFT
-    dx = engine.convertSpeed 200 if engine.keyboard.isDown Engine.Globals.KEY_RIGHT
-    dy = -engine.convertSpeed 200 if engine.keyboard.isDown Engine.Globals.KEY_UP
-    dy = engine.convertSpeed 200 if engine.keyboard.isDown Engine.Globals.KEY_DOWN
+    dx = -@engine.convertSpeed 200 if @engine.keyboard.isDown Engine.Globals.KEY_LEFT
+    dx = @engine.convertSpeed 200 if @engine.keyboard.isDown Engine.Globals.KEY_RIGHT
+    dy = -@engine.convertSpeed 200 if @engine.keyboard.isDown Engine.Globals.KEY_UP
+    dy = @engine.convertSpeed 200 if @engine.keyboard.isDown Engine.Globals.KEY_DOWN
     @circle.move dx, dy
 
     # Update text fields
