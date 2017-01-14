@@ -1,12 +1,12 @@
 class Main
-  constructor: ->
+  constructor: (@engine)->
     @onLoaded()
 
   onLoaded: ->
     # Hide loader overlay
-    engine.loader.hideOverlay()
+    @engine.loader.hideOverlay()
 
-    object = engine.currentRoom.create.GameObject(
+    object = @engine.currentRoom.create.GameObject(
       'character' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       50 # x-position
       50 # y-position
@@ -21,7 +21,7 @@ class Main
       )
     object.animation()
 
-    object2 = engine.currentRoom.create.GameObject(
+    object2 = @engine.currentRoom.create.GameObject(
       'rock' # Image ID (See "/themes/Example/theme.json" for an explanation of themes)
       16 # x-position
       50 # y-position
@@ -38,10 +38,10 @@ class Main
       else
         text2.set string: 'no collision'
 
-    text1 = engine.currentRoom.create.TextBlock '', 6, 4, 80, {color: '#4F4'}
-    text2 = engine.currentRoom.create.TextBlock '', 6, 78, 80, {color: '#000'}
+    text1 = @engine.currentRoom.create.TextBlock '', 6, 4, 80, {color: '#4F4'}
+    text2 = @engine.currentRoom.create.TextBlock '', 6, 78, 80, {color: '#000'}
 
-    engine.currentRoom.loops.eachFrame.attachFunction object, object.checkCollision
+    @engine.currentRoom.loops.eachFrame.attachFunction object, object.checkCollision
 
 # Start engine
 new Engine
@@ -63,3 +63,6 @@ new Engine
   # Resolution of the game
   canvasResX: 100
   canvasResY: 100
+
+  drawMasks: true
+  drawBoundingBoxes: true

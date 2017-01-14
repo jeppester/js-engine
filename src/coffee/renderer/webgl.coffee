@@ -83,8 +83,8 @@ module.exports = class WebGLRenderer
     @updateRenderList list, room, new Uint16Array [0]
     @processRenderList list
 
-    @renderMasks list if @engine.drawMasks
-    @renderBoundingBoxes list if @engine.drawBoundingBoxes
+    @renderMasks list if @engine.settings.drawMasks
+    @renderBoundingBoxes list if @engine.settings.drawBoundingBoxes
 
     return
 
@@ -157,8 +157,7 @@ module.exports = class WebGLRenderer
     gl = @gl
     @setProgram @programs.color
     for object in list
-      if object.mask
-        @currentProgram.renderBoundingBox gl, object, object.wm
+      @currentProgram.renderBoundingBox gl, object, object.wm if object.mask
 
     @currentProgram.flushBuffers? gl
     return

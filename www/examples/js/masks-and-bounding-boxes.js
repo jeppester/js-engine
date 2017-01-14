@@ -2,14 +2,15 @@
 var Main;
 
 Main = (function() {
-  function Main() {
+  function Main(engine) {
+    this.engine = engine;
     this.onLoaded();
   }
 
   Main.prototype.onLoaded = function() {
     var object, object2, text1, text2;
-    engine.loader.hideOverlay();
-    object = engine.currentRoom.create.GameObject('character', 50, 50, 0);
+    this.engine.loader.hideOverlay();
+    object = this.engine.currentRoom.create.GameObject('character', 50, 50, 0);
     object.animation = function() {
       return this.animate({
         direction: this.direction + Math.PI * 2
@@ -19,7 +20,7 @@ Main = (function() {
       });
     };
     object.animation();
-    object2 = engine.currentRoom.create.GameObject('rock', 16, 50, 0);
+    object2 = this.engine.currentRoom.create.GameObject('rock', 16, 50, 0);
     object.checkCollision = function() {
       if (this.boundingBoxCollidesWith(object2)) {
         text1.set({
@@ -40,13 +41,13 @@ Main = (function() {
         });
       }
     };
-    text1 = engine.currentRoom.create.TextBlock('', 6, 4, 80, {
+    text1 = this.engine.currentRoom.create.TextBlock('', 6, 4, 80, {
       color: '#4F4'
     });
-    text2 = engine.currentRoom.create.TextBlock('', 6, 78, 80, {
+    text2 = this.engine.currentRoom.create.TextBlock('', 6, 78, 80, {
       color: '#000'
     });
-    return engine.currentRoom.loops.eachFrame.attachFunction(object, object.checkCollision);
+    return this.engine.currentRoom.loops.eachFrame.attachFunction(object, object.checkCollision);
   };
 
   return Main;
@@ -60,7 +61,9 @@ new Engine({
   backgroundColor: "#888",
   disableWebGL: /canvas/.test(window.location.search),
   canvasResX: 100,
-  canvasResY: 100
+  canvasResY: 100,
+  drawMasks: true,
+  drawBoundingBoxes: true
 });
 
 

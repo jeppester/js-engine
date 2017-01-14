@@ -137,7 +137,7 @@ module.exports = class WebGLTextureShaderProgram
   # Draw functions
   renderMask: (gl, object, wm) ->
     # Fetch/update texture
-    @setMaskTexture gl, object
+    @setTexture gl, object.mask
 
     # Update corners cache with transformed object corners
     @setTransformedCorners object.clipWidth, object.clipHeight, wm
@@ -151,11 +151,6 @@ module.exports = class WebGLTextureShaderProgram
       @bufferAnimatedTexture object
 
     @coordsCount += 30
-    return
-
-  setMaskTexture: (gl, object)->
-    texture = engine.loader.getMask(object.source, object.getTheme())
-    @setTexture gl, texture
     return
 
   setTexture: (gl, texture)->

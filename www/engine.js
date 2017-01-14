@@ -8814,10 +8814,10 @@ module.exports = WebGLRenderer = (function() {
     list = room.renderList != null ? room.renderList : room.renderList = [];
     this.updateRenderList(list, room, new Uint16Array([0]));
     this.processRenderList(list);
-    if (this.engine.drawMasks) {
+    if (this.engine.settings.drawMasks) {
       this.renderMasks(list);
     }
-    if (this.engine.drawBoundingBoxes) {
+    if (this.engine.settings.drawBoundingBoxes) {
       this.renderBoundingBoxes(list);
     }
   };
@@ -9070,9 +9070,8 @@ module.exports = WebGLColorShaderProgram = (function() {
   };
 
   WebGLColorShaderProgram.prototype.renderBoundingBox = function(gl, object, wm) {
-    var box, color, coords, mask;
-    mask = engine.loader.getMask(object.source, object.getTheme());
-    box = mask.boundingBox;
+    var box, color, coords;
+    box = object.mask.boundingBox;
     color = Helpers.WebGL.colorFromCSSString('#0F0');
     coords = Helpers.WebGL.getPolygonOutlineTriangleCoords(box.points, 1);
     this.pushObject(gl, coords, color, 1, wm);
@@ -9214,7 +9213,7 @@ module.exports = WebGLTextureShaderProgram = (function() {
   };
 
   WebGLTextureShaderProgram.prototype.renderMask = function(gl, object, wm) {
-    this.setMaskTexture(gl, object);
+    this.setTexture(gl, object.mask);
     this.setTransformedCorners(object.clipWidth, object.clipHeight, wm);
     this.bufferOpacity(1);
     this.bufferRectangle();
@@ -9224,12 +9223,6 @@ module.exports = WebGLTextureShaderProgram = (function() {
       this.bufferAnimatedTexture(object);
     }
     this.coordsCount += 30;
-  };
-
-  WebGLTextureShaderProgram.prototype.setMaskTexture = function(gl, object) {
-    var texture;
-    texture = engine.loader.getMask(object.source, object.getTheme());
-    this.setTexture(gl, texture);
   };
 
   WebGLTextureShaderProgram.prototype.setTexture = function(gl, texture) {

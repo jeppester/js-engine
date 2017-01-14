@@ -156,8 +156,7 @@ module.exports = class WebGLColorShaderProgram
     return
 
   renderBoundingBox: (gl, object, wm) ->
-    mask = engine.loader.getMask object.source, object.getTheme()
-    box = mask.boundingBox
+    box = object.mask.boundingBox
     color = Helpers.WebGL.colorFromCSSString '#0F0'
     coords = Helpers.WebGL.getPolygonOutlineTriangleCoords box.points, 1
     @pushObject gl, coords, color, 1, wm
