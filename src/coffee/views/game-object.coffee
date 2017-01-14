@@ -33,17 +33,11 @@ speed: new Math.Vector(0, 0)
 </code>
 ###
 module.exports = class GameObject extends Views.Collidable
-  constructor: (source, x, y, direction, additionalProperties) ->
-    throw new Error("Missing argument: source") if source is undefined #dev
-    throw new Error("Missing argument: x") if x is undefined #dev
-    throw new Error("Missing argument: y") if y is undefined #dev
-    super source, x, y, direction, additionalProperties
-
-    # Add object to right loop
-    @loop ?= engine.defaultActivityLoop
-
+  onAdded: ->
+    super
+    @loop = @getRoom().loops.eachFrame
     unless @loop.hasOperation 'basic-transforms'
-      @loop.attachOperation 'basic-transforms', @constructor.basicTransformsOperation
+      @loop.attachOperation 'basic-transforms', @constructor.basicTransformsOperation.bind(@getRoom())
 
     @loop.subscribeToOperation 'basic-transforms', @
     @speed ?= new Geometry.Vector 0, 0
@@ -55,9 +49,9 @@ module.exports = class GameObject extends Views.Collidable
     for object in objects
       # If the object is "alive", add its speed vector to its position
       if object.alive
-        object.x += engine.perFrameSpeed object.speed.x
-        object.y += engine.perFrameSpeed object.speed.y
-        object.direction += engine.perFrameSpeed object.rotationSpeed if object.rotationSpeed
+        object.x += @engine.convertSpeed object.speed.x
+        object.y += @engine.convertSpeed object.speed.y
+        object.direction += @engine.convertSpeed object.rotationSpeed if object.rotationSpeed
 
 Geometry =
   Vector: require '../geometry/vector'

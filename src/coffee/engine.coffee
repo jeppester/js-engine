@@ -112,6 +112,7 @@ module.exports = class
     for name, value of @constructor.DefaultSettings
       @settings[name] ?= value
     @autoResizeCanvas = @autoResizeCanvas.bind @
+    @initialize = @initialize.bind @
     @load()
 
   ###
@@ -179,12 +180,7 @@ module.exports = class
     @loader = new @constructor.Loader @host, @settings
 
     # Load themes
-    @defaultTheme = @settings.themes[0]
-    @loader.onthemesloaded = =>
-      @initialize()
-      return
-
-    @loader.loadThemes @settings.themes
+    @loader.loadThemes @settings.themes, @initialize
     return
 
   ###
@@ -333,9 +329,6 @@ module.exports = class
     @canvas.style.width = w + "px"
     return
 
-  perFrameSpeed: (speed)->
-    speed * @gameTimeIncrease / 1000
-
   ###
   Function for converting between speed units
 
@@ -482,7 +475,7 @@ module.exports = class
     throw new Error("Missing argument: themeName") if themeName is undefined #dev
     throw new Error("Trying to set nonexistent theme: " + themeName) if loader.themes[themeName] is undefined #dev
     enforce = (if enforce isnt undefined then enforce else false)
-    @defaultTheme = themeName
+    @loader.setDefaultTheme themeName
     @currentRoom.setTheme undefined, enforce
     return
 

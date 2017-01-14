@@ -19,10 +19,11 @@ Can check both for precise (bitmap-based) collisions and bounding box collisions
 @param {object} [additionalProperties] An object containing key-value pairs that will be set as properties for the created object. Can be used for setting advanced options such as sprite offset and opacity.
 ###
 module.exports = class Collidable extends Views.Sprite
-  constructor: (source, x, y, direction, additionalProperties) ->
+  onAdded: ->
     super
-    @mask = (if @mask then @mask else engine.loader.getMask(source, @getTheme()))
-    @collisionResolution = (if @collisionResolution then @collisionResolution else engine.defaultCollisionResolution)
+    engine = @getEngine()
+    @mask = engine.loader.getMask(@source, @getTheme())
+    @collisionResolution ?= engine.settings.defaultCollisionResolution
 
   ###
   A "metafunction" for checking if the Collidable collides with another object of the same type.
@@ -52,21 +53,18 @@ module.exports = class Collidable extends Views.Sprite
 
     # First, do a bounding box based collision check
     objects = @boundingBoxCollidesWith objects, true
-    return false if objects is false
-
+    return false unless objects
 
     # If a bounding box collision is detected, do a precise collision check with maskCollidesWith
     # If getCollisionPosition and getCollidingObjects are both false, just return a boolean
-    if not getCollisionPosition and not getCollidingObjects
+    if !getCollisionPosition && !getCollidingObjects
       return @maskCollidesWith(objects)
     else
-
       # Create an object to return
       ret =
         objects: []
         positions: []
         combinedPosition: false
-
 
       # If getCollidingObjects is false, only getCollisionPosition is true. Therefore return an average position of all checked objects
       if getCollidingObjects is false
@@ -76,7 +74,6 @@ module.exports = class Collidable extends Views.Sprite
           ret.combinedPosition = position.copy()
           ret.combinedPosition.pixelCount = 0
       else
-
         # If both getCollidingObjects and getCollisionPosition is true, both return an array of objects and positions (this is slower)
         if getCollisionPosition
           i = 0
@@ -165,16 +162,15 @@ module.exports = class Collidable extends Views.Sprite
   "pixelCount": [The number of colliding pixels]
   }</code>
   ###
-  maskCollidesWith: (objects, getCollisionPosition) ->
+  maskCollidesWith: (objects, getCollisionPosition = false) ->
     throw new Error("Missing argument: objects") if objects is undefined #dev
     objects = [objects] unless Array::isPrototypeOf(objects)
-    getCollisionPosition = (if getCollisionPosition isnt undefined then getCollisionPosition else false)
-    bitmap = @createCollisionBitmap(objects)
+    collisionMap = Helpers.Collision.generateCollisionMap(@, objects)
+    bitmap = collisionMap.getContext('2d').getImageData 0, 0, collisionMap.width, collisionMap.height
     length = bitmap.data.length / 4
     pxArr = []
     pixel = 0
     while pixel < length
-
       # To get better spread of the checked pixels, increase the pixel each time we're on a new line
       x = pixel % bitmap.width
       if @collisionResolution > 1 and x < @collisionResolution
@@ -232,82 +228,9 @@ module.exports = class Collidable extends Views.Sprite
       return retVector
     false
 
-  createCollisionBitmap: (objects) ->
-    # Get mask from loader object
-    mask = @mask
-    calc = Helpers.MatrixCalculation
-
-    # Create a new canvas for checking for a collision
-    canvas = document.createElement("canvas")
-    canvas.width = Math.ceil(@clipWidth)
-    canvas.height = Math.ceil(@clipHeight)
-
-    # Add canvas for debugging
-    canvas.id = 'colCanvas'
-    # if document.getElementById 'colCanvas'
-    #   document.body.removeChild document.getElementById('colCanvas')
-    # document.body.appendChild canvas
-
-    c = canvas.getContext "2d"
-    c.fillStyle = "#FFF"
-    c.fillRect 0, 0, canvas.width, canvas.height
-    parents = @getParents()
-    parents.unshift @
-
-    # Reset transform to the world matrix
-    @wm ?= new Float32Array 9
-    calc.setTranslation @wm, @offset.x, @offset.y
-
-    for parent in parents
-      calc.reverseMultiply @wm, calc.getInverseLocalMatrix(parent)
-
-    # Draw other objects
-    for obj in objects
-      if obj == @
-        throw new Error "Objects are not allowed to check for collisions with themselves"
-
-      # Create local matrix (to add to the world matrix)
-      obj.wm ?= new Float32Array 9
-      calc.setIdentity obj.wm
-
-      parents = obj.getParents()
-      parents.reverse()
-      parents.push obj
-
-      for parent in parents
-        calc.reverseMultiply(obj.wm, calc.getLocalMatrix(parent))
-
-      calc.multiply(obj.wm, @wm)
-      calc.reverseMultiply(obj.wm, calc.getTranslation(-obj.offset.x, -obj.offset.y))
-
-      # Set world transform
-      c.setTransform(
-        obj.wm[0]
-        obj.wm[1]
-        obj.wm[3]
-        obj.wm[4]
-        obj.wm[6]
-        obj.wm[7]
-      )
-
-      # Draw object mask
-      c.drawImage obj.mask, (obj.clipWidth + obj.texture.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight
-
-    # Reset transform
-    c.setTransform 1, 0, 0, 1, 0, 0
-
-    # Draw over other objects to make them semi transparant
-    c.globalAlpha = 0.5
-    c.fillRect 0, 0, canvas.width, canvas.height
-
-    # Draw checked objects mask
-    c.drawImage mask, (@clipWidth + @texture.spacing) * @imageNumber, 0, @clipWidth, @clipHeight, 0, 0, @clipWidth, @clipHeight
-
-    # Return collision image data
-    c.getImageData 0, 0, canvas.width, canvas.height
-
 Helpers =
   MatrixCalculation: require '../helpers/matrix-calculation'
+  Collision: require '../helpers/collision'
 
 Geometry =
   Vector: require '../geometry/vector'

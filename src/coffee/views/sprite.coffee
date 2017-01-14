@@ -103,7 +103,7 @@ module.exports = class Sprite extends Views.Child
     # If using an offset global, set offset
     @offsetFromGlobal offset if offset
 
-  @onAdded: ->
+  onAdded: ->
     super
     @animationLastSwitch ?= @getEngine()?.gameTime
     @refreshSource() || throw new Error("Sprite source was not successfully loaded: " + @source) # dev

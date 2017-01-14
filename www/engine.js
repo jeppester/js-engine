@@ -2964,6 +2964,7 @@ module.exports = (function() {
       }
     }
     this.autoResizeCanvas = this.autoResizeCanvas.bind(this);
+    this.initialize = this.initialize.bind(this);
     this.load();
   }
 
@@ -3031,13 +3032,7 @@ module.exports = (function() {
     @global
      */
     this.loader = new this.constructor.Loader(this.host, this.settings);
-    this.defaultTheme = this.settings.themes[0];
-    this.loader.onthemesloaded = (function(_this) {
-      return function() {
-        _this.initialize();
-      };
-    })(this);
-    this.loader.loadThemes(this.settings.themes);
+    this.loader.loadThemes(this.settings.themes, this.initialize);
   };
 
 
@@ -3177,10 +3172,6 @@ module.exports = (function() {
     container.style.marginLeft = -w / 2 + "px";
     this.canvas.style.height = h + "px";
     this.canvas.style.width = w + "px";
-  };
-
-  _Class.prototype.perFrameSpeed = function(speed) {
-    return speed * this.gameTimeIncrease / 1000;
   };
 
 
@@ -3365,7 +3356,7 @@ module.exports = (function() {
       throw new Error("Trying to set nonexistent theme: " + themeName);
     }
     enforce = (enforce !== void 0 ? enforce : false);
-    this.defaultTheme = themeName;
+    this.loader.setDefaultTheme(themeName);
     this.currentRoom.setTheme(void 0, enforce);
   };
 
@@ -3533,7 +3524,7 @@ module.exports = (function() {
 
 
 
-},{"./engine/camera":13,"./engine/custom-loop":14,"./engine/default-settings":15,"./engine/globals":16,"./engine/loader":17,"./engine/object-creator":18,"./engine/room":19,"./geometry/circle":20,"./geometry/line":21,"./geometry/polygon":22,"./geometry/rectangle":23,"./geometry/vector":24,"./helpers/matrix-calculation":26,"./helpers/mixin":27,"./helpers/room-transition":28,"./helpers/webgl":29,"./input/keyboard":30,"./input/pointer":31,"./mixins/animatable":32,"./renderer/canvas":34,"./renderer/webgl":35,"./sounds/effect":39,"./sounds/music":40,"./views/child":41,"./views/circle":42,"./views/collidable":43,"./views/container":44,"./views/game-object":45,"./views/line":46,"./views/polygon":47,"./views/rectangle":48,"./views/sprite":49,"./views/text-block":50}],13:[function(_dereq_,module,exports){
+},{"./engine/camera":13,"./engine/custom-loop":14,"./engine/default-settings":15,"./engine/globals":16,"./engine/loader":17,"./engine/object-creator":18,"./engine/room":19,"./geometry/circle":20,"./geometry/line":21,"./geometry/polygon":22,"./geometry/rectangle":23,"./geometry/vector":24,"./helpers/matrix-calculation":27,"./helpers/mixin":28,"./helpers/room-transition":29,"./helpers/webgl":30,"./input/keyboard":31,"./input/pointer":32,"./mixins/animatable":33,"./renderer/canvas":35,"./renderer/webgl":36,"./sounds/effect":40,"./sounds/music":41,"./views/child":42,"./views/circle":43,"./views/collidable":44,"./views/container":45,"./views/game-object":46,"./views/line":47,"./views/polygon":48,"./views/rectangle":49,"./views/sprite":50,"./views/text-block":51}],13:[function(_dereq_,module,exports){
 
 /*
 Constructor for Camera class
@@ -3998,7 +3989,7 @@ Helpers = {
 
 
 
-},{"../helpers/easing":25}],15:[function(_dereq_,module,exports){
+},{"../helpers/easing":26}],15:[function(_dereq_,module,exports){
 module.exports = {
   avoidSubPixelRendering: true,
   running: false,
@@ -4117,6 +4108,10 @@ module.exports = {
 
 
 },{}],17:[function(_dereq_,module,exports){
+var CollisionHelper, Loader, Sounds;
+
+CollisionHelper = _dereq_('../helpers/collision');
+
 
 /*
 Constructor for the Loader class.
@@ -4128,13 +4123,12 @@ Therefore, remember to call hideOverlay, when your game is ready to be shown.
 On engine startup a Loader object is instantiated to the global variable "loader".
 This loader object will also create a load overlay (the overlay saying "jsEngine loading"), this overlay will not be removed until the loader.hideOverlay() is called.
  */
-var Geometry, Loader, Sounds;
 
 module.exports = Loader = (function() {
   function Loader(host, engineSettings) {
     var name, ref, value;
     this.host = host;
-    this.themesPath = engineSettings.themesPath, this.loadText = engineSettings.loadText, this.defaultTheme = engineSettings.defaultTheme, this.container = engineSettings.container, this.cachedSoundCopies = engineSettings.cachedSoundCopies, this.soundsMuted = engineSettings.soundsMuted;
+    this.themesPath = engineSettings.themesPath, this.loadText = engineSettings.loadText, this.container = engineSettings.container, this.cachedSoundCopies = engineSettings.cachedSoundCopies, this.soundsMuted = engineSettings.soundsMuted;
     this.images = {};
     this.loaded = {
       classes: []
@@ -4208,6 +4202,10 @@ module.exports = Loader = (function() {
     this.fade();
   };
 
+  Loader.prototype.setDefaultTheme = function(defaultTheme) {
+    this.defaultTheme = defaultTheme;
+  };
+
 
   /*
   Fetches an image from the Loader. This function will automatically be called by objects that implements the Sprite object.
@@ -4274,12 +4272,14 @@ module.exports = Loader = (function() {
     if (resource === void 0) {
       throw new Error("Missing argument: resource");
     }
-    themeName = (themeName !== void 0 ? themeName : this.defaultTheme);
+    if (themeName == null) {
+      themeName = this.defaultTheme;
+    }
     mask = this.getResource(resource, "masks", themeName);
     if (mask) {
       return mask;
     } else {
-      mask = this.generateMask(resource);
+      mask = CollisionHelper.generateMask(this.getImage(resource, themeName));
       this.themes[themeName].masks[resource] = mask;
       return mask;
     }
@@ -4426,12 +4426,13 @@ module.exports = Loader = (function() {
 
   Loader.prototype.loadThemes = function(themeNames, callback) {
     var i, name, req, results;
-    if (themeNames === void 0) {
+    if (!themeNames) {
       throw new Error("Missing argument: themeNames");
     }
-    if (callback !== void 0) {
-      this.onthemesloaded = callback;
+    if (this.onThemesLoaded == null) {
+      this.onThemesLoaded = callback;
     }
+    this.setDefaultTheme(themeNames[0]);
     i = 0;
     results = [];
     while (i < themeNames.length) {
@@ -4650,72 +4651,6 @@ module.exports = Loader = (function() {
 
 
   /*
-  Generates a mask for an image specified by its resource string.
-  This function is used by getMask to fetch and cache masks for each of the loaded images.
-  
-  @param {string} resourceString A resource string specifying the image to generate a mask for
-  @param {number} alphaLimit An alpha value (0-255). Pixel having this alpha value or larger will become black on the mask, pixels with a value below the limit will become completely transparent
-  @return {HTMLCanvasElement} A canvas element with the generated mask
-   */
-
-  Loader.prototype.generateMask = function(resourceString, alphaLimit) {
-    var bitmap, bottom, canvas, ctx, data, image, left, length, pixel, right, top, x, y;
-    if (resourceString === void 0) {
-      throw new Error("Missing argument: resourceString");
-    }
-    alphaLimit = (alphaLimit !== void 0 ? alphaLimit : 255);
-    image = this.getImage(resourceString);
-    canvas = document.createElement("canvas");
-    canvas.width = image.width;
-    canvas.height = image.height;
-    canvas.imageLength = image.imageLength;
-    canvas.cacheKey = "mask:" + image.cacheKey;
-    ctx = canvas.getContext("2d");
-    if (image === false) {
-      throw new Error("Trying to create mask for non-existing resource: " + resourceString);
-    }
-    ctx.drawImage(image, 0, 0, image.width, image.height);
-    bitmap = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    data = bitmap.data;
-    length = data.length / 4;
-    top = bitmap.height;
-    bottom = 0;
-    left = bitmap.width;
-    right = 0;
-    pixel = 0;
-    while (pixel < length) {
-      if (data[pixel * 4 + 3] < alphaLimit) {
-        data[pixel * 4] = 0;
-        data[pixel * 4 + 1] = 0;
-        data[pixel * 4 + 2] = 0;
-        data[pixel * 4 + 3] = 0;
-      } else {
-        data[pixel * 4] = 0;
-        data[pixel * 4 + 1] = 0;
-        data[pixel * 4 + 2] = 0;
-        data[pixel * 4 + 3] = 255;
-        y = Math.floor(pixel / bitmap.width);
-        x = pixel - y * bitmap.width;
-        while (x >= Math.floor(image.width / image.imageLength)) {
-          x -= Math.floor(image.width / image.imageLength) + image.spacing;
-        }
-        if (x < 0) {
-          continue;
-        }
-        top = Math.min(y, top);
-        bottom = Math.max(y + 1, bottom);
-        left = Math.min(x, left);
-        right = Math.max(x + 1, right);
-      }
-      pixel++;
-    }
-    ctx.putImageData(bitmap, 0, 0);
-    canvas.boundingBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon();
-    return canvas;
-  };
-
-
-  /*
   Checks if all resources - of all themes - has been loaded. This check is automatically called any time a single resource has finished loading.
   
   @private
@@ -4723,19 +4658,18 @@ module.exports = Loader = (function() {
    */
 
   Loader.prototype.checkAllLoaded = function() {
-    var i, loaded, theme, total;
+    var loaded, name, ref, theme, total;
     total = 0;
     loaded = 0;
-    for (i in this.themes) {
-      if (this.themes.hasOwnProperty(i)) {
-        theme = this.themes[i];
-        total += theme.resourcesCount;
-        loaded += theme.resourcesLoaded;
-      }
+    ref = this.themes;
+    for (name in ref) {
+      theme = ref[name];
+      total += theme.resourcesCount;
+      loaded += theme.resourcesLoaded;
     }
     if (loaded === total) {
-      if (this.onthemesloaded) {
-        this.onthemesloaded();
+      if (typeof this.onThemesLoaded === "function") {
+        this.onThemesLoaded();
       }
       return true;
     }
@@ -4755,13 +4689,9 @@ Sounds = {
   Effect: _dereq_('../sounds/effect')
 };
 
-Geometry = {
-  Rectangle: _dereq_('../geometry/rectangle')
-};
 
 
-
-},{"../geometry/rectangle":23,"../sounds/effect":39,"../sounds/music":40}],18:[function(_dereq_,module,exports){
+},{"../helpers/collision":25,"../sounds/effect":40,"../sounds/music":41}],18:[function(_dereq_,module,exports){
 var ObjectCreator, Views,
   slice = [].slice;
 
@@ -4854,7 +4784,7 @@ Views = {
 
 
 
-},{"../views/circle":42,"../views/collidable":43,"../views/container":44,"../views/game-object":45,"../views/line":46,"../views/polygon":47,"../views/rectangle":48,"../views/sprite":49,"../views/text-block":50}],19:[function(_dereq_,module,exports){
+},{"../views/circle":43,"../views/collidable":44,"../views/container":45,"../views/game-object":46,"../views/line":47,"../views/polygon":48,"../views/rectangle":49,"../views/sprite":50,"../views/text-block":51}],19:[function(_dereq_,module,exports){
 var CustomLoop, Room, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -4989,7 +4919,7 @@ CustomLoop = _dereq_('./custom-loop');
 
 
 
-},{"../views/container":44,"./custom-loop":14}],20:[function(_dereq_,module,exports){
+},{"../views/container":45,"./custom-loop":14}],20:[function(_dereq_,module,exports){
 var Circle, Geometry, Helpers, Mixins;
 
 Helpers = {
@@ -5230,7 +5160,7 @@ Geometry = {
 
 
 
-},{"../helpers/mixin":27,"../mixins/animatable":32,"./line":21,"./polygon":22,"./rectangle":23,"./vector":24}],21:[function(_dereq_,module,exports){
+},{"../helpers/mixin":28,"../mixins/animatable":33,"./line":21,"./polygon":22,"./rectangle":23,"./vector":24}],21:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Line class. Uses setFromVectors to create the line's start and end points
@@ -6269,7 +6199,7 @@ Geometry = {
 
 
 
-},{"../helpers/mixin":27,"../mixins/animatable":32,"./circle":20,"./line":21,"./polygon":22,"./vector":24}],24:[function(_dereq_,module,exports){
+},{"../helpers/mixin":28,"../mixins/animatable":33,"./circle":20,"./line":21,"./polygon":22,"./vector":24}],24:[function(_dereq_,module,exports){
 var Geometry, Helpers, Mixins, Vector;
 
 Helpers = {
@@ -6599,7 +6529,122 @@ Geometry = {
 
 
 
-},{"../helpers/mixin":27,"../mixins/animatable":32,"./circle":20,"./line":21,"./polygon":22,"./rectangle":23}],25:[function(_dereq_,module,exports){
+},{"../helpers/mixin":28,"../mixins/animatable":33,"./circle":20,"./line":21,"./polygon":22,"./rectangle":23}],25:[function(_dereq_,module,exports){
+var Geometry, Helpers;
+
+Geometry = {
+  Rectangle: _dereq_('../geometry/rectangle')
+};
+
+Helpers = {
+  MatrixCalculation: _dereq_('./matrix-calculation')
+};
+
+module.exports = {
+  generateMask: function(image, alphaLimit) {
+    var bitmap, bottom, bytes, canvas, ctx, frameWidth, i, left, pixel, pixelCount, ref, right, top, x, y;
+    if (!image) {
+      throw new Error("Missing argument: image");
+    }
+    if (alphaLimit == null) {
+      alphaLimit = 255;
+    }
+    canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    canvas.imageLength = image.imageLength;
+    canvas.cacheKey = "mask:" + image.cacheKey;
+    ctx = canvas.getContext("2d");
+    ctx.drawImage(image, 0, 0, image.width, image.height);
+    bitmap = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    bytes = bitmap.data;
+    pixelCount = bytes.length / 4;
+    top = image.height;
+    bottom = 0;
+    left = image.width;
+    right = 0;
+    pixel = 0;
+    frameWidth = Math.floor(image.width / image.imageLength);
+    for (pixel = i = 0, ref = pixelCount; 0 <= ref ? i < ref : i > ref; pixel = 0 <= ref ? ++i : --i) {
+      if (bytes[pixel * 4 + 3] < alphaLimit) {
+        bytes[pixel * 4] = 0;
+        bytes[pixel * 4 + 1] = 0;
+        bytes[pixel * 4 + 2] = 0;
+        bytes[pixel * 4 + 3] = 0;
+      } else {
+        bytes[pixel * 4] = 0;
+        bytes[pixel * 4 + 1] = 0;
+        bytes[pixel * 4 + 2] = 0;
+        bytes[pixel * 4 + 3] = 255;
+        y = Math.floor(pixel / bitmap.width);
+        x = pixel - y * bitmap.width;
+        while (x >= frameWidth) {
+          x -= frameWidth + image.spacing;
+        }
+        top = Math.min(y, top);
+        bottom = Math.max(y + 1, bottom);
+        left = Math.min(x, left);
+        right = Math.max(x + 1, right);
+      }
+      pixel++;
+    }
+    ctx.putImageData(bitmap, 0, 0);
+    canvas.boundingBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon();
+    return canvas;
+  },
+  generateCollisionMap: function(source, objects) {
+    var c, calc, canvas, clipHeight, clipWidth, i, imageNumber, j, k, len, len1, len2, mask, obj, offset, parent, parents, texture;
+    mask = source.mask, clipHeight = source.clipHeight, clipWidth = source.clipWidth, offset = source.offset, texture = source.texture, imageNumber = source.imageNumber;
+    calc = Helpers.MatrixCalculation;
+    canvas = document.createElement("canvas");
+    canvas.width = Math.ceil(clipWidth);
+    canvas.height = Math.ceil(clipHeight);
+    canvas.id = 'colCanvas';
+    c = canvas.getContext("2d");
+    c.fillStyle = "#FFF";
+    c.fillRect(0, 0, canvas.width, canvas.height);
+    parents = source.getParents();
+    parents.unshift(source);
+    if (source.wm == null) {
+      source.wm = new Float32Array(9);
+    }
+    calc.setTranslation(source.wm, offset.x, offset.y);
+    for (i = 0, len = parents.length; i < len; i++) {
+      parent = parents[i];
+      calc.reverseMultiply(source.wm, calc.getInverseLocalMatrix(parent));
+    }
+    for (j = 0, len1 = objects.length; j < len1; j++) {
+      obj = objects[j];
+      if (obj === source) {
+        throw new Error("Objects should not check for collisions with themselves");
+      }
+      if (obj.wm == null) {
+        obj.wm = new Float32Array(9);
+      }
+      calc.setIdentity(obj.wm);
+      parents = obj.getParents();
+      parents.reverse();
+      parents.push(obj);
+      for (k = 0, len2 = parents.length; k < len2; k++) {
+        parent = parents[k];
+        calc.reverseMultiply(obj.wm, calc.getLocalMatrix(parent));
+      }
+      calc.multiply(obj.wm, source.wm);
+      calc.reverseMultiply(obj.wm, calc.getTranslation(-obj.offset.x, -obj.offset.y));
+      c.setTransform(obj.wm[0], obj.wm[1], obj.wm[3], obj.wm[4], obj.wm[6], obj.wm[7]);
+      c.drawImage(obj.mask, (obj.clipWidth + obj.texture.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight);
+    }
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.globalAlpha = 0.5;
+    c.fillRect(0, 0, canvas.width, canvas.height);
+    c.drawImage(mask, (clipWidth + texture.spacing) * imageNumber, 0, clipWidth, clipHeight, 0, 0, clipWidth, clipHeight);
+    return canvas;
+  }
+};
+
+
+
+},{"../geometry/rectangle":23,"./matrix-calculation":27}],26:[function(_dereq_,module,exports){
 module.exports = {
   linear: function(t, b, c, d) {
     t /= d;
@@ -6653,7 +6698,7 @@ module.exports = {
 
 
 
-},{}],26:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 var MatrixCalculationHelper;
 
 module.exports = MatrixCalculationHelper = {
@@ -6810,7 +6855,7 @@ module.exports = MatrixCalculationHelper = {
 
 
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 var MixinHelper;
 
 module.exports = MixinHelper = {
@@ -6839,7 +6884,7 @@ module.exports = MixinHelper = {
 
 
 
-},{}],28:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 var Camera, RoomTransitionHelper;
 
 module.exports = RoomTransitionHelper = {
@@ -7136,7 +7181,7 @@ Camera = _dereq_('../engine/camera');
 
 
 
-},{"../engine/camera":13}],29:[function(_dereq_,module,exports){
+},{"../engine/camera":13}],30:[function(_dereq_,module,exports){
 var Vector, WebGLHelper, poly2tri;
 
 poly2tri = _dereq_('poly2tri');
@@ -7322,7 +7367,7 @@ module.exports = WebGLHelper = {
 
 
 
-},{"../geometry/vector":24,"poly2tri":6}],30:[function(_dereq_,module,exports){
+},{"../geometry/vector":24,"poly2tri":6}],31:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Keyboard class
@@ -7467,7 +7512,7 @@ module.exports = Keyboard = (function() {
 
 
 
-},{}],31:[function(_dereq_,module,exports){
+},{}],32:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Pointer class
@@ -8140,7 +8185,7 @@ Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":16,"../geometry/vector":24}],32:[function(_dereq_,module,exports){
+},{"../engine/globals":16,"../geometry/vector":24}],33:[function(_dereq_,module,exports){
 var Animatable, Globals;
 
 module.exports = Animatable = (function() {
@@ -8363,7 +8408,7 @@ Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":16}],33:[function(_dereq_,module,exports){
+},{"../engine/globals":16}],34:[function(_dereq_,module,exports){
 var Geometry, Globals, Texture;
 
 module.exports = Texture = (function() {
@@ -8445,7 +8490,7 @@ Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":16,"../geometry/rectangle":23,"../geometry/vector":24}],34:[function(_dereq_,module,exports){
+},{"../engine/globals":16,"../geometry/rectangle":23,"../geometry/vector":24}],35:[function(_dereq_,module,exports){
 var CanvasRenderer, Helpers;
 
 module.exports = CanvasRenderer = (function() {
@@ -8680,7 +8725,7 @@ Helpers = {
 
 
 
-},{"../helpers/matrix-calculation":26}],35:[function(_dereq_,module,exports){
+},{"../helpers/matrix-calculation":27}],36:[function(_dereq_,module,exports){
 var ColorShaderProgram, Helpers, TextureShaderProgram, View, WebGLRenderer;
 
 module.exports = WebGLRenderer = (function() {
@@ -8901,7 +8946,7 @@ View = {
 
 
 
-},{"../helpers/matrix-calculation":26,"../views/child":41,"./webgl/color-shader-program":36,"./webgl/texture-shader-program":37}],36:[function(_dereq_,module,exports){
+},{"../helpers/matrix-calculation":27,"../views/child":42,"./webgl/color-shader-program":37,"./webgl/texture-shader-program":38}],37:[function(_dereq_,module,exports){
 var Helpers, TriangleBuffer, WebGLColorShaderProgram;
 
 TriangleBuffer = _dereq_('./triangle-buffer');
@@ -9064,7 +9109,7 @@ Helpers = {
 
 
 
-},{"../../helpers/webgl":29,"./triangle-buffer":38}],37:[function(_dereq_,module,exports){
+},{"../../helpers/webgl":30,"./triangle-buffer":39}],38:[function(_dereq_,module,exports){
 var WebGLTextureShaderProgram, coordsBufferLength;
 
 coordsBufferLength = 5 * 6 * 20000;
@@ -9302,7 +9347,7 @@ module.exports = WebGLTextureShaderProgram = (function() {
 
 
 
-},{}],38:[function(_dereq_,module,exports){
+},{}],39:[function(_dereq_,module,exports){
 var TriangleBuffer;
 
 module.exports = TriangleBuffer = (function() {
@@ -9355,7 +9400,7 @@ module.exports = TriangleBuffer = (function() {
 
 
 
-},{}],39:[function(_dereq_,module,exports){
+},{}],40:[function(_dereq_,module,exports){
 
 /*
 Constructor for the sound class
@@ -9514,7 +9559,7 @@ module.exports = Effect = (function() {
 
 
 
-},{}],40:[function(_dereq_,module,exports){
+},{}],41:[function(_dereq_,module,exports){
 
 /*
 Constructor for the Music class
@@ -9620,7 +9665,7 @@ module.exports = Music = (function() {
 
 
 
-},{}],41:[function(_dereq_,module,exports){
+},{}],42:[function(_dereq_,module,exports){
 
 /*
 @name View.Child
@@ -9826,7 +9871,7 @@ Geometry = {
 
 
 
-},{"../engine/room":19,"../geometry/vector":24}],42:[function(_dereq_,module,exports){
+},{"../engine/room":19,"../geometry/vector":24}],43:[function(_dereq_,module,exports){
 var Circle, Geometry, Helpers, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -9890,7 +9935,7 @@ Geometry.Rectangle = _dereq_('../geometry/rectangle');
 
 
 
-},{"../geometry/circle":20,"../geometry/rectangle":23,"../helpers/mixin":27,"./child":41}],43:[function(_dereq_,module,exports){
+},{"../geometry/circle":20,"../geometry/rectangle":23,"../helpers/mixin":28,"./child":42}],44:[function(_dereq_,module,exports){
 var Collidable, Geometry, Helpers, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -9921,11 +9966,17 @@ Can check both for precise (bitmap-based) collisions and bounding box collisions
 module.exports = Collidable = (function(superClass) {
   extend(Collidable, superClass);
 
-  function Collidable(source, x, y, direction, additionalProperties) {
-    Collidable.__super__.constructor.apply(this, arguments);
-    this.mask = (this.mask ? this.mask : engine.loader.getMask(source, this.getTheme()));
-    this.collisionResolution = (this.collisionResolution ? this.collisionResolution : engine.defaultCollisionResolution);
+  function Collidable() {
+    return Collidable.__super__.constructor.apply(this, arguments);
   }
+
+  Collidable.prototype.onAdded = function() {
+    var engine;
+    Collidable.__super__.onAdded.apply(this, arguments);
+    engine = this.getEngine();
+    this.mask = engine.loader.getMask(this.source, this.getTheme());
+    return this.collisionResolution != null ? this.collisionResolution : this.collisionResolution = engine.settings.defaultCollisionResolution;
+  };
 
 
   /*
@@ -9965,7 +10016,7 @@ module.exports = Collidable = (function(superClass) {
       return false;
     }
     objects = this.boundingBoxCollidesWith(objects, true);
-    if (objects === false) {
+    if (!objects) {
       return false;
     }
     if (!getCollisionPosition && !getCollidingObjects) {
@@ -10100,15 +10151,18 @@ module.exports = Collidable = (function(superClass) {
    */
 
   Collidable.prototype.maskCollidesWith = function(objects, getCollisionPosition) {
-    var avX, avY, bitmap, length, pixel, pxArr, retVector, x, y;
+    var avX, avY, bitmap, collisionMap, length, pixel, pxArr, retVector, x, y;
+    if (getCollisionPosition == null) {
+      getCollisionPosition = false;
+    }
     if (objects === void 0) {
       throw new Error("Missing argument: objects");
     }
     if (!Array.prototype.isPrototypeOf(objects)) {
       objects = [objects];
     }
-    getCollisionPosition = (getCollisionPosition !== void 0 ? getCollisionPosition : false);
-    bitmap = this.createCollisionBitmap(objects);
+    collisionMap = Helpers.Collision.generateCollisionMap(this, objects);
+    bitmap = collisionMap.getContext('2d').getImageData(0, 0, collisionMap.width, collisionMap.height);
     length = bitmap.data.length / 4;
     pxArr = [];
     pixel = 0;
@@ -10169,61 +10223,13 @@ module.exports = Collidable = (function(superClass) {
     return false;
   };
 
-  Collidable.prototype.createCollisionBitmap = function(objects) {
-    var c, calc, canvas, j, k, l, len, len1, len2, mask, obj, parent, parents;
-    mask = this.mask;
-    calc = Helpers.MatrixCalculation;
-    canvas = document.createElement("canvas");
-    canvas.width = Math.ceil(this.clipWidth);
-    canvas.height = Math.ceil(this.clipHeight);
-    canvas.id = 'colCanvas';
-    c = canvas.getContext("2d");
-    c.fillStyle = "#FFF";
-    c.fillRect(0, 0, canvas.width, canvas.height);
-    parents = this.getParents();
-    parents.unshift(this);
-    if (this.wm == null) {
-      this.wm = new Float32Array(9);
-    }
-    calc.setTranslation(this.wm, this.offset.x, this.offset.y);
-    for (j = 0, len = parents.length; j < len; j++) {
-      parent = parents[j];
-      calc.reverseMultiply(this.wm, calc.getInverseLocalMatrix(parent));
-    }
-    for (k = 0, len1 = objects.length; k < len1; k++) {
-      obj = objects[k];
-      if (obj === this) {
-        throw new Error("Objects are not allowed to check for collisions with themselves");
-      }
-      if (obj.wm == null) {
-        obj.wm = new Float32Array(9);
-      }
-      calc.setIdentity(obj.wm);
-      parents = obj.getParents();
-      parents.reverse();
-      parents.push(obj);
-      for (l = 0, len2 = parents.length; l < len2; l++) {
-        parent = parents[l];
-        calc.reverseMultiply(obj.wm, calc.getLocalMatrix(parent));
-      }
-      calc.multiply(obj.wm, this.wm);
-      calc.reverseMultiply(obj.wm, calc.getTranslation(-obj.offset.x, -obj.offset.y));
-      c.setTransform(obj.wm[0], obj.wm[1], obj.wm[3], obj.wm[4], obj.wm[6], obj.wm[7]);
-      c.drawImage(obj.mask, (obj.clipWidth + obj.texture.spacing) * obj.imageNumber, 0, obj.clipWidth, obj.clipHeight, 0, 0, obj.clipWidth, obj.clipHeight);
-    }
-    c.setTransform(1, 0, 0, 1, 0, 0);
-    c.globalAlpha = 0.5;
-    c.fillRect(0, 0, canvas.width, canvas.height);
-    c.drawImage(mask, (this.clipWidth + this.texture.spacing) * this.imageNumber, 0, this.clipWidth, this.clipHeight, 0, 0, this.clipWidth, this.clipHeight);
-    return c.getImageData(0, 0, canvas.width, canvas.height);
-  };
-
   return Collidable;
 
 })(Views.Sprite);
 
 Helpers = {
-  MatrixCalculation: _dereq_('../helpers/matrix-calculation')
+  MatrixCalculation: _dereq_('../helpers/matrix-calculation'),
+  Collision: _dereq_('../helpers/collision')
 };
 
 Geometry = {
@@ -10232,7 +10238,7 @@ Geometry = {
 
 
 
-},{"../geometry/vector":24,"../helpers/matrix-calculation":26,"./sprite":49}],44:[function(_dereq_,module,exports){
+},{"../geometry/vector":24,"../helpers/collision":25,"../helpers/matrix-calculation":27,"./sprite":50}],45:[function(_dereq_,module,exports){
 var Container, Geometry, ObjectCreator, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
@@ -10507,7 +10513,7 @@ Geometry = {
 
 
 
-},{"../engine/object-creator":18,"../geometry/rectangle":23,"./child":41}],45:[function(_dereq_,module,exports){
+},{"../engine/object-creator":18,"../geometry/rectangle":23,"./child":42}],46:[function(_dereq_,module,exports){
 var GameObject, Geometry, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -10552,22 +10558,15 @@ speed: new Math.Vector(0, 0)
 module.exports = GameObject = (function(superClass) {
   extend(GameObject, superClass);
 
-  function GameObject(source, x, y, direction, additionalProperties) {
-    if (source === void 0) {
-      throw new Error("Missing argument: source");
-    }
-    if (x === void 0) {
-      throw new Error("Missing argument: x");
-    }
-    if (y === void 0) {
-      throw new Error("Missing argument: y");
-    }
-    GameObject.__super__.constructor.call(this, source, x, y, direction, additionalProperties);
-    if (this.loop == null) {
-      this.loop = engine.defaultActivityLoop;
-    }
+  function GameObject() {
+    return GameObject.__super__.constructor.apply(this, arguments);
+  }
+
+  GameObject.prototype.onAdded = function() {
+    GameObject.__super__.onAdded.apply(this, arguments);
+    this.loop = this.getRoom().loops.eachFrame;
     if (!this.loop.hasOperation('basic-transforms')) {
-      this.loop.attachOperation('basic-transforms', this.constructor.basicTransformsOperation);
+      this.loop.attachOperation('basic-transforms', this.constructor.basicTransformsOperation.bind(this.getRoom()));
     }
     this.loop.subscribeToOperation('basic-transforms', this);
     if (this.speed == null) {
@@ -10577,8 +10576,7 @@ module.exports = GameObject = (function(superClass) {
       this.rotationSpeed = 0;
     }
     this.alive = true;
-    return;
-  }
+  };
 
   GameObject.basicTransformsOperation = function(objects) {
     var i, len, object, results;
@@ -10586,10 +10584,10 @@ module.exports = GameObject = (function(superClass) {
     for (i = 0, len = objects.length; i < len; i++) {
       object = objects[i];
       if (object.alive) {
-        object.x += engine.perFrameSpeed(object.speed.x);
-        object.y += engine.perFrameSpeed(object.speed.y);
+        object.x += this.engine.convertSpeed(object.speed.x);
+        object.y += this.engine.convertSpeed(object.speed.y);
         if (object.rotationSpeed) {
-          results.push(object.direction += engine.perFrameSpeed(object.rotationSpeed));
+          results.push(object.direction += this.engine.convertSpeed(object.rotationSpeed));
         } else {
           results.push(void 0);
         }
@@ -10610,7 +10608,7 @@ Geometry = {
 
 
 
-},{"../geometry/vector":24,"./collidable":43}],46:[function(_dereq_,module,exports){
+},{"../geometry/vector":24,"./collidable":44}],47:[function(_dereq_,module,exports){
 var Geometry, Helpers, Line, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -10714,7 +10712,7 @@ Geometry.Vector = _dereq_('../geometry/vector');
 
 
 
-},{"../geometry/line":21,"../geometry/vector":24,"../helpers/mixin":27,"./child":41}],47:[function(_dereq_,module,exports){
+},{"../geometry/line":21,"../geometry/vector":24,"../helpers/mixin":28,"./child":42}],48:[function(_dereq_,module,exports){
 var Geometry, Helpers, Polygon, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -10775,7 +10773,7 @@ module.exports = Polygon = (function(superClass) {
 
 
 
-},{"../geometry/polygon":22,"../helpers/mixin":27,"./child":41}],48:[function(_dereq_,module,exports){
+},{"../geometry/polygon":22,"../helpers/mixin":28,"./child":42}],49:[function(_dereq_,module,exports){
 var Geometry, Helpers, Rectangle, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -10893,7 +10891,7 @@ module.exports = Rectangle = (function(superClass) {
 
 
 
-},{"../geometry/rectangle":23,"../helpers/mixin":27,"./child":41}],49:[function(_dereq_,module,exports){
+},{"../geometry/rectangle":23,"../helpers/mixin":28,"./child":42}],50:[function(_dereq_,module,exports){
 var Globals, Helpers, Mixins, Sprite, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -11009,9 +11007,9 @@ module.exports = Sprite = (function(superClass) {
     }
   }
 
-  Sprite.onAdded = function() {
+  Sprite.prototype.onAdded = function() {
     var ref;
-    Sprite.__super__.constructor.onAdded.apply(this, arguments);
+    Sprite.__super__.onAdded.apply(this, arguments);
     if (this.animationLastSwitch == null) {
       this.animationLastSwitch = (ref = this.getEngine()) != null ? ref.gameTime : void 0;
     }
@@ -11113,7 +11111,7 @@ Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":16,"../helpers/mixin":27,"../mixins/animatable":32,"../mixins/texture":33,"./child":41}],50:[function(_dereq_,module,exports){
+},{"../engine/globals":16,"../helpers/mixin":28,"../mixins/animatable":33,"../mixins/texture":34,"./child":42}],51:[function(_dereq_,module,exports){
 var Geometry, Globals, Helpers, Mixins, TextBlock, Views,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -11374,5 +11372,5 @@ Globals = _dereq_('../engine/globals');
 
 
 
-},{"../engine/globals":16,"../geometry/vector":24,"../helpers/mixin":27,"../mixins/animatable":32,"../mixins/texture":33,"./child":41}]},{},[12])(12)
+},{"../engine/globals":16,"../geometry/vector":24,"../helpers/mixin":28,"../mixins/animatable":33,"../mixins/texture":34,"./child":42}]},{},[12])(12)
 });

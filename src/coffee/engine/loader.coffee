@@ -1,3 +1,5 @@
+CollisionHelper = require '../helpers/collision'
+
 ###
 Constructor for the Loader class.
 This function will also create a load overlay which will not disappear until the hideOverlay is called.
@@ -13,7 +15,6 @@ module.exports = class Loader
     {
       @themesPath
       @loadText
-      @defaultTheme
       @container
       @cachedSoundCopies
       @soundsMuted
@@ -81,6 +82,8 @@ module.exports = class Loader
     @fade()
     return
 
+  setDefaultTheme: (@defaultTheme)->
+
   ###
   Fetches an image from the Loader. This function will automatically be called by objects that implements the Sprite object.
 
@@ -129,7 +132,7 @@ module.exports = class Loader
   ###
   getMask: (resource, themeName) ->
     throw new Error("Missing argument: resource") if resource is undefined #dev
-    themeName = (if themeName isnt undefined then themeName else @defaultTheme)
+    themeName ?= @defaultTheme
 
     # Check if the mask has been generated
     mask = @getResource(resource, "masks", themeName)
@@ -139,7 +142,7 @@ module.exports = class Loader
 
     # Otherwise, generate the mask and return it
     else
-      mask = @generateMask(resource)
+      mask = CollisionHelper.generateMask(@getImage(resource, themeName))
       @themes[themeName].masks[resource] = mask
       mask
 
@@ -240,9 +243,10 @@ module.exports = class Loader
   @param {function} callback A callback function to run when all the themes has been loaded
   ###
   loadThemes: (themeNames, callback) ->
-    if themeNames is undefined #dev
-      throw new Error "Missing argument: themeNames"
-    @onthemesloaded = callback if callback isnt undefined
+    throw new Error "Missing argument: themeNames" unless themeNames #dev
+    @onThemesLoaded ?= callback
+    @setDefaultTheme themeNames[0]
+
     i = 0
     while i < themeNames.length
       name = themeNames[i]
@@ -419,65 +423,6 @@ module.exports = class Loader
     res.setAttribute "data-resourceString", resourceString
     return
 
-
-  ###
-  Generates a mask for an image specified by its resource string.
-  This function is used by getMask to fetch and cache masks for each of the loaded images.
-
-  @param {string} resourceString A resource string specifying the image to generate a mask for
-  @param {number} alphaLimit An alpha value (0-255). Pixel having this alpha value or larger will become black on the mask, pixels with a value below the limit will become completely transparent
-  @return {HTMLCanvasElement} A canvas element with the generated mask
-  ###
-  generateMask: (resourceString, alphaLimit) ->
-    throw new Error("Missing argument: resourceString") if resourceString is undefined #dev
-    alphaLimit = (if alphaLimit isnt undefined then alphaLimit else 255)
-    image = @getImage(resourceString)
-    canvas = document.createElement("canvas")
-    canvas.width = image.width
-    canvas.height = image.height
-    canvas.imageLength = image.imageLength
-    canvas.cacheKey = "mask:" + image.cacheKey
-    ctx = canvas.getContext("2d")
-
-    throw new Error("Trying to create mask for non-existing resource: " + resourceString) if image is false #dev
-
-    ctx.drawImage image, 0, 0, image.width, image.height
-    bitmap = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    data = bitmap.data
-    length = data.length / 4
-    top = bitmap.height
-    bottom = 0
-    left = bitmap.width
-    right = 0
-    pixel = 0
-    while pixel < length
-      # If the pixel is partly transparent, make it completely transparent, else make it completely black
-      if data[pixel * 4 + 3] < alphaLimit
-        data[pixel * 4] = 0 # Red
-        data[pixel * 4 + 1] = 0 # Green
-        data[pixel * 4 + 2] = 0 # Blue
-        data[pixel * 4 + 3] = 0 # Alpha
-      else
-        data[pixel * 4] = 0 # Red
-        data[pixel * 4 + 1] = 0 # Green
-        data[pixel * 4 + 2] = 0 # Blue
-        data[pixel * 4 + 3] = 255 # Alpha
-
-        # Remember the mask's bounding box
-        y = Math.floor(pixel / bitmap.width)
-        x = pixel - y * bitmap.width
-        x -= Math.floor(image.width / image.imageLength) + image.spacing while x >= Math.floor(image.width / image.imageLength)
-        continue if x < 0
-        top = Math.min(y, top)
-        bottom = Math.max(y + 1, bottom)
-        left = Math.min(x, left)
-        right = Math.max(x + 1, right)
-      pixel++
-    ctx.putImageData bitmap, 0, 0
-    canvas.boundingBox = new Geometry.Rectangle(left, top, right - left, bottom - top).getPolygon()
-    canvas
-
-
   ###
   Checks if all resources - of all themes - has been loaded. This check is automatically called any time a single resource has finished loading.
 
@@ -487,13 +432,11 @@ module.exports = class Loader
   checkAllLoaded: ->
     total = 0
     loaded = 0
-    for i of @themes
-      if @themes.hasOwnProperty(i)
-        theme = @themes[i]
-        total += theme.resourcesCount
-        loaded += theme.resourcesLoaded
-    if loaded is total
-      @onthemesloaded() if @onthemesloaded
+    for name, theme of @themes
+      total += theme.resourcesCount
+      loaded += theme.resourcesLoaded
+    if loaded == total
+      @onThemesLoaded?()
       return true
     false
 
@@ -502,6 +445,3 @@ module.exports = class Loader
 Sounds =
   Music: require '../sounds/music'
   Effect: require '../sounds/effect'
-
-Geometry =
-  Rectangle: require '../geometry/rectangle'

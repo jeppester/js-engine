@@ -3,8 +3,9 @@
 var Main;
 
 Main = (function() {
-  function Main() {
-    engine.loader.hideOverlay((function(_this) {
+  function Main(engine) {
+    this.engine = engine;
+    this.engine.loader.hideOverlay((function(_this) {
       return function() {
         return _this.onLoaded();
       };
@@ -14,7 +15,7 @@ Main = (function() {
   Main.prototype.onLoaded = function() {
     this.objectView = new Engine.Views.Container();
     this.hudView = new Engine.Views.Container();
-    engine.currentRoom.addChildren(this.objectView, this.hudView);
+    this.engine.currentRoom.addChildren(this.objectView, this.hudView);
     this.fpsCounter = new Engine.Views.TextBlock('FPS: 0', 10, 10, 150, {
       color: '#FFF'
     });
@@ -26,15 +27,15 @@ Main = (function() {
     });
     global.collider = this.collider = new Engine.Views.Collidable('character', 300, 200);
     this.hudView.addChildren(this.collider, this.fpsCounter, this.objectCounter, this.collisionDisplay);
-    engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
-    engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
-    engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
-    engine.currentRoom.loops.eachFrame.attachFunction(this, this.checkCollision);
+    this.engine.currentRoom.addLoop('each20Frames', new Engine.CustomLoop(20));
+    this.engine.currentRoom.loops.each20Frames.attachFunction(this, this.updateFPS);
+    this.engine.currentRoom.loops.eachFrame.attachFunction(this, this.controls);
+    this.engine.currentRoom.loops.eachFrame.attachFunction(this, this.checkCollision);
     return this.addObjects(400);
   };
 
   Main.prototype.checkCollision = function() {
-    if (this.collider.collidesWith(this.objectView.getChildren(), 1)) {
+    if (this.collider.collidesWith(this.objectView.getChildren())) {
       return this.collisionDisplay.set({
         string: 'Collides: Yes'
       });
@@ -47,7 +48,7 @@ Main = (function() {
 
   Main.prototype.updateFPS = function() {
     this.fpsCounter.set({
-      string: 'FPS: ' + engine.fps
+      string: 'FPS: ' + this.engine.fps
     });
     return this.objectCounter.set({
       string: 'Objects: ' + this.objectView.children.length
@@ -76,20 +77,20 @@ Main = (function() {
     count = Math.min(count, objects.length);
     results = [];
     for (i = j = 0, ref = count; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-      results.push(engine.purge(objects.shift()));
+      results.push(this.engine.purge(objects.shift()));
     }
     return results;
   };
 
   Main.prototype.controls = function() {
     var pointers;
-    if (engine.keyboard.isDown(Engine.Globals.KEY_UP)) {
+    if (this.engine.keyboard.isDown(Engine.Globals.KEY_UP)) {
       this.addObjects();
     }
-    if (engine.keyboard.isDown(Engine.Globals.KEY_DOWN)) {
+    if (this.engine.keyboard.isDown(Engine.Globals.KEY_DOWN)) {
       this.removeObjects();
     }
-    pointers = engine.pointer.isPressed(Engine.Globals.MOUSE_TOUCH_ANY) || engine.pointer.isDown(Engine.Globals.MOUSE_TOUCH_ANY);
+    pointers = this.engine.pointer.isPressed(Engine.Globals.MOUSE_TOUCH_ANY) || this.engine.pointer.isDown(Engine.Globals.MOUSE_TOUCH_ANY);
     if (pointers) {
       this.collider.x = pointers[0].x;
       return this.collider.y = pointers[0].y;
