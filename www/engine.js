@@ -6486,7 +6486,7 @@ module.exports = Vector = (function() {
     if (!point instanceof module.exports) {
       throw new Error("Only Vectors or objects inheriting Vector are supported");
     }
-    return point.getDirection() - this.getDirection();
+    return point.copy().subtract(this).getDirection();
   };
 
 
