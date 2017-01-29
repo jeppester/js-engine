@@ -73,43 +73,41 @@ module.exports = class WebGLRenderer
       gl.viewport pr.x, pr.y, pr.width, pr.height
       rooms = [ @engine.masterRoom, camera.room ]
 
+      # Draw rooms
       for room in rooms
-        # Draw rooms
+        room.wm = camera.wm
         @renderRoom room, camera.wm
     return
 
   renderRoom: (room, wm)->
     list = room.renderList ?= []
-    @updateRenderList list, room, new Uint16Array [0]
+    @updateRenderList list, room.children, new Uint16Array [0]
     @processRenderList list
 
     @renderMasks list if @engine.settings.drawMasks
     @renderBoundingBoxes list if @engine.settings.drawBoundingBoxes
-
     return
 
-  updateRenderList: (list, object, counter)->
-    return unless object.isVisible()
+  updateRenderList: (list, children, counter)->
+    for object in children
+      continue unless object.isVisible()
+      # Only update the list if necessary
+      last = list[counter[0]]
+      unless object == last
+        if last == undefined
+          list.push object
+        else
+          list.splice counter[0], list.length - counter[0], object
+      counter[0] += 1
 
-    # Only update the list if necessary
-    last = list[counter[0]]
-    unless object == last
-      if last == undefined
-        list.push object
-      else
-        list.splice counter[0], list.length - counter[0], object
-    counter[0] += 1
-
-    if object.children
-      for child in object.children
-        @updateRenderList list, child, counter
+      @updateRenderList list, object.children, counter if object.children
 
   processRenderList: (list)->
     gl = @gl
     for object in list
       object.wm ?= new Float32Array 9
       Helpers.MatrixCalculation.setLocalMatrix object.wm, object
-      Helpers.MatrixCalculation.multiply object.wm, object.parent.wm if object.parent
+      Helpers.MatrixCalculation.multiply object.wm, object.parent.wm
       offset = Helpers.MatrixCalculation.getTranslation -object.offset.x, -object.offset.y
       Helpers.MatrixCalculation.reverseMultiply object.wm, offset
 

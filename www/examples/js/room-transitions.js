@@ -2,54 +2,59 @@
 var Main;
 
 Main = (function() {
-  function Main() {
+  function Main(engine) {
     var i, j, k, l, m, room;
-    engine.currentRoom.name = 'room1';
-    engine.currentRoom.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#F00'));
+    this.engine = engine;
+    this.engine.currentRoom.name = 'room1';
+    this.engine.currentRoom.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#F00'));
     for (i = j = 0; j < 5; i = ++j) {
-      engine.currentRoom.addChildren(new Engine.Views.Sprite('character', 100 + Math.random() * 400, 100 + Math.random() * 200));
+      this.engine.currentRoom.addChildren(new Engine.Views.Sprite('character', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
+    window.engine = this.engine;
     room = new Engine.Room('room2');
+    this.engine.addRoom(room);
     room.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#0F0'));
     for (i = k = 0; k < 5; i = ++k) {
       room.addChildren(new Engine.Views.Sprite('rock', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
     room = new Engine.Room('room3');
+    this.engine.addRoom(room);
     room.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#00F'));
     for (i = l = 0; l < 10; i = ++l) {
       room.addChildren(new Engine.Views.Sprite('folder/star2', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
     room = new Engine.Room('room4');
+    this.engine.addRoom(room);
     room.addChildren(new Engine.Views.Rectangle(0, 0, 600, 400, '#FFF'));
     for (i = m = 0; m < 20; i = ++m) {
       room.addChildren(new Engine.Views.Sprite('folder/star3', 100 + Math.random() * 400, 100 + Math.random() * 200));
     }
-    engine.loader.hideOverlay((function(_this) {
+    this.engine.loader.hideOverlay((function(_this) {
       return function() {
-        return engine.masterRoom.loops.eachFrame.attachFunction(_this, _this.doKeyboardControl);
+        return _this.engine.masterRoom.loops.eachFrame.attachFunction(_this, _this.doKeyboardControl);
       };
     })(this));
   }
 
   Main.prototype.doKeyboardControl = function() {
-    if (engine.keyboard.isPressed(Engine.Globals.KEY_SPACE)) {
-      if (engine.currentRoom.name === 'room1') {
-        return engine.goToRoom('room2', Engine.Globals.ROOM_TRANSITION_SLIDE_SLIDE, {
+    if (this.engine.keyboard.isPressed(Engine.Globals.KEY_SPACE)) {
+      if (this.engine.currentRoom.name === 'room1') {
+        return this.engine.goToRoom('room2', Engine.Globals.ROOM_TRANSITION_SLIDE_SLIDE, {
           duration: 1000,
           from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]
         });
-      } else if (engine.currentRoom.name === 'room2') {
-        return engine.goToRoom('room3', Engine.Globals.ROOM_TRANSITION_SQUEEZE_SQUEEZE, {
+      } else if (this.engine.currentRoom.name === 'room2') {
+        return this.engine.goToRoom('room3', Engine.Globals.ROOM_TRANSITION_SQUEEZE_SQUEEZE, {
           duration: 1000,
           from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]
         });
-      } else if (engine.currentRoom.name === 'room3') {
-        return engine.goToRoom('room4', Engine.Globals.ROOM_TRANSITION_SLIDE_SQUEEZE, {
+      } else if (this.engine.currentRoom.name === 'room3') {
+        return this.engine.goToRoom('room4', Engine.Globals.ROOM_TRANSITION_SLIDE_SQUEEZE, {
           duration: 1000,
           from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]
         });
       } else {
-        return engine.goToRoom('room1', Engine.Globals.ROOM_TRANSITION_SQUEEZE_SLIDE, {
+        return this.engine.goToRoom('room1', Engine.Globals.ROOM_TRANSITION_SQUEEZE_SLIDE, {
           duration: 1000,
           from: ['left', 'right', 'top', 'bottom'][Math.floor(Math.random() * 4)]
         });

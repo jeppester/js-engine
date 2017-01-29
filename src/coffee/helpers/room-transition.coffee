@@ -1,5 +1,5 @@
 module.exports = RoomTransitionHelper =
-  slideOut: (camera, from, animOptions) ->
+  slideOut: (engine, camera, from, animOptions) ->
     switch from
       when "left"
         camera.projectionRegion.animate
@@ -18,7 +18,7 @@ module.exports = RoomTransitionHelper =
           y: camera.projectionRegion.y - engine.canvasResY
         , animOptions
 
-  slideIn: (camera, from, animOptions) ->
+  slideIn: (engine, camera, from, animOptions) ->
     switch from
       when "left"
         camera.projectionRegion.x -= engine.canvasResX
@@ -41,7 +41,7 @@ module.exports = RoomTransitionHelper =
           y: camera.projectionRegion.y - engine.canvasResY
         , animOptions
 
-  squeezeOut: (camera, from, animOptions) ->
+  squeezeOut: (engine, camera, from, animOptions) ->
     switch from
       when "left"
         camera.projectionRegion.animate
@@ -62,7 +62,7 @@ module.exports = RoomTransitionHelper =
           height: 0
         , animOptions
 
-  squeezeIn: (camera, from, animOptions) ->
+  squeezeIn: (engine, camera, from, animOptions) ->
     switch from
       when "left"
         oldWidth = camera.projectionRegion.width
@@ -100,7 +100,7 @@ module.exports = RoomTransitionHelper =
   @param {Room} oldRoom The room that is left
   @param {Room} newRoom The room that is entered
   ###
-  roomTransitionNone: (oldRoom, newRoom, options, callback) ->
+  roomTransitionNone: (engine, oldRoom, newRoom, options, callback) ->
     i = 0
     while i < engine.cameras.length
       camera = engine.cameras[i]
@@ -115,7 +115,7 @@ module.exports = RoomTransitionHelper =
   @param {Room} oldRoom The room that is left
   @param {Room} newRoom The room that is entered
   ###
-  roomTransitionSlideSlide: (oldRoom, newRoom, options, callback) ->
+  roomTransitionSlideSlide: (engine, oldRoom, newRoom, options, callback) ->
     newCams = []
     oldRoom.pause()
     options = options or {}
@@ -135,7 +135,7 @@ module.exports = RoomTransitionHelper =
       i++
     engine.cameras.push.apply engine.cameras, newCams
     for c in newCams
-      @slideIn c, options.from, animOptions
+      @slideIn engine, c, options.from, animOptions
 
     engine.masterRoom.loops.eachFrame.schedule oldRoom, (->
       @play()
@@ -152,7 +152,7 @@ module.exports = RoomTransitionHelper =
   @param {Room} oldRoom The room that is left
   @param {Room} newRoom The room that is entered
   ###
-  roomTransitionSqueezeSlide: (oldRoom, newRoom, options, callback) ->
+  roomTransitionSqueezeSlide: (engine, oldRoom, newRoom, options, callback) ->
     newCams = []
     oldRoom.pause()
     options = options or {}
@@ -172,7 +172,7 @@ module.exports = RoomTransitionHelper =
       i++
     engine.cameras.push.apply engine.cameras, newCams
     for c in newCams
-      @slideIn c, options.from, animOptions
+      @slideIn engine, c, options.from, animOptions
 
     engine.masterRoom.loops.eachFrame.schedule oldRoom, (->
       @play()
@@ -189,7 +189,7 @@ module.exports = RoomTransitionHelper =
   @param {Room} oldRoom The room that is left
   @param {Room} newRoom The room that is entered
   ###
-  roomTransitionSqueezeSqueeze: (oldRoom, newRoom, options, callback) ->
+  roomTransitionSqueezeSqueeze: (engine, oldRoom, newRoom, options, callback) ->
     newCams = []
     oldRoom.pause()
     options = options or {}
@@ -209,7 +209,7 @@ module.exports = RoomTransitionHelper =
       i++
     engine.cameras.push.apply engine.cameras, newCams
     for c in newCams
-      @squeezeIn c, options.from, animOptions
+      @squeezeIn engine, c, options.from, animOptions
 
     engine.masterRoom.loops.eachFrame.schedule oldRoom, (->
       @play()
@@ -226,7 +226,7 @@ module.exports = RoomTransitionHelper =
   @param {Room} oldRoom The room that is left
   @param {Room} newRoom The room that is entered
   ###
-  roomTransitionSlideSqueeze: (oldRoom, newRoom, options, callback) ->
+  roomTransitionSlideSqueeze: (engine, oldRoom, newRoom, options, callback) ->
     newCams = []
     oldRoom.pause()
     options = options or {}
@@ -246,7 +246,7 @@ module.exports = RoomTransitionHelper =
       i++
     engine.cameras.push.apply engine.cameras, newCams
     for c in newCams
-      @squeezeIn c, options.from, animOptions
+      @squeezeIn engine, c, options.from, animOptions
 
     engine.masterRoom.loops.eachFrame.schedule oldRoom, (->
       @play()

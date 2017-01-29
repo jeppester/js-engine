@@ -385,7 +385,7 @@ module.exports = class
     transition = (if transition then transition else ROOM_TRANSITION_NONE)
     oldRoom = @currentRoom
     @changingRoom = true
-    @constructor.Helpers.RoomTransition[transition] oldRoom, room, transitionOptions, =>
+    @constructor.Helpers.RoomTransition[transition] @, oldRoom, room, transitionOptions, =>
       @changingRoom = false
       @currentRoom = room
 

@@ -3243,7 +3243,7 @@ module.exports = (function() {
     transition = (transition ? transition : ROOM_TRANSITION_NONE);
     oldRoom = this.currentRoom;
     this.changingRoom = true;
-    this.constructor.Helpers.RoomTransition[transition](oldRoom, room, transitionOptions, (function(_this) {
+    this.constructor.Helpers.RoomTransition[transition](this, oldRoom, room, transitionOptions, (function(_this) {
       return function() {
         _this.changingRoom = false;
         return _this.currentRoom = room;
@@ -6888,7 +6888,7 @@ module.exports = MixinHelper = {
 var Camera, RoomTransitionHelper;
 
 module.exports = RoomTransitionHelper = {
-  slideOut: function(camera, from, animOptions) {
+  slideOut: function(engine, camera, from, animOptions) {
     switch (from) {
       case "left":
         return camera.projectionRegion.animate({
@@ -6908,7 +6908,7 @@ module.exports = RoomTransitionHelper = {
         }, animOptions);
     }
   },
-  slideIn: function(camera, from, animOptions) {
+  slideIn: function(engine, camera, from, animOptions) {
     switch (from) {
       case "left":
         camera.projectionRegion.x -= engine.canvasResX;
@@ -6932,7 +6932,7 @@ module.exports = RoomTransitionHelper = {
         }, animOptions);
     }
   },
-  squeezeOut: function(camera, from, animOptions) {
+  squeezeOut: function(engine, camera, from, animOptions) {
     switch (from) {
       case "left":
         return camera.projectionRegion.animate({
@@ -6954,7 +6954,7 @@ module.exports = RoomTransitionHelper = {
         }, animOptions);
     }
   },
-  squeezeIn: function(camera, from, animOptions) {
+  squeezeIn: function(engine, camera, from, animOptions) {
     var oldHeight, oldWidth;
     switch (from) {
       case "left":
@@ -6995,7 +6995,7 @@ module.exports = RoomTransitionHelper = {
   @param {Room} oldRoom The room that is left
   @param {Room} newRoom The room that is entered
    */
-  roomTransitionNone: function(oldRoom, newRoom, options, callback) {
+  roomTransitionNone: function(engine, oldRoom, newRoom, options, callback) {
     var camera, i;
     i = 0;
     while (i < engine.cameras.length) {
@@ -7015,7 +7015,7 @@ module.exports = RoomTransitionHelper = {
   @param {Room} oldRoom The room that is left
   @param {Room} newRoom The room that is entered
    */
-  roomTransitionSlideSlide: function(oldRoom, newRoom, options, callback) {
+  roomTransitionSlideSlide: function(engine, oldRoom, newRoom, options, callback) {
     var animOptions, c, camera, i, j, len, newCam, newCams;
     newCams = [];
     oldRoom.pause();
@@ -7039,7 +7039,7 @@ module.exports = RoomTransitionHelper = {
     engine.cameras.push.apply(engine.cameras, newCams);
     for (j = 0, len = newCams.length; j < len; j++) {
       c = newCams[j];
-      this.slideIn(c, options.from, animOptions);
+      this.slideIn(engine, c, options.from, animOptions);
     }
     return engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
       this.play();
@@ -7057,7 +7057,7 @@ module.exports = RoomTransitionHelper = {
   @param {Room} oldRoom The room that is left
   @param {Room} newRoom The room that is entered
    */
-  roomTransitionSqueezeSlide: function(oldRoom, newRoom, options, callback) {
+  roomTransitionSqueezeSlide: function(engine, oldRoom, newRoom, options, callback) {
     var animOptions, c, camera, i, j, len, newCam, newCams;
     newCams = [];
     oldRoom.pause();
@@ -7081,7 +7081,7 @@ module.exports = RoomTransitionHelper = {
     engine.cameras.push.apply(engine.cameras, newCams);
     for (j = 0, len = newCams.length; j < len; j++) {
       c = newCams[j];
-      this.slideIn(c, options.from, animOptions);
+      this.slideIn(engine, c, options.from, animOptions);
     }
     return engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
       this.play();
@@ -7099,7 +7099,7 @@ module.exports = RoomTransitionHelper = {
   @param {Room} oldRoom The room that is left
   @param {Room} newRoom The room that is entered
    */
-  roomTransitionSqueezeSqueeze: function(oldRoom, newRoom, options, callback) {
+  roomTransitionSqueezeSqueeze: function(engine, oldRoom, newRoom, options, callback) {
     var animOptions, c, camera, i, j, len, newCam, newCams;
     newCams = [];
     oldRoom.pause();
@@ -7123,7 +7123,7 @@ module.exports = RoomTransitionHelper = {
     engine.cameras.push.apply(engine.cameras, newCams);
     for (j = 0, len = newCams.length; j < len; j++) {
       c = newCams[j];
-      this.squeezeIn(c, options.from, animOptions);
+      this.squeezeIn(engine, c, options.from, animOptions);
     }
     return engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
       this.play();
@@ -7141,7 +7141,7 @@ module.exports = RoomTransitionHelper = {
   @param {Room} oldRoom The room that is left
   @param {Room} newRoom The room that is entered
    */
-  roomTransitionSlideSqueeze: function(oldRoom, newRoom, options, callback) {
+  roomTransitionSlideSqueeze: function(engine, oldRoom, newRoom, options, callback) {
     var animOptions, c, camera, i, j, len, newCam, newCams;
     newCams = [];
     oldRoom.pause();
@@ -7165,7 +7165,7 @@ module.exports = RoomTransitionHelper = {
     engine.cameras.push.apply(engine.cameras, newCams);
     for (j = 0, len = newCams.length; j < len; j++) {
       c = newCams[j];
-      this.squeezeIn(c, options.from, animOptions);
+      this.squeezeIn(engine, c, options.from, animOptions);
     }
     return engine.masterRoom.loops.eachFrame.schedule(oldRoom, (function() {
       this.play();
@@ -8797,6 +8797,7 @@ module.exports = WebGLRenderer = (function() {
       rooms = [this.engine.masterRoom, camera.room];
       for (j = 0, len1 = rooms.length; j < len1; j++) {
         room = rooms[j];
+        room.wm = camera.wm;
         this.renderRoom(room, camera.wm);
       }
     }
@@ -8805,7 +8806,7 @@ module.exports = WebGLRenderer = (function() {
   WebGLRenderer.prototype.renderRoom = function(room, wm) {
     var list;
     list = room.renderList != null ? room.renderList : room.renderList = [];
-    this.updateRenderList(list, room, new Uint16Array([0]));
+    this.updateRenderList(list, room.children, new Uint16Array([0]));
     this.processRenderList(list);
     if (this.engine.settings.drawMasks) {
       this.renderMasks(list);
@@ -8815,29 +8816,30 @@ module.exports = WebGLRenderer = (function() {
     }
   };
 
-  WebGLRenderer.prototype.updateRenderList = function(list, object, counter) {
-    var child, i, last, len, ref, results;
-    if (!object.isVisible()) {
-      return;
-    }
-    last = list[counter[0]];
-    if (object !== last) {
-      if (last === void 0) {
-        list.push(object);
+  WebGLRenderer.prototype.updateRenderList = function(list, children, counter) {
+    var i, last, len, object, results;
+    results = [];
+    for (i = 0, len = children.length; i < len; i++) {
+      object = children[i];
+      if (!object.isVisible()) {
+        continue;
+      }
+      last = list[counter[0]];
+      if (object !== last) {
+        if (last === void 0) {
+          list.push(object);
+        } else {
+          list.splice(counter[0], list.length - counter[0], object);
+        }
+      }
+      counter[0] += 1;
+      if (object.children) {
+        results.push(this.updateRenderList(list, object.children, counter));
       } else {
-        list.splice(counter[0], list.length - counter[0], object);
+        results.push(void 0);
       }
     }
-    counter[0] += 1;
-    if (object.children) {
-      ref = object.children;
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        child = ref[i];
-        results.push(this.updateRenderList(list, child, counter));
-      }
-      return results;
-    }
+    return results;
   };
 
   WebGLRenderer.prototype.processRenderList = function(list) {
@@ -8849,9 +8851,7 @@ module.exports = WebGLRenderer = (function() {
         object.wm = new Float32Array(9);
       }
       Helpers.MatrixCalculation.setLocalMatrix(object.wm, object);
-      if (object.parent) {
-        Helpers.MatrixCalculation.multiply(object.wm, object.parent.wm);
-      }
+      Helpers.MatrixCalculation.multiply(object.wm, object.parent.wm);
       offset = Helpers.MatrixCalculation.getTranslation(-object.offset.x, -object.offset.y);
       Helpers.MatrixCalculation.reverseMultiply(object.wm, offset);
       switch (object.renderType) {
