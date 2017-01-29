@@ -7641,7 +7641,6 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.onMouseMove = function(event) {
-    var roomPos;
     if (event === void 0) {
       throw new Error("Missing argument: event");
     }
@@ -7649,9 +7648,6 @@ module.exports = Pointer = (function() {
     this.mouse.set(this.mouse.window.x - this.container.offsetLeft - this.canvas.offsetLeft + document.body.scrollLeft, this.mouse.window.y - this.container.offsetTop - this.canvas.offsetTop + document.body.scrollTop);
     this.mouse.x = this.mouse.x / this.container.offsetWidth * this.canvasResX;
     this.mouse.y = this.mouse.y / this.container.offsetHeight * this.canvasResY;
-    roomPos = this.calculateRoomPosition(this.mouse);
-    this.mouse.x = roomPos.x;
-    this.mouse.y = roomPos.y;
     this.mouse.buttons.forEach((function(_this) {
       return function(b) {
         b.x = _this.mouse.x;
@@ -7724,7 +7720,7 @@ module.exports = Pointer = (function() {
    */
 
   Pointer.prototype.onTouchMove = function(event) {
-    var eventTouch, j, len1, pointerTouch, ref, roomPos;
+    var eventTouch, j, len1, pointerTouch, ref;
     if (event === void 0) {
       throw new Error("Missing argument: event");
     }
@@ -7737,9 +7733,6 @@ module.exports = Pointer = (function() {
       pointerTouch.set(eventTouch.pageX - this.container.offsetLeft - this.canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - this.container.offsetTop - this.canvas.offsetTop + document.body.scrollTop);
       pointerTouch.x = pointerTouch.x / this.container.offsetWidth * this.canvasResX;
       pointerTouch.y = pointerTouch.y / this.container.offsetHeight * this.canvasResY;
-      roomPos = this.calculateRoomPosition(pointerTouch);
-      pointerTouch.x = roomPos.x;
-      pointerTouch.y = roomPos.y;
     }
   };
 

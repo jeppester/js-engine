@@ -107,10 +107,6 @@ module.exports = class Pointer
     @mouse.x = @mouse.x / @container.offsetWidth * @canvasResX
     @mouse.y = @mouse.y / @container.offsetHeight * @canvasResY
 
-    # Convert the position to make it relative to the room
-    roomPos = @calculateRoomPosition(@mouse)
-    @mouse.x = roomPos.x
-    @mouse.y = roomPos.y
     @mouse.buttons.forEach (b) =>
       b.x = @mouse.x
       b.y = @mouse.y
@@ -180,11 +176,6 @@ module.exports = class Pointer
       pointerTouch.set eventTouch.pageX - @container.offsetLeft - @canvas.offsetLeft + document.body.scrollLeft, eventTouch.pageY - @container.offsetTop - @canvas.offsetTop + document.body.scrollTop
       pointerTouch.x = pointerTouch.x / @container.offsetWidth * @canvasResX
       pointerTouch.y = pointerTouch.y / @container.offsetHeight * @canvasResY
-
-      # Convert the position to make it relative to the room
-      roomPos = @calculateRoomPosition(pointerTouch)
-      pointerTouch.x = roomPos.x
-      pointerTouch.y = roomPos.y
     return
 
   ###
