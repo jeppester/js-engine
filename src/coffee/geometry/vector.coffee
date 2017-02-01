@@ -214,6 +214,9 @@ module.exports = class Vector
     throw new Error("Only Vectors or objects inheriting Vector are supported") if not point instanceof module.exports #dev
     point.copy().subtract(@).getDirection()
 
+  getDirectionDifference: (point) ->
+    point.getDirection() - @getDirection()
+
   ###
   Calculates the shortest distance from the Vector object to another geometric object
 

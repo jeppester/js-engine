@@ -6489,6 +6489,10 @@ module.exports = Vector = (function() {
     return point.copy().subtract(this).getDirection();
   };
 
+  Vector.prototype.getDirectionDifference = function(point) {
+    return point.getDirection() - this.getDirection();
+  };
+
 
   /*
   Calculates the shortest distance from the Vector object to another geometric object
@@ -7331,7 +7335,7 @@ module.exports = WebGLHelper = {
       nN.set(-nN.y, nN.x);
       nN.scale(1 / nN.getLength());
       pointNormal = pN.copy().add(nN);
-      angle = pN.getDirectionTo(pointNormal);
+      angle = pN.getDirectionDifference(pointNormal);
       length = width / 2 / Math.cos(angle);
       pointNormal.scale(length / pointNormal.getLength());
       p1 = point.copy().add(pointNormal);

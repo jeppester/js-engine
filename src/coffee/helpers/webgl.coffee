@@ -156,7 +156,7 @@ module.exports = WebGLHelper =
       pointNormal = pN.copy().add nN
 
       # Find normal length
-      angle = pN.getDirectionTo pointNormal
+      angle = pN.getDirectionDifference pointNormal
       length = width / 2 / Math.cos(angle)
       pointNormal.scale length / pointNormal.getLength()
 
